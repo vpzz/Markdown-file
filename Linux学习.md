@@ -2838,7 +2838,7 @@
           tar   -jxvf    xx.tar.bz2
           ```
 
-     2. 有Readme文件的话，应该先读完改文件。
+     2. 有Readme文件的话，应该先读完该文件。
         
      3. 进入解压后的目录，运行configure脚本来生成Makefile文件。configure脚本主要探测系统环境，编译器的版本，函数库和版本，linux内核版本，头文件版本，以生成可行的Makefile文件。
         
@@ -2853,73 +2853,90 @@
       --includedir=DIR   #指定C头文件的安装位置。
       ```
 
-5. linux下的软件主要分为两类：脚本（shell脚本，perl脚本，Python脚本）和二进制文件（大部分的程序）。实际上有些脚本是对二进制程序的一个封装，便于使用。
+5. 如果安装的是库，例如gsl，会在/usr/local目录下出现一个gsl目录，其下有三个子目录lib（存放.so动态库文件），bin(存放可执行文件，有的库没有)，include(存放.h头文件)。为了使得编译器能够找到对应的头文件和动态库文件，需要设置gcc命令行或设置环境变量：
 
-6. linux下安装软件主要有以下几部分组成：可执行文件，编译用的头文件，运行时的共享库，配置文件，man手册，帮助文档等。
+      ```shell
+      gcc –Lyour_path/lib –Iyour_path/include your_code –lgsl –lgslcblas#这里-l出现了2次，是因为gsl库的特殊性，它需要调用gslcblas
+      #设置环境变量，这样就可以省略-I和-L，但是-l还是需要的
+      export C_INCLUDE_PATH=$C_INCLUDE_PATH:your_path/include
+      export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:your_path/include #C++的头文件搜索路径
+      export LIBRARY_PATH=$LIBRARY_PATH:your_path/lib
+      ```
 
-7. 不论是直接安装软件包还是运行编译安装脚本，都是将上述对应的文件放到正确的位置。这样程序才能运行起来。使用配置文件来进行配置的好处是，如果想要重装软件（软件升级或部分文件损坏等）或者在其他系统中安装，只需要备份配置文件，然后重新安装软件后，再恢复原来的配置文件即可。
+6. 运行可执行程序时，还需要保证链接时使用到的动态库可以被链接器找到：
 
-8. 如果程序运行出了故障，提示缺少某些文件，也可以从网上下载或从另一台完好的计算机上拷贝过来对应的文件即可。这是和Windows很不一样的地方，Windows的大型软件都要和系统的注册表打交道，没有做到解耦合。注册表是一个集中的配置数据库，windows系统和应用程序的配置都在其中，确实提高了配置效率和安全性，但是稳定性或易用性降低了，备份也不方便。
+      ```shell
+      export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:your_path/lib #shell脚本
+      your_path/lib #或者在/etc/ld.so.conf或/etc/ld.so.conf.d下的某个.conf配置文件中添加目录即可，要单独占用一行。然后运行ldconfig命令，让系统重新读取该配置文件。
+      ```
 
-9. RPM，RedHat Package Manager是由二进制可执行文件+安装规则构成，安装规则说明了依赖关系，可执行文件使用的编译选项，版本，说明等，目的是降低安装难度。
+7. linux下的软件主要分为两类：脚本（shell脚本，perl脚本，Python脚本）和二进制文件（大部分的程序）。实际上有些脚本是对二进制程序的一个封装，便于使用。
 
-10. yum仓库是将大量的经过检验的rpm包放在本地或互联网上，用yum工具统一管理。
+8. linux下安装软件主要有以下几部分组成：可执行文件，编译用的头文件，运行时的共享库，配置文件，man手册，帮助文档等。
 
-11. rpm包：bind-9.8.2-0.47.rc1.el6.x86_64.rpm：
+9. 不论是直接安装软件包还是运行编译安装脚本，都是将上述对应的文件放到正确的位置。这样程序才能运行起来。使用配置文件来进行配置的好处是，如果想要重装软件（软件升级或部分文件损坏等）或者在其他系统中安装，只需要备份配置文件，然后重新安装软件后，再恢复原来的配置文件即可。
 
-          1. 软件名bind
-          2. 9.8.2是主版本，次版本，修正版本号。47是发布版本号，表示这个rpm包是第47次编译生成的。rc1表示release candidate，也就是候选发布的版本，一般要经过几个rc版本之后，才会定型为正式的版本。
-          3. el6表示适用于发行版rhel6版本的。
-          4. x86_64或i686或noarch表示当前软件的适用的硬件平台，一定不能安装错了。
-          5. 有些包还有对应的开发版本，如bind-devel   开发版本一般会带.h头文件。
+10. 如果程序运行出了故障，提示缺少某些文件，也可以从网上下载或从另一台完好的计算机上拷贝过来对应的文件即可。这是和Windows很不一样的地方，Windows的大型软件都要和系统的注册表打交道，没有做到解耦合。注册表是一个集中的配置数据库，windows系统和应用程序的配置都在其中，确实提高了配置效率和安全性，但是稳定性或易用性降低了，备份也不方便。
 
-12. yum将常用到的一些包进行组合，形成了一些group，安装一个group就相当于安装了一堆rpm包。
+11. RPM，RedHat Package Manager是由二进制可执行文件+安装规则构成，安装规则说明了依赖关系，可执行文件使用的编译选项，版本，说明等，目的是降低安装难度。
 
-       ```shell
-       [zj@z] ~]$ yum grouplist
-       已加载插件: fastestmirror
-       没有安装组信息文件
-       Maybe run: yum groups mark convert (see man yum)
-       loading mirror speeds from cached hostfile
-        * base: mirror.zu.edu.cn
-        * extras: mirror.lzu.edu.cn
-        * updates: mirrors.bfsu.edu.cn
-       可用的环境分组:
-         最小安装
-         基础设施服务器
-         计算节点
-         文件及打印服务器
-         基本网页服务器
-         虚拟化主机
-         带 GUI 的服务器
-         GNOME桌面
-         KDE Plasma Workspaces
-         开发及生成工作站
-       可用组:
-         传统 UNIX 兼容性
-         兼容性程序库
-         图形管理工具
-         安全性工具
-         开发工具
-         控制台互联网工具
-         智能卡支持
-         科学记数法支持
-         系统管理
-         系统管理工具
-       完成
-       ```
+12. yum仓库是将大量的经过检验的rpm包放在本地或互联网上，用yum工具统一管理。
 
-13. 可以使用yum的downloadonly 插件来只下载，不安装对应的rpm包，依赖的包也会下载。
+13. rpm包：bind-9.8.2-0.47.rc1.el6.x86_64.rpm：
 
-14. 使用yum或dnf下载rpm包，解压rpm包。
+             1. 软件名bind
+             2. 9.8.2是主版本，次版本，修正版本号。47是发布版本号，表示这个rpm包是第47次编译生成的。rc1表示release candidate，也就是候选发布的版本，一般要经过几个rc版本之后，才会定型为正式的版本。
+             3. el6表示适用于发行版rhel6版本的。
+             4. x86_64或i686或noarch表示当前软件的适用的硬件平台，一定不能安装错了。
+             5. 有些包还有对应的开发版本，如bind-devel   开发版本一般会带.h头文件。
+
+14. yum将常用到的一些包进行组合，形成了一些group，安装一个group就相当于安装了一堆rpm包。
 
           ```shell
-           sudo yum download --downloadonly  tmux    #默认下载到当前路径下
-           rpm -qpl *.rpm      #查看rpm包内的文件 
-           rpm2cpio *.rpm | cpio -div     #将rpm格式转化为cpio格式，然后输出到当前目录下。
+          [zj@z] ~]$ yum grouplist
+          已加载插件: fastestmirror
+          没有安装组信息文件
+          Maybe run: yum groups mark convert (see man yum)
+          loading mirror speeds from cached hostfile
+           * base: mirror.zu.edu.cn
+           * extras: mirror.lzu.edu.cn
+           * updates: mirrors.bfsu.edu.cn
+          可用的环境分组:
+            最小安装
+            基础设施服务器
+            计算节点
+            文件及打印服务器
+            基本网页服务器
+            虚拟化主机
+            带 GUI 的服务器
+            GNOME桌面
+            KDE Plasma Workspaces
+            开发及生成工作站
+          可用组:
+            传统 UNIX 兼容性
+            兼容性程序库
+            图形管理工具
+            安全性工具
+            开发工具
+            控制台互联网工具
+            智能卡支持
+            科学记数法支持
+            系统管理
+            系统管理工具
+          完成
           ```
 
-15. https://pkgs.org/这个网站可以查询各个发行版的软件包。
+15. 可以使用yum的downloadonly 插件来只下载，不安装对应的rpm包，依赖的包也会下载。
+
+16. 使用yum或dnf下载rpm包，解压rpm包。
+
+             ```shell
+              sudo yum download --downloadonly  tmux    #默认下载到当前路径下
+              rpm -qpl *.rpm      #查看rpm包内的文件 
+              rpm2cpio *.rpm | cpio -div     #将rpm格式转化为cpio格式，然后输出到当前目录下。
+             ```
+
+17. https://pkgs.org/这个网站可以查询各个发行版的软件包。
 
 
 
