@@ -4,7 +4,7 @@
 
 2. //表示除法向下取整，Python中的浮点数不区分单精度和双精度。
 
-3. 布尔类型为False和True，开头大写。支持与或非运算。 2>1 and 2<3结果为True。and or not相当于C语言中的 && || ！
+3. 布尔类型为False和True，开头大写。支持与，或，非运算。 2>1 and 2<3结果为True。and or not相当于C语言中的 && || ！
 
 4. 4种基本数据类型：整型，浮点型，布尔型，字符串类型。
 
@@ -32,7 +32,7 @@
     	def xxx
     ```
 
-13. 数据结构关注 时间和空间复杂度，时间尤其重要。
+13. 数据结构关注：时间和空间复杂度，时间尤其重要。
 
 14. 例如利用函数递归来计算斐波那切数列，程序编制十分简单。
 
@@ -45,11 +45,9 @@
 
 16. 计算流程展开是树形结构，不同的分支存在重复计算。所需时间随着问题规模n的增加指数增加。自顶向下
 
-17. <img src="Python科学计算应用基础.assets/image-20200831141304238.png" alt="image-20200831141304238" style="zoom:50%;" />
+17. 可以使用迭代的方式来避免重复计算。所需时间随着问题规模n的增加线性增加。自底向上
 
-18. 可以使用迭代的方式来避免重复计算。所需时间随着问题规模n的增加线性增加。自底向上
-
-19. ```python
+18. ```python
     def fib1(n):
         prev,curr = 1,1
         k = 2
@@ -59,154 +57,209 @@
         return curr
     ```
 
-20. 常用算法的时间复杂度：O(1)<O(logn)<O(n)<O(nlogn)<O(n^2)
+19. 常用算法的时间复杂度：O(1)<O(logn)<O(n)<O(nlogn)<O(n^2)
 
-21. python中有4种数据结构类型：list相当于线性表。tuple是只读列表，set是元素不重复的列表，dict是键值对。
+20. python中有4种数据结构类型：list相当于线性表。tuple是只读列表，set是元素不重复的列表，dict是键值对。
 
-22. 数据结构中学到的有链表，数组，二叉树，哈希表，图
+21. 数据结构中学到的有链表，数组，二叉树，哈希表，图。
 
-23. list 底层使用的是数组。链表和数组的区别是数组是挨个排放的，如果在头部插入，就得把数组整体向后移动。链表则对头尾插入不敏感。数组是单向的，链表是双向的。数组从尾部插入时间复杂度为O(1)，从头部插入时间复杂度为O(n)。O(1)表示和数组的长度n无关。链表从任何地方插入时间复杂度都是O(1)。
+22. list 底层使用的是数组。链表和数组的区别是数组是挨个排放的，如果在头部插入，就得把数组整体向后移动。链表则对头尾插入不敏感。数组是单向的，链表是双向的。数组从尾部插入时间复杂度为O(1)，从头部插入时间复杂度为O(n)。O(1)表示和数组的长度n无关。链表从任何地方插入时间复杂度都是O(1)。
 
-24. set底层使用的是哈希表。查找速率飞起，远比数组快得多。时间复杂度为O(1)。数组的查找是从头开始逐个查询。时间复杂度为O(n)。哈希表的方法是将待查询的数据送给hash函数，hash函数输出该数据应在的地址，直接根据地址查找该地址内是否存在该数。时间复杂度为 O(n)。
+23. set底层使用的是哈希表。查找速率飞起，远比数组快得多。时间复杂度为O(1)。数组的查找是从头开始逐个查询。时间复杂度为O(n)。哈希表的方法是将待查询的数据送给hash函数，hash函数输出该数据应在的地址，直接根据地址查找该地址内是否存在该数。时间复杂度为 O(n)。
 
-25. dict也是哈希表。
+24. dict也是哈希表。
 
-26. 树的查找算法复杂度为O(logn)，每询问一次，就将问题的规模缩减为原来的一半。
+25. 树的查找算法复杂度为O(logn)，每询问一次，就将问题的规模缩减为原来的一半。
 
-27. <img src="Python科学计算应用基础.assets/image-20200831211316165.png" alt="image-20200831211316165" style="zoom:50%;" />
+26. <img src="Python科学计算应用基础.assets/image-20200831211316165.png" alt="image-20200831211316165" style="zoom:50%;" />
 
-# Numpy
+27. 可以使用IPython自带的计时功能来对一行或一段代码进行性能分析：
 
-1. numpy的基本数据类型为多维数组ndarray。      一维数组建议使用小写字母，多维数组建议使用大写字母。
+    ```python
+    # %timeit对该行重复执行多次（次数不定，如果单次执行时间太短，则会多次执行），然后给出统计值。会调用timeit模块来计时。
+    # %time只会执行一次
+    a = [1,2,3]
+    %timeit a[1] = 5 #测量对列表元素赋值操作消耗的时间，20.9 ns ± 0.0998 ns per loop (mean ± std. dev. of 7 runs, 10,000,000 loops each) 可以看到执行了7轮，每轮1千万次。
+    %time a[1] = 5 #结果为 CPU times: total: 0 ns Wall time: 0 ns，因为时间太短了，只有多次运行才能捕捉到这么小的时间间隔。
+    
+    # %%timeit作用于一段代码
+    # %%time也是作用于一段代码
+    %%timeit
+    a = []
+    for i in range(10):
+        a.append(i)
+    #结果为453 ns ± 4.61 ns per loop (mean ± std. dev. of 7 runs, 1,000,000 loops each)
+    %%time
+    a = []
+    for i in range(10):
+        a.append(i)
+    #结果为 CPU times: total: 0 ns Wall time: 0 ns
+    ```
 
-2. 一般使用import numpy as np
+28. 
 
-3. np.array()可以接受一个list对象，创建一个array类型的对象。
+29. 
+
+# NumPy
+
+1. numpy为python提供了真正的多维数组功能。
+
+2. python自带的列表list可以保存一组类型不同的对象，因此实际保存的是指针。这对于数值计算来说浪费空间和时间。因此python又提供了array模块，只支持同类型对象，能直接保存数值，但是只支持一维数组。也没有各种配套的运算函数。
+
+3. NumPy提供2种对象：
+
+   1. ndarray：存储同类型数据的n维数组，这是NumPy的基本数据类型。
+
+   2. ufunc：能够对上面数组进行处理的特殊函数，NumPy的所有函数都是围绕ndarray处理的。
+
+4. 一维数组建议使用小写字母，多维数组建议使用大写字母。
+
+5. 库版本查看：
+
+   ```python
+   import numpy as np #一般都使用这种方式导入
+   np.__version__ #结果为str类型 '1.25.2'
+   ```
+
+## ndarray对象
+
+1. np.array()可以接受一个列表或元组对象，创建一个numpy.ndarray类型的对象。
+
+   ```python
+   a1 = np.array([1,2,3,4,5]) #1维数组
+   type(a1) # numpy.ndarray
+   ```
+
+2. ndarray对象的数据是按行存储的，和C语言多维数组一样，不过二者获取多维数组元素的方式不同，numpy使用元组作为下标，例如`a[1,2]`，等价于`a[(1,2)]`，C语言使用多次引用，例如`a[1][2]`。
+
+3. 从下面四个求和运算分别花费的时间，可以看出使用全套的numpy的速度最快，其次是全套的Python。而交叉使用是比较差的，因为要先进行类型转化。
 
 4. ```python
-   import numpy as np
-   a1 = np.array([1,2,3,4,5])
-   type(a1)
-   Out[3]: numpy.ndarray
+   L = [1.0 for i in range(10000000)] #所有元素的都是1.0
+   sum(L)    #1  34.8 ms ± 1.31 ms
+   np.sum(L) #2  353 ms ± 2.16 ms per loop
+   L1 = np.array(L) #实际上这一步也要消耗不少时间 340 ms ± 642 µs，不过转换过后，后续都可以享受NumPy的高速计算
+   sum(L1)    #3  618 ms ± 16.9 ms
+   np.sum(L1) #4  10.6 ms ± 127 µs
    ```
 
-   Python中常用的列表推导：
+5. 由于Python对每个数据还要额外保存类型信息，numpy是统一保存，也可以节省空间。Python的源代码中，对于浮点数除了都是用double类型外，还保存了一个对象的头部信息，包含类型和引用次数等信息。
 
-5. ```python
-   L=[1.0 for i in range(10)]
-   等价于
-   L=[]
-   for i in range(10):
-       L.append(1.0)
-   上边的代码生成了一个这样的列表：[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-   同理也可以使用如下代码来生成一个等差数列：
-   L=[i for i in range(10)]
-   此时L=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-   也可以对迭代变量进行筛选，如下：
-   print([i for i in range(11) if i > 4])
-   # 输出结果:
-   [5, 6, 7, 8, 9, 10]
+   ```c
+   typedef strcut{
+       PyObject_HEAD
+       double ob_fval;
+   }PyFloatObject
    ```
 
-6. 从下面四个求和运算分别花费的时间，可以看出使用全套的numpy的速度最快，其次是全套的Python。而较差使用是比较差的，因为还要进行类型转化。==在Python中，所有的变量都是类的对象，而在numpy中，所有的变量都是C语言的基本数据类型。==
+6. numpy自定义的基本数据类型，比C语言还丰富。
 
-7. python和numpy都有各自的求和函数。
+   ```python
+   numpy.bool_  #布尔类型
+   numpy.int_ #默认的整数类型，类似于C的long类型
+   numpy.intc #与C的int类型一样
+   numpy.intp #用于索引的整数类型，类似于C的ssize_t
+   numpy.int8 int16 int32 int64 #4种带符号整数，python内置类型int等价于int32
+   numpy.uint8 uint16 uint32 uint64 #4种无符号整数
+   numpy.float_ #等价于float64
+   numpy.float16 float32 float64 #半，单，双精度浮点数。python内置类型float等价于float64
+   numpy.complex_ #等价于complex128
+   numpy.complex64 complex128 #复数，实部和虚部分别为32和64位。
+   #实际上numpy还把内置的类型都在其内部重命名了，例如numpy.bool就是内置类型bool，不过在1.20以后就不建议在使用numpy.bool了，推荐直接使用bool。
+   ```
 
-8. ```python
-   L = [1.0 for i in range(10000000)]
-   sum(L)            #1  49ms
-   np.sum(L)         #2  439ms
+7. 可以直接创建numpy类型的变量：
+
+   ```python
+   a = np.int16(200) #16位带符号数，范围为-32768到32767
+   print(a*a) #-25536 IPython会提示发生了溢出。结果并不是40000-32767，而是带符号乘法的32位结果的低16位。
+   #需要注意的是，numpy类型的变量运算速度比python内置类型要慢得多，不过批量计算的话，还是numpy快。
+   a = 3.14
+   b = np.float64(3.14)
+   %timeit a*a #结果为 28 ns ± 0.788 ns
+   %timeit b*b #结果为 61.3 ns ± 2.13 ns
+   ```
+
+8. 查看ndarray对象内存储的数据的类型。整型默认使用int32存储，浮点数默认使用float64存储。通过.nbytes属性来查看对象内所存储的数据占用的总字节数。这个数值除以元素个数，就是每个元素的字节数。
+
+   ```python
+   L = np.array([1,2,3,4])
+   L.dtype   #结果为 dtype('int32')
+   type(L.dtype) #结果为 numpy.dtypes.Int32DType
+   L.dtype.type  #结果为numpy.int32
+   type(L.dtype.type) #结果为type
+   L.nbytes  #结果为 16，因此每个元素占用16/4=4个字节
+   #astype函数并不会修改原来的对象，而是返回一个新的对象。
+   L1 = L.astype(np.int64) #修改存储的数据类型，也就是强制类型转换。np.int64是type类型
+   L1.dtype  #结果为 dtype('int64')
+   L1.nbytes #结果为 32，因此每个元素占用32/4=8个字节
+   ```
+
+9. 不推荐直接修改对象的dtype属性，因为这样只会更改解释对象内存储内容的方式，而不会类型转换：
+
+   ```python
+   L = np.array([1,2], dtype = np.int64)
+   print(L) #结果为 [1 2]
+   L.nbytes #结果为 16
+   L.dtype = np.int32 #并不会报错，但是十分危险
+   print(L) #结果为 [1 0 2 0]
+   L.nbytes #结果为 16，可以看到数据的总长度并没有变化
    
-   L1 = mp.array(L)
-   sum(L1)           #3  903ms
-   np.sum(L1)        #4  13.4ms
-   
+   #在修改类型前，L在内存中以小端形式存储，分别为
+   # 01 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00
+   #每8个字节作为一个数。修改类型后，每4个字节作为一个数，则为1 0 2 0
    ```
 
-9. ==numpy的计算效率比Python原生的速度还要快==。因为它的==底层都是C语言实现的==，因此他和C语言一样有多种整型。例如int8 int16 int32 int64。
+10. 可以通过dtype参数在创建ndarray时指定类型。dtype参数也接收字符串形式，每种数值类型都有几种字符串表示方式。
 
-10. 同时由于Python对每个数据还要额外保存类型信息，numpy是统一保存，也可以节省空间，额外的信息会在一个array类型中统一保存。
-
-11. 例如Python的源代码中，对于浮点数除了都是用double类型外，还保存了一个对象的头部信息，包含类型和引用次数等信息。
-
-    ```c
-    typedef strcut{
-        PyObject_HEAD
-        double ob_fval;
-    }PyFloatObject
+    ```python
+    L = np.array([1,2], dtype = int) #可以使用内置类型，例如int,float,complex，也可以使用numpy自定义的例如int32等，前者会自动转化为后者。
+    L.dtype #结果为dtype('int32')
+    # np.typeDict可以获得如下字典，不过该功能已经在numpy1.25.0中被删除了。
+    {'?': numpy.bool_,
+     0: numpy.bool_,
+     'byte': numpy.int8,
+     'i': numpy.int32,
+     5: numpy.int32,
+    ...
+    }
+    #使用如下命令将字典中的值提取出来，set可以去重。
+    set(np.typeDict.values()) #结果为 {numpy.bool_, numpy.int8, ...}
     ```
 
-12. ==numpy的基本数据类型，比C语言还丰富。==
+11. 将python内置的列表或元组转化为ndarray对象，效率比较低，可以选择直接创建ndarray对象：
 
-14. <img src="Python科学计算应用基础.assets/image-20200831214839715.png" alt="image-20200831214839715" style="zoom:50%;" />
-
-15. ==使用.dtype属性来查看numpy.array对象内存储的数据的类型==。整型默认使用==int32==存储，浮点数默认使用==float64==存储。
-
-16. ```python
-    L = numpy.array([1,2,3,4])
-    L.dtype
-    Out[19]: dtype('int32')
-    L.nbytes
-    Out[20]: 16
-    
-    L1 = L.astype(numpy.int64)
-    Out[25]: array([1, 2, 3, 4], dtype=int64)
-    L1.dtype
-    Out[26]: dtype('int32')
-    L1.nbytes
-    Out[27]: 32
+    ```python
+    np.arange(0,1,0.1) #结果为array([0. , 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])，类似于内置函数range，都不包括终值。不过range函数的参数必须都是整数，且它的返回值并不是list或tuple，而是一个range对象，还需要再封装一下。
+    np.linspace(0,1,11) #结果为array([0. , 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1. ])，包括终值，均匀分隔，一共11个点。dtype为numpy.float64
+    np.linspace(0,1,10,endpoint=False) #结果为array([0. , 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])。不包含终值，一共10个点。
+    np.logspace(0,3,4) #结果为 array([   1.,   10.,  100., 1000.])。产生10^0到10^3之间的等比数列，包括终值，一共4个点。相当于pow(10,np.linspace(0,3,4))的结果。
+    np.logspace(0,3,4,base=2) #结果为 array([1., 2., 4., 8.])。指定基为2，范围变成了2^0到2^3
     ```
 
-17. 可以使用==.astype(numpy.int64)来修改存储的数据类型==。通过.nbytes属性来查看对象内所存储的数据占用的==总字节==数。这个数值除以元素个数，就是每个元素的字节数。
+12. 从字符串或文件创建一维数组：
 
-18. astype函数并不会修改原来的对象，而是返回一个新的对象。如下：
-
-19. ```python
-    L = numpy.array([1,2,3,4])
-    L1 = L.astype(numpy.int64)
-    L
-    Out[4]: array([1, 2, 3, 4])
-    L1
-    Out[5]: array([1, 2, 3, 4], dtype=int64)
+    ```python
+    s = "abcdefg"
+    np.fromstring(s,dtype=np.int8) #结果为 array([ 97,  98,  99, 100, 101, 102, 103], dtype=int8)，不过已经不推荐使用了，推荐用frombuffer替代
     ```
 
-    可以看到如果ndarray中存储的数据不是对应的默认类型，例如int32和float64，就会显示类型信息dtype。
+13. 创建固定值的数组：
 
-    ![image-20201003171104736](Python科学计算应用基础.assets/image-20201003171104736.png)
-
-20. 4个int32的整数，每个整数占用4个字节，一共16个字节。4个int64的整数，一个占用8个字节，一共32个字节。
-
-21. 如果通过修改对象的dtype，则不会更改对象的存储方式，只会更改==解释对象内存储内容的方式==。如下：
-
-22. ```
-    L
-    Out[12]: array([1, 2, 3, 4])
-    L1
-    Out[12]: array([1, 2, 3, 4],dtype=int64)
-    L1.dtype = numpy.int32
-    L1
-    Out[11]: array([1, 0, 2, 0, 3, 0, 4, 0])
-    L1.nbytes
-    Out[17]: 32
+    ```python
+    np.empty((2,3)) #创建一个2行3列的二维数组，不进行初始化，默认为numpy.float64类型，速度最快。
+    np.zeros((2,3)) #全0
+    np.ones((2,3))  #全1
+    np.full((2,3),np.pi) #用np.pi初始化
     ```
 
-23. 可以看到直接修改后，L1的字节数还是32，没有变小为16。同时每个数中间又多了一个0。这是因为在小端存储的内存中，64位的数据是如果按照两个32位来解释，高32位为高地址，低32位为低地址。因此会之前的一个64位的1，现在被解释成了2个32位的数，一个是1，一个是0。
+14. ndarray对象的属性：
 
-24. ```python
+    ```python
     import numpy as np
     a1 = np.array([1,2,3,4,5])
-    print(a1)
+    print(a1) #结果为 [1 2 3 4 5]
     print(a1.flags)   #标志位
-    print(a1.shape)   #多维数组的形状 （8,）表示是1维，这1维中有8个元素。8行的意思。
-    print(a1.strides) #每个维度元素之间的字节数间隔。实际是该维度元素的大小。
-    print(a1.ndim)    #数组的维数
-    print(a1.data)	  #存储的数据块的内存地址，同一个数据块可以被不同的ndarray引用。
-    print(a1.size)    #总的元素个数，等于shape的各个维度相乘。
-    print(a1.itemsize)#每个元素的字节数。
-    print(a1.nbytes)  #总的字节数，=itemsize*size。
-    print(a1.base)    #表示data是复用的哪个变量，如果flags中的owndata是true，那么base就是none。
-    
-    [1 2 3 4 5]
       C_CONTIGUOUS : True
       F_CONTIGUOUS : True
       OWNDATA : True	#true表示这个变量a1拥有a1.data这个数据块。
@@ -214,64 +267,136 @@
       ALIGNED : True	#对齐相关
       WRITEBACKIFCOPY : False
       UPDATEIFCOPY : False
+    print(a1.shape)   #数组的形状，结果为 (5,)
+    print(a1.strides) #每个维度元素之间的字节数间隔。实际是该维度元素的大小。结果为 (4,)
+    print(a1.ndim)    #数组的维数，结果为 1
+    print(a1.data)	  #存储的数据块的内存地址 结果为<memory at 0x0000000008F74280>，同一个数据块可以被不同的ndarray引用。
+    print(a1.size)    #总的元素个数，等于shape的各个维度相乘。结果为 5
+    print(a1.itemsize)#每个元素的字节数。结果为4
+    print(a1.nbytes)  #总的字节数，=itemsize*size。结果为20
+    print(a1.base)    #表示data是复用的哪个变量，如果flags中的owndata是true，那么base就是none。结果为None
+    ```
+
+15. ndarray对象的srides属性保存的是每个维度的上，相邻（该维度下标相差1）两个元素的地址差，也就是ndarray的data属性：
+
+    ```python
+    #如果strides的值正好和该维度所占用的字节数相同，则数据是连续存储的。通过切片下标获得数组是原数组的一个视图，但是二者的strides不同。
+    a = np.array([1,2,3,4,5,6]).reshape((2,3)) #2个维度，长度分别为2和3。
+    a.strides #结果为(12,4) 默认按行存储，a[0,0]和a[1,0]相差3个int32元素，即3*4=12字节。a[0,0]和a[0,1]相差1个int32元素，即1*4=4字节。
+    #通过strides可以从a[i,j]的地址A得到a[i+m,j+n]的地址B，B=A+m*12+n*4
     
-    (5,)
-    (4,)
-    1
-    <memory at 0x0000000008F74280>
-    5
-    4
-    20
-    None
+    
+    
+    
+    
     ```
 
-25. 如果对array进行切片操作，例如：
+16. NumPy默认使用C语言的数组排序，即按行存储。也可以在创建时设置order参数，使用Fortran的按列存储顺序。
 
-26. ```python
-    a2 = a1[0:3]
-    print(a2.flags)
-      C_CONTIGUOUS : True
-      F_CONTIGUOUS : True
-      OWNDATA : False
-      WRITEABLE : True
-      ALIGNED : True
-      WRITEBACKIFCOPY : False
-      UPDATEIFCOPY : False
-    ```
+17. 
 
-    可以发现a2是复用了a1中的数据，此时修改a1中的数据，a2会变化，反之亦然。
+## 形状
 
-27. ```python
-    a1 = np.append(a1,[6,7,8,9])
-    a1
-    Out[24]: array([8, 2, 3, 4, 5, 6, 7, 8, 9]) #9个元素
-    a2 = a1.reshape(3,3)
-    a2
-    Out[25]: 
-    array([[8, 2, 3],
-           [4, 5, 6],
-           [7, 8, 9]])
-    a2.shape
-    Out[27]: (3, 3)
-    ```
+1. 数组的形状可以通过ndarray.shape属性获得，结果为描述各个维度元素数量的元组：
 
-28. 通过这个append的函数可以看出，np把函数的功能是现在np模块内，而不是ndarray类中，这样可以减小类的体积，运算更快。
+   ```python
+   a1 = np.array([1,2,3,4,5]) #1维数组
+   a1.shape #结果为 (5,)，表示该元组只有一个元素，括号内的逗号不能省略，否则会被当作单个整数。
+   a2 = np.array([[1,2,3],[4,5,6]]) #2维数组
+   a2.shape #结果为 (2,3)
+   a2[1,0] #第1行，第0列的元素，结果为 4
+   1 2 3
+   4 5 6
+   ```
 
-29. reshape函数可以变换维度，而不改变数据，其中的一个参数可以写成-1，np会自动计算。该操作不改变内存的数据，只是改变结构化解析数据的方式，所以速度很快。
+2. 可以直接对数组的shape属性进行修改，不过不会修改内存中的数据，也不是将二维数组表示的矩阵转置（转置会交换实际数据）。如果某一个维度的大小被设置为了-1，则会自动计算：
 
-30. 如果reshape只传递一个参数-1，则会将该数组变为1维数组。
+   ```python
+   a = np.array([[1,2,3],[4,5,6]])
+   a.shape = (3,2)
+   a[1,0] #第1行，第0列的元素，结果为 3
+   1 2
+   3 4
+   5 6
+   #类似于a.reshape((3,2))，但是reshape并不修改a本身，而是将结果返回。reshape的两个数组共享同一块内存数据，不过a的flags中OWNDATA为true，而b的flags中OWNDATA为false
+   a = np.array([1,2,3,4,5,6])
+   b = a.reshape((3,2))
+   a[2] = 10
+   print(b[1,0]) #结果为 10
+   ```
 
-31. 可以看到，对于6这个元素，应先索引到a2数组的第1个元素array([4,5,6])。然后再索引第2个元素，即a2[1,2] 
+3. 一维数组可以看作是行向量，列向量实际上是只有一列的二维数组。
 
-32. 下标从0开始。==多维数组可以看做是数组的嵌套。==
+4. reshape函数可以变换维度，而不改变数据，只是改变了解析数据的方式，所以速度很快。
 
-33. 二维数组最原始的理解应该是把一行或者一列数据进行分割，它和矩阵的关系不是天然的。
+5. 如果reshape只传递一个参数`(-1,)`，则会将该数组变为1维数组。
 
-34. 可以看到默认的1维数组可以看做列向量，因为他的shape是（9，)，如果要是和二维数组的shape含义统一，那么这个==（9，）就表示（9，1）即9行1列，即是一个列向量==。这两个还是不同的，(9,1)表示1维数组，(1,9)表示2维数组。遍历的时候需要注意。
+## 切片
 
-35. 可以使用reshape来转换行列向量：
+1. ndarray可以和列表一样进行切片操作，二者的用法和效果一摸一样，不同的是，ndarray通过整数或切片获得的只是原始数组的一个视图，二者共享数据，而list是复制了一份新的数据。
 
-36. ```python
+   ```python
+   a1 = np.array([1, 2, 3, 4])
+   a2 = a1[0:2] #a2.flags的OWNDATA为false，而a1.flags的OWNDATA为true
+   a2[1] = 10 #此时a1也会变成[1, 10, 3, 4]
+   ```
+
+2. numpy还支持使用整数列表（数组）和布尔列表（数组）来获取不连续下标的元素，这不能称为切片操作，列表也不支持这一操作。通过这一方式获得的数组不和原数组共享数据：
+
+   ```python
+   a = np.array([1, 2, 3, 4])
+   a[[0,2,3]] #结果为 array([1, 3, 4])
+   a[np.array([0,2,3])] #结果同上
+   a[[True,False,True,False]] #结果为 array([1, 3])，获取第0和2个元素。这个操作在numpy1.10之前，会将True和False分别当作1和0，套用整数列表的方法。
+   a[[1,0,1,0]] #结果为 array([2, 1, 2, 1])，不会自动当作布尔数组。
+   #布尔数组和列表的形状尺寸需要和原数组一模一样。布尔数组一般不是手动构造的，而是通过函数运算得来的，例如
+   x = np.random.randint(0,10,6) #产生6个元素值为0到9的一维数组，结果为 array([5, 7, 7, 1, 0, 3])
+   x[x>5] #筛选出>5的值，结果为 array([7, 7])
+   ```
+
+3. 使用slice生成切片对象，可以用该对象来取切片：
+
+   ```python
+   a = np.array([1, 2, 3, 4])
+   idx = slice(None,None,2) #idx等价于::2
+   a[idx] #结果为 array([1, 3])
+   #使用python内置的
+   
+   ```
+
+4. numpy还提供了一个更方便的方法来创建slice对象：
+
+   ```python
+   np.s_[::2,2:]  #等价于(slice(None, None, 2), slice(2, None, None))。2个slice对象构成的元组，可以作为二维数组的下标。
+   #s_并不是np的一个函数，而是一个IndexExpression类的对象，对该对象使用[]下标语法，会调用它的__getitem__(self, index)方法。
+   
+   
+   
+   ```
+
+5. 
+
+6. 
+
+7. 
+
+8. 
+
+9. np把对ndarray对象操作的函数实现在np模块内，而不是作为ndarray类的方法。
+
+10. 
+
+11. 可以看到，对于6这个元素，应先索引到a2数组的第1个元素array([4,5,6])。然后再索引第2个元素，即a2[1,2] 
+
+12. 数组的下标从0开始。多维数组可以看做是数组的嵌套。
+
+13. 二维数组最原始的理解应该是把一行或者一列数据进行分割，它和矩阵的关系不是天然的。
+
+14. 可以看到默认的1维数组可以看做列向量，因为他的shape是（9，)，如果要是和二维数组的shape含义统一，那么这个（9，）就表示（9，1）即9行1列，即是一个列向量。这两个还是不同的，(9,1)表示1维数组，(1,9)表示2维数组。遍历的时候需要注意。
+
+15. 可以使用reshape来转换行列向量：
+
+16. ```python
     import numpy as np
     a1 = np.array([1,2,3,4,5])
     a1
@@ -289,9 +414,9 @@
     Out[10]:2
     ```
 
-37. 返回的shape是元组类型，使用 row,col = a1.shape来解析。
+17. 返回的shape是元组类型，使用 row,col = a1.shape来解析。
 
-38. ```python
+18. ```python
     import numpy as np
     a1 = np.array([i+1 for i in range(8)])
     a1.shape
@@ -322,9 +447,9 @@
       UPDATEIFCOPY : False
     ```
 
-39. reshape还是复用内存块。如果不想复用，可以使用.copy()函数
+19. reshape还是复用内存块。如果不想复用，可以使用.copy()函数
 
-40. ```python
+20. ```python
     a3 = a1.copy()
     a3.flags
     Out[10]: 
@@ -337,17 +462,17 @@
       UPDATEIFCOPY : False
     ```
 
-41. 之所以要这么多属性，是为了效率优化。
+21. 之所以要这么多属性，是为了效率优化。
 
-41. Python标准库中也有一个array库。Python下一共可用4种数组类型。
+22. Python标准库中也有一个array库。Python下一共可用4种数组类型。
 
     ```
     numpy.array    array.array    list      collection.deque
     ```
 
-43. np支持修改数据的存储方式，大小端：
+23. np支持修改数据的存储方式，大小端：
 
-45. ```python
+24. ```python
     import numpy as np
     a1 = np.array([i+1 for i in range(8)])
     a1.dtype = '>i2' # <表示小端 >表示大端， int8 in16 in32 int64可以用 i1 i2 i4 i8来替代。
@@ -357,7 +482,7 @@
               0, 1792,    0, 2048,    0], dtype=int16)
     ```
 
-46. numpy数组和矩阵的生成有如下几种方法：
+25. numpy数组和矩阵的生成有如下几种方法：
 
     1. zeros，ones（和zeros用法相同，只不过是元素都是1），full（用法也相同，不过可以指定值）
 
@@ -388,7 +513,7 @@
        np.linspace(1,5,6)    #把1到5之间分为(6-1)段  即算上开头结尾，一共有6个数。
        Out[20]: array([1. , 1.8, 2.6, 3.4, 4.2, 5. ])    #默认为浮点数
        ```
-    
+
     3. 用随机数填充，numpy自带的随机数库为np.random
 
        ```python
@@ -414,10 +539,10 @@
               [10.23936329, 10.90041123,  9.48025634,  8.96784637,  9.66475886],
               [10.69037768, 10.68503437, 10.45207827, 10.52940481,  9.98909406]])
        ```
-    
+
        每次生成随机数的时候，都会使用种子，如果没有设置（紧挨着这个生成的函数前设置才有效），就使用当前时间，如果种子一样，那么随机序列也是一样的。每次生成完成依次随机数，都会修改种子，所以要复现，就必须啊在每次生成前都设置一下随机数。在软件测试时会使用种子，确保测试环境的可重复性。
-    
-47. 基本操作：
+
+26. 基本操作：
 
     1. 索引（==a [2] [3]，a [2,3]，a [(2,3)] 是一样的==）和切片(默认不会创建新的内存块)
 
@@ -490,8 +615,8 @@
        print(x1,x2,x3)
        [1 2] [3 4 5] [6 7 8]
        ```
-    
-48. 数组的运算，从下面的例子可以看出numpy对大规模数组的操作效率很高：
+
+27. 数组的运算，从下面的例子可以看出numpy对大规模数组的操作效率很高：
 
     ```python
     n=1000000
@@ -502,7 +627,7 @@
     %timeit N*2         #花费3.09ms
     ```
 
-49. 数组和数的加减乘除相当于对其中的每一个元素进行该运算
+28. 数组和数的加减乘除相当于对其中的每一个元素进行该运算
 
     ```python
     import numpy as np
@@ -547,7 +672,7 @@
            [100, 121, 144, 169, 196]], dtype=int32)
     ```
 
-50. 除了一些Python中自带的基本运算，还可以使用numpy带的一些数学运算。
+29. 除了一些Python中自带的基本运算，还可以使用numpy带的一些数学运算。
 
     ```python
     np.abs(X-5)
@@ -559,7 +684,7 @@
 
     还有np.sin(X)   np.exp(X)  np.power(3,X) 第一个参数是指数。
 
-51. 矩阵运算：默认的操作都是针对数组的，矩阵运算要使用特殊的函数，例如：
+30. 矩阵运算：默认的操作都是针对数组的，矩阵运算要使用特殊的函数，例如：
 
     ```python
     import numpy as np
@@ -589,9 +714,9 @@
     ValueError: operands could not be broadcast together with shapes (3,3) (3,4) 
     ```
 
-52. 其他操作：转置（A.T），求逆（np.linalg.inv(A)），求伪逆（对于非方阵使用，np.linalg.pinv(A)）     linalg表示linear algebra 线性代数
+31. 其他操作：转置（A.T），求逆（np.linalg.inv(A)），求伪逆（对于非方阵使用，np.linalg.pinv(A)）     linalg表示linear algebra 线性代数
 
-53. 聚合运算（统计运算，此时只有数组（1维或多维），没有矩阵）：
+32. 聚合运算（统计运算，此时只有数组（1维或多维），没有矩阵）：
 
     ```python
     A = np.random.random(10)
@@ -617,7 +742,7 @@
     Out[56]: 0.3186512127662723
     ```
 
-54. 多维数组也可以进行上述的聚合运算，A.sum()是对所有元素求和，相当看做1维数组。如果要沿行或列方向求和，那么要设置axis值。对min，max等操作也都可以设置axis值。
+33. 多维数组也可以进行上述的聚合运算，A.sum()是对所有元素求和，相当看做1维数组。如果要沿行或列方向求和，那么要设置axis值。对min，max等操作也都可以设置axis值。
 
     ```python
     A = np.arange(9).reshape(3,-1)
@@ -634,9 +759,9 @@
     Out[62]: array([ 3, 12, 21])
     ```
 
-55. 对于一个2维数组A，3行4列。那么使用A[1,1]来进行索引时，==就是对它的两个axis进行索引==，axis=0的那个轴，范围是0-2；axis=1的那个轴，范围是0-3，二维数组不能按照C语言那样当做一维数组进行索引，例如A[5]会报错，提示5超出了axis=0的范围。
+34. 对于一个2维数组A，3行4列。那么使用A[1,1]来进行索引时，==就是对它的两个axis进行索引==，axis=0的那个轴，范围是0-2；axis=1的那个轴，范围是0-3，二维数组不能按照C语言那样当做一维数组进行索引，例如A[5]会报错，提示5超出了axis=0的范围。
 
-56. arg索引运算，例如a.min()是获得数组a的最小值，而对应的索引运算a.argmin()是获得该最小值的索引位置。
+35. arg索引运算，例如a.min()是获得数组a的最小值，而对应的索引运算a.argmin()是获得该最小值的索引位置。
 
     ```python
     a1 = np.array([i+1 for i in range(8)])
@@ -646,7 +771,7 @@
     Out[68]: 7      #  a1[a1.argmax()] == a1.max()
     ```
 
-57. 排序：
+36. 排序：
 
     ```python
     A = np.arange(16)
@@ -700,9 +825,9 @@
     Out[99]: array([ 0,  1,  2,  6, 14, 12,  7,  8,  3,  4, 11, 10,  5, 15, 13,  9])
     ```
 
-58. 比较运算和FancyIndex
+37. 比较运算和FancyIndex
 
-59. 如果想要单独取某几个元素，可以用以下FancyIndex方法（将一个索引数组（==可以是np.array，也可以是list==）传递到原数组（==只能是np.array==）的索引位置，然后根据索引数组来生成新的数组，这个方法对于Python的list是不成立的）：
+38. 如果想要单独取某几个元素，可以用以下FancyIndex方法（将一个索引数组（==可以是np.array，也可以是list==）传递到原数组（==只能是np.array==）的索引位置，然后根据索引数组来生成新的数组，这个方法对于Python的list是不成立的）：
 
     ```python
     import numpy as np
@@ -717,7 +842,7 @@
            [4, 6]])
     ```
 
-60. 如果原数组是多维的，那么索引数组也要多个才可以。例如：
+39. 如果原数组是多维的，那么索引数组也要多个才可以。例如：
 
     ```python
     row =np.array([0,1,2])
@@ -733,7 +858,7 @@
     Out[29]: array([1, 4, 5])
     ```
 
-61. 还可以传递bool型数据来作为索引。
+40. 还可以传递bool型数据来作为索引。
 
     ```python
     a1
@@ -748,7 +873,7 @@
     Out[32]: array([2, 4, 8])
     ```
 
-62. 可以结合比较运算来对数组进行筛选，例如：
+41. 可以结合比较运算来对数组进行筛选，例如：
 
     ```python
     a1=a1.reshape(-1)
@@ -760,7 +885,7 @@
     Out[41]: array([4, 5, 6, 7, 8])
     ```
 
-63. 比较运算，它和fancyindex结合可以帮助更好地索引数据，方便数据预处理。
+42. 比较运算，它和fancyindex结合可以帮助更好地索引数据，方便数据预处理。
 
     ```python
     np.any(a1 == 3)  #主要有一个为True，就输出True
@@ -771,7 +896,7 @@
     Out[44]: 1
     ```
 
-64. KNN（k个最近邻居）分类算法：
+43. KNN（k个最近邻居）分类算法：
 
     ```python
     import numpy as np
@@ -798,12 +923,13 @@
     KNN_classify(k,x,X,y)
     ```
 
+# SciPy
 
-# Scipy
+1. SciPy的核心计算部分都是久经考验的Fortran数值计算库，例如线性代数（LAPACK），快速傅里叶变换（FFTPACK），常微分方程（ODEPACK），非线性方程组或最小值（MINPACK）。
 
-1. 主要功能：优化问题求解，插值，数值积分，线性代数，信号处理。
+2. 主要功能：优化问题求解，插值，数值积分，线性代数，信号处理。
 
-2. scipy.constants模块包含了几乎所有的物理数学化学常数，例如：
+3. scipy.constants模块包含了几乎所有的物理数学化学常数，例如：
 
    ```python
    import numpy as np
@@ -816,7 +942,7 @@
    Out[13]: 3.141592653589793
    ```
 
-3. scipy.special模块的精度比Python自带的函数要高，当要对一些数值做更精确的计算时，应该用特殊函数库，例如：
+4. scipy.special模块的精度比Python自带的函数要高，当要对一些数值做更精确的计算时，应该用特殊函数库，例如：
 
    ```python
    import math
@@ -845,7 +971,7 @@
    Out[27]: 4.84
    ```
 
-4. 排列组合：$A_5^3$，$C_5^3$。
+5. 排列组合：$A_5^3$，$C_5^3$。
 
    ```python
    sp.perm(5,3)     
@@ -855,7 +981,7 @@
    Out[29]: 10.0
    ```
 
-5. 优化问题，基本套路都是这样的：①通过分析问题，确定问题的损失函数或者效用函数②通过最优化损失函数或者效用函数，获得机器学习的模型。几乎所有的参数学习算法都是这样的套路。常用的最优化算法有两类：传统的，例如梯度下降，牛顿等；启发式的，例如粒子群，遗传，退火等算法。
+6. 优化问题，基本套路都是这样的：①通过分析问题，确定问题的损失函数或者效用函数②通过最优化损失函数或者效用函数，获得机器学习的模型。几乎所有的参数学习算法都是这样的套路。常用的最优化算法有两类：传统的，例如梯度下降，牛顿等；启发式的，例如粒子群，遗传，退火等算法。
 
    1. 最小二乘拟合（leastsq），步骤如下：
 
@@ -1149,9 +1275,10 @@
        plt.show()
        ```
 
-# Sympy
+# SymPy
 
-1. Sympy依赖于mpmath。符号计算可以利用符号进行表达式推导。符号计算又称为计算代数系统 computer algebra system  CAS。Sympy可以简化表达式，求导，积分，求极限，解方程，处理矩阵等。可以将结果输出成图片或Latex结果。
+1. SymPy是一套符号运算的扩展库，完全采用python编写。
+2. SymPy依赖于mpmath。符号计算可以利用符号进行表达式推导。符号计算又称为计算代数系统 computer algebra system  CAS。Sympy可以简化表达式，求导，积分，求极限，解方程，处理矩阵等。可以将结果输出成图片或Latex结果。
 
    ```python
    import math
@@ -1161,7 +1288,7 @@
    sympy.sqrt(3)  #结果为 sqrt(3)。会保留精确值。
    sympy.sqrt(8)  #结果为 2*sqrt(2)。会化简
    ```
-2. 所有的符号变量都要用symbols定义。
+3. 所有的符号变量都要用symbols定义。
 
    ```python
    from sympy import symbols
@@ -1170,7 +1297,7 @@
    expr - x   #输出2*y，x和-x会消掉。
    x*expr     #输出x*(x + 2*y)。而不是展开多项式。
    ```
-3. 符号计算的结果可以设置不同的输出形式，展开或者因式分解形式。
+4. 符号计算的结果可以设置不同的输出形式，展开或者因式分解形式。
 
    ```python
    from sympy import expand, factor
@@ -1179,7 +1306,7 @@
    expanded_expr = expand(x*expr)  #结果为x**2 + 2*x*y
    factor(expanded_expr)           #结果为x*(x + 2*y)
    ```
-4. 例子：
+5. 例子：
 
    ```python
    from sympy import *
@@ -1207,7 +1334,7 @@
    latex(Integral(cos(x)**2, (x, 0, pi)))  #输出latex结果
    \int\limits_{0}^{\pi} \cos^{2}{\left(x \right)}\, dx
    ```
-5. 使用符号变量构造其他变量后，二者就没有关系了：
+6. 使用符号变量构造其他变量后，二者就没有关系了：
 
    ```python
    x = symbols('x')
@@ -1215,14 +1342,14 @@
    x = 2     #此时变量x就不代表符号x了。
    print(expr) #结果还是x+1，
    ```
-6. 符号表达式可以通过将符号变量替换为具体数值，来求值：
+7. 符号表达式可以通过将符号变量替换为具体数值，来求值：
 
    ```python
    x = symbols('x')
    expr = x + 1
    expr.subs(x, 2)   #结果为3
    ```
-7. =在Sympy中表示赋值，==只是比较结构是否相等，而不是产生一个表达式：
+8. =在Sympy中表示赋值，==只是比较结构是否相等，而不是产生一个表达式：
 
    ```python
    x + 1 == 4       #结果为 False，因为x+1可能是任意值，不恒等于4。
@@ -1230,36 +1357,24 @@
    Eq(x+1,4)    #产生一个符号表达式，判断x+1是否等于4.
    Eq(x+1,4).subs(x,3)   #结果为true，因为3+1 == 4。
    ```
-8. 
 9. 
 10. 
 11. 
 12. 
-13. 
-14. 
-15. 
-16. 
-17. 
-18. 
-19. 
-20. 
-21. 
-22. 
-23. 
-24. 
-25. 
-26. 
 
 # Matplotlib
 
-1. ```python
+1. matplotlib十分适合编写短小的脚本来进行快速绘图，采用面向对象技术实现，
+
+2. 例子：
+
+   ```python
    import numpy as np
    import matplotlib.pyplot as plt
    x = np.linspace(0,20,100)
    y = np.sin(x)
    plt.plot(x, y)    #默认是折线图
    plt.show()
-   
    
    siny=np.sin(x)
    cosy=np.cos(x)
@@ -1279,9 +1394,9 @@
    plt.show()       #一张图中画了两条曲线。
    ```
 
-   ![image-20201019095656225](Python科学计算应用基础.assets/image-20201019095656225.png)
+3. ![image-20201019095656225](Python科学计算应用基础.assets/image-20201019095656225.png)
 
-2. 子图
+4. 子图
 
    ```python
    plt.subplot(211)   #2行1列，第1个
@@ -1290,11 +1405,11 @@
    plt.plot(x, cosy,label='U2',color='y',linestyle='-.',marker='*')
    ```
 
-3. 默认大小为6x4inch，dpi为72。
+5. 默认大小为6x4inch，dpi为72。
 
-4. 也可以使用子图对象来控制子图
+6. 也可以使用子图对象来控制子图
 
-5. ```python
+7. ```python
    fig1 = plt.figure(dpi=150)   #单位 inch
    sub = [plt.subplot(221+i) for i in range(4)]
    
@@ -1308,31 +1423,31 @@
 
    ![image-20201019151416047](Python科学计算应用基础.assets/image-20201019151416047.png)
 
-6. 可用的线型有    '-', '--', '-.', ':', 'None', ' ', '', 'solid', 'dashed', 'dashdot', 'dotted'
+8. 可用的线型有    '-', '--', '-.', ':', 'None', ' ', '', 'solid', 'dashed', 'dashdot', 'dotted'
 
-7. plt.plot()  折线图， plt.scatter()   散点图 
+9. plt.plot()  折线图，plt.scatter()   散点图
 
-8. 柱状图   plt.bar() 
+10. 柱状图：plt.bar() 
 
-9. ```python
-   plt.figure(figsize=(5,3),dpi=100)   #单位 inch 
-   cites = ['BJ','SH','TJ','CQ']
-   GDP = [12400,13900,9386,9143]
-   plt.bar(range(4),GDP)   #柱状图
-   plt.title('GDP')
-   plt.ylabel('GDP')
-   plt.xticks(range(4),cites)
-   
-   plt.show()
-   #横排的柱状图
-   plt.barh(range(4),GDP)
-   plt.title('GDP')
-   plt.xlabel('GDP')
-   plt.yticks(range(4),cites)
-   plt.show()
-   ```
+11. ```python
+    plt.figure(figsize=(5,3),dpi=100)   #单位 inch 
+    cites = ['BJ','SH','TJ','CQ']
+    GDP = [12400,13900,9386,9143]
+    plt.bar(range(4),GDP)   #柱状图
+    plt.title('GDP')
+    plt.ylabel('GDP')
+    plt.xticks(range(4),cites)
+    
+    plt.show()
+    #横排的柱状图
+    plt.barh(range(4),GDP)
+    plt.title('GDP')
+    plt.xlabel('GDP')
+    plt.yticks(range(4),cites)
+    plt.show()
+    ```
 
-10. 直方图是一种概率统计图
+12. 直方图是一种概率统计图
 
     ```python
     x = np.random.normal(70,10,10000000)
@@ -1342,7 +1457,7 @@
 
     ![image-20201019153922560](Python科学计算应用基础.assets/image-20201019153922560.png)
 
-11. 使用opencv读取图片，结果为ndarray类型，3维数组，每个数据是uint8。
+13. 使用opencv读取图片，结果为ndarray类型，3维数组，每个数据是uint8。
 
     ```python
     import numpy as np
@@ -1354,16 +1469,18 @@
     Out[10]: (600, 900, 3)
     ```
 
-12. 
+14. 
 
 
 # Pandas
 
-1. numpy是数据处理的基础包，pandas是在其上进行封装，相当于一个代码版的Excel。
+1. Pandas在NumPy的基础上提供了类似于电子表格的数据结构DataFrame，核心运算函数使用CPython编写，灵活而高效。
 
-2. 常见的读取函数：pandas.read_csv或pandas.read_sql（读取MySQL的数据库）或pandas.read_excel
+2. numpy是数据处理的基础包，pandas是在其上进行封装，相当于一个代码版的Excel。
 
-3. ```python
+3. 常见的读取函数：pandas.read_csv或pandas.read_sql（读取MySQL的数据库）或pandas.read_excel
+
+4. ```python
    pvuv = pd.read_csv(
        fpath,
        sep="\t",  #tab键分割
@@ -1372,13 +1489,13 @@
    )
    ```
 
-4. 最重要的数据类型是DataFrame，相当于Excel中的一个sheet，当数据量巨大时，Excel就hold不住了。也类似于数据库中的一条一条的记录。
+5. 最重要的数据类型是DataFrame，相当于Excel中的一个sheet，当数据量巨大时，Excel就hold不住了。也类似于数据库中的一条一条的记录。
 
-5. DataFrame的dtypes属性，可以给出每一列的数据类型。
+6. DataFrame的dtypes属性，可以给出每一列的数据类型。
 
-6. ![image-20201007212851391](Python科学计算应用基础.assets/image-20201007212851391.png)
+7. ![image-20201007212851391](Python科学计算应用基础.assets/image-20201007212851391.png)
 
-7. ```python
+8. ```python
    data.index
    Out[7]: RangeIndex(start=0, stop=50, step=1)
    data.columns
@@ -1412,13 +1529,13 @@
    data[data['得分']<20].to_excel("kk.xlsx")   #不会发生乱码。需要安装openpyxl库。
    ```
 
-8. Series相当于是在numpy数组基础上加了一个索引，索引不一定是数字，也可以是字符串等，类似于键值对。
+9. Series相当于是在numpy数组基础上加了一个索引，索引不一定是数字，也可以是字符串等，类似于键值对。
 
-9. dataframe是把多个列组合到一起，并为每一列添加了列名。
+10. dataframe是把多个列组合到一起，并为每一列添加了列名。
 
-10. ![image-20201007223738443](Python科学计算应用基础.assets/image-20201007223738443.png)
+11. ![image-20201007223738443](Python科学计算应用基础.assets/image-20201007223738443.png)
 
-11. ```python
+12. ```python
     import numpy as np
     import pandas as pd
     s1 = pd.Series([56,78,89,80]) #默认会增加一个从0开始的索引。
@@ -1476,7 +1593,7 @@
     dtype: bool
     ```
 
-12. dataframe，相当于是np的二维数组，不过加了两种索引，一种是行index，一种是列columns。这里的一个index对应一条记录，也就是一个一维数组。
+13. dataframe，相当于是np的二维数组，不过加了两种索引，一种是行index，一种是列columns。这里的一个index对应一条记录，也就是一个一维数组。
 
     ```python
     import numpy as np
@@ -1521,7 +1638,7 @@
     1  日本  东京
     ```
 
-13. 修改索引：
+14. 修改索引：
 
     ```python
     df.head()
@@ -1550,7 +1667,7 @@
     df.loc[lambda df : (df["bWendu"]<=30) & (df["yWendu"]>=15), :]  #使用lambda表达式来索引，其中的参数是整个dataframe。lambda表达式的结果也应是一个表示True或False的Series。
     ```
 
-14. 也可以通过一个二维数组+行索引（可省略）+列索引（可省略）的方式来构建DataFrame：
+15. 也可以通过一个二维数组+行索引（可省略）+列索引（可省略）的方式来构建DataFrame：
 
     ```python
     d1 = pd.DataFrame([[200,300,200],[100,100,400],[200,100,300]],index=['2018','2019','2020'],\
@@ -1570,7 +1687,7 @@
     2  200  100  300
     ```
 
-15. 新增列：
+16. 新增列：
 
     ```python
     df.assign(
@@ -1580,7 +1697,7 @@
     )
     ```
 
-16. Mapping和replace
+17. Mapping和replace
 
     ```python
     import numpy as np
@@ -1601,7 +1718,7 @@
     d1['小吃']=d1['小吃'].replace(['炸酱面','拌饭'],['炒肝','辣白菜'])
     ```
 
-17. 对于Series和DataFrame的操作：
+18. 对于Series和DataFrame的操作：
 
     ```python
     import numpy as np
@@ -1621,7 +1738,7 @@
     s1.sum(求和) .mode(众数)  .median(中位数)   .value_counts(统计出现的次数)
     ```
 
-18. 两个序列做运算，会找键相同的值进行运算，不是共有的键，则产生NaN。
+19. 两个序列做运算，会找键相同的值进行运算，不是共有的键，则产生NaN。
 
     ```python
     import numpy as np
@@ -1659,9 +1776,9 @@
     dtype: float64
     ```
 
-19. 对于dataframe求和，也可以按照numpy的做法，来指定axis。
+20. 对于dataframe求和，也可以按照numpy的做法，来指定axis。
 
-20. 协方差，相关系数：
+21. 协方差，相关系数：
 
     ```python
     df.cov()
@@ -1687,7 +1804,7 @@
     aqiLevel	0.0	0.0	0.0	-0.0
     ```
 
-21. 排序
+22. 排序
 
     ```python
     s3 = pd.Series(np.random.rand(10))
@@ -1744,7 +1861,7 @@
     2  200  100  300
     ```
 
-22. Merge（两个dataframe要有公共的列才可以合并）
+23. Merge（两个dataframe要有公共的列才可以合并）
 
     ```python
     import numpy as np
@@ -1798,7 +1915,7 @@
     4   CQ      NaN  2423.0
     ```
 
-23. Concat（类似于numpy中的多维数组合并np.concatenate）和Combine(去重合并)
+24. Concat（类似于numpy中的多维数组合并np.concatenate）和Combine(去重合并)
 
     ```python
     import numpy as np
@@ -1852,7 +1969,7 @@
     dtype: float64
     ```
 
-24. Apply操作，根据axis参数来逐行或逐列调用函数，构成一个series：
+25. Apply操作，根据axis参数来逐行或逐列调用函数，构成一个series：
 
     ```python
     import numpy as np
@@ -1876,7 +1993,7 @@
     Out[23]: 35271.0      #可以看出转化成了浮点数。
     ```
 
-25. 去重和清洗：
+26. 去重和清洗：
 
     ```python
     df1
@@ -1923,7 +2040,7 @@
     2   CQ  23605   2423
     ```
 
-26. 分箱（类似于Excel的筛选，为每一行增加一个新的列数据）和分组（）：
+27. 分箱（类似于Excel的筛选，为每一行增加一个新的列数据）和分组（）：
 
     ```python
     import numpy as np
@@ -1945,97 +2062,97 @@
     df1['grade']=pd.cut(scores,bins,labels=['E','D','C','B','A'])
     ```
 
-27. Excel操作，读取Excel2003的.xls文件需要xlrd库，读取Excel2007以后的.xlsx文件需要xlrd或openpyxl库：
+28. Excel操作，读取Excel2003的.xls文件需要xlrd库，读取Excel2007以后的.xlsx文件需要xlrd或openpyxl库：
 
-28. ![image-20201009141656736](Python科学计算应用基础.assets/image-20201009141656736.png)
+29. ![image-20201009141656736](Python科学计算应用基础.assets/image-20201009141656736.png)
 
     
 
-29. 默认返回第一个sheet的dataframe。如果参数是是none，那么字典的键是各个sheet的名字字符串。
+30. 默认返回第一个sheet的dataframe。如果参数是是none，那么字典的键是各个sheet的名字字符串。
 
-30. ![image-20201009141731212](Python科学计算应用基础.assets/image-20201009141731212.png)
+31. ![image-20201009141731212](Python科学计算应用基础.assets/image-20201009141731212.png)
 
-31. 对于没有表头的表格，需要设定header=none，如果有表头，则设置为0。
+32. 对于没有表头的表格，需要设定header=none，如果有表头，则设置为0。
 
-32. 默认情况下header=0，index_col=None。如果设置了header不为0，那么会跳过header上面的行。
+33. 默认情况下header=0，index_col=None。如果设置了header不为0，那么会跳过header上面的行。
 
-33. ![image-20201009142701957](Python科学计算应用基础.assets/image-20201009142701957.png)
+34. ![image-20201009142701957](Python科学计算应用基础.assets/image-20201009142701957.png)
 
-34. usecols参数可以只读取部分列，提高效率。切片包含左右边界值。下图中的AAA那一行为表头。str-list方法比较好，可读性好，也不怕列顺序变动。
+35. usecols参数可以只读取部分列，提高效率。切片包含左右边界值。下图中的AAA那一行为表头。str-list方法比较好，可读性好，也不怕列顺序变动。
 
-35. ![image-20201009143401457](Python科学计算应用基础.assets/image-20201009143401457.png)
+36. ![image-20201009143401457](Python科学计算应用基础.assets/image-20201009143401457.png)
 
-36. skiprows跳过行。一般如果要跳过列的话，可以用usecols来操作。
+37. skiprows跳过行。一般如果要跳过列的话，可以用usecols来操作。
 
-37. ![image-20201009144034860](Python科学计算应用基础.assets/image-20201009144034860.png)
+38. ![image-20201009144034860](Python科学计算应用基础.assets/image-20201009144034860.png)
 
-38. 如果源文件没有标题行，则可以使用names来手动设置，记得设置header=None，也可以在读完之后，用dataframe.columns=来设置。
+39. 如果源文件没有标题行，则可以使用names来手动设置，记得设置header=None，也可以在读完之后，用dataframe.columns=来设置。
 
-39. 可以通过dtype参数传入一个字典，来对每一列设置类型。
+40. 可以通过dtype参数传入一个字典，来对每一列设置类型。
 
-40. ![image-20201009144642905](Python科学计算应用基础.assets/image-20201009144642905.png)
+41. ![image-20201009144642905](Python科学计算应用基础.assets/image-20201009144642905.png)
 
-41. 设置Series内储存数据的类型，object表示Series内的数据类型不唯一。下图中画框的类型是可以自动推导的。其余的要手动设置。也可以在dataframe的dtypes属性中查看类型。使用dataframe的astype()函数设置类型。
+42. 设置Series内储存数据的类型，object表示Series内的数据类型不唯一。下图中画框的类型是可以自动推导的。其余的要手动设置。也可以在dataframe的dtypes属性中查看类型。使用dataframe的astype()函数设置类型。
 
-42. 当一列的数据只有几种情况时，可以设置为分类数据类型category。可以更快的索引，节约内存，还可以排序。
+43. 当一列的数据只有几种情况时，可以设置为分类数据类型category。可以更快的索引，节约内存，还可以排序。
 
-43. 设置dtype的目的是，不同的类型有不同的操作函数。所以一般都要有一个明确的类型，而不是object。
+44. 设置dtype的目的是，不同的类型有不同的操作函数。所以一般都要有一个明确的类型，而不是object。
 
-44. <img src="Python科学计算应用基础.assets/image-20201009144801373.png" alt="image-20201009144801373" style="zoom: 50%;" />
+45. <img src="Python科学计算应用基础.assets/image-20201009144801373.png" alt="image-20201009144801373" style="zoom: 50%;" />
 
-45. 选择对应的列为日期列，并解析它们。
+46. 选择对应的列为日期列，并解析它们。
 
-46. ![image-20201009150223029](Python科学计算应用基础.assets/image-20201009150223029.png)
+47. ![image-20201009150223029](Python科学计算应用基础.assets/image-20201009150223029.png)
 
-47. 下图左边的标准日期类型，不用设置日期解析器，右边的非标准的日期就需要手动设置。
+48. 下图左边的标准日期类型，不用设置日期解析器，右边的非标准的日期就需要手动设置。
 
-48. ![image-20201009150310684](Python科学计算应用基础.assets/image-20201009150310684.png)
+49. ![image-20201009150310684](Python科学计算应用基础.assets/image-20201009150310684.png)
 
-49. 在自动推导的时候，会参考Excel的列类型。可以通过多个分别表示时间的列（例如，年月日放在3个不同的列）合并成一个。
+50. 在自动推导的时候，会参考Excel的列类型。可以通过多个分别表示时间的列（例如，年月日放在3个不同的列）合并成一个。
 
-50. ![image-20201009152929202](Python科学计算应用基础.assets/image-20201009152929202.png)
+51. ![image-20201009152929202](Python科学计算应用基础.assets/image-20201009152929202.png)
 
-51. data_parser接受一个函数，如下format参数可以解析2002年2月13日之类的日期。
+52. data_parser接受一个函数，如下format参数可以解析2002年2月13日之类的日期。
 
-52. ![image-20201009153646698](Python科学计算应用基础.assets/image-20201009153646698.png)
+53. ![image-20201009153646698](Python科学计算应用基础.assets/image-20201009153646698.png)
 
-53. Pandas中常用NaN表示缺失值，是一个float类型。可以用na_values参数来指定那些内容被解析为NaN。可接受list，或字符串，数字等。默认全局的对应内容都会被解析为NaN，可以使用字典来直解析某些列中对应的内容为NaN（key是列名）。
+54. Pandas中常用NaN表示缺失值，是一个float类型。可以用na_values参数来指定那些内容被解析为NaN。可接受list，或字符串，数字等。默认全局的对应内容都会被解析为NaN，可以使用字典来直解析某些列中对应的内容为NaN（key是列名）。
 
-54. ![image-20201009154410609](Python科学计算应用基础.assets/image-20201009154410609.png)
+55. ![image-20201009154410609](Python科学计算应用基础.assets/image-20201009154410609.png)
 
-55. na_values = ['a',1]，这样所有内容为'a'或1的单元格会被解析为NaN。
+56. na_values = ['a',1]，这样所有内容为'a'或1的单元格会被解析为NaN。
 
-56. 值转换函数，参数为一个字典，键为列明或索引，值为函数，可以对指定的列进行修改。可以用来对数据进行清洗，预处理。
+57. 值转换函数，参数为一个字典，键为列明或索引，值为函数，可以对指定的列进行修改。可以用来对数据进行清洗，预处理。
 
-57. ![image-20201009155038237](Python科学计算应用基础.assets/image-20201009155038237.png)
+58. ![image-20201009155038237](Python科学计算应用基础.assets/image-20201009155038237.png)
 
-58. true_values false_values两个参数可以接受list，将对应的字符串转化为true或FALSE，只有某一列的内容全部可以转化时，才会转化该列。只对字符串有效。
+59. true_values false_values两个参数可以接受list，将对应的字符串转化为true或FALSE，只有某一列的内容全部可以转化时，才会转化该列。只对字符串有效。
 
-59. ![image-20201009155450713](Python科学计算应用基础.assets/image-20201009155450713.png)
+60. ![image-20201009155450713](Python科学计算应用基础.assets/image-20201009155450713.png)
 
-60. Excel中的列名可以重复，但是dataframe中不可以重复。
+61. Excel中的列名可以重复，但是dataframe中不可以重复。
 
-61. nrows参数可以指定要解析的行数（除了表头以外的）。
+62. nrows参数可以指定要解析的行数（除了表头以外的）。
 
-62. 使用dataframe.to_excel（）将对应的dataframe写入Excel文件。
+63. 使用dataframe.to_excel（）将对应的dataframe写入Excel文件。
 
-63. <img src="Python科学计算应用基础.assets/image-20201009160627716.png" alt="image-20201009160627716" style="zoom: 67%;" />
+64. <img src="Python科学计算应用基础.assets/image-20201009160627716.png" alt="image-20201009160627716" style="zoom: 67%;" />
 
-64. 一般如果是默认的列索引，则可以不输出列索引。
+65. 一般如果是默认的列索引，则可以不输出列索引。
 
-65. ![image-20201009160801818](Python科学计算应用基础.assets/image-20201009160801818.png)
+66. ![image-20201009160801818](Python科学计算应用基础.assets/image-20201009160801818.png)
 
-66. 在写入的时候，需要确保该文件当前没有被打开。
+67. 在写入的时候，需要确保该文件当前没有被打开。
 
-67. 实际使用的时候，index列也应该有一个名字，可以使用dataframe.index.name = 来设置。
+68. 实际使用的时候，index列也应该有一个名字，可以使用dataframe.index.name = 来设置。
 
-68. ![image-20201009161227716](Python科学计算应用基础.assets/image-20201009161227716.png)
+69. ![image-20201009161227716](Python科学计算应用基础.assets/image-20201009161227716.png)
 
-69. 使用ExcelWriter可以一次写入多个sheet，同时修改时间格式。用ExcelWriter打开一个文件，to_excel可以往该writer代表的文件中写入多次数据。
+70. 使用ExcelWriter可以一次写入多个sheet，同时修改时间格式。用ExcelWriter打开一个文件，to_excel可以往该writer代表的文件中写入多次数据。
 
-70. ![image-20201009162057738](Python科学计算应用基础.assets/image-20201009162057738.png)
+71. ![image-20201009162057738](Python科学计算应用基础.assets/image-20201009162057738.png)
 
-71. 不过以上的所有的to_excel都会导致覆盖原有的所有数据，这时需要使用openpyxl引擎来操作Excel。例如：
+72. 不过以上的所有的to_excel都会导致覆盖原有的所有数据，这时需要使用openpyxl引擎来操作Excel。例如：
 
     ```python
     import pandas as pd
@@ -2062,9 +2179,9 @@
     writer.close()
     ```
 
-72. 读写CSV文件。大部分参数和Excel是一样的。读写CSV文件需要特别注意编码。CSV文件在写入时，都要设置index=False，否则产生不是标准的CSV文件。
+73. 读写CSV文件。大部分参数和Excel是一样的。读写CSV文件需要特别注意编码。CSV文件在写入时，都要设置index=False，否则产生不是标准的CSV文件。
 
-73. ![image-20201009195256960](Python科学计算应用基础.assets/image-20201009195256960.png)
+74. ![image-20201009195256960](Python科学计算应用基础.assets/image-20201009195256960.png)
 
 # openpyxl
 
@@ -2081,6 +2198,25 @@
 11. 对于['A2:C4']，获得的是一个二维的元组，索引方式类似于二维数组。['A2:C4']\[0\]获得的是第2行的数据。先索引行，再索引列。
 12. 对于['A:C']，也是一个二维的元组，虽然没有指定行的范围，但是会默认取到最大的有数据的行，如果是空表，则去前4行。不过此时，单元格的索引时先列后行，基['A:C']\[0\]是A列。
 13. 
+
+# CPython
+
+1. python的动态特性虽然方便了程序的开发，但是会极大降低运行的速度。CPython可以将添加了类型声明的Python程序编译为C语言程序，再编译为扩展模块，从而提高程序的运行速度。
+2. 
+3. 
+4. 
+5. 
+6. 
+7. 
+8. 
+9. 
+10. 
+11. 
+12. 
+13. 
 14. 
+15. 
+16. 
+17. 
+18. 
 19. 
-20. 

@@ -1,14 +1,14 @@
 # 基础部分
 
-1. Python诞生于1990年，完成同一功能所需要的代码量一般为C语言的10%不到，有庞大的第三方库，C和Python可以互相调用。
+1. Python诞生于1990年，完成同一功能所需要的代码量一般为C语言的10%不到，有庞大的第三方库，C和Python可以互相调用。2009年发布了python3.0版本。
 
 2. Python的名称来源于巨蟒剧团 Monty Python，python作为英文单词，意思是蟒蛇，
 
-3. Python Package Index（PyPI）是Python的官方软件仓库。
+3. Python Package Index（PyPI）是Python的官方软件仓库。现在已经有6万多个库了。
 
 4. 计算机只能解决一个问题的可计算部分。
 
-5. 有两种编程方式，交互式（例如IPython和Jupyter）和文件式，和matlab类似。
+5. 有两种编程方式，交互式（例如IPython和Jupyter）和文件式，和matlab类似。交互式控制台提供REPL（read-eval-print-loop），即读取，求值，输出的循环。
 
 6. 缩进是Python语法的一部分，缩进不正确可能导致运行错误，是表达代码包含和层次关系的唯一手段。一般为四个空格或一个tab。
 
@@ -43,7 +43,17 @@
 
 12. 如果某行代码太长，可以使用\来续行。要求\之后立刻就是换行，不能有别的空格。相当于\把enter转义了。
 
-13. PEP是Python Enhancement Proposals的缩写，一般包含以下几种：
+13. python会忽略`(),[],{}`内的换行符，因此他们内部的换行符可以不用\来续行。
+
+    ```python
+    a = [1, 2, 3,
+         4, 5]
+    #等价于
+    a = [1, 2, 3,\
+         4, 5]
+    ```
+
+14. PEP是Python Enhancement Proposals的缩写，一般包含以下几种：
 
     1. 跟踪Python中的新特性
 
@@ -514,7 +524,7 @@
 
    ```python
    data = ["a","b","c"]
-   for index,data in enumerate(data): #enumerate的返回值是一个迭代器，从中可以依次取出由data构造的元组, (0,data[0]),(1,data[1]),(2,data[2])。
+   for index,data in enumerate(data): #enumerate的返回值是一个enumerate对象，它也是迭代器，从中可以依次取出由data构造的元组, (0,data[0]),(1,data[1]),(2,data[2])。该函数还可以指定下标的起始值start，默认为0
        print(index,"  ",data)
    ```
 
@@ -1123,7 +1133,18 @@
    demo_func(1, 2, b=100) #正常运行
    ```
 
-9. 函数定义中可以有return，也可以没有，没有的话默认返回None。return可以返回多个返回值，用逗号分隔。
+9. 从Python3.8开始，函数的定义中，参数位置允许出现/和*。
+
+   ```python
+   def f1(a, b, /): # /之前的参数必须使用位置传参，不能使用关键字传参
+       return a + b
+   def f1(a, *, b, c): # *之后的参数必须使用关键字传参，不能使用位置传参
+       return a + b + c
+   #标准库中的一些用法
+   sorted(iterable, /, *, key=None, reverse=False) #第一个参数只能使用位置传参，key和reverse只能使用关键字传参。
+   ```
+
+10. 函数定义中可以有return，也可以没有，没有的话默认返回None。return可以返回多个返回值，用逗号分隔。
 
    ```python
    def f():
@@ -1131,17 +1152,8 @@
    a,b = f()     #用多个变量来分别接受返回值。
    ```
 
-10. 函数的参数传递实际上是对象的地址，如果实参是引用数据类型（列表，字典等），则在函数内部修改后，会影响到外部。
+11. 函数的参数传递实际上是对象的地址，如果实参是引用数据类型（列表，字典等），则在函数内部修改后，会影响到外部。
 
-11. 如果函数返回多个值，可以用*拆分成多个参数，传入一个新的函数。
-
-    ```python
-    def f():
-        return 2,3
-    def g(a,b,c):
-        print(a,b,c)
-    g(1,*f()) #相当于调用g(1,*(2,3)) → g(1,2,3)
-    ```
 
 ## 递归
 
@@ -1541,22 +1553,22 @@
 
 10. 前面定义的变量，可以在同块内的后面的函数内直接使用。不过不建议这样使用，建议使用参数传递进去。
 
-   ```python
-   ls = ["F","f"]    #全局变量
-   def func(a):
-       ls.append(a)      #此处的ls是上面的全局变量
-       return ls
-   func("C")     #结果为["F","f","C"]
-   print(ls)     #结果为["F","f","C"]
-   
-   ls = ["F","f"]
-   def func(a):
-       ls = []           #创建了局部变量，屏蔽了全局变量
-       ls.append(a)      #此处的ls是新创建的局部变量
-       return ls
-   func("C")             #局部变量ls被修改，然后函数退出后，由于被返回给了外部函数，因此引用计数并非为0，内存没有被销毁，结果为["C"]
-   print(ls)             #此处打印的是全局变量，并未被修改，仍然是["F","f"]
-   ```
+    ```python
+    ls = ["F","f"]    #全局变量
+    def func(a):
+        ls.append(a)      #此处的ls是上面的全局变量
+        return ls
+    func("C")     #结果为["F","f","C"]
+    print(ls)     #结果为["F","f","C"]
+    
+    ls = ["F","f"]
+    def func(a):
+        ls = []           #创建了局部变量，屏蔽了全局变量
+        ls.append(a)      #此处的ls是新创建的局部变量
+        return ls
+    func("C")             #局部变量ls被修改，然后函数退出后，由于被返回给了外部函数，因此引用计数并非为0，内存没有被销毁，结果为["C"]
+    print(ls)             #此处打印的是全局变量，并未被修改，仍然是["F","f"]
+    ```
 
 11. 变量集合：
 
@@ -1574,39 +1586,110 @@
     foo()  #输出 a=3
     ```
 
-# 推导式
+# 序列
 
-1. 推导式又称为解析式，是python独有的一种特性。可以从一个数据序列构建一个新的数据序列。一般有两种用法， 构造新的容器数据或从已有的容器数据中筛选出满足条件的。一共有四种：
+1. 标准库用C实现了一系列序列类型，分为两类：
+   1. 容器序列：list，tuple，collections.deque。可以存放不同的类型（包括用户自定义类型），实际存放的是指针。
+   2. 扁平序列：str，bytes，bytearray，memoryview，array.array。只能存放一种类型，使用连续的内存空间存储数据本身。只能存放字符，字节，数值等基础类型。
+
+2. 序列类型还可以根据能否被修改分类：
+   1. 不可变序列：str，tuple，bytes。
+   2. 可变序列：list，bytearray，array.array，collections.deque，memoryview。一般比不可变序列多提供一些修改自身的方法，例如insert，append方法。
+
+3. 容器就是包含其他对象引用的对象，python中存在非序列的容器，例如集合，字典等。
+
+4. collections.abc模块列举了一些构造内置序列类型时用到的抽象基类：
 
    ```python
-   #列表推导式  基本形式: new_list = [expression for_loop_expression if condition]，只会讲使得condition为True的元素筛选下来。其中if condition可以省略。
-   [i**2 for i in range(5)]  #构造新的列表，结果为[0, 1, 4, 9, 16]
-   old_list = [0,1,2,3,4,5]
-   new_list = [item for item in old_list if item % 2 == 0] #筛选出来列表中偶数，组成一个新的列表。结果为 [0, 2, 4]
-   #字典推导式 基本形式: new_dict ={ key_expr: value_expr for_loop_expression if condition }
-   kvinfo = {i:i**2 for i in range(5)} #构造新的字典，结果为{0: 0, 1: 1, 2: 4, 3: 9, 4: 16}
-   old_info = {
-       "Jack": {
-           "chinese": 87,
-           "math": 92,
-           "english": 78
-       },
-       "Tom": {
-           "chinese": 92,
-           "math": 100,
-           "english": 89
-       }
-   }
-   new_info = {name: scores for name, scores in old_info.items() if scores["math"] == 100} # 筛选出数学为100分的记录，结果为{'Tom': {'chinese': 92, 'math': 100, 'english': 89}}
-   
-   #集合推导式 基本形式: new_set = { expr for_loop_expression if condition }
-   {i for i in [0,0,1,2,3,3]}  #可以用此方法对数据进行去重，结果为{0, 1, 2, 3}
-   #生成器推导式 基本形式: gen = (expression for_loop_expression if condition)，和列表推导式就相差一对括号。
+   Container #类中包含__contains__特殊方法。
+   Iterable  #类中包含__iter__特殊方法。
+   Sized     #类中包含__len__特殊方法。
+   Sequence  #类同时继承了上述3个类，同时还增加或重写了一些方法，__getitem__, __contains__, __iter__, __reversed__, index, count。
+   MutableSequence #类继承了Sequence，同时同时还增加了一些方法，__setitem__, __delitem__, insert, append, reverse, extend, pop, remove, __iadd__
    ```
 
-# 容器
+5. python支持一种数据结构的基本概念，容器container，也就是可以包含其他对象的对象。两种主要的容器为==序列和映射==。序列包含列表list，元组tuple，字符串str。映射包含字典dict。二者的主要区别时序列使用编号来索引元素，映射使用键来索引元素。还有一种既不是序列，也不是映射的容器，就是集合set。
 
-1. python支持一种数据结构的基本概念，容器container，也就是可以包含其他对象的对象。两种主要的容器为==序列和映射==。序列包含列表list，元组tuple，字符串str。映射包含字典dict。二者的主要区别时序列使用编号来索引元素，映射使用键来索引元素。还有一种既不是序列，也不是映射的容器，就是集合set。
+6. str和bytes是python3特有的类型。
+
+7. Python使用统一的风格来处理数据，不论是字符串，列表，还是字节序列等，他们共用一套操作：迭代，切片，排序，拼接等。
+
+8. python程序员会默认序列可以进行+和*运算的。二者都不会修改原有的序列，python会构建一个新的序列。
+
+9. 在对序列a进行`a*n`这样操作时，如果a中的元素是对其他可变对象的引用，那么新的序列中会有多个元素是指向同一个对象的引用。
+
+   ```python
+   x = [[1, 2]]*3 # 此时x为[[1, 2], [1, 2], [1, 2]]，因为[1, 2]是可变对象，因此[[1, 2]]的第0个元素实际上是一个对[1, 2]的引用，而*3会导致该引用被复制3次。
+   x[0][0] = 3 # 此时x为[[3, 2], [3, 2], [3, 2]]
+   #要想避免这种情况，可以使用列表推导式
+   x = [[1, 2] for i in range(3)]
+   #或使用for循环
+   x = []
+   for i in range(3):
+       x.append([1, 2]) #每次添加的都是新构造的对象
+   #但是不能使用如下的for循环
+   x = []
+   a = [1, 2]
+   for i in range(3):
+       x.append(a) #每次添加的都是同一个对象
+   #如果a*n中的a中的元素是不可变对象的引用，
+   ??a[0] = 3是修改了第0个元素指向的值，属于引用重新绑定？
+   x = [1, 2]*3 #相当于[1, 2]+[1, 2]+[1, 2]，结果为[1, 2, 1, 2, 1, 2]
+   x[0] = 5 #此时x为[5, 2, 1, 2, 1, 2]
+   ```
+
+10. 序列的增量赋值结果取决于第一个对象，
+
+   ```python
+   a += b #会先尝试调用a.__iadd__(b)这个特殊方法，如果该方法不存在，表达式就等价于a = a + b，分两步进行加法和赋值。由于赋值操作的存在，会将a绑定到其他位置，因此id(a)会变化。
+   #一般来说，可变序列都会实现.__iadd__和.__add__方法，不可变序列只会实现.__add__方法。
+   #观察id(a)的变化
+   a = [1,2]     # id(a)为2106087749376
+   a += [3,4]    # id(a)为2106087749376，此时a为[1, 2, 3, 4]
+   a = a + [5,6] # id(a)为2106088734400，此时a为[1, 2, 3, 4, 5, 6]
+   #如果a是不可变序列
+   a = (1,2)  # id(a)为2106088792640
+   a += (3,4) # id(a)为2106087631152，此时a为(1, 2, 3, 4)
+   ```
+
+11. 对不可变序列进行拼接操作，时间和空间效率很低，因为会产生临时对象，将原先的数据复制进去，再复制新的数据。
+
+12. 不可变性对元组来说，意味着它的元素不支持赋值操作，但是可以通过+=来修改元素的值。因此不要把可变对象放到元组中：
+
+    ```python
+    t = (1, 2, [30, 40])
+    t[2] += [50, 60] # 会报错TypeError: 'tuple' object does not support item assignment，但是也会修改t，此时t为(1, 2, [30, 40, 50, 60])
+    #增量赋值不是原子操作，这里+=操作被分解为两个步骤，因此虽然第二步抛出了异常，但是还是完成了第一步的操作：
+    t[2].extend([50,60]) # 这一步将[30,40]变成了[30,40,50,60]，可以顺利完成，因为list是可变对象。
+    t[2] = t[2] # 这一步会报错，因为t是元组，不支持元素的赋值。
+    #可以使用dis模块的的dis函数来对CPython进行反汇编，然后分析具体的操作。
+    import dis
+    dis.dis("t[2] += [50, 60]") #输出为
+    #行号   指令的字节编号 指令的操作码   指令的操作数
+    0           0 RESUME                   0
+    1           2 LOAD_NAME                0 (t) #将co_names[0](即t)入栈，栈顶为STACK[-1]，栈底为STACK[0]
+                4 LOAD_CONST               0 (2) #将co_consts[0](即2)入栈，
+                6 COPY                     2 #将STACK[-2]追加到栈顶，但是不从原有的位置删除
+                8 COPY                     2
+               10 BINARY_SUBSCR #binary表示二元操作，subscr表示下标，这个指令会从栈顶弹出key和container，然后在栈顶追加上container[key]
+               20 LOAD_CONST               1 (50)
+               22 LOAD_CONST               2 (60)
+               24 BUILD_LIST               2 #使用栈顶的2个元素创建一个list，然后将该list入栈
+               26 BINARY_OP               13 (+=) #执行二元操作+=，此时栈顶为[50,60]的引用，次栈顶为t[2]的引用
+               30 SWAP                     3 #将STACK[-3]和STACK[-1]交换。
+               32 SWAP                     2 #将STACK[-2]和STACK[-1]交换。
+               34 STORE_SUBSCR #从栈顶依次获取key, container, value，执行container[key] = value。经过上面的交换，栈顶向下依次为2,t,t[2]。因此会执行t[2] = t[2]。等号右侧的t[2]是之前就地追加产生的。这一步会报错，因为t是元组，不知道元素的赋值。
+               38 LOAD_CONST               3 (None) #将None入栈
+               40 RETURN_VALUE #将栈顶元素作为返回值返回
+    ```
+
+13. 
+
+14. 
+
+15. 
+
+16. 
 
 ## 列表
 
@@ -1640,7 +1723,269 @@
    [1,2,3,4,5,6][1:5:2] #结果为[2, 4],分别取[1],[3]的元素，构成一个新的list。
    ```
 
-6. 切片操作，左闭右开的区间：
+6. 内置函数，len计算长度，max和min函数需要序列的元素是可比的。
+
+   ```python
+   s = [1,2,3,4,5,6,7,8,9]
+   len(s)     #容器的大小,即元素个数9
+   max(s)     #结果为9
+   min(s)     #结果为1
+   s.index(2) #结果为1 在序列中查找第一个值为2的元素,并返回下标。如果找不到对应元素，会报ValueError。
+   s.index(5,1,8) #结果为4,在[1,8)范围内寻找元素5,并返回下标(原始的下标)。
+   s.count(2) #结果为1,返回序列中出现元素2的次数。
+   ```
+
+7. 可以用任何序列来初始化列表对象，即构造函数的参数。
+
+   ```python
+   list("Hello") #结果为["H", "e", "l", "l", "o"]将字符串转换为字符列表,这样就可以进行修改了。
+   "".join(l1)   #结果为'Hello',可以将字符列表转换为字符串。
+   x = [1, 2, 3]
+   x[6] = 1     #不能给不存在的元素赋值。
+   del x[1]     #x为[1,3],从列表中删除特定元素,该操作会修改x。
+   del x        #删除标识符x。
+   del x[:]     #删除x中的所有元素，相当于x.clear()。
+   ```
+
+8. 列表方法：
+
+   ```python
+   x = [1,2,3]
+   x.append(4)  #x为[1, 2, 3, 4],将一个对象附加到列表的末尾。方法返回NoneType,而不是修改后的列表。
+   x.clear()    #将x清空为空列表[],等价于x[:] = []
+   y = x        #默认浅拷贝,此时y和x指向同一块内存,修改会互相影响。
+   y = x.copy() #深拷贝,两块内存,修改不影响。等价于y = x[:];y =list(a)，都是深拷贝。
+   
+   x = [1,2,3,4,5]
+   x.extend([7,8]) #拼接列表,x为[1, 2, 3, 4, 5, 7, 8],相当于多次append。
+   x+[7,8]         #结果同上，但是不修改x,这个称为常规拼接。
+   x.insert(3,"h") #x为[1,2,3,"h",4,5],在x[3]前面插入一个对象。
+   #列表可以当做栈来使用
+   x.pop()         #删除并返回列表的最后一个元素。pop是唯一一个既修改列表又返回非None值的方法。
+   x.append(1)     #在列表末尾添加一个元素1。Python的列表没有push方法,可以用append替代。
+   #列表可以当做队列使用
+   x.pop(0)        #将x[0]从列表中弹出并删除,相当于出队。
+   x.append("w")   #入队操作。
+   x.remove("h")   #删除元素"h",如果有多个，只删除最前面的那个元素。返回None。和pop不同的是，它是通过值来删除，pop时通过编号来删除。
+   x.reverse()     #逆序当前列表,返回None。还有一种逆序的方法x[::-1]，不过不会修改x。
+   reversed(x)     #内置函数，返回一个逆序的迭代器,用于逆序遍历。
+   ```
+
+9. 
+
+
+## 元组
+
+1. 元组不仅仅是不可变的列表，还是没有字段名的记录（字段的集合）。
+
+2. 元组中的每个元素都存放了记录中一个字段的数据，外加这个字段的位置。列表可以进行排序，然而元组不可以，因为元组中各个元素的含义和它们的位置有关系。元组没有sort方法，但是仍可以使用sorted函数排序，结果并非元组，而是一个新的列表。
+
+3. 函数返回多个值时，实际上是返回了一个元组。
+
+4. 元组拆包Unpacking的应用：
+
+   ```python
+   #将一个元组同时赋值给多个变量，这被称作平行赋值，因为等号左侧也构成了一个元组
+   x = (1,2,3,4)
+   a, b, _, d = x  #这里的_是占位符，某个元素不想要的话，可以使用_占位。如果程序是国际化的，那就不推荐使用_来做占位符，因为它常被用来当作gettext.gettext函数的别名。
+   a, *args, d = x #使用*来接收拆包剩余的元素,只能出现一次,args为[2,3]，这里借鉴了函数中不定量参数的写法。
+   y = (1,2,(3,4))
+   a,b,(c,d) = y   #拆包可以嵌套进行，等号两侧的结构需要一一对应。
+   a,b = b,a       #不使用中间变量来交换两个变量的值
+   #使用*运算符拆包，使之作为函数的实参。所有的可迭代对象都可以这么使用
+   def func(a,b,c):
+       print(a,b,c)
+   x = (1,2,3)
+   func(x)  #会报错，需要使用func(*x)
+   ```
+
+5. 在python3之前，元组可以作为形参放在函数声明中，例如`def func(a,b,(c,d))`，然而python3中不再支持这种写法，这个改变对函数调用者并没有影响，它改变的是某些函数的声明方式。
+
+6. 如果需要给记录中的字段命名，可以使用具名元组namedtuple函数。
+
+   ```python
+   import collections
+   Card = collections.namedtuple("Card",["rank","suit"]) #该函数是一个工厂函数，可以用来构建一个带字段名的元组和一个有名字的类。该函数的第二个参数也可以为"rank suit"或("rank","suit")。
+   #类名是第一个参数，而不是等号左侧的Card，因为它可以赋值给其他变量。
+   CC = Card
+   CC("3","Δ") #创建一个对象，Card(rank='3', suit='Δ')
+   #使用namedtuple构建的类的对象和元组占用一样的内存，因为对象的字段名都保存在类中。这个类的对象跟普通类的对象比起来也要小一些，因为python不会使用__dict__来存放这些实例的属性。
+   card1 = Card("3","Δ") #构造一个元组，可以使用字段名或位置来获取元素的字段值。
+   ```
+
+7. 具名元组特有的功能：
+
+   ```python
+   Card._fields    #类属性，获得所有字段名，结果为 ('rank', 'suit')
+   Card._make(["2","Δ"]) #类方法，参数为一个可迭代对象，用来生成这个类的一个实例，等价于Card(*["2","Δ"])
+   card1._asdict() #实例方法，转化为collections.OrderedDict字典，结果为 {'rank': '3', 'suit': 'Δ'}
+   ```
+
+8. 除了列表的增减元素的方法（例如就地拼接，就地逆序排列）外，元组支持列表其他所有方法。一个例外是，元组没有返回逆序迭代器的`__reversed__`方法，不过reverse(my_tuple)在没有`__reversed__`时，也可以调用成功，返回一个逆序迭代器。
+
+9. 元组是序列类型的扩展，一旦创建就不能被修改。
+
+   ```python
+   () == tuple()  #创建空元组的两种方法
+   a = (1,2,3)    #括号可以省略
+   return 1,2     #等价于 return (1,2)
+   #创建只有一个元素的元组
+   a = 2,         #等价于a = (2,),是tuple类型。
+   2 == (2)       #结果为True,(2)是int类型。
+   ```
+
+10. 元组和列表的相互转化：
+
+    ```python
+    atuple = (1,2,3,4)
+    b = list(atuple) # b=[1,2,3,4]
+    
+    b=[1,2,3,4]
+    atuple = tuple(b) #atuple = (1,2,3,4)
+    ```
+
+## 数组
+
+1. 列表底层存放的是对象，而数组底层存放的是字节表述。
+
+2. 如果列表的所有元素都是数值，那么可以使用内置数组来替代。python内置的数组和C语言数组一样精简，创建数组需要一个类型码，用来指示在C底层如何放置数据，这样可以合理使用内存空间，python不允许在数组中存放指定类型以外的数据。
+
+   ```python
+   #类型码     对应的C语言数据类型 占用的最小字节数
+   'b'         signed integer     1
+   'B'         unsigned integer   1
+   'u'         Unicode character  2 (see note)
+   'h'         signed integer     2
+   'H'         unsigned integer   2
+   'i'         signed integer     2
+   'I'         unsigned integer   2
+   'l'         signed integer     4
+   'L'         unsigned integer   4
+   'q'         signed integer     8 (see note)
+   'Q'         unsigned integer   8 (see note)
+   'f'         floating point     4
+   'd'         floating point     8
+   ```
+
+3. 创建一个有1000万个随机浮点数的数组，将其写入到文件中，然后再从文件中读出：
+
+   ```python
+   import array
+   import random
+   floats = array.array("d",(random.random() for i in range(10**7))) #d表示双精度浮点
+   fp = open("floats.bin","wb") #以2进制形式打开文件
+   floats.tofile(fp) #将数组写入文件
+   fp.close()
+   fp = open("floats.bin","rb")
+   floats2 = array.array("d") #创建一个空的数组，元素类型为双精度浮点
+   floats2.fromfile(fp,10**7) #读如10**7个数据
+   fp.close()
+   ```
+
+4. 将数组写入文件或从文件读入，都比文本文件的操作要快得多，大概2个数量级，因为文本文件还需要执行floats方法。同时二进制存储文件更节省空间，每个双精度浮点数占用8个字节，而使用文本文件存储，每个数字需要19个字节。
+
+5. 还有一些特殊的数字数组类型，例如bytes和bytearray
+
+6. 数组特有的操作：
+
+   ```python
+   s = array.array("l",(1,2,3)) #
+   s.fromlist([4,5]) #从列表读入数据，添加到尾部
+   s.itemsize  #数组中每个元素的占用的字节数
+   s.tobytes() #转化成bytes对象，结果为 b'\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00\x05\x00\x00\x00'
+   s.byteswap() #翻转数组内每个元素的字节序列，多字节元素会受到影响，默认为小端
+   s.typecode #类型码，结果为 'l'
+   ```
+
+7. 从python3.4开始，数组不再支持类似list.sort的这种就地排序的方法，应该使用sorted函数新建一个数组。
+
+   ```python
+   a = array.array(a.typecode, sorted(a)) #sorted函数的返回始终为list，需要再构造成array
+   ```
+
+
+## Memory view
+
+1. memoryview 内存视图是一个内置类，表示一块带解释方式的内存区域，能够让用户在不复制内容的情况下操作同一个数组的不同切片。它的出现受到了numpy的启发。它实际上是泛化的，去数学化的numpy数组。允许在不需要复制内容的前提下，在数据结构之间共享内存。
+
+2. memory.cast和数组模块类似，能够以不同方式读写同一块内存区域，且cast操作不会改变内存字节，类似于C语言的类型转换。它会使用memoryview对象构造另一个memoryview对象。
+
+   ```python
+   numbers = array.array("h", [-2, -1, 0, 1, 2]) #双字节带符号整数
+   numbers.tobytes() #内存中的字节序列，结果为 b'\xfe\xff\xff\xff\x00\x00\x01\x00\x02\x00'
+   memv = memoryview(numbers) #构造一个memoryview对象
+   len(memv) #memoryview对象中的元素个数，结果为5
+   memv.nbytes #内存区域的字节数
+   memv.format #解释方式，结果为 'h'
+   memv[1]  #第2个元素，结果为-1
+   memv_oct = memv.cast("B") #将内存当作多个单字节的无符号整数来解析，产生一个新的memoryview对象，这一步并不会复制数据。
+   len(memv_oct) #结果为 10
+   l1 = memv_oct.tolist() #构造一个list，结果为[254, 255, 255, 255, 0, 0, 1, 0, 2, 0]
+   memv_oct[5] = 4 #给对应的字节赋值，会修改numbers本身，结果为array('h', [-2, -1, 1024, 1, 2])，因为此时numbers.tobytes()为b'\xfe\xff\xff\xff\x00\x04\x01\x00\x02\x00'
+   ```
+
+
+## 双端队列
+
+1. 利用append和pop(0)方法可以将list当作或栈队列来使用，但是删除列表的第一个元素或在第一个元素前添加元素比较耗时。
+
+2. collections.deque类是一个线程安全的双向队列（线程之间合作交换数据常常喜欢使用队列），允许快速从两端插入或删除元素。双向队列允许指定大小上限，满了后再添加，会将另一端的元素挤出去。
+
+   ```python
+   from collections import deque
+   d1 = deque(range(10),maxlen = 10) #构造一个双端队列，大小上线为10，这个属性一旦设定就不能更改了
+   d1.rotate(3) #队列的旋转操作，类似于循环移位，n>0表示向右移动，n<0表示向左移动，结果为 deque([7, 8, 9, 0, 1, 2, 3, 4, 5, 6], maxlen=10)
+   d1.append(-1) #在右侧添加一个元素，结果为 deque([8, 9, 0, 1, 2, 3, 4, 5, 6, -1], maxlen=10)，会把原来的最右侧元素挤出去。d1.appendleft为在左侧插入单个元素
+   d1.extend([-2,-3]) #将可迭代对象的元素依次插入到右侧，结果为deque([0, 1, 2, 3, 4, 5, 6, -1, -2, -3], maxlen=10)。d1.extendleft为将可迭代对象的元素依次插入到左侧。
+   a = d1.pop() #将最右侧元素删除，并返回，结果为 a =-3，d1 =deque([0, 1, 2, 3, 4, 5, 6, -1, -2], maxlen=10)。d1.popleft为从最左侧删除并返回。
+   ```
+
+3. 双向队列也可以从中间删除元素，但是会慢些，因为它只对在头尾的操作进行了优化。
+
+4. append和popleft都是原子操作，因此可以在多线程程序中安全使用，不用考虑资源锁的问题。
+
+5. 除了collections.deque之外，python的如下模块也支持队列：
+
+   1. queue模块，提供了线程安全的Queue，LifoQueue，PriorityQueue三个类。和collections.deque不同的时，他们在达到大小上限后，不会挤出另一端的元素，而是会将该线程锁住，直到有新的线程从队列中移除元素后，才会被解锁。
+   2. multiprocessing模块，提供Queue，JoinableQueue类，专门用于进程间通信，可以让任务管理更方便。multiprocessing.Queue和queue.Queue功能相似。
+   3. asyncio模块，在python3.4中提供，包含Queue，LifoQueue，PriorityQueue，JoinableQueue四个类，收到了queue和multiprocessing模块的影响，为异步编程的任务管理提供帮助。
+   4. heapq模块，没有队列类，而是提供了heappush和heappop方法，让用户可以把可变序列当作堆队列或优先队列使用。
+
+6. 
+
+7. 
+
+8. 
+
+9. 
+
+10. 
+
+## 切片
+
+1. 列表，字符串，元组都支持切片操作，切片和区间操作都不包含区间范围的最后一个元素，这是python的风格，这个习惯符合python和C语言中下标从0开始的传统，这样做的好处有：
+
+   1. 当只有一个位置信息的时候，也可以快速看出切片的长度，`range(3)`和`my_list[:3]`都有3个元素。
+   2. 当起止信息都有的时候，可以快速计算出切片的长度，`my_list[2:5]`中有5-2=3个元素。
+   3. 可以使用任意一个下标将序列分为不重合的两部分，`my_list[:3]`和`my_list[3:]`。
+
+2. `a:b:c`这种用法只能出现在`[ ]`内，索引是指`[ ]`内只有一个下标。
+
+3. 切片的实际操作为：
+
+   ```python
+   my_list[a:b:c] #等价于my_list[slice(a,b,c)]，下标运算又会被转化为如下特殊方法的调用
+   my_list.__getitem__(slice(a,b,c)) #会生成一个临时的切片对象。
+   ```
+
+4. `[ ]`内还可以使用逗号分隔的多个索引或切片，numpy.ndarray对象就支持这种写法。python内置的序列类型都是一维的，`[[1,2],[3,4]]`也是一维的，因此不支持numpy的这种写法。
+
+   ```python
+   a = numpy.array([1,2,3,4,5,6]).reshape((2,3))
+   a[1,0] #要这么使用，需要在numpy.ndarray对象的__getitem__和__setitem__方法中以元组的形式来处理position参数。因为python会将a[i,j]转化为a.__getitem__((i,j))
+   ```
+
+5. 切片操作，左闭右开的区间：
 
    ```python
    x = [1,2,3,4,5,6]
@@ -1653,7 +1998,7 @@
    x[:]     #等价于x本身。
    ```
 
-7. 切片的步长默认为1，也可以为负数，但是不能为0：
+6. 切片的步长默认为1，也可以为负数，但是不能为0：
 
    ```python
    x = [1,2,3,4,5,6,7]
@@ -1665,214 +2010,277 @@
    x[:1:-2] #结果为[7, 5, 3]
    ```
 
-8. 切片赋值：
+7. 切片赋值，如果赋值的对象是一个切片，则等号右侧必须是一个可迭代对象：
 
    ```python
    x = [1,2,3,4,5]
    x[2:] = [2,1]   #结果为[1,2,2,1]。将[2:]子序列替换为[2,1],子序列的替换,二者的长度可以不等。
    x[2:2] = [2,1]  #结果为[1,2,2,1,3,4,5]。将[2,2)子序列替换为[2,1],该子序列为空,实际就是在x[2]前面插入。
    x[1:3] = []     #结果为[1,4,5]。相当于将[1,3)子序列删除。等价于del x[1:3]
+   del x[1:3] #结果为 x = [1,4,5]
+   x[2:4] = 10 # 会报错，TypeError: can only assign an iterable
    ```
 
-9. 内置函数，len计算长度，max和min函数需要序列的元素是可比的。
+8. 省略的正确写法是三个英文句号`...`。python解释器将其当作Ellipsis对象的别名，Ellipsis对象是ellipsis类的唯一对象，类似于True和False是bool类的唯二对象。
 
    ```python
-   s = [1,2,3,4,5,6,7,8,9]
-   len(s)     #容器的大小,即元素个数9
-   max(s)     #结果为9
-   min(s)     #结果为1
-   s.index(2) #结果为1 在序列中查找第一个值为2的元素,并返回下标。如果找不到对应元素，会报ValueError。
-   s.index(5,1,8) #结果为4,在[1,8)范围内寻找元素5,并返回下标(原始的下标)。
-   s.count(2) #结果为1,返回序列中出现元素2的次数。
+   print(...)      #结果为 Ellipsis
+   ... == Ellipsis #结果为True
+   type(...)       #结果为 ellipsis
+   #可以用在类型提示中
+   from typing import Tuple
+   t2: tuple[int, ...] = (1, 2, 3,) # 声明t2为整数组成的元组
+   #可以用在函数内部，相当于pass
+   def foo2(): ...
+   #可以用在numpy的索引中，相当于:
+   arr2 = np.array([1,2,3,4,5,6]).reshape(2,3)
+   arr2[1 , ...] #结果为array([4, 5, 6])，等价于arr2[1,:]
    ```
 
-10. 可以用任何序列来初始化列表对象，即构造函数的参数。
+9. 
 
-    ```python
-    list("Hello") #结果为["H", "e", "l", "l", "o"]将字符串转换为字符列表,这样就可以进行修改了。
-    "".join(l1)   #结果为'Hello',可以将字符列表转换为字符串。
-    x = [1, 2, 3]
-    x[6] = 1     #不能给不存在的元素赋值。
-    del x[1]     #x为[1,3],从列表中删除特定元素,该操作会修改x。
-    del x        #删除标识符x。
-    del x[:]     #删除x中的所有元素，相当于x.clear()。
-    ```
+# 字典
 
-11. 列表方法：
+1. 模块的命名空间，实例的属性，函数的关键字参数都隐式地使用到了字典，它是python的基石。python实现对字典做了高度的优化，散列表是字典性能出众的重要原因。集合的实现也依赖于散列表。
 
-    ```python
-    x = [1,2,3]
-    x.append(4)  #x为[1, 2, 3, 4],将一个对象附加到列表的末尾。方法返回NoneType,而不是修改后的列表。
-    x.clear()    #将x清空为空列表[],等价于x[:] = []
-    y = x        #默认浅拷贝,此时y和x指向同一块内存,修改会互相影响。
-    y = x.copy() #深拷贝,两块内存,修改不影响。等价于y = x[:];y =list(a)，都是深拷贝。
-    
-    x = [1,2,3,4,5]
-    x.extend([7,8]) #拼接列表,x为[1, 2, 3, 4, 5, 7, 8],相当于多次append。
-    x+[7,8]         #结果同上，但是不修改x,这个称为常规拼接。
-    x.insert(3,"h") #x为[1,2,3,"h",4,5],在x[3]前面插入一个对象。
-    #列表可以当做栈来使用
-    x.pop()         #删除并返回列表的最后一个元素。pop是唯一一个既修改列表又返回非None值的方法。
-    x.append(1)     #在列表末尾添加一个元素1。Python的列表没有push方法,可以用append替代。
-    #列表可以当做队列使用
-    x.pop(0)        #将x[0]从列表中弹出并删除,相当于出队。
-    x.append("w")   #入队操作。
-    x.remove("h")   #删除元素"h",如果有多个，只删除最前面的那个元素。返回None。和pop不同的是，它是通过值来删除，pop时通过编号来删除。
-    x.reverse()     #逆序当前列表,返回None。还有一种逆序的方法x[::-1]，不过不会修改x。
-    reversed(x)     #内置函数，返回一个逆序的迭代器,用于逆序遍历。
-    
-    ```
+2. collections.abc模块中含有Mapping和MutableMapping两个抽象基类，它们为dict和其他类似的类型提供接口。在python2.6到3.2期间，这些类还属于collections模块，而不是collections.abc模块。
 
-12. 排序算法，用来排序的列表需要元素两两可以比较大小。数值之间，字符串之间可以比较大小，数值和字符串不可以比较大小：
-
-    ```python
-    x.sort()        #对列表x进行就地排序。
-    sorted(x)       #内置函数，返回排序后的列表，不修改x本身。按照数值大小，或ASCII顺序来进行增序排序。
-    #sort方法支持两个可选参数,key为一个排序函数,reverse设置是否要进行降序排序。
-    x = ["aar","aba","acme","add"]
-    x.sort(key = len, reverse = False)  #这里并非用len函数来直接给两个元素比较大小。而是先对每个的元素计算一个新的对应的值，生成一个新的列表，然后根据这个新的列表对原有列表进行排序。
-    ```
-
-
-## 元组
-
-1. 元组是序列类型的扩展，一旦创建就不能被修改。
+3. 一般来说，非抽象的映射类型一般不会直接继承自这些抽象基类，它们会直接对dict或collections.UserDict进行扩展，这些抽象基类的主要作用是作为形式化的文档，定义了构建一个映射类型所需要的基本接口，还可以使用isinstance来判定某个对象是否是映射类型。
 
    ```python
-   () == tuple()  #创建空元组的两种方法
-   a = (1,2,3)    #括号可以省略
-   return 1,2     #等价于 return (1,2)
-   #使用元组推导式,不同于列表推导式，这里的结果是一个生成器
-   a = (i for i in range(1,6))  #<generator object <genexpr> at 0x0000017F4EE73D80>
-   #创建只有一个元素的元组
-   a = 2,         #等价于a = (2,),是tuple类型。
-   2 == (2)       #结果为True,(2)是int类型。
+   import collections
+   my_dict = {}
+   isinstance(my_dict, collections.abc.Mapping) #结果为True，这里没有使用type是因为，映射类型不一定都是dict类型。
    ```
 
-2. 元组和列表的相互转化：
+4. 标准库里的映射类型都是利用dict实现的。其他映射类型有：
 
-   ```python
-   atuple = (1,2,3,4)
-   b = list(atuple) # b=[1,2,3,4]
-   
-   b=[1,2,3,4]
-   atuple = tuple(b) #atuple = (1,2,3,4)
-   ```
+   1. collections.OrderDict，这个类型在添加键时，会保持顺序，因此对键的迭代次序总是一致的。popitem方法有一个可选参数last，默认为True。此时遵循LIFO弹出，如果last为False，遵循FIFO弹出。
 
-## 字典
+   2. collections.ChainMap，可以容纳数个不同的映射对象，像一个映射链。进行键查找时，会按顺序逐个查找，这个功能在给有嵌套作用域的语言做解释器时很有用。可以使用一个映射对象代表一个作用域的上下文。
 
-1. 通过名称来访问值的数据结构称为映射，Python中唯一内置的映射类型是字典。
+   3. collections.Counter，该映射类型中键的值为一个整数，用来标记键出现的次数。该类型可以用来给可散列对象计数，或当作多重集合使用。Counter还实现了+，-操作，用来合并记录。
 
-2. 字典的键必须是可以hash的，例如字符串，数值等。值可以是任意对象，包括字典。
+      ```python
+      ct = collections.Counter('abracadabra') #ct为 Counter({'a': 5, 'b': 2, 'r': 2, 'c': 1, 'd': 1})
+      ct.update('aaaaazzz') #ct为 Counter({'a': 10, 'z': 3, 'b': 2, 'r': 2, 'c': 1, 'd': 1})
+      ct["f"] #对于不存在的键，不会报KeyError异常，而是会返回0，表示计数为0
+      ct["a"] += 1 #向多重集合ct中添加一个元素"a"
+      ct.most_common(2) #结果为 [('a', 10), ('z', 3)] 按照次序返回映射里最常见的2个键和它们的计数。
+      ```
 
-3. 键值对之间是无序的，这里的无序指的是不保证按照插入的顺序存放，并不是真正的没有顺序。键值对用：表示，键值对之间用，分隔。
+   4. colllections.UserDict，其实就是把标准dict用纯Python又实现了一遍，目的就是为了让用户来继承，创建自定义映射类型的。它比dict好的点是：dict类会在某些方法的实现上走一些捷径，导致不得不在子类中重写这些方法。
 
-4. 创建字典的3种方法：
+      ```python
+      #collections.UserDict并不是dict的子类，但是它有一个data的属性，该属性是dict的实例，它就是最终存储数据的地方。
+      import collections
+      class StrKeyDict(collections.UserDict): #继承
+          def __missing__(self, key):
+              if isinstance(key, str):
+                  raise KeyError(key)
+              return self[str(key)]
+          def __contains__(self, key):
+              return str(key) in self.data #这里就不用两次判断了，因为所有已存储的键都是字符串了。
+          def __setitem__(self, key, item):
+              self.data[str(key)] = item #将所有的键都转化成字符串。
+      #UserDict继承自MutableMapping，后者又是从Mapping继承来的
+      ```
+
+5. 通过名称来访问值的数据结构称为映射，Python中唯一内置的映射类型是字典dict。除此之外，在collections模块中还有2个映射类型，defaultdict和OrderedDict。常见的方法如下：
+
+6. 字典的键必须是可以hash的，例如字符串，数值等。值可以是任意对象，包括字典。
+
+7. 键值对之间是无序的，这里的无序指的是不保证按照插入的顺序存放，并不是真正的没有顺序。键和值用：分隔，键值对之间用，分隔。
+
+8. 创建字典的3种方法：
 
    ```python
    {} == dict()  #创建空字典的两种方法
-   d = dict(a = 1, b = 2, c = 3)  #使用关键字参数来调用dict类的构造函数。
+   #使用使用关键字参数来调用dict类的构造函数
+   d = dict(a = 1, b = 2, c = 3) #键不需要是加""
+   #使用{}
    d = {"a":1,"b":2,"c":3}
-   d["d"] = 4             #向字典中添加新的键值对,如果对应的键已存在,则会修改值。
    #字典推导式
    adict = {x: x**2 for x in (2, 4, 6)}  #结果为 {2: 4, 4: 16, 6: 36}
-   data = [("a",1),("b",2),("c",3)]  #[["a",1],["b",2],["c",3]]或(("a",1),("b",2),("c",3))
-   dict(data)  #使用键值对序列来创建字典。结果为 {'a': 1, 'b': 2, 'c': 3}。其中data可以是二层列表，也可以是二层元组。
+   #使用键值对的二维序列
+   data = [("a",1),("b",2),("c",3)]  #[["a",1],["b",2],["c",3]]或(("a",1),("b",2),("c",3))也可以
+   dict(data) #结果为 {'a': 1, 'b': 2, 'c': 3}。
    ```
 
-5. 使用[]和键来进行索引。
+9. 使用[]和键来进行索引。
 
    ```python
    d = {"a":1,"b":2,"c":3}
-   d["a"]  #结果为1
+   d["a"]  #结果为1，会调用__getitem__特殊方法
    d["d"]  #会报KeyError错误
+   d["d"] = 4 #向字典中添加新的键值对,如果对应的键已存在,则会修改值。
    #建议使用get方法
    d.get("d")  #结果为None
    d.get("d","default") #当没有对应的键时，返回第二个参数。
    ```
 
-6. 常用的方法：
+10. 常用的方法：
+
+    ```python
+    del d["a"]   #从字典中删除键为"a"的键值对。
+    "b" in d     #判断字典中是否存在一个键为"b"的键值对。
+    d.keys()     #返回字典中所有键的信息      dict_keys(['b', 'c'])
+    d.values()   #返回字典中所有值的信息      dict_values([2, 3])
+    d.items()    #返回字典中所有键值对的信息  dict_items([('b', 2), ('c', 3)])
+    d.get("b","Not In")  #获取字典中键为"b"的键值对的值，如果不存在则返回None或第二个参数。这个函数比直接使用[]来获取值好点,后者当键不存在是会抛出异常。这一步并不会为字典增加一个键。函数的返回值可能是左值或右值，如果值为基本类型，则为左值，引用类型则为右值。
+    d.pop("b","Not In")  #弹出字典中键为"b"的键值对的值，如果不存在则返回第二个参数。这个函数会修改字典本身。
+    d.popitem()          #从字典中随机弹出一个键值对，以元组的形式返回。例如('a', 1)，Python3.7后，保证按照LIFO即栈的规则弹出。
+    d.clear()            #删除所有键值对，清空字典。
+    d.fromkeys(it, [initial]) #将迭代器it里的元素添加为字典的键，其值默认为None，如果有initial参数，将这些值设置为initial。
+    d.__iter__() #获取键的迭代器
+    d.setdefault(k, [default]) #如果键k存在则返回对应的值，如果不存在，则返回None或default，并增加一个键k。它和get的区别是，如果键不存在，它会增加一个键k，值为None或default，get不会。
+    ```
+
+11. 使用setdefault处理找不到键的情况：
+
+    ```python
+    #读取对应键的值可以使用d[k]或d.get(k, [default])，前者在找不到键时，会报异常，后者则不会，会返回None或提供的default参数。
+    #使用上述两种方法，也可以来更改对应键的值。
+    d = {"a":[1],"b":[2],"c":[3]} #例如现在要给特定键的值列表追加一个元素5
+    d["a"].append(5) #可以直接更新，因为d[]返回的始终是左值，但是考虑到键可能不存在，一般不会使用d[k]
+    d.get("a", []).append(5) #也可以正常完成，如果键不存在时，运行不会报错，但是并不会在d中添加一个键，并设置其值为[5]，而是将5追加到了get返回的一个临时的[]中。
+    #可以使用如下形式
+    tmp = d.get("f", [])
+    tmp.append(5)
+    d["f"] = tmp #这里d["f"]不会报错，因为当f不是d的键时，这一步会新增一个键，如果是的话，会修改该键对应的值。
+    #也可以使用如下一条语句完成等价的功能
+    d.setdefault("f",[]).append(5) #这一条语句只会进行1次键查询，上面要进行2次键查询。
+    #如下例子的功能是，扫描一个文件，提取出其中的字母数字串，然后获得其行列号，添加到一个index的字典中，
+    import sys
+    import re
+    WORD_RE = re.compile(r'\w+')
+    index = {}
+    with open("test.py", encoding='utf-8') as fp:
+        for line_no, line in enumerate(fp, 1): # line_no从1开始
+            for match in WORD_RE.finditer(line):
+                word = match.group() #获取匹配的结果
+                column_no = match.start()+1 #匹配的位置，+1表示从1开始计数
+                location = (line_no, column_no) #构造记录此次match位置的元组
+                occurrences = index.get(word, []) #查询字典中是否已经存在这个字母数字串的键
+                occurrences.append(location) #在[]或原有的列表上追加一个新的元组
+                index[word] = occurrences #修改键对应的值
+    #index字典中的一个键值对为如下形式："for":[(6, 5), (7, 9), (15, 1)]
+    #以上程序的倒数三行完成的是一个查询并更新的工作，可以使用setdefault一条语句完成。
+                index.setdefault(word, []).append(location)
+    ```
+
+12. d.keys()等方法返回的类型并不是列表，而是返回dict_keys等类型，都是可迭代对象，也可以用来构造list类型。
+
+    ```python
+    for key,value in t:   #错误，不能直接对t进行迭代
+        pass
+    for key in t.keys():  #可以采用这种方式进行迭代。可以省略keys()，直接对t进行迭代，结果一样。
+        print(key,"  ",t[key])
+    for key,value in t.items():  #每次迭代出来的是一个元组
+        print(key,"  ",value)
+    
+    list(d.items())        #列表中每一项都是元组
+    [('a', 1), ('b', 2), ('c', 3)]
+    dict(list(d.items())) == d #结果为true,也可以用上面的元组列表来生成字典。每个元组构成一个键值对。
+    ```
+
+13. python2中，字典有一个haskey的方法，用来判断给定字典是否含有某个键。但这个方法在python3中取消了，使用 in 或not in代替。
+
+    ```python
+    d = {"a":1,"b":2,"c":3}
+    d.haskey("c")   #True。仅在python2中有效。
+    "c" in d  #True
+    ```
+
+14. 弹性键查询，有时为了方便起见，有时希望就算某个键不在映射里，也希望能读取到一个默认值，有两种办法：
+
+    1. 使用defaultdict这个dict的派生类型：
+
+       ```python
+       #在创建defaultdict对象的时候，就需要提供一个可调用对象，该对象会在__getitem__找不到键时被调用，让__getitem__返回一个默认值。如果没有提供该可调用对象，default_factory属性为None，键不在时，会报错KeyError。
+       #不过该可调用对象只会在__getitem__找不到键时被调用，如果使用dd.get(key)，找不到键时，不会调用该对象。这是因为__getitem__找不到键时，会调用__missing__特殊方法，而__missing__中又会调用default_factory。
+       import collections
+       dd = collections.defaultdict(list) #list就是提供的可调用对象
+       dd.default_factory #结果为list，type类型，可调用对象存放在对象属性default_factory中
+       dd["new-key"] #经检查new-key不在dd中，因此会将new-key:list()插入到dd中，并返回新的dd["new-key"]
+       #此时dd为defaultdict(list, {'new-key': []})
+       ```
+
+    2. 自定义一个继承自dict的子类，实现`__missing__`方法：
+
+       ```python
+       #dict虽然没有定义__missing__方法，但是它知道它的存在，如果子类实现了__missing__方法，那么在__getitem__找不到键时就会调用该方法，而不是抛出KeyError异常
+       #__missing__方法只会被__getitem__调用，它对get或__contains__没有影响。
+       #构造一个映射类型，如果找不到的键是字符串，则抛出KeyError异常，如果不是字符串，则将其转化为字符串，再查找。
+       class StrKeyDict0(dict): #继承自dict
+           def __missing__(self, key):
+               if isinstance(key, str): #这一步不能缺少，因为return语句会产生递归调用。如果没有这句，当key是字符串，且键不存在时，会无限递归调用return行。
+                   raise KeyError(key)
+               return self[str(key)]
+           def get(self, key, default=None): #重写父类的方法
+               try:
+                   return self[key] #将.get()的工作委托给__getitem__特殊方法。
+               except KeyError:
+                   return default #如果键不存在，则返回default
+           def __contains__(self, key): # in操作会调用这个函数。
+               return key in self.keys() or str(key) in self.keys() #只要key或str(key)是字典的键就可以。这里不能使用key in self，因为会导致无限递归。必须采用显式方式查询。
+       #像k in my_dict.keys()这样的操作在python3中是很快的，即使映射类型的元素很多也无所谓，因为my_dict.keys()返回的是一个视图，这个视图就像一个集合，查找元素很快。python2中返回的是一个列表，在列表中查找元素需要扫描整个列表。
+       ```
+
+15. 标准库里所有的映射类型都是可变的，不过有时会有不可变需求。从python3.3开始，types模块引入了一个封装类，MappingProxyType。如果给这个类一个映射，它会返回一个只读的映射视图。对原映射的修改会反映到这个视图上，不过无法通过视图修改映射。具体使用时，只把视图暴露给用户。
+
+    ```python
+    from types import MappingProxyType
+    d = {1:'A'}
+    d_proxy = MappingProxyType(d) #d为 mappingproxy({1: 'A'})
+    d_proxy[2] = 'x' #会报错，TypeError: 'mappingproxy' object does not support item assignment
+    d[2] = 'B' #通过原映射进行修改，此时视图中d_proxy[2]耶也变成了"B"
+    ```
+
+# 集合
+
+1. Python的集合和数学上的集合类似，无序，不能重复，元素不可更改。在创建或后续添加元素时，会自动去重。集合不是序列，因为它是无序的。
+
+2. set和forzenset在python2.3中首次以模块的形式出现，在python2.6中才升级为内置类型。
+
+3. 集合中的元素必须为可散列的，而集合本身却是不可散列的，而frozenset是不可散列的。因此可以创建一个包含不同forzenset的set。
+
+4. 不可变数据类型：整数，浮点数，复数，字符串，元组。
+
+5. python的集合专门为in操作进行过优化，对于检查一个元素是否在一个范围中，集合的操作最快，得益于背后使用的散列表。
+
+6. 集合的创建：
 
    ```python
-   del d["a"]   #从字典中删除键为"a"的键值对。
-   "b" in d     #判断字典中是否存在一个键为"b"的键值对。
-   d.keys()     #返回字典中所有键的信息      dict_keys(['b', 'c'])
-   d.values()   #返回字典中所有值的信息      dict_values([2, 3])
-   d.items()    #返回字典中所有键值对的信息  dict_items([('b', 2), ('c', 3)])
-   d.get("b","Not In")  #获取字典中键为"b"的键值对的值，如果不存在则返回第二个参数。这个函数比直接使用[]来获取值好点,后者当键不存在是会抛出异常。
-   d.pop("b","Not In")  #弹出字典中键为"b"的键值对的值，如果不存在则返回第二个参数。这个函数会修改字典本身。
-   d.popitem()          #从字典中随机弹出一个键值对，以元组的形式返回。例如('a', 1)
-   d.clear()            #删除所有键值对，清空字典。
-   ```
-
-7. d.keys()等方法返回的类型并不是列表，而是返回dict_keys等类型，都是可迭代对象，也可以用来构造list类型。
-
-   ```python
-   for key,value in t:   #错误，不能直接对t进行迭代
-       pass
-   for key in t.keys():  #可以采用这种方式进行迭代。可以省略keys()，直接对t进行迭代，结果一样。
-       print(key,"  ",t[key])
-   for key,value in t.items():  #每次迭代出来的是一个元组
-       print(key,"  ",value)
-   
-   list(d.items())        #列表中每一项都是元组
-   [('a', 1), ('b', 2), ('c', 3)]
-   dict(list(d.items())) == d #结果为true,也可以用上面的元组列表来生成字典。每个元组构成一个键值对。
-   ```
-
-8. python2中，字典有一个haskey的方法，用来判断给定字典是否含有某个键。但这个方法在python3中取消了，使用 in 或not in代替。
-
-   ```python
-   d = {"a":1,"b":2,"c":3}
-   d.haskey("c")   #True。仅在python2中有效。
-   "c" in d  #True
-   ```
-
-9. 要给某个键设置默认值，如果该键存在，什么也不做，如果不存在，设为给定的值。
-
-   ```python
-   d = {"a":1,"b":2,"c":3}
-   d.setdefault("a",4)  #d不变
-   d.setdefault("d",4)  #d添加一个新键值对。
-   ```
-
-## 集合
-
-1. Python的集合和数学上的集合类似，无序，不能重复，元素不可更改。在创建或后续添加元素时，会自动去重。
-
-2. 不可变数据类型：整数，浮点数，复数，字符串，元组。
-
-3. 集合的创建：
-
-   ```python
-   set()  #创建一个空集合，不能使用{},{}默认是生成空字典类型的，而非空集合。
-   a = {1,2,"ab"}
+   set()  #创建一个空集合，不能使用{},因为{}默认是生成空字典类型的，而非空集合。
+   a = {1,2,"ab"} #使用字面量方式创建集合，效率比使用set方法快，frozenset没有这种方法。
    A = {"python","python",123,("python",123)} #使用{}建立集合，有三个元素，其中一个元素是元组
    {123,("python",123),"python"}    #可以看到顺序和建立集合时的顺序无关，且重复的元素会被删除
    B = set("pypy123")  #结果为{'1', '2', '3', 'p', 'y'} 参数应为可迭代的对象，例如字符串或者列表等
    B=set([1,2,3,4])        #结果为 {1, 2, 3, 4}
    ```
 
-4. 集合之间的运算：
+7. 集合之间的运算：
 
    ```python
-   S|T  #返回一个新集合，是S和T的并集。等价于union方法
-   S-T  #返回一个新集合，是S和T的差集，由在S中，但是不在T中的元素构成。等价于difference方法
-   S&T  #返回一个新集合，是S和T的交集。等价于intersection方法
-   S^T  #返回一个新集合，由不同时在S和T中的元素构成。相当于S|T-S&T。等价于symmetric_difference 方法
+   S ^ T  #返回一个新集合，由不同时在S和T中的元素构成。相当于S|T-S&T。等价于symmetric_difference 方法
    S <= T或 S < T #返回True/False，判断S是否是T的子集或真子集
    S >= T或 S > T #返回True/False，判断T是否是S的子集或真子集
    
-   A={"p","y",123}   # A = {123, 'p', 'y'}
-   B=set("pypy123")  # B = {'1', '2', '3', 'p', 'y'}
-   A-B #结果为 {123}，就一个元素
-   B-A #结果为 {'1', '2', '3'}
-   A&B #结果为 {'p', 'y'}
-   A|B #结果为 {'1', 123, '2', '3', 'p', 'y'}
-   A^B #结果为 {'1', 123, '2', '3'}
+   A = {"p","y",123}   # A = {123, 'p', 'y'}
+   B = set("pypy123")  # B = {'1', '2', '3', 'p', 'y'}
+   A - B #结果为 {123}，就一个元素。差集，由在A中，但是不在B中的元素构成，等价于.difference方法
+   B - A #结果为 {'1', '2', '3'}
+   A & B #结果为 {'p', 'y'}，交集，等价于.intersection方法
+   A | B #结果为 {'1', 123, '2', '3', 'p', 'y'}，并集，等价于.union方法
+   A ^ B #结果为 {'1', 123, '2', '3'}，对称差集，由不同时在A和B中的元素构成。相当于S|T-S&T。等价于.symmetric_difference方法
+   #不同的是，运算符要求两侧都应为集合类型，而对应的方法允许运算符右侧为可迭代类型。
+   a = {1,2}
+   a | {3,4} #结果为{1, 2, 3, 4}
+   a.union([3,4,5]) #结果为{1, 2, 3, 4, 5}
    ```
 
-5. 集合的函数或方法：
+8. 集合的函数或方法：
 
    ```python
    S.add(x)     #如果x不在S中，则将x增加到S中.update方法有同样的效果。
@@ -1880,7 +2288,7 @@
    S.discard(x) #从S中移出x，如果x不在S中，不报错
    S.clear()    #移出S中的所有元素
    S.pop()      #随机弹出S中的一个元素，这会修改S，若S为空，则产生KeyError异常
-   
+   S.isdisjoint(Z) #判断两个集合是否不相交
    S.copy()     #返回S的一个副本
    len(S)       #返回S中的元素个数
    x in S       #判断x是否在S中
@@ -1888,17 +2296,136 @@
    {1}.issubset({1,2,3})   #判断是否为子集。结果为True
    ```
 
-6. 由于集合没有索引，因此无法查询或修改元素。
+9. 由于集合没有索引，因此无法查询或修改元素。
 
-7. 集合一旦被定义后，内部是有顺序的，不过外部无法利用，仍看做是无序的。
+10. 集合一旦被定义后，内部是有顺序的，不过外部无法利用，仍看做是无序的。
 
-8. 集合的一个非常重要的作用是包含关系的比较和数据去重。
+11. 集合的一个非常重要的作用是包含关系的比较和数据去重。
+
+    ```python
+    ls = ["p","p","y","y",123]
+    S = set(ls)  #{123, 'p', 'y'}
+    lt = list(S) #[123, 'y', 'p']  对ls进行了去重，但是原有的顺序已经被打乱了
+    ```
+
+# 散列表原理
+
+1. 对集合或字典使用in运算符来查找，会使用散列表，因此速度快，而list只会从头到尾依次扫描一遍，因此速度慢。
+
+2. 如果程序中存在磁盘的读写，那么字典和集合的查询时间消耗，与之相比，可以忽略不计。
+
+3. 散列表（hash table）其实是一个稀疏数组，大部分元素都是空白，每个元素称之为表元（bucket）。在dict的散列表中，每个键值对都占据一个表元，每个表元有两部分组成，对键的引用和对值的引用。因为所有表元的大小一致，因此可以通过偏移量来读取某个表元。
+
+4. Python会设法保证大概还有1/3的表元是空的，因此快到这个阈值时，原有的散列表会被复制到一个更到的空间中。如果要把一个对象放入散列表中，首先要计算他的散列值。
+
+5. 内置函数hash()可以用于所有内置类型对象，对自定义对象调用hash()，实际是调用其`__hash__`特殊方法。
+
+6. 可散列对象必须满足如下性质：
+
+   1. 支持hash函数，且通过`__hash__()`所得到的散列值在其生命周期内不变。
+
+   2. 支持通过`__eq__`方法来检测对象的相等性。因为散列值相等不一定表示对象真的相等。
+
+   3. 若 `a == b`为真，则`hash(a) == hash(b)`也为真，这个应该由`__hash__`方法保证，否则散列表就无法正常工作了。
+
+      ```python
+      1 == 1.0 #结果为True
+      hash(1) == hash(1.0) #也必须为True，尽管这两个对象本身并不完全一样
+      ```
+
+   4. 应该仅在不可变的自定义类中实现`__hash__`方法。
+
+7. 原子不可变数据类型（str，bytes，数值类型）都是可散列类型，frozenset也是，因为它被定义为只能容纳可散列对象，普通的set不是可散列对象。只有当一个元组包含的所有元素都是可散列对象时，该元组才是可散列的。并非所有的不可变类型都是可散列的，因为元组是不可变的，但有的元组不是可散列的。
 
    ```python
-   ls = ["p","p","y","y",123]
-   S = set(ls)  #{123, 'p', 'y'}
-   lt = list(S) #[123, 'y', 'p']  对ls进行了去重，但是原有的顺序已经被打乱了
+   tt = (1,2,(30,40))
+   hash(tt) #结果为 -3907003130834322577
+   tl = (1,2,[3,4])
+   hash(tl) #会报错,TypeError: unhashable type: 'list'
+   a = frozenset([20,30]) #构造一个集合，内部含有2个元素，
+   hash(a) #结果为 255044489464142886
    ```
+
+8. 自定义类的`__eq__`方法不为None，在该方法下，对象只和自己相等。自定义类的`__hash__`方法为None，不可调用。因此hash()该对象时，会报错，提示unhashable type。自定义类的`__hash__`方法一般依赖于`id()`函数的返回值来构建。
+
+   ```python
+   class NewInt:
+       def __init__(self, x=0):
+           self.x = x
+       def __repr__(self):
+           print("__repr__ 被调用了")
+           return str(self.x)
+       def __eq__(self, other):
+           print("__eq__ 被调用了")
+           return self.x == other.x
+       def __hash__(self):
+           print("__hash__ 被调用了")
+           return id(self)
+   #测试
+   a = NewInt(3) #id为2067242640656
+   b = NewInt(4) #id为2067244222608
+   d = {a:"value-a", b:"value-b"} #d为{3: 'value-a', 4: 'value-b'}，这一步__hash__被调用了2次，每次的参数分别为a和b。
+   d #在交互式控制台的结果为{3: 'value-a', 4: 'value-b'}，这一步__hash__和__repr__都被调用了2次
+   d[a] #结果为"value-a"，这一步__hash__被调用了1次。
+   ```
+
+9. 散列值应该在索引空间中尽量分散开，这样才能更好作为散列表的索引。也就是说，对于一个好的散列函数，相似对象的散列值应该相差很大。
+
+   ```python
+   hash(1.0002) #结果为 461168601842689，二进制表示为0000000000000001101000110110111000101110101100011100010000000001
+   hash(1.0003) #结果为 691752902764033，二进制表示为
+   0000000000000010011101010010010101000110000010101010011000000001
+   #二者有23位不同
+   ```
+
+10. 从Python3.3开始，str，bytes，datetime对象的散列值计算过程都增加了随机“加盐”的步骤，这个盐值是Python进程中的一个常量，但是每次启动进程都会生成一个随机新的。这样的目的是为了放置DOS攻击。
+
+11. CPython的实现中，如果整形对象能被存入一个机器字中，则它的散列值就是它本身。
+
+12. 为了获取对应键的值，python首先会计算key的散列值，然后把这个值最低的几位数字（具体几位，需要根据散列表的大小确定）当作偏移量，在散列表里查找表元。如果找不到，则抛出KeyError异常。如果找到，则表元内会有一堆对`found_key:found_value`。此时python会检查`key == found_key`，如果为真，则返回found_value，如果为假，则发生了散列冲突，此时python会再散列值中多取几位，然后用特殊方法处理一下，把新得到的数值再在散列表中作为索引查询，如果仍然发生散列冲突，则重复此步骤。
+
+13. 散列冲突：因为散列函数是将任意对象映射到了有限位的散列值上，而在散列表中查询时，又只是用了散列值的一部分，因此冲突确实有可能发生。
+
+14. 添加和更新键值对的过程和查询键值对几乎一样。
+
+15. 在插入新键值对时，python会根据散列表的拥挤程度来决定是否要重新分配内存为它扩容。扩容后，散列值的位数和用作索引的位数都会增加，这样可以降低散列冲突的概率。
+
+16. 实际使用中，即使dict中有数百万个元素，散列冲突也很少发生。
+
+17. 由于字典使用了稀疏的散列表，因此它的空间利用率比较低。因此当只是要存放大量记录时，推荐使用元组或具名元组构成的列表，最好不要使用由字典组成的列表，因为这样会导致散列表占用大量的空间，且每个字典都会存储一份字段名。
+
+    ```python
+    #元组构成的列表
+    l = [("lip",18),("deb",12)]
+    #具名元组构成的列表
+    import collections
+    Person = collections.namedtuple("Person","name age")
+    l = [Person("lip",18), Person("deb",12)]
+    #字典构成的列表
+    l = [{"name":"lip", "age":18},{"name":"deb", "age":12}]
+    ```
+
+18. dict的实现就是用空间换时间，字典类型有着巨大的内存开销，但是可以提供无视数据量大小的快速访问，只要字典可以被装载到内存中。
+
+19. 内存空间的优化工作可以等到真正需要的时候再进行，因为优化往往是可维护性的对立面。
+
+20. 当往dict中添加新键时发生散列冲突，新建可能会被安排到另一个位置。
+
+21. 
+
+22. 
+
+23. 
+
+24. 
+
+25. 
+
+26. 
+
+27. 
+
+28. 
 
 # 迭代器
 
@@ -1979,32 +2506,129 @@
 
 6. 不过还是建议将类型和它的迭代器类型分开设置。
 
-# 生成器
 
-1. 是一个可以像迭代器那样使用for循环来获取元素的的函数。python2.2引入，实现了延迟计算，缓解了在大量数据下内存消耗过猛的问题。
+# 推导式
 
-2. 创建生成器：
+1. 推导式（comprehension）又称为解析式，是python独有的一种特性，可以从一个数据序列构建一个新的数据序列。这是一种可读性好，且高效的形式。
+
+2. 一般有两种用法， 构造新的容器数据或从已有的容器数据中筛选出满足条件的，一共有三种：
+
+   1. 列表推导式：
+
+      ```python
+      #基本形式: new_list = [expression for_loop_expression if condition]，只会讲使得condition为True的元素筛选下来。其中if condition可以省略。
+      [i**2 for i in range(5)]  #构造新的列表，结果为[0, 1, 4, 9, 16]
+      old_list = [0,1,2,3,4,5]
+      new_list = [item for item in old_list if item % 2 == 0] #筛选出来列表中偶数，组成一个新的列表。结果为 [0, 2, 4]
+      ```
+
+   2. 字典推导式：
+
+      ```python
+      #基本形式: new_dict ={ key_expr: value_expr for_loop_expression if condition }
+      kvinfo = {i:i**2 for i in range(5)} #构造新的字典，结果为{0: 0, 1: 1, 2: 4, 3: 9, 4: 16}
+      old_info = {
+          "Jack": {
+              "chinese": 87,
+              "math": 92,
+              "english": 78
+          },
+          "Tom": {
+              "chinese": 92,
+              "math": 100,
+              "english": 89
+          }
+      }
+      new_info = {name: scores for name, scores in old_info.items() if scores["math"] == 100} # 筛选出数学为100分的记录，结果为{'Tom': {'chinese': 92, 'math': 100, 'english': 89}}
+      ```
+
+   3. 集合推导式：
+
+      ```python
+      #基本形式: new_set = { expr for_loop_expression if condition }
+      {i for i in [0,0,1,2,3,3]}  #可以用此方法对数据进行去重，结果为{0, 1, 2, 3}
+      ```
+
+3. 不存在元组推导式，因为其结果是一个生成器。
 
    ```python
-   def generator_factory(top=5):
-   	index = 0
-   	while index < top:
-   		print("index 值为: " + str(index))
-   		index = index + 1
-   		yield index
-   	raise StopIteration
-   gen = generator_factory()  #<generator object generator_factory at 0x0000017F4B359000>  此时gen就是一个生成器对象。
-   
-   gen = (i for i in range(5)) #使用元组推导式可以产生一个生成器
+   a = (i for i in range(1,6))  #<generator object <genexpr> at 0x0000017F4EE73D80>
    ```
 
-3. yield相当于函数中的return，但又不一样：
+4. 推导式可能被滥用，因此建议只使用它来创建新的列表，且尽量保持简短，如果逻辑过于复杂，建议使用for循环重写。列表推导不再会有变量泄露的问题。
+
+   ```python
+   #python2中for关键字之后的赋值操作可能会影响上下文中的同名变量
+   x = "abc"
+   y = [x for x in "def"] #上一行定义的x会在这里经历多次赋值，最终变成"f"。
+   #但是这种情况已经在python3中解决了，python3规定了推导式和生成器表达式都使用自己局部的作用域，和函数类似，表达式内部的变量会会暂时屏蔽外部的同名变量。
+   x = "abc"
+   y = [ord(x) for x in x] #执行完成后x的值不变，y的值为[97, 98, 99]
+   ```
+
+5. 推导式可以将一个可迭代对象中的元素过滤或加工，产生一个新的列表，以替代filter+map的工作，而且还不需要构造lambda表达式：
+
+   ```python
+   x = "abcdef"
+   y = [ord(s) for s in x if ord(s) > 99] #结果为[100,101,102]
+   #如果不适用列表推导式
+   x = "abcdef"
+   y = list(filter(lambda c : c > 99, map(ord, x))) #map对象是一个可迭代的对象，其中每个元素是ord函数逐个作用在x的对应元素上。filter会依次调用lambda表达式，只保留结果为True的对象，结果也是一个可迭代对象，然后用list包装一下。
+   ```
+
+6. 用推导式作用在两个可迭代对象上，可以生成笛卡尔积，笛卡尔积是一个元组的列表，其中的元素是从多个可迭代对象中任选的元素组合起来的。
+
+   ```python
+   # x = ["a","b"]×[1,2,3]
+   x = [(s, str(i)) for s in ["a","b"] for i in [1,2,3]] #结果为[('a', '1'), ('a', '2'), ('a', '3'), ('b', '1'), ('b', '2'), ('b', '3')]，两个for的顺序不能反
+   #相当于二层循环
+   x = []
+   for s in ["a","b"]:
+       for i in [1,2,3]:
+           x.append((s,str(i)))
+   ```
+
+# 生成器表达式
+
+1. 虽然使用推导式也可以初始化除了列表以外的其他序列类型，但是生成器表达式是更好的选择，这是因为生成器背后遵循了迭代器协议，可以逐个地产生元素，也不会保留之前产生的元素，而不是先建立一个完整的列表，然后把列表传递到对应类型的构造函数中，这样会浪费时间，额外占用内存空间。
+
+2. 使用生成器时，内存中不会存在一个由该生成器能生成的所有数据的序列。
+
+3. 
+
+4. 生成器是一个可以像迭代器那样使用for循环来获取元素的的函数。python2.2引入，实现了延迟计算，缓解了在处理大量数据时内存消耗过猛的问题。
+
+5. 
+
+6. 创建生成器的两种方法：
+
+   1. 使用生成器表达式，和列表推导式就相差一对括号
+
+      ```python
+      (i for i in range(5)) #结果为 <generator object <genexpr> at 0x000002149B440AD0>
+      tuple(i for i in range(5)) #结果为(0, 1, 2, 3, 4)。如果生成器表达式是一个函数的唯一参数，那么外边的括号可以省略。
+      ```
+
+   2. 函数：
+
+      ```python
+      def generator_factory(top=5):
+      	index = 0
+      	while index < top:
+      		print("index 值为: " + str(index))
+      		index = index + 1
+      		yield index
+      	raise StopIteration
+      gen = generator_factory()#<generator object generator_factory at 0x0000017F4B359000>  此时gen就是一个生成器对象。
+      ```
+
+7. yield相当于函数中的return，但又不一样：
 
    1. 函数运行到yield时，会暂停，并且把yield后的值返回回去。
    2. 若yield没有接收到任何值，则返回None。
    3. yield虽然返回了，但是函数并没有结束。
 
-4. 使用方法：
+8. 使用方法：
 
    ```python
    #使用next逐个获取
@@ -2016,7 +2640,7 @@
        print(i)  
    ```
 
-5. 生成器对象在创建后，并不会执行任何代码逻辑，想要从中获取元素，首先要激活它。有两种方法：
+9. 生成器对象在创建后，并不会执行任何代码逻辑，想要从中获取元素，首先要激活它。有两种方法：
 
    ```python
    #使用next()
@@ -2025,47 +2649,120 @@
    gen.send(None)  #结果为0，相当于执行了next()。
    ```
 
-6. 生成器在其生命周期中，有4种状态：
+10. 生成器在其生命周期中，有4种状态：
+
+    ```python
+    GEN_CREATED  #已经创建，但还未激活
+    GEN_RUNNING  #解释器正在执行(只有在多线程应用中才能看到这个状态)
+    GEN_SUSPEND  #在yield表达式处暂停
+    GEN_CLOSED   #执行结束
+    #使用 getgeneratorstate(gen)查看gen的状态。
+    gen = (i for i in range(3))
+    getgeneratorstate(gen)  #结果为 'GEN_CREATED'
+    next(gen)  #结果为 0
+    getgeneratorstate(gen)  #结果为 'GEN_SUSPENDED'
+    next(gen)  #结果为 1
+    next(gen)  #结果为 2
+    next(gen)  #迭代结束
+    ---------------------------------------------------------------------------
+    StopIteration                             Traceback (most recent call last)
+    Input In [100], in <cell line: 1>()
+    ----> 1 next(gen)
+    
+    StopIteration:
+    getgeneratorstate(gen)  #结果为 'GEN_CLOSED'
+    ```
+
+11. 上面定义生成器时，当没有元素可以返回时，抛出了StopIteration的异常，其实，如果不手动抛出StopIteration的异常，生成器在遇到该函数的return时，会自动抛出StopIteration异常。
+
+    ```python
+    def generator_factory(top=2):
+    	index = 0
+    	while index < top:
+    		index = index + 1
+    		yield index
+    	
+    gen = generator_factory()
+    next(gen) #结果为1
+    next(gen) #结果为2
+    next(gen) #此时或报异常
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+    StopIteration
+    ```
+
+12. 
+
+# 排序和查找
+
+1. 排序算法，用来排序的列表需要元素两两可以比较大小。数值之间，字符串之间可以比较大小，数值和字符串不可以比较大小：
 
    ```python
-   GEN_CREATED  #已经创建，但还未激活
-   GEN_RUNNING  #解释器正在执行(只有在多线程应用中才能看到这个状态)
-   GEN_SUSPEND  #在yield表达式处暂停
-   GEN_CLOSED   #执行结束
-   #使用 getgeneratorstate(gen)查看gen的状态。
-   gen = (i for i in range(3))
-   getgeneratorstate(gen)  #结果为 'GEN_CREATED'
-   next(gen)  #结果为 0
-   getgeneratorstate(gen)  #结果为 'GEN_SUSPENDED'
-   next(gen)  #结果为 1
-   next(gen)  #结果为 2
-   next(gen)  #迭代结束
-   ---------------------------------------------------------------------------
-   StopIteration                             Traceback (most recent call last)
-   Input In [100], in <cell line: 1>()
-   ----> 1 next(gen)
-   
-   StopIteration:
-   getgeneratorstate(gen)  #结果为 'GEN_CLOSED'
+   x.sort()        #对列表x进行就地排序。
+   sorted(x)       #内置函数，接收任何形式的可迭代对象包括不可变序列或生成器，返回排序后的列表，不修改x本身。按照数值大小，或ASCII顺序来进行增序排序。
+   #以上两个函数都有两个可选参数,key为一个单参数函数,从元素中提取出比较使用的键,默认值为None,即恒等函数,reverse设置是否要进行降序排序,默认值为False。
+   x = ["aar","aba","acme","add"]
+   x.sort(key = len, reverse = False)#结果为['aar', 'aba', 'add', 'acme']，可以看到python的排序算法是稳定的，也就是值相同的两个元素在排序前后不会改变顺序，不论reverse的取值。对一个序列多次使用稳定的排序算法，没有副作用。
+   #如果没有提供key函数，那么会直接对元素使用<进行比较，因此自定义类型需要实现__lt__特殊方法。
+   #这里并非用len函数来直接给两个元素比较大小。而是先对每个的元素计算一个新的对应的值，生成一个新的列表，然后根据这个新的列表对原有列表进行排序。min,max函数也会用到这种方法。
    ```
 
-7. 上面定义生成器时，当没有元素可以返回时，抛出了StopIteration的异常，其实，如果不手动抛出StopIteration的异常，生成器在遇到该函数的return时，会自动抛出StopIteration异常。
+2. 其他语言中需要的key一般是一个2参数的函数，接收两个元素，进行比较，返回-1，0，1。python使用单参数的key，虽然总会需要比较两个参数，但是它被是现在了C语言层面，效率更高。
+
+3. 例子：
 
    ```python
-   def generator_factory(top=2):
-   	index = 0
-   	while index < top:
-   		index = index + 1
-   		yield index
-   	
-   gen = generator_factory()
-   next(gen) #结果为1
-   next(gen) #结果为2
-   next(gen) #此时或报异常
-   Traceback (most recent call last):
-     File "<stdin>", line 1, in <module>
-   StopIteration
+   class NewInt:
+       def __init__(self, x = 0):
+           self.x = x
+       def __repr__(self):
+           return str(self.x)
+       def __lt__(self, other):
+           return self.x < other.x
+   arr = [NewInt(i) for i in [0,5,2,4,5,6,1]]
+   sorted(arr) #会调用13次__lt__函数
+   sorted(arr, reverse = True) #会调用15次__lt__函数
    ```
+
+4. Python的默认排序算法是Timsort，它借鉴了归并排序和二分插入排序（比普通的插入排序需要更少的比较次数）两种方法，速度特别快。Oracle对Google的侵权起诉中，就提供了一些Timsort算法的细节。
+
+   1. 先将待排序的序列划分为有序（递增或严格递减）的片段（称之为run），逆序的片段会被翻转，过短的片段会使用紧邻的后续元素填充，然后使用二分插入排序使之变成较长的有序片段。
+   2. 该算法是自适应的，因为run的下限会根据序列的长度自动确定。会从32到64（包括）选择一个数字，使得序列的长度除以run的下限等于或者略小于2的幂次方。如果序列长度比32还短，则会直接使用插入排序。
+   3. 归并run时，如果run的总数等于或略小于2的幂次时，效率最高，如果run的总数略高于2的幂次，效率最差。
+   4. 普通的归并算法是，相邻子序列的两两合并，这样子序列数量减少一半，然后再重复相邻子序列两两合并。而这里是从前往后，逐个按需合并。
+   5. 该算法使用一个栈来保存每个run，从前往后，依次入栈。每次都考察栈顶的3个run（长度分别为X，Y，Z），如果$Z>Y+X$和$Y>X$有一个不满足，则会触发合并，将Y和X，Z中较短的那个合并成一个新的run，放置在原来的位置。如果这两个条件都满足，则会继续向后处理，寻找新的run。
+   6. 之所以规定一个最小run长度是因为，将一个长序列和短序列进行归并排序效率低下。该算法之所以较快，是因为它考虑到了现实世界中的序列，有很多是有序的子序列。
+
+5. 像sort这样的方法，返回值是None，这就表明该方法会就地处理对象，这是python的风格。就地修改有一个缺点，就是无法进行连贯接口（fluent interface）的调用，例如`l1.sort().index(3)`。
+
+6. 已排序的序列可以进行快速搜索，标准库的bisect模块实现了二分查找：
+
+   ```python
+   #bisect模块包含两个函数bisect和insort,这俩函数有2个可选参数，lo和hi，分别指定搜索和插入的范围，默认值分别为0和序列长度。要求序列本身是递增（不一定严格递增）的，即前一个元素<=后一个元素。
+   import bisect
+   bisect.bisect(haystack, needle) #在有序序列haystack中查找needle的位置，使得needle插入这个的位置时，haystack仍然保持有序。也就是<= needle的元素中下标的最大值+1。
+   bisect.insort(haystack, needle) #在有序序列haystack中合适的位置插入needle，等价于先用bisect查找到index，然后再用haystack.insert(index,needle)在对应位置插入。
+   x = [1,4,5,5,6,8,12,15]
+   bisect.bisect(x,0)  #结果为 0，比所有元素都小，就放在第0个前面
+   bisect.bisect(x,3)  #结果为 1，<=3的元素中最大下标为0
+   bisect.bisect(x,5)  #结果为 4，<=5的元素中最大小标为3
+   bisect.bisect(x,17) #结果为 8
+   #bisect还有一个函数为bisect_left，他和bisect的区别时，如果序列中存在和needle相等的一个或多个元素，由于bisect是从右往左搜索，则会返回最后一个相等元素的下标+1，而bisect_left是从左往右搜索，会返回第一个相等元素的下标。这个差别对于整数序列没有影响，但是对于那些值相等，但是形式不同的情况会有区别
+   x = [1,2,2.0,3]
+   bisect.bisect(x,2) #结果为3，插入后x为[1,2,2.0,2,3]
+   bisect.bisect_left(x,2) #结果为1，插入后x为[1,2,2,2.0,3]
+   ```
+
+7. 对字典进行排序，得到的是一个关于其键的列表：
+
+   ```python
+   d = {"b":2,"a":1,"c":3}
+   sorted(d) #结果为 ['a', 'b', 'c']
+   ```
+
+8. 
+
+9. 
 
 # 文件操作
 
@@ -2224,41 +2921,148 @@
 
 # 面向对象
 
-1. Python中所有的数据类型都是对象，函数，模块都是对象，所有的对象都继承自object。数据的操作都是类方法的体现。
-
-2. 对象是对函数的更高级别的抽象。面向对象并非高级的方法，而是为了复用代码。
-
-3. 面向对象的重要的三个特征：
-
-   1. 封装，属性方法的抽象，用数据和操作数据的方法来形成对象逻辑
-
-   2. 继承，代码用的高级抽象，用对象之间的继承关系来形成代码复用
-
-   3. 多态，方法灵活性的抽象，让对象的操作更灵活，更多地复用代码
-
-4. Python使用弱类型，天然支持多态。
-
-   1. 参数类型的多态，一个方法可以处理多种类型的能力
-
-   2. 参数形式的多态，一个方法能够接受多个参数的能力
-
-5. 类中包含属性（变量）和方法（函数）。
-
-6. ![1590856005743](Python.assets/1590856005743.png)
-
-7. 使用class保留字定义类，类的定义不限定位置，只要使用类时定义已经完成即可：
+1. 构造一个包含一摞有序的纸牌的类：
 
    ```python
-   class <类名>:  #类名一般使用大写字母单词的组合
-       [类描述 "documentation string"] #类描述的字符串，可以使用类名.\_\_doc\_\_访问，可以使用多行字符串。
-       <语句块>
+   import collections #首先构建表示单张纸牌的类，然后构建一个类似于序列的类，来存储所有的纸牌
+   Card = collections.namedtuple("Card",["rank","suit"]) #不能省略返回值赋值。从python2.6开始，collections模块中加入了一个namedtuple命名元组函数，用来快捷构造一个只有属性，而没有方法的类。
+   #相当于定义了一个类，名称为Card，有2个属性，分别为rank和suit。
+   beer_card = Card("7","diamonds") #创建一个Card的对象。
+   class FrenchDeck:
+       ranks = [str(n) for n in range(2,11)]+list("JQKA") #字符列表
+       suits = "spades diamonds clubs hearts".split #字符串列表
+       def __init__(self):
+           self._cards = [Card(rank,suit) for rank in self.ranks for suit in self.suits] #该对象底层是使用list来实现的
+       def __len__(self): # len函数作用在该类的对象上时，会调用此函数
+           return len(self._cards)
+       def __getitem__(self, position): # 下标[]作用在该类的对象上时，会调用此函数，[]内的下标会传递给position参数。
+           return self._cards[position]
+   #使用该类
+   deck = FrenchDeck()
+   len(deck) #结果为52
+   deck[0] #结果为 Card(rank='2', suit='spades')
+   #由于__getitem__方法内部交给了list的__getitem__方法， 因此自动支持列表才支持的切片操作
+   deck[3:5] #结果为 [Card(rank='2', suit='hearts'), Card(rank='3', suit='spades')]
+   #同时该类也是一个可迭代的类
+   for card in deck:
+       print(card)
+   #该类没有实现__contains__特殊方法，因此in运算符会按顺序进行迭代搜索，所以in也可以作用在该对象上。
+   Card("Q","hearts") in deck #结果为True
+   Card("M","hearts") in deck #结果为False
+   import random
+   random.choice(deck) #从序列中随机获得一个元素，结果为Card(rank='8', suit='hearts')
    ```
 
-8. __开头和结尾的是类的保留属性，预定义的。
+2. 为自己定义的类实现特殊方法，有两个优点：
 
-9. 当成功定义一个类之后，会产生一个Python类基本信息的数据结构（即使还没有实例化对象），只有一个，全局唯一，实例对象可以有很多。类对象是type类型的。
+   1. 方便用户使用，不必去记住一些函数或属性名称，例如不用去纠结获得元素个数到底是.size还是.length方法。
 
-10. 类的定义和类对象的生成使得类内的一些语句被执行，因此不在类的定义中包含可执行语句。
+   2. 方便和标准库进行结合，例如random.choice。
+
+3. 特殊方法（又称为魔术方法）的存在是为了给python解释器调用的，用户一般不应该直接调用，除非代码中有大量的元编程存在。例如应该使用`len(deck)`，而不是`deck.__len__()`。`__init__`方法除外，因为子类中经常要显式调用父类的构造方法。
+
+4. Ruby语言中也有特殊方法概念，不过它的社区称之为魔术方法，他们都使用其来丰富元对象协议，让语言的用户和核心开发者拥有并使用同样的工具。Javascript的元对象支持就不够好，例如在Javascript 1.8.5中，用户的自定义对象不能有只读属性，而不少Javascript的内置对象就可以有该属性。
+
+5. 如果对于内置类型调用特殊方法，CPython可能会抄近路，而不去调用特殊方法，例如对于`len([1,2])`，CPython会直接返回PyVarObject（表示内存中长度可变的内置对象的C语言结构体）的ob_size属性，这样比调用特殊方法快得多。
+
+6. 很多时候，特殊方法的调用是隐式的，例如`for i in x:`，背后是`iter(x)`，而这个函数又会调用`x.__iter__()`特殊方法。
+
+7. 通过内置函数（例如len，iter，str）来使用特殊方法是最好的选择，这样可以方便地像使用内置类一样使用自定义类，内置函数作用在内置类上，速度更快。
+
+8. 用户自定义的方法名称不要写成特殊方法`__xxx__`的形式，因为后续Python标准可能会增加特殊方法，容易碰撞。
+
+9. Python内置的complex类可以当作二维向量使用（不过只能模拟加减，无法模拟内积），如果要用n维向量，就要自定义了。
+
+   ```python
+   from math import hypot
+   class Vector:
+       def __init__(self, x = 0, y = 0):
+           self.x = x
+           self.y = y
+       def __repr__(self):
+           return "Vector(%r,%r)" % (self.x, self.y) #%r表示用repr处理对应的参数
+       def __abs__(self):
+           return hypot(self.x, self.y)
+       def __bool__(self):
+           return bool(abs(self)) #虽然在类中，也不建议直接调用特殊方法__abs__
+           #或者使用 bool(self.x or self.y)，效率更高
+       def __add__(self, other):
+           x = self.x + other.x
+           y = self.y + other.y
+           return Vector(x,y)
+       def __mul__(self, scalar):
+           return Vector(self.x*scalar, self.y*scalar)
+   #测试
+   v1 = Vector(2,3)
+   repr(v1) #结果为 'Vector(2,3)'
+   
+   ```
+
+10. 内置函数repr，获得对象的字符串表示形式。它会调用参数的`__repr__`方法。如果没有实现该特殊方法，函数会调用object的该方法，结果为`'<__main__.Vector object at 0x000001F27393DC90>'`。交互式控制台和调试程序都会使用repr函数获取变量或对象的字符串表示形式。格式化输出时，可以使用%r来获得对应参数的字符串表示，会隐式调用repr函数。
+
+11. 特殊方法`__repr__`不能随便写，应该反映出如何使用代码构造该对象。例如上面的`repr(v1)`的结果就是`Vector(2,3)`。
+
+12. repr和str的区别：str返回的字符串是对终端和用户友好的，repr返回的字符串是方便调试和记录日志的。二者都有对应的特殊方法。如果只想实现一个特殊方法，推荐实现`__repr__`，因为一个对象如果没有`__str__`方法，则解释器会调用`__repr__`方法。
+
+13. python的任何对象都可以用于需要布尔值的上下文，例如if语句中。
+
+    1. 对于自定义类，此时python会自动调用bool函数，bool(x)的背后会调用`__bool__`特殊方法，该方法只能返回True或False。如果`__bool__`特殊方法不存在，则会尝试调用`__len__`特殊方法，如果返回0，则表示False，否则为True。如果这两个方法都不存在，则认为对象总是为True。
+
+    2. 对于内置类型的对象，标准规定了检验真假的标准，不必执行特殊方法。
+
+14. 
+
+15. 
+
+16. 
+
+17. collections.abc模块内存放了很多抽象基类（Abstract Base Class），可以用他们来快速建立具有某一特性的类来替代标准库自带的类。
+
+18. 
+
+19. 
+
+20. 
+
+21. 
+
+22. Python中所有的数据类型都是对象，函数，模块都是对象，所有的对象都继承自object。数据的操作都是类方法的体现。
+
+23. python2中对object类的继承需要显式写出ClassA(object)，而Python3中默认都是继承自object。
+
+24. 对象是对函数的更高级别的抽象。面向对象并非高级的方法，而是为了复用代码。
+
+25. 面向对象的重要的三个特征：
+
+    1. 封装，属性方法的抽象，用数据和操作数据的方法来形成对象逻辑
+
+    2. 继承，代码用的高级抽象，用对象之间的继承关系来形成代码复用
+
+    3. 多态，方法灵活性的抽象，让对象的操作更灵活，更多地复用代码
+
+26. Python使用弱类型，天然支持多态。
+
+    1. 参数类型的多态，一个方法可以处理多种类型的能力
+
+    2. 参数形式的多态，一个方法能够接受多个参数的能力
+
+27. 类中包含属性（变量）和方法（函数）。
+
+28. ![1590856005743](Python.assets/1590856005743.png)
+
+29. 使用class保留字定义类，类的定义不限定位置，只要使用类时定义已经完成即可：
+
+    ```python
+    class <类名>:  #类名一般使用大写字母单词的组合
+        [类描述 "documentation string"] #类描述的字符串，可以使用类名.\_\_doc\_\_访问，可以使用多行字符串。
+        <语句块>
+    ```
+
+30. __开头和结尾的是类的保留属性，预定义的。
+
+31. 当成功定义一个类之后，会产生一个Python类基本信息的数据结构（即使还没有实例化对象），只有一个，全局唯一，实例对象可以有很多。类对象是type类型的。
+
+32. 类的定义和类对象的生成使得类内的一些语句被执行，因此不在类的定义中包含可执行语句。
 
     ```python
     class DemoClass:
@@ -2268,17 +3072,17 @@
     print(type(DemoClass)) #<class 'type'>
     ```
 
-11. 实例化对象，可以提供多个参数。实例对象的类型是 \_\_main\_\_.类名 这种类型。
+33. 实例化对象，可以提供多个参数。实例对象的类型是 \_\_main\_\_.类名 这种类型。
 
     ```python
     <对象名> = <类名>([<参数>])
     ```
 
-12. 构造函数规定如何生成一个对象，支持参数构造。
+34. 构造函数规定如何生成一个对象，支持参数构造。
 
-13. Python使用预定义的__init\_\_函数作为构造函数。创建对象时提供的参数会传递给init函数的参数列表（self之后的）。
+35. Python使用预定义的__init\_\_函数作为构造函数。创建对象时提供的参数会传递给init函数的参数列表（self之后的）。
 
-14. self表示类实例自身（在类定义内部使用，就像类名代表类对象本身），构造函数没有返回值，或者返回none使用return会产生typeerror异常，因为它要返回实例化的对象，
+36. self表示类实例自身（在类定义内部使用，就像类名代表类对象本身），构造函数没有返回值，或者返回none使用return会产生typeerror异常，因为它要返回实例化的对象，
 
     ```python
     class <类名>:
@@ -2287,13 +3091,13 @@
         ……
     ```
 
-15. 属性分为两种：
+37. 属性分为两种：
 
     1. 类属性，类对象的属性，由所有实例对象共享
 
     2. 实例属性：实例对象的属性，由各实例对象所独享
 
-16. 类属性在类的内外都是使用类名.属性名来访问。
+38. 类属性在类的内外都是使用类名.属性名来访问。
 
     ```python
     class <类名>:
@@ -2303,7 +3107,7 @@
         ……
     ```
 
-17. 类内一共可以定义5种方法：
+39. 类内一共可以定义5种方法：
 
     1. 实例方法，实例对象的方法，由各实例对象独享，最常用的形式，第一个参数必须是self
 
@@ -2315,7 +3119,7 @@
 
     5. 保留方法，由双下划线开始和结束，保留使用，例如\_\_len\_\_()
 
-18. 需要在定义方法前加上一个装饰器。类对象和实例对象都可以调用。至少包含一个参数，表示类对象，建议用cls。类方法只能操作类属性和其他类方法，不能操作实例属性和实例方法。
+40. 需要在定义方法前加上一个装饰器。类对象和实例对象都可以调用。至少包含一个参数，表示类对象，建议用cls。类方法只能操作类属性和其他类方法，不能操作实例属性和实例方法。
 
     ```python
     class <类名>:
@@ -2324,7 +3128,7 @@
         	...
     ```
 
-19. 自由方法：定义在类命名空间中的普通函数。使用类名.方法名()来调用，不能使用对象名.方法名()来调用。类名表示命名空间。不需要self和cls的参数，只能操作类属性和类方法。完全可以放到类定义之外，不过放在内部可以是程序更加紧凑，合理。
+41. 自由方法：定义在类命名空间中的普通函数。使用类名.方法名()来调用，不能使用对象名.方法名()来调用。类名表示命名空间。不需要self和cls的参数，只能操作类属性和类方法。完全可以放到类定义之外，不过放在内部可以是程序更加紧凑，合理。
 
     ```python
     class <类名>:
@@ -2332,7 +3136,7 @@
         	...
     ```
 
-20. 静态方法，用到装饰器，是定义在类中的普通函数，就是比自由函数多个装饰器，但是能够被所有实例对象和类对象使用。
+42. 静态方法，用到装饰器，是定义在类中的普通函数，就是比自由函数多个装饰器，但是能够被所有实例对象和类对象使用。
 
     ```python
     class <类名>:
@@ -2341,7 +3145,7 @@
         	...
     ```
 
-21. 保留方法统一用__开头和结束。一般都有self参数（因为调用对应操作符时，会自动传参），在使用操作符时，会调用这些方法。
+43. 保留方法统一用__开头和结束。一般都有self参数（因为调用对应操作符时，会自动传参），在使用操作符时，会调用这些方法。
 
     ```python
     class <类名>:
@@ -2349,17 +3153,17 @@
         	...
     ```
 
-22. 例如定义了__len\_\_方法后，就能使用len(对象)方法了（调用该函数）。
+44. 例如定义了__len\_\_方法后，就能使用len(对象)方法了（调用该函数）。
 
-23. 当对象消亡时，可以使用析构函数做一些额外处理，如果不写，Python解释器的垃圾回收机制会处理。
+45. 当对象消亡时，可以使用析构函数做一些额外处理，如果不写，Python解释器的垃圾回收机制会处理。
 
-24. 使用预定义的__del\_\_作为析构函数（至少需要定义一个self参数），在真实删除（引用数=0或当前程序退出）实例对象时 会被调用。del 对象名 可以删除对象。
+46. 使用预定义的__del\_\_作为析构函数（至少需要定义一个self参数），在真实删除（引用数=0或当前程序退出）实例对象时 会被调用。del 对象名 可以删除对象。
 
-25. 如下代码会输出两次，第一次在地13行，第二次输出在main（）函数返回退出后，会删除掉所有局部变量。此时d2真正被删除，调用析构函数。
+47. 如下代码会输出两次，第一次在地13行，第二次输出在main（）函数返回退出后，会删除掉所有局部变量。此时d2真正被删除，调用析构函数。
 
-26. 一般在构建类的时候，不会写析构函数，而是让Python的垃圾回收机制自己去处理。
+48. 一般在构建类的时候，不会写析构函数，而是让Python的垃圾回收机制自己去处理。
 
-27. ```python
+49. ```python
     class Demo:
         
         def __init__(self,name):
@@ -2376,17 +3180,17 @@
     main()
     ```
 
-28. 使用构造函数创建对象时，真正生成对象，=赋值只是生成了一个引用。
+50. 使用构造函数创建对象时，真正生成对象，=赋值只是生成了一个引用。
 
-29. sys.getrefcount(对象名)，可以获得对象的引用次数+1的值。由于调用该函数要传递引用参数，所以对象的引用次数会加1。函数返回后，又会-1。
+51. sys.getrefcount(对象名)，可以获得对象的引用次数+1的值。由于调用该函数要传递引用参数，所以对象的引用次数会加1。函数返回后，又会-1。
 
-30. 封装的目的是形成对外可操作的接口，隔离和保护私有的内容。
+52. 封装的目的是形成对外可操作的接口，隔离和保护私有的内容。
 
-31. 一共4种属性，公开/私有  类/实例   属性。默认的属性就是公开的。私有的属性定义要以__开头。
+53. 一共4种属性，公开/私有  类/实例   属性。默认的属性就是公开的。私有的属性定义要以__开头。
 
-32. 私有的类属性，只能在类定义的内部使用（要用类名.属性名访问），子类也不能访问。不过也可以编写get，set之类的函数，使得在类外也可以访问。如果不在类内访问，则会报错。
+54. 私有的类属性，只能在类定义的内部使用（要用类名.属性名访问），子类也不能访问。不过也可以编写get，set之类的函数，使得在类外也可以访问。如果不在类内访问，则会报错。
 
-33. ```python
+55. ```python
     class Demo:
         __count = 0 #私有类属性
         def __init__(self,name):
@@ -2403,13 +3207,13 @@
     print(str(d1._Demo__count)+'    '+d1._Demo__name)      #形式上的私有
     ```
 
-34. 私有实例属性，只能在当前类内访问，子类也不能访问，使用__开头。用self来定义。
+56. 私有实例属性，只能在当前类内访问，子类也不能访问，使用__开头。用self来定义。
 
-35. Python的私有属性，只是将属性改名了，这是一种形式上的私有。改名为_类名__属性名。
+57. Python的私有属性，只是将属性改名了，这是一种形式上的私有。改名为_类名__属性名。
 
-36. 默认定义的方法是公开的，在定义时，以__开头，则为私有方法。以后只能在类内部使用。也是形式上保护。
+58. 默认定义的方法是公开的，在定义时，以__开头，则为私有方法。以后只能在类内部使用。也是形式上保护。
 
-37. 类的保留属性（使用类名.属性名访问），也称为特殊属性，是Python解释器预留的类属性，以__开头和结尾。为理解Python类提供了统一的接口。类定义后就可以直接使用。
+59. 类的保留属性（使用类名.属性名访问），也称为特殊属性，是Python解释器预留的类属性，以__开头和结尾。为理解Python类提供了统一的接口。类定义后就可以直接使用。
 
     ```python
     __name__        #类的名称
@@ -2422,7 +3226,7 @@
     __module__      #类所在的模块名称
     ```
 
-38. class，doc ,module使用可以用对象名.属性名或类名.属性名访问。类的class属性为type，对象的class属性为类名
+60. class，doc ,module使用可以用对象名.属性名或类名.属性名访问。类的class属性为type，对象的class属性为类名
 
     ```python
     print(DemoClass.__doc__, DemoClass.__module__, DemoClass.__class__)
@@ -2431,11 +3235,11 @@
     A Demo Class __main__ <class '__main__.DemoClass'>
     ```
 
-39. 类的保留方法，也称为特殊方法，一般与操作符有关，类定义需要重载。使用__开头和结尾。Python提供了超过100多个保留方法，对应各种操作。
+61. 类的保留方法，也称为特殊方法，一般与操作符有关，类定义需要重载。使用__开头和结尾。Python提供了超过100多个保留方法，对应各种操作。
 
-40. 继承是代码复用的高级抽象，新定义的类能够几乎完全使用原有类的属性和方法。基类（超类）和派生类（子类）
+62. 继承是代码复用的高级抽象，新定义的类能够几乎完全使用原有类的属性和方法。基类（超类）和派生类（子类）
 
-41. Python支持多继承。类名后加括号，引入基类，不是参数，基类名之间用逗号分隔。
+63. Python支持多继承。类名后加括号，引入基类，不是参数，基类名之间用逗号分隔。
 
     ```python
     class <类名>(<基类名>):   #基类名可以带有路径：ModuleName.BaseClassName
@@ -2443,18 +3247,18 @@
         	...
     ```
 
-42. 基类的属性等同于直接定义在派生类中。派生类可以使用基类的类属性（使用基类名.属性名调用）和实例属性。
+64. 基类的属性等同于直接定义在派生类中。派生类可以使用基类的类属性（使用基类名.属性名调用）和实例属性。
 
-43. 派生类可以直接使用基类的各种方法，可以使用派生类对象调用基类的实例方法。
+65. 派生类可以直接使用基类的各种方法，可以使用派生类对象调用基类的实例方法。
 
     ```python
     isinstance(obj, cls)    #判断对象obj是否是类cls的实例或子类实例，is-a判断
     issubclass(cls1, cls2)  #判断类cls1是否是类cls2的子类
     ```
 
-44. 派生类只能继承基类的公开属性和方法。
+66. 派生类只能继承基类的公开属性和方法。
 
-45. object类是Python最基础的类（但是它的类型是type），所有类定义时，默认继承object类。保留属性和保留方法实际上都是在object类中定义的属性和方法。
+67. object类是Python最基础的类（但是它的类型是type），所有类定义时，默认继承object类。保留属性和保留方法实际上都是在object类中定义的属性和方法。
 
     ```python
     object.__name__   #结果为 'object' 表示对象的名称
@@ -2471,9 +3275,9 @@
     
     ```
 
-46. 字符串就是不可变的类型。主流的Python的解释器使用C语言编写的，也叫CPython，使用内存地址表示对象的标识。其他的解释器还有JPython（Java写的）IronPython（.Net写的）
+68. 字符串就是不可变的类型。主流的Python的解释器使用C语言编写的，也叫CPython，使用内存地址表示对象的标识。其他的解释器还有JPython（Java写的）IronPython（.Net写的）
 
-47. python对象的三个要素：
+69. python对象的三个要素：
 
     1. 标识，identity，对象一旦构建就不会改变，用id()获得，CPython解释器使用内存地址，x is y 用来判断x和y的标识是否相等，而不判断值。
 
@@ -2481,11 +3285,11 @@
 
     3. 值 value，分为可变mutable和不可变immutable两种
 
-48. 重载：派生类对基类的属性或方法的再定义。需要同名。
+70. 重载：派生类对基类的属性或方法的再定义。需要同名。
 
-49. 在索引属性时，使用就近原则，如果派生类内定义了，就是用他自己的，如果没有，就向上找。
+71. 在索引属性时，使用就近原则，如果派生类内定义了，就是用他自己的，如果没有，就向上找。
 
-50. 最近覆盖原则：重载无需特殊标记
+72. 最近覆盖原则：重载无需特殊标记
 
     1. 优先使用派生类重定义的属性和方法
 
@@ -2493,7 +3297,7 @@
 
     3. 再寻找超类的属性和方法
 
-51. 方法重载分为完全重载（完全不同的功能，直接同名覆盖即可）和增量重载（包含基类的功能，还增加了一些功能）。使用super（），该函数返回派生类对应的基类。
+73. 方法重载分为完全重载（完全不同的功能，直接同名覆盖即可）和增量重载（包含基类的功能，还增加了一些功能）。使用super（），该函数返回派生类对应的基类。
 
     ```python
     class <派生类名>(<基类名>):
@@ -2501,47 +3305,15 @@
         	super().<基类方法名>(<参数列表>)
     ```
 
-52. 多继承，采用深度优先，从左到右的的方法。当派生类使用方法时，首先会在本身内查找，然后是第一个基类，第一个基类的基类等等，直到找到object类，再然后是第二个基类。
+74. 多继承，采用深度优先，从左到右的的方法。当派生类使用方法时，首先会在本身内查找，然后是第一个基类，第一个基类的基类等等，直到找到object类，再然后是第二个基类。
 
-53. 构造函数也参照上述原则，super()也是。
+75. 构造函数也参照上述原则，super()也是。
 
-54. Python的运算体现为运算符的重载（object方法中定义过）。实际是保留方法。
+76. Python的运算体现为运算符的重载（object方法中定义过）。实际是保留方法。
 
-55. 不能重载内置类型的运算符，例如字符串的加法。不能新建运算符，只能重载现有的。is and not or 不能被重载。重载也可以是增量的。
+77. 不能重载内置类型的运算符，例如字符串的加法。不能新建运算符，只能重载现有的。is and not or 不能被重载。重载也可以是增量的。
 
-56. 算术运算符：
-
-    1. 一元运算符 + - ~ abs
-
-       ```python
-       保留方法         对应操作    描述
-       .__pos__(self)    +obj     #取原值
-       .__neg__(self)    -obj     #取相反数
-       .__invert__(self) ~obj     #布尔逻辑取反
-       .__abs__(self)    abs(obj) #取绝对值
-       ```
-
-    2. 二元运算符 + - * / // % divmod( ) pow( ) ** << >> & ^ |
-
-       ```python
-       保留方法                对应操作         描述
-       .__add__(self, other)  obj + other    #对象加法
-       .__sub__(self, other)  obj - other    #对象减法
-       .__mul__(self, other)  obj * other    #对象乘法
-       .__truediv__(self, other) obj/other   #对象除法
-       .__floordiv__(self, other) obj//other #对象整数除法
-       .__mod__(self, other) obj%other       #对象除法取余数
-       .__divmod__(self, other) divmod(obj, other) #返回由商obj//other和余数obj%other组成的元组
-       .__pow__(self, other)    obj ** other  #幂运算
-       .__lshift__(self, other) obj << other  #左移运算
-       .__rshift__(self, other) obj >> other  #右移运算
-       #位运算
-       .__and__(self, other)  obj & other     #按位与
-       .__xor__(self, other)  obj ^ other     #按位异或
-       .__or__(self, other)   obj | other     #按位或
-       ```
-
-57. ```python
+78. ```python
     class NewList(list):
         def __add__(self,other):
             result = []
@@ -2556,69 +3328,141 @@
     print(l1+l2)
     ```
 
-58. 比较运算符：< <= == != > >=
+## 特殊方法
 
-    ```python
-    .__lt__(self, obj2)   obj1 < obj2
-    .__le__(self, obj2)   obj1 <= obj2
-    .__eq__(self, obj2)   obj1 == obj2
-    .__ne__(self, obj2)   obj1 != obj2
-    .__gt__(self, obj2)   obj1 > obj2
-    .__ge__(self, obj2)   obj1 >= obj2
-    ```
+1. python定义了83个特殊方法，根据是否和运算符相关可以分为两大类：
 
-59. 成员运算：
+   1. 运算符相关的特殊方法：
 
-    ```python
-    保留方法                     对应操作       描述
-    .__getitem__(self, key)     obj[key]       #获取对象中序号为key的元素
-    .__setitem__(self, key, v)  obj[key] = v   #将v赋值给对象中序号为key的元素
-    .__delitem__(self, key)     del obj[k]     #删除对象中序号为key的元素
-    .__reversed__()             obj.reversed() #使对象中元素逆序
-    __contains__(self, item)    item in obj    #判断item是否为对象中的一个元素
-    ```
+      ```python
+      #一元运算符
+      .__pos__(self)    +obj     #取原值
+      .__neg__(self)    -obj     #取相反数
+      .__abs__(self)    abs(obj) #取绝对值
+      #比较运算符
+      .__lt__(self, obj2)   obj1 < obj2
+      .__le__(self, obj2)   obj1 <= obj2
+      .__eq__(self, obj2)   obj1 == obj2
+      .__ne__(self, obj2)   obj1 != obj2
+      .__gt__(self, obj2)   obj1 > obj2
+      .__ge__(self, obj2)   obj1 >= obj2
+      #算术运算符
+      .__add__(self, other)      obj + other
+      .__sub__(self, other)      obj - other
+      .__mul__(self, other)      obj * other
+      .__truediv__(self, other)  obj / other      #除法
+      .__floordiv__(self, other) obj // other     #除法取商
+      .__mod__(self, other)      obj % other      #除法取余数
+      .__divmod__(self, other)   divmod(obj, other)  #返回由商和余数组成的元组
+      .__pow__(self, other)      obj ** other   #幂运算
+      .__round__(self, ndigits)  round(number, ndigits)  #四舍五入
+      #反向算术运算符，除了.__round__(self, ndigits)外，都有对应的反向算术运算符，例如.__radd__(self, other)。
+      #增量赋值算术运算符 += -= *= /= //= %= **=，特殊方法名例如.__iadd__(self,other)，i表示in place就地进行。
+      #位运算
+      .__invert__(self) ~obj        #按位取反
+      .__lshift__(self, other) obj << other  #左移
+      .__rshift__(self, other) obj >> other  #右移
+      .__and__(self, other)  obj & other     #按位与
+      .__or__(self, other)   obj | other     #按位或
+      .__xor__(self, other)  obj ^ other     #按位异或
+      #除了按位取反外，每个位运算符(例如.__and__(self, other))都有对应的反向位运算符(.__rand__(self, other))和增量位运算符(.__iand__(self, other))
+      ```
 
-60. python的内置函数一般都和类内的保留方法对应，将对象作为盖函数的参数来调用时，会调用对应的保留方法。某些保留方法在定义一个新的类时会自动使用默认的，例如str，del，某些则没有默认的可供使用，例如len。
+   2. 运算符无关的特殊方法：
 
-    ```python
-    #保留方法            对应操作           描述
-    .__init__(self)     obj=ClassName()    #初始化实例对象
-    .__del__(self)      del obj            #删除实例对象
-    .__repr__(self)     repr(obj)          #将对象转换为可打印字符串
-    .__str__(self)      str(obj)           #将对象转换为字符串
-    .__bytes__(self)    bytes(obj)         #将对象转化为字节串
-    .__format__(self)   obj.format()或format(obj) #将对象格式化输出
-    .__hash__(self)     hash(obj)          #哈希操作
-    .__bool__(self)     bool(obj)          #布尔运算
-    .__len__(self)      len(obj)           #对象长度
-    .__reversed__(self) obj.reversed()     #对象逆序，一般用于含有多个子元素的对象上
-    .__abs__(self)      abs(obj)           #绝对值
-    .__int__(self)      int(obj)           #转换为整数
-    .__float__(self)   float(obj)          #转换为浮点数
-    .__complex__(self) complex(obj)        #转换为复数
-    .__round__(self)   round(obj)          #四舍五入
-    .__bytes__(self)   bytes(obj)          #转换为字节串
-    ```
+      ```python
+      #字符串/字节序列表示形式
+      .__repr__(self)     repr(obj)          #将对象转换为可打印字符串
+      .__str__(self)      str(obj)           #将对象转换为字符串
+      .__bytes__(self)    bytes(obj)         #将对象转化为字节串
+      .__format__(self)   obj.format()或format(obj) #将对象格式化输出
+      #数值转换
+      .__abs__(self)      abs(obj)           #绝对值
+      .__bool__(self)     bool(obj)          #布尔运算
+      .__int__(self)      int(obj)           #转换为整数
+      .__float__(self)    float(obj)          #转换为浮点数
+      .__complex__(self)  complex(obj)        #转换为复数
+      .__hash__(self)     hash(obj)          #哈希操作
+      __index__()        ??
+      #集合模拟
+      .__len__(self)      len(obj)           #对象长度
+      .__getitem__(self, key)     obj[key]       #获取对象中序号为key的元素
+      .__setitem__(self, key, v)  obj[key] = v   #将v赋值给对象中序号为key的元素
+      .__delitem__(self, key)     del obj[k]     #删除对象中序号为key的元素
+      __contains__(self, item)    item in obj    #判断item是否为对象中的一个元素
+      #迭代枚举
+      .__reversed__(self) obj.reversed()     #对象逆序，一般用于含有多个子元素的对象上
+      .__iter__(self) iter(obj) ??
+      .__next__(self)  ??
+      #可调用模拟
+      .__call__(self) ??
+      #上下文管理
+      .__enter__(self)
+      .__exit__(self)
+      #实例创建与销毁
+      .__init__(self)     obj=ClassName()    #初始化实例对象
+      .__del__(self)      del obj            #删除实例对象
+      .__new__(self) ??
+      #属性管理
+      .__getattr__(self) ??
+      .__getattribute__(self) ??
+      .__setattr__(self) ??
+      .__delattr__(self) ??
+      .__dir__(self) ??
+      #属性描述符
+      .__get__()
+      .__set__()
+      .__delete__()
+      #跟类相关的服务
+      .__prepare__()
+      .__instancecheck__()
+      .__subclasscheck__()
+      ```
 
-61. Python天生支持多态，仅针对方法，分为参数类型（可以处理多种参数类型）和参数形式（可以接受多个参数）两种。
+2. 当算术或位运算符左侧的对象没有实现对应的特殊方法（例如`__add__`）时，就会调用右侧对象的反向方法（例如`__radd__`）：
 
-62. 由于Python的变量没有类型声明，所以天然支持参数类型的多态，Python是通过文档来约束，而非语法。只需在程序内部做参数类型的区分处理即可。而无需写多个函数。如果要使得函数可以处理任意类型，建议另外重载一个Python的内部函数（该函数可以和任意对象打交道，例如id()）。
+   ```python
+   class my_complex:
+       def __init__(self, real = 0, imag = 0):
+           self.real = real
+           self.imag = imag
+       def __add__(self, other):
+           real = self.real + other
+           imag = self.imag
+           return my_complex(real, imag)
+       def __radd__(self, other):
+           real = self.real + other
+           imag = self.imag
+           return my_complex(real, imag)
+       def __repr__(self):
+           return "my_complex(%r,%r)" % (self.real, self.imag)
+   #测试
+   c1 = my_complex(2,3)
+   c1+3 #结果为 my_complex(5,3)，会调用c1.__add__(3)
+   3+c1 #结果为 my_complex(5,3)，因为没有3.__radd__(c1)，所以会调用c1.__radd__(3)
+   ```
 
-63. Python你的函数/方法都支持可变参数，可以使用默认值。
+3. python的内置函数一般都和类内的保留方法对应，将对象作为该函数的参数来调用时，会调用对应的保留方法。某些保留方法在定义一个新的类时会自动使用默认的，例如str，del，某些则没有默认的可供使用，例如len。
 
-64. 引用是对象的指针，对象是在计算机中真实分配空间的区域。
+4. Python天生支持多态，仅针对方法，分为参数类型（可以处理多种参数类型）和参数形式（可以接受多个参数）两种。
 
-65. 引用在程序中表达为变量名，在系统中表达为内存地址。每个对象至少存在一个引用，否则会被垃圾回收。
+5. 由于Python的变量没有类型声明，所以天然支持参数类型的多态，Python是通过文档来约束，而非语法。只需在程序内部做参数类型的区分处理即可。而无需写多个函数。如果要使得函数可以处理任意类型，建议另外重载一个Python的内部函数（该函数可以和任意对象打交道，例如id()）。
 
-66. 传参和赋值时，都是传递的引用。而不是赋值对象。因此不会调用构造函数。
+6. Python你的函数/方法都支持可变参数，可以使用默认值。
 
-67. Python内部对引用的处理：
+7. 引用是对象的指针，对象是在计算机中真实分配空间的区域。
+
+8. 引用在程序中表达为变量名，在系统中表达为内存地址。每个对象至少存在一个引用，否则会被垃圾回收。
+
+9. 传参和赋值时，都是传递的引用。而不是赋值对象。因此不会调用构造函数。
+
+10. Python内部对引用的处理：
 
     1. 不可变对象：immutable 解释器为相同值维护尽量少的内存区域
 
     2. 可变对象：mutable 解释器为每个对象维护不同的内存区域
 
-68. Python对不可变对象维护同一个内存。因为他不可能被改变，因此解释器就复用了。
+11. Python对不可变对象维护同一个内存。因为他不可能被改变，因此解释器就复用了。
 
     ```python
     a = 10
@@ -2627,7 +3471,7 @@
     #以上三个变量的 id()的结果是相同的。
     ```
 
-69. 运算后产生的对象由解释器重新建立。因为运算的结果不确定，因此没有对此进行优化。
+12. 运算后产生的对象由解释器重新建立。因为运算的结果不确定，因此没有对此进行优化。
 
     ```python
     a="Python计算生态"   # id为2086092911568
@@ -2638,7 +3482,7 @@
     f="Python计算生态"   # id为2086092913696，和a也不同？？？
     ```
 
-70. 可变对象不做优化。不复用内存。
+13. 可变对象不做优化。不复用内存。
 
     ```python
     la = []
@@ -2649,9 +3493,9 @@
     print(id(lc)) #81021088
     ```
 
-71. sys.getrefcount(d) 获取对象d的引用计数
+14. sys.getrefcount(d) 获取对象d的引用计数
 
-72. 导致引用+1的情况：
+15. 导致引用+1的情况：
 
     1. 对象被创建，d = DemoClass()
 
@@ -2661,32 +3505,32 @@
 
     4. 对象被作为一个容器中的元素，ls = [d]
 
-73. 导致引用-1的情况：
+16. 导致引用-1的情况：
 
     1. 对象被删除，del d
     2. 对象的名字被赋予新的对象，d = 123
     3. 对象离开作用域，例如函数的局部变量
     4. 对象所在的容器被删除，del ls，其中ls = [d]，此时d的引用会-1
 
-74. 列表等组合数据类型中存储的也都是引用。
+17. 列表等组合数据类型中存储的也都是引用。
 
-75. Python默认是浅拷贝，只复制最顶层对象。深拷贝会真实的生成对象。以下这几种情况是浅拷贝。
+18. Python默认是浅拷贝，只复制最顶层对象。深拷贝会真实的生成对象。以下这几种情况是浅拷贝。
 
-76. ![1590923708272](Python.assets/1590923708272.png)
+19. ![1590923708272](Python.assets/1590923708272.png)
 
-77. 列表容器被拷贝，而其中的元素并没有被拷贝。
+20. 列表容器被拷贝，而其中的元素并没有被拷贝。
 
-78. 列表内存储的是对应数据的指针或者引用。此处修改其中一个元素的内容，同时指向该元素的其他列表也会被修改。
+21. 列表内存储的是对应数据的指针或者引用。此处修改其中一个元素的内容，同时指向该元素的其他列表也会被修改。
 
-79. ![1590923879364](Python.assets/1590923879364.png)
+22. ![1590923879364](Python.assets/1590923879364.png)
 
-80. 深拷贝需要使用copy库的deepcopy()方法。可以迭代拷贝对象的各层次对象，完全创建新的内存。仅针对可变数据类型。如果遇到不可变数据类型，则不会另外复制一份。
+23. 深拷贝需要使用copy库的deepcopy()方法。可以迭代拷贝对象的各层次对象，完全创建新的内存。仅针对可变数据类型。如果遇到不可变数据类型，则不会另外复制一份。
 
-81. ![1590924132074](Python.assets/1590924132074.png)
+24. ![1590924132074](Python.assets/1590924132074.png)
 
-82. 函数名是对函数本身的引用。类的实例方法名也是对其实例方法的一种引用。
+25. 函数名是对函数本身的引用。类的实例方法名也是对其实例方法的一种引用。
 
-83. 使用对象名.方法名来创建方法的引用。
+26. 使用对象名.方法名来创建方法的引用。
 
     ```python
     class DemoClass:
@@ -2704,13 +3548,13 @@
     print(lucky(10))
     ```
 
-84. ![1590924332588](Python.assets/1590924332588.png)
+27. ![1590924332588](Python.assets/1590924332588.png)
 
-85. 命名空间：从名字到对象的一种映射。
+28. 命名空间：从名字到对象的一种映射。
 
-86. 管理作用域的问题，全局变量名在模块命名空间中有用，局部变量名在函数命名空间中有用。属性和方法在类的命名空间中有用。名字的全称是       命名空间.变量名/函数名    
+29. 管理作用域的问题，全局变量名在模块命名空间中有用，局部变量名在函数命名空间中有用。属性和方法在类的命名空间中有用。名字的全称是       命名空间.变量名/函数名    
 
-87. 命名空间底层使用字典类型实现的，变量名是键，变量引用的对象是值。
+30. 命名空间底层使用字典类型实现的，变量名是键，变量引用的对象是值。
 
     1. 复数z，z.real和z.imag时对象z命名空间的两个属性
 
@@ -2718,7 +3562,7 @@
 
     3. global和nonlocal是两个声明命名空间的保留字
 
-88. 命名空间互相嵌套 global声明是模块命名空间（全局命名空间）中的变量，nonlocal声明不是本命名空间中的，而是向上层命名空间寻找，直到找到为止。
+31. 命名空间互相嵌套 global声明是模块命名空间（全局命名空间）中的变量，nonlocal声明不是本命名空间中的，而是向上层命名空间寻找，直到找到为止。
 
     ```python
     count = 0       #模块的命名空间
@@ -2735,7 +3579,7 @@
     print(getCounting("3"), count)
     ```
 
-89. 类的特性装饰器：使用对象名.属性名来给属性赋值时，是无法进行安全检测的。可以使用@property来做。使用@property把类中的方法变成对外可见的属性，内部表现为方法，外部表现为属性。
+32. 类的特性装饰器：使用对象名.属性名来给属性赋值时，是无法进行安全检测的。可以使用@property来做。使用@property把类中的方法变成对外可见的属性，内部表现为方法，外部表现为属性。
 
     ```python
     class DemoClass:
@@ -2755,11 +3599,11 @@
     print(dc1.age)  #等价于调用dc1.age()，结果为30
     ```
 
-90. 获取该属性的值或给属性赋值时，会自动调用对应的方法，并传参。这样做的目的是为了方便用户使用，毕竟属性要比方法更容易使用，同时也能增加对属性获取或写入的控制。
+33. 获取该属性的值或给属性赋值时，会自动调用对应的方法，并传参。这样做的目的是为了方便用户使用，毕竟属性要比方法更容易使用，同时也能增加对属性获取或写入的控制。
 
-91. 异常也是一种对象，自定义异常需要继承自Exception类。使用raise来主动产生异常。
+34. 异常也是一种对象，自定义异常需要继承自Exception类。使用raise来主动产生异常。
 
-92. 可以重载异常的构造方法，as e是捕获并引用异常对象。
+35. 可以重载异常的构造方法，as e是捕获并引用异常对象。
 
     ```python
     class DemoException(Exception):          #自定义一个异常类型
@@ -2773,7 +3617,7 @@
         print("{}异常的报警是{}".format(e.name, e.msg))  #输出为"脚本错误异常的报警是自定义异常"
     ```
 
-93. Python通过_对名称（属性+方法）进行修饰，来完成预定的功能，一共分为5种情况：
+36. Python通过_对名称（属性+方法）进行修饰，来完成预定的功能，一共分为5种情况：
 
     ```python
     _X  #为类内部使用，PEP8。只是约定，仍然可以通过\<对象名\>.\<属性名\>的方式访问。使用from XX import *时不会导入单下划线开头的属性或方法。
@@ -2783,22 +3627,22 @@
     _ #无特殊意义
     ```
 
-94. 约定内部调用，然是仍然可以在外部访问到。
+37. 约定内部调用，然是仍然可以在外部访问到。
 
-95. __是一种约束，不是约定，因为他已经做了一些修改。
+38. __是一种约束，不是约定，因为他已经做了一些修改。
 
-96. 一些保留方法（属性）使用这种前后都有双下划线的做法。
+39. 一些保留方法（属性）使用这种前后都有双下划线的做法。
 
-97. 例如for in循环便利时，如果循环变量没有被用到，可以使用_。
+40. 例如for in循环便利时，如果循环变量没有被用到，可以使用_。
 
-98. 定义了一个没有任何内容的类，就是最小空类。类实际上就是命名空间，最小空类可以当命名空间使用。最小空类可以辅助数据存储和使用。动态增加属性是python类的一个特点。
+41. 定义了一个没有任何内容的类，就是最小空类。类实际上就是命名空间，最小空类可以当命名空间使用。最小空类可以辅助数据存储和使用。动态增加属性是python类的一个特点。
 
     ```python
     class <类名>:
     	pass
     ```
 
-99. 类支持动态增加属性，当做一个命名空间使用。使用dict来访问所有数据。
+42. 类支持动态增加属性，当做一个命名空间使用。使用dict来访问所有数据。
 
     ```python
     class EmptyClass:  #建立一个最小空类
@@ -2809,6 +3653,16 @@
     a.family = {"儿子":"小李","女儿":"小李女"}
     print(a.__dict__)  #结果为字典 {'name': '老李', 'age': 50, 'family': {'儿子': '小李', '女儿': '小李女'}}
     ```
+
+43. 
+
+# 序列化对象
+
+1. pickle模块可以将对象序列化，方便写入到文件中。
+2. pickle.dump处理浮点数组，几乎和array.tofile一样快。不过前者可以处理几乎所有的内置类型和用户自定义的类。
+3. 
+4. 
+5. 
 
 # 正则表达式
 
@@ -3184,6 +4038,80 @@
    ```
 
 4. 建议用法   pyinstaller -F --clean test.py
+
+
+## doctest
+
+1. 测试驱动开发（TDD）的精髓就是先写测试。在考虑如何实现一个功能之前，先严格地列出这个功能能做什么，这能帮助我们在编程时把精力花在该花的地方。
+
+2. Doctest是一个轻量级的单元测试框架，它寻找像Python交互式代码的文本，然后执行这些代码来确保它们的确就像展示的那样正确运行。
+
+3. doctest的测试原理：把在Python控制台的输入输出记录保存到函数的文档字符串docstring里，然后一一把这些输入到解释器然后对比输出是否一致，来确定测试结果是否通过。
+
+4. 使用方法：只需要把自己平时在Python交互式控制台上测代码时的输入输出记录，拷贝到docstring里，以后要回归这个函数的时候就可以通过doctest回放测试用例了。
+
+   ```python
+   def factorial(n): #定义一个函数，下面是它的文档字符串
+       """Return the factorial of n, an exact integer >= 0.
+   以>>>开头的行会被识别为测试例子，
+       >>> [factorial(n) for n in range(6)]
+       [1, 1, 2, 6, 24, 120]
+       >>> factorial(30)
+       265252859812191058636308480000000
+       >>> factorial(-1)
+       Traceback (most recent call last):
+           ...
+       ValueError: n must be >= 0
+   
+       Factorials of floats are OK, but the float must be an exact integer:
+       >>> factorial(30.1)
+       Traceback (most recent call last):
+           ...
+       ValueError: n must be exact integer
+       >>> factorial(30.0)
+       265252859812191058636308480000000
+   
+       It must also not be ridiculously large:
+       >>> factorial(1e100)
+       Traceback (most recent call last):
+           ...
+       OverflowError: n too large
+       """
+       import math
+       if not n >= 0:
+           raise ValueError("n must be >= 0")
+       if math.floor(n) != n:
+           raise ValueError("n must be exact integer")
+       if n+1 == n:  # catch a value like 1e300
+           raise OverflowError("n too large")
+       result = 1
+       factor = 2
+       while factor <= n:
+           result *= factor
+           factor += 1
+       return result
+   
+   if __name__ == "__main__":
+       import doctest
+       doctest.testmod()
+   ```
+
+5. 如果函数功能简单，可以直接在docstring里写测试用例，但是如果函数功能比较复杂，或者测试用例比较多，那么写到docstring里就太长了。Doctest支持把测试代码抽离到另外一个文本文件中，然后通过解析该文件的方式运行测试。
+
+6. 
+
+7. 
+
+
+# 元对象协议
+
+1. 元对象协议是对象模型的同义词，也就是构建核心语言的API。元对象是指那些对建构语言本身来说很重要的对象，协议指的是接口。
+
+2. 一套丰富的元对象协议，允许程序员对语言进行扩展，让它支持新的编程范式，
+
+3. 面向方面编程，Aspect Oriented Programing，AOP。
+
+4. 
 
 
 # 脚本
