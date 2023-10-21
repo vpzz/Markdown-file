@@ -106,35 +106,87 @@
 
 2. python自带的列表list可以保存一组类型不同的对象，因此实际保存的是指针。这对于数值计算来说浪费空间和时间。因此python又提供了array模块，只支持同类型对象，能直接保存数值，但是只支持一维数组。也没有各种配套的运算函数。
 
-3. NumPy提供2种对象：
+3. 一些科学计算库也接受python自带的序列类型，不过一般会先转化为ndarray对象，然后运算，结果输出也是ndarray对象。
+
+4. ndarray对象的操作默认是逐元的，也就是说二维数组的乘法，要求维度相同，会进行对应元素的乘积。
+
+5. 使用numpy可以利用python的编码便捷性（代码越少，出错也就越少），和预编译的C代码的高效性。
+
+6. Numpy的两大特性：
+
+   1. 向量化，使得可以使用`c=a*b`来表示同形状多维数组的对应元素乘积，使得代码简洁，省略很多显式的for循环，可读性强，和数学表达近似。
+
+   2. 广播，使得不同维度的数组可以进行运算，例如二维数组和标量的乘积，可以将一个小的数组扩展到和大的数组同形状，然后借助向量化来计算。不过需要保证小数组的扩展不会造成歧义。
+
+7. numpy同时支持面向过程和面向对象两种编程范式，因为ndarray对象可以使用它的类内的方法或全局函数来操作。不过numpy的成员方法不如numpy中的全局函数丰富。许多一元操作，例如sum，max都被实现为成员方法。
+
+8. NumPy提供2种对象：
 
    1. ndarray：存储同类型数据的n维数组，这是NumPy的基本数据类型。
 
    2. ufunc：能够对上面数组进行处理的特殊函数，NumPy的所有函数都是围绕ndarray处理的。
 
-4. 一维数组建议使用小写字母，多维数组建议使用大写字母。
+   3. masked layers：掩码数组
 
-5. 库版本查看：
+   4. matrices：矩阵
 
-   ```python
-   import numpy as np #一般都使用这种方式导入
-   np.__version__ #结果为str类型 '1.25.2'
-   ```
+9. 一维数组建议使用小写字母，多维数组建议使用大写字母。
+
+10. numpy中也含有python内置或math模块中的数学运算函数。
+
+11. print会将ndarray对象当作嵌套列表输出，一维数组当作行，二维数组当作矩阵，三维数组当作矩阵的列表。如果矩阵特别大时，会只输出角部的元素，省略的元素用...替代。
+
+    ```python
+    np.set_printoptions(threshold=sys.maxsize) #修改numpy的设置，使得不省略输出
+    ```
+
+12. 库版本查看：
+
+    ```python
+    import numpy as np #一般都使用这种方式导入
+    np.__version__ #结果为str类型 '1.25.2'
+    ```
+
 
 ## ndarray对象
 
-1. np.array()可以接受一个列表或元组对象，创建一个numpy.ndarray类型的对象。
+1. 6种创建ndarray对象的方法：
+
+   ```python
+   #从python的其他序列类型转换
+   np.array([1,2,3,4,5])
+   #Numpy内置的数组创建函数
+   np.ones((2,3))
+   #通过复制，连接，更改现有的数组得到
+   a = np.array([1, 2, 3, 4, 5, 6])
+   b = a[:2]
+   #从磁盘读入，可以手动指定格式，或者使用某些专用格式的标准库，例如h5py模块处理HDF5格式数据。
+   #例如CSV文件内容如下
+   x, y
+   0, 0
+   1, 1
+   2, 4
+   3, 9
+   np.loadtxt('simple.csv', delimiter = ',', skiprows = 1)#掠过第一行，结果为一个4*2的数组
+   #从字节数组创建
+   np.fromfile()和np.tofile()配合使用
+   #使用其他基于numpy的库会产生ndarray对象
+   ```
+
+2. np.array()可以接受一个列表或元组对象，创建一个numpy.ndarray类型的对象。
 
    ```python
    a1 = np.array([1,2,3,4,5]) #1维数组
    type(a1) # numpy.ndarray
    ```
 
-2. ndarray对象的数据是按行存储的，和C语言多维数组一样，不过二者获取多维数组元素的方式不同，numpy使用元组作为下标，例如`a[1,2]`，等价于`a[(1,2)]`，C语言使用多次引用，例如`a[1][2]`。
+3. 和列表不同的是，改变ndarray对象的大小会导致创建一个新的ndarray对象，然后删除旧的。允许创建包含python对象或ndarray对象的numpy数组。
 
-3. 从下面四个求和运算分别花费的时间，可以看出使用全套的numpy的速度最快，其次是全套的Python。而交叉使用是比较差的，因为要先进行类型转化。
+4. ndarray对象的数据是按行存储的，和C语言多维数组一样，不过二者获取多维数组元素的方式不同，numpy使用元组作为下标，例如`a[1,2]`，等价于`a[(1,2)]`，C语言使用多次引用，例如`a[1][2]`，numpy也支持这种方式，不过效率比较低，因为会创建一个临时的中间对象`a[1]`。
 
-4. ```python
+5. 从下面四个求和运算分别花费的时间，可以看出使用全套的numpy的速度最快，其次是全套的Python。而交叉使用是比较差的，因为要先进行类型转化。
+
+6. ```python
    L = [1.0 for i in range(10000000)] #所有元素的都是1.0
    sum(L)    #1  34.8 ms ± 1.31 ms
    np.sum(L) #2  353 ms ± 2.16 ms per loop
@@ -143,7 +195,35 @@
    np.sum(L1) #4  10.6 ms ± 127 µs
    ```
 
-5. 由于Python对每个数据还要额外保存类型信息，numpy是统一保存，也可以节省空间。Python的源代码中，对于浮点数除了都是用double类型外，还保存了一个对象的头部信息，包含类型和引用次数等信息。
+7. ndarray对象的属性：
+
+   ```python
+   import numpy as np
+   a1 = np.array([1,2,3,4,5])
+   print(a1) #结果为 [1 2 3 4 5]
+   a1.dtype   #结果为 dtype('int32')，根据平台的不同，有时可能是dtype('int64')
+   type(a1.dtype) #结果为 numpy.dtypes.Int32DType
+   a1.dtype.type  #结果为numpy.int32
+   type(a1.dtype.type) #结果为type
+   print(a1.flags)   #标志位，之所以要这么多标志，是为了效率优化。
+     C_CONTIGUOUS : True
+     F_CONTIGUOUS : True
+     OWNDATA : True	#true表示这个变量a1拥有a1.data这个数据块。
+     WRITEABLE : True
+     ALIGNED : True	#对齐相关
+     WRITEBACKIFCOPY : False
+     UPDATEIFCOPY : False
+   print(a1.shape)   #数组的形状，结果为 (5,)
+   print(a1.strides) #每个维度元素之间的字节数间隔。实际是该维度元素的大小。结果为 (4,)
+   print(a1.ndim)    #数组的维数，结果为 1
+   print(a1.data)	  #存储的数据块的内存地址 结果为<memory at 0x0000000008F74280>，同一个数据块可以被不同的ndarray引用。
+   print(a1.size)    #总的元素个数，等于shape的各个维度相乘。结果为 5
+   print(a1.itemsize)#每个元素的字节数。结果为4。等价于a1.dtype.itemsize
+   print(a1.nbytes)  #总的字节数，=itemsize*size。结果为20
+   print(a1.base)    #表示data是复用的哪个变量，如果flags中的owndata是true，那么base就是none。结果为None
+   ```
+
+8. 由于Python对每个数据还要额外保存类型信息，numpy是统一保存，也可以节省空间。Python的源代码中，对于浮点数除了都是用double类型外，还保存了一个对象的头部信息，包含类型和引用次数等信息。
 
    ```c
    typedef strcut{
@@ -152,7 +232,7 @@
    }PyFloatObject
    ```
 
-6. numpy自定义的基本数据类型，比C语言还丰富。
+9. numpy自定义的基本数据类型，比C语言还丰富。
 
    ```python
    numpy.bool_  #布尔类型
@@ -168,49 +248,48 @@
    #实际上numpy还把内置的类型都在其内部重命名了，例如numpy.bool就是内置类型bool，不过在1.20以后就不建议在使用numpy.bool了，推荐直接使用bool。
    ```
 
-7. 可以直接创建numpy类型的变量：
+10. 对ndarray对象的真值测试会调用其`__bool__`特殊方法，如果数组的元素比1多，则会报错，因为此时是有歧义的，应该使用`all`或`any`方法。
 
-   ```python
-   a = np.int16(200) #16位带符号数，范围为-32768到32767
-   print(a*a) #-25536 IPython会提示发生了溢出。结果并不是40000-32767，而是带符号乘法的32位结果的低16位。
-   #需要注意的是，numpy类型的变量运算速度比python内置类型要慢得多，不过批量计算的话，还是numpy快。
-   a = 3.14
-   b = np.float64(3.14)
-   %timeit a*a #结果为 28 ns ± 0.788 ns
-   %timeit b*b #结果为 61.3 ns ± 2.13 ns
-   ```
+11. 可以直接创建numpy类型的变量：
 
-8. 查看ndarray对象内存储的数据的类型。整型默认使用int32存储，浮点数默认使用float64存储。通过.nbytes属性来查看对象内所存储的数据占用的总字节数。这个数值除以元素个数，就是每个元素的字节数。
+    ```python
+    a = np.int16(200) #16位带符号数，范围为-32768到32767
+    print(a*a) #-25536 IPython会提示发生了溢出。结果并不是40000-32767，而是带符号乘法的32位结果的低16位。
+    #需要注意的是，numpy类型的变量运算速度比python内置类型要慢得多，不过批量计算的话，还是numpy快。
+    a = 3.14
+    b = np.float64(3.14)
+    %timeit a*a #结果为 28 ns ± 0.788 ns
+    %timeit b*b #结果为 61.3 ns ± 2.13 ns
+    ```
 
-   ```python
-   L = np.array([1,2,3,4])
-   L.dtype   #结果为 dtype('int32')
-   type(L.dtype) #结果为 numpy.dtypes.Int32DType
-   L.dtype.type  #结果为numpy.int32
-   type(L.dtype.type) #结果为type
-   L.nbytes  #结果为 16，因此每个元素占用16/4=4个字节
-   #astype函数并不会修改原来的对象，而是返回一个新的对象。
-   L1 = L.astype(np.int64) #修改存储的数据类型，也就是强制类型转换。np.int64是type类型
-   L1.dtype  #结果为 dtype('int64')
-   L1.nbytes #结果为 32，因此每个元素占用32/4=8个字节
-   ```
+12. 查看ndarray对象内存储的数据的类型。整型默认使用int32存储，浮点数默认使用float64存储。通过.nbytes属性来查看对象内所存储的数据占用的总字节数。这个数值除以元素个数，就是每个元素的字节数。
 
-9. 不推荐直接修改对象的dtype属性，因为这样只会更改解释对象内存储内容的方式，而不会类型转换：
+    ```python
+    L = np.array([1,2,3,4])
+    L.dtype   #结果为 dtype('int32')
+    L.nbytes  #结果为 16，因此每个元素占用16/4=4个字节
+    #astype函数并不会修改原来的对象，而是返回一个新的对象。
+    L1 = L.astype(np.int64) #修改存储的数据类型，也就是强制类型转换。np.int64是type类型
+    L1.dtype  #结果为 dtype('int64')
+    L1.nbytes #结果为 32，因此每个元素占用32/4=8个字节
+    ```
 
-   ```python
-   L = np.array([1,2], dtype = np.int64)
-   print(L) #结果为 [1 2]
-   L.nbytes #结果为 16
-   L.dtype = np.int32 #并不会报错，但是十分危险
-   print(L) #结果为 [1 0 2 0]
-   L.nbytes #结果为 16，可以看到数据的总长度并没有变化
-   
-   #在修改类型前，L在内存中以小端形式存储，分别为
-   # 01 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00
-   #每8个字节作为一个数。修改类型后，每4个字节作为一个数，则为1 0 2 0
-   ```
+13. 不推荐直接修改对象的dtype属性，因为这样只会更改解释对象内存储内容的方式，而不会类型转换：
 
-10. 可以通过dtype参数在创建ndarray时指定类型。dtype参数也接收字符串形式，每种数值类型都有几种字符串表示方式。
+    ```python
+    L = np.array([1,2], dtype = np.int64)
+    print(L) #结果为 [1 2]
+    L.nbytes #结果为 16
+    L.dtype = np.int32 #并不会报错，但是十分危险
+    print(L) #结果为 [1 0 2 0]
+    L.nbytes #结果为 16，可以看到数据的总长度并没有变化
+    
+    #在修改类型前，L在内存中以小端形式存储，分别为
+    # 01 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00
+    #每8个字节作为一个数。修改类型后，每4个字节作为一个数，则为1 0 2 0
+    ```
+
+14. 可以通过dtype参数在创建ndarray时指定类型。dtype参数也接收字符串形式，每种数值类型都有几种字符串表示方式。
 
     ```python
     L = np.array([1,2], dtype = int) #可以使用内置类型，例如int,float,complex，也可以使用numpy自定义的例如int32等，前者会自动转化为后者。
@@ -227,73 +306,211 @@
     set(np.typeDict.values()) #结果为 {numpy.bool_, numpy.int8, ...}
     ```
 
-11. 将python内置的列表或元组转化为ndarray对象，效率比较低，可以选择直接创建ndarray对象：
+15. 不同dtype的数组之间运算时，会先转化为同类型的数组：
+
+    ```python
+    a = np.array([2, 3, 4], dtype=np.uint32)
+    b = np.array([5, 6, 7], dtype=np.int32)
+    c = a + b #c.dtype为dtype('int64')，会选择一个能够同时容纳两个类型的类型。
+    ```
+
+16. 将python内置的列表或元组转化为ndarray对象，效率比较低，可以选择直接创建ndarray对象：
 
     ```python
     np.arange(0,1,0.1) #结果为array([0. , 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])，类似于内置函数range，都不包括终值。不过range函数的参数必须都是整数，且它的返回值并不是list或tuple，而是一个range对象，还需要再封装一下。
+    #和range的用法一样，不同的是他返回的是ndarray对象而不是range对象，同时Python自带的range所有参数只支持整数
+    #不过由于range的步长可以是浮点数，而浮点数存在精度问题，因此可能不一定会产生对应数量的元素。因此建议使用linspace
     np.linspace(0,1,11) #结果为array([0. , 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1. ])，包括终值，均匀分隔，一共11个点。dtype为numpy.float64
     np.linspace(0,1,10,endpoint=False) #结果为array([0. , 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])。不包含终值，一共10个点。
     np.logspace(0,3,4) #结果为 array([   1.,   10.,  100., 1000.])。产生10^0到10^3之间的等比数列，包括终值，一共4个点。相当于pow(10,np.linspace(0,3,4))的结果。
     np.logspace(0,3,4,base=2) #结果为 array([1., 2., 4., 8.])。指定基为2，范围变成了2^0到2^3
+    np.geomspace(1, 8, num=4) #等比数列，起点为1，终点为8，结果为array([1., 2., 4., 8.])
     ```
 
-12. 从字符串或文件创建一维数组：
+17. 从字符串或文件创建一维数组：
 
     ```python
     s = "abcdefg"
     np.fromstring(s,dtype=np.int8) #结果为 array([ 97,  98,  99, 100, 101, 102, 103], dtype=int8)，不过已经不推荐使用了，推荐用frombuffer替代
     ```
 
-13. 创建固定值的数组：
+18. 创建已填充值的数组，以下默认都是numpy.float64类型：
 
     ```python
-    np.empty((2,3)) #创建一个2行3列的二维数组，不进行初始化，默认为numpy.float64类型，速度最快。
+    np.empty((2,3)) #创建一个2行3列的二维数组，不进行初始化，，数值为内存中原来的随机值，速度最快。
     np.zeros((2,3)) #全0
     np.ones((2,3))  #全1
     np.full((2,3),np.pi) #用np.pi初始化
+    np.eye(3) #创建3阶单位方阵
+    np.eye(3, 5) #创建3行5列的单位矩阵，相当于3阶方阵，然后再扩展2列
+    np.eye(3,k=1) #主对角线向上移动1格，结果为
+    array([[0., 1., 0.],
+           [0., 0., 1.],
+           [0., 0., 0.]])
+    np.diag(x) #如果x是矩阵，则返回主对角线元素构成的向量。如果x是一个向量，那么构造一个方阵，使之主对角线的元素为x，其他元素为0。
+    np.trace(x) #主对角线元素的和
+    x = np.array([1, 2, 3, 5])
+    N = 3
+    np.vander(x, N) #创建一个范德蒙矩阵，结果为
+    array([[ 1,  1,  1],
+           [ 4,  2,  1],
+           [ 9,  3,  1],
+           [25,  5,  1]])
+    #以上函数都有_like版本
+    a = np.arange(15).reshape(3,5)
+    np.ones_like(a) #结果的shape和a一样。
     ```
 
-14. ndarray对象的属性：
-
-    ```python
-    import numpy as np
-    a1 = np.array([1,2,3,4,5])
-    print(a1) #结果为 [1 2 3 4 5]
-    print(a1.flags)   #标志位
-      C_CONTIGUOUS : True
-      F_CONTIGUOUS : True
-      OWNDATA : True	#true表示这个变量a1拥有a1.data这个数据块。
-      WRITEABLE : True
-      ALIGNED : True	#对齐相关
-      WRITEBACKIFCOPY : False
-      UPDATEIFCOPY : False
-    print(a1.shape)   #数组的形状，结果为 (5,)
-    print(a1.strides) #每个维度元素之间的字节数间隔。实际是该维度元素的大小。结果为 (4,)
-    print(a1.ndim)    #数组的维数，结果为 1
-    print(a1.data)	  #存储的数据块的内存地址 结果为<memory at 0x0000000008F74280>，同一个数据块可以被不同的ndarray引用。
-    print(a1.size)    #总的元素个数，等于shape的各个维度相乘。结果为 5
-    print(a1.itemsize)#每个元素的字节数。结果为4
-    print(a1.nbytes)  #总的字节数，=itemsize*size。结果为20
-    print(a1.base)    #表示data是复用的哪个变量，如果flags中的owndata是true，那么base就是none。结果为None
-    ```
-
-15. ndarray对象的srides属性保存的是每个维度的上，相邻（该维度下标相差1）两个元素的地址差，也就是ndarray的data属性：
+19. ndarray对象的strides跨步属性保存的是每个维度的上，相邻（该维度下标相差1）两个元素的地址差，也就是ndarray的data属性：
 
     ```python
     #如果strides的值正好和该维度所占用的字节数相同，则数据是连续存储的。通过切片下标获得数组是原数组的一个视图，但是二者的strides不同。
     a = np.array([1,2,3,4,5,6]).reshape((2,3)) #2个维度，长度分别为2和3。
     a.strides #结果为(12,4) 默认按行存储，a[0,0]和a[1,0]相差3个int32元素，即3*4=12字节。a[0,0]和a[0,1]相差1个int32元素，即1*4=4字节。
+    
+    #这个16表示a2[0]和a2[1]头部相差的字节数，表示a2[0]或a2[1]的大小，1个元素4个字节，4个元素一共16字节。这个4表示a2[0][0]和a2[0][1]头部相差的字节数，即a2[0][0]的大小，1个元素就是4个字节。
+    
     #通过strides可以从a[i,j]的地址A得到a[i+m,j+n]的地址B，B=A+m*12+n*4
+    ```
+
+20. NumPy默认使用C语言的数组排序，即按行存储。也可以在创建时设置order参数，使用Fortran的按列存储顺序。
+
+21. 高维数组的索引：
+
+    ```python
+    a = np.ones((2, 3, 4)) #创建一个3维数组a，a[0]和a[1]都是是一个3*4的二维数组。a[0]等价于a[0,:,:]
+    x = np.arange(15).reshape(3,5) #x为如下
+    array([[ 0,  1,  2,  3,  4],
+           [ 5,  6,  7,  8,  9],
+           [10, 11, 12, 13, 14]])
+    x[:2,:3] #结果如下，相当于x的2个维度同时索引，也就是一个子矩阵
+    array([[0, 1, 2],
+           [5, 6, 7]])
+    x[:2][:3] #结果如下，相当于x[:2,:][:3,:],会分两步索引，第一步得到前两行构成的子矩阵，第二部会在上一步子矩阵的基础上，得到前3行构成的子矩阵，因为第一部的子矩阵只有2行，因此第二步的结果和第一步一样。
+    array([[0, 1, 2, 3, 4],
+           [5, 6, 7, 8, 9]])
+    #因此还是推荐使用numpy自带的索引模式。
+    ```
+
+22. np支持修改数据的存储方式，大小端：
+
+    ```python
+    import numpy as np
+    a1 = np.array([i+1 for i in range(8)])
+    a1.dtype = '>i2' # <表示小端 >表示大端， int8 in16 in32 int64可以用 i1 i2 i4 i8来替代。
+    a1
+    Out[5]: 
+    array([ 256,    0,  512,    0,  768,    0, 1024,    0, 1280,    0, 1536,
+              0, 1792,    0, 2048,    0], dtype=int16)
+    ```
+
+23. 数据拷贝的情况：
+
+    1. 函数传参和变量赋值不会导致numpy数据的复制：
+
+       ```python
+       a = np.array([0,  1,  2,  3])
+       b = a #不会复制
+       b is a #True，同一个ndarray对象的两个名字而已。is操作符比较的是两个对象的id
+       def f(x):
+           print(id(x))
+       f(a) #2543492345424
+       id(a) #2543492345424
+       ```
+
+    2. 使用view方法来和一个已有的ndarray对象共享数据，可以认为是浅拷贝：
+
+       ```python
+       a = np.array([0,  1,  2,  3])
+       c = a.view() #type(c)也是numpy.ndarray类型
+       c == a #结果为array([ True,  True,  True,  True])，二者的元素完全一样
+       c is a #False，因为二者的id不同，是两个对象
+       c.base is a #True，可以认为c的所有索引都会代理给a。
+       c.flags.owndata #结果为False，c不拥有数据，数据实际是a拥有
+       c = c.reshape((2, 2)) #不会改变a的shape
+       c[1, 1] = 1234 #但是会改变a的数据
+       ```
+
+    3. 对一个数组使用切片也会返回它的一个视图：
+
+       ```python
+       a = np.array([0,  1,  2,  3])
+       s = a[:2]
+       s.base is a #True
+       ```
+
+    4. 使用copy方法来进行深拷贝：
+
+       ```python
+       a = np.array([0,  1,  2,  3])
+       d = a.copy() #拷贝对象本身和它的数据
+       d is a #False
+       d.base is a #False
+       d[0] = 5 #对d的修改不会影响到a本身。
+       d.flags.owndata #True，d自己拥有数据
+       #如果a是一个中间结果，b是a的切片，也是最终需要的结果，建议在切片后进行深拷贝，然后删除a，这样可以减少内存空间占用。
+       #新的数组的WRITEABLE标志会被设置为True
+       a = np.arange(int(1e8))
+       b = a[:100].copy() #如果没有对b进行深拷贝，就del a则会导致b的数据发生危险，虽然不一定立即影响b的使用，b会在垃圾清理之后变得不可用。
+       del a #如果对b进行深拷贝后，没有del a，则a的内存不会释放。
+       ```
+
+24. 数组的邻接连续Contiguous的2个条件：
+
+    1. 数组占据一块连续的空间
+    2. 下标大的元素的地址也大，意味着每一维的stride都是非负的。
+
+25. ndarray对象的内部内存布局：
+
+    1. 该对象由两部分组成，内存中的一段连续的空间（可能是自己的或其他对象的）和一个索引模式，可以将N个整数映射到一个内存地址上。
+    2. 这N个整数中每个的范围由shape属性约束。
+    3. Numpy支持多种带跨步的索引模式（strided indexing scheme）。N维索引，$(n_0,n_1,...,n_{N-1})$对应的地址偏移为：$\sum_{k=0}^{N-1}s_kn_k$。其中$s_k$为每一个维度的stride。
+    4. 最常见的有两种索引模式，行优先（C风格的）和列优先（Fortran和Matlab风格）。
+    5. 通过dtype属性来确定该内存地址的数据占用多少字节，如何解析字节。
+
+26. C风格的strides计算方法：$s_k = itemsize\times \prod_{j=0}^{k-1}d_j$，F风格的strides计算方法：$s_k = itemsize\times \prod_{j=k+1}^{N-1}d_j$，其中$d_j=self.shape[j]$，也就是第`j`维的尺寸。
+
+27. C风格和F风格：
+
+    ```python
+    x = np.array([[1,2,3],[4,5,6]], order='C') #默认就是C
+    y = np.array([[1,2,3],[4,5,6]], order='F')
+    #二者的shape都是(2,3)
+    x == y #结果为True，也就是说x[i,j] == y[i,j]
+    #可以见在使用上没有任何区别
+    z = x + y #结果如下，可以见运算也是可以正常进行的。
+    array([[ 2,  4,  6],
+           [ 8, 10, 12]])
+    z.flags["C_CONTIGUOUS"] # 结果为True，可见，默认生成的都是C风格的。
+    yc = y.copy() # yc.flags["C_CONTIGUOUS"]的结果也是True。因为copy方法有一个默认参数是order，默认值为"C"。"F"表示使用Fortran风格，"A"表示和原来的保持一样。
+    x.shape #结果为(2,3)
+    x.strides #s_0 = 4×(1)=4，s_1 = 4×(2=8)
     
-    
-    
+    ```
+
+28. 高级索引会产生新的数据，因此其strides可能会和原有的数组不同，shape也不一样了
+
+    ```python
+    x = np.array([[ 0,  1,  2],
+                  [ 3,  4,  5],
+                  [ 6,  7,  8],
+                  [ 9, 10, 11]])
+    rows = [0, 3]
+    columns = [0, 2]
+    newx = x[np.ix_(rows, columns)] #新数组也是默认的C邻接
+    x.shape #结果为 (4, 3)
+    x.strides #结果为 (12, 4)
+    newx.shape #结果为 (2, 2)
+    newx.strides #结果为 (8, 4)
     
     
     ```
 
-16. NumPy默认使用C语言的数组排序，即按行存储。也可以在创建时设置order参数，使用Fortran的按列存储顺序。
+29. 
 
-17. 
+30. 
+
+31. 
 
 ## 形状
 
@@ -313,143 +530,63 @@
 
    ```python
    a = np.array([[1,2,3],[4,5,6]])
-   a.shape = (3,2)
-   a[1,0] #第1行，第0列的元素，结果为 3
    1 2
    3 4
    5 6
+   a.shape = (3,2)
+   a[1,0] #第1行，第0列的元素，结果为 3
    #类似于a.reshape((3,2))，但是reshape并不修改a本身，而是将结果返回。reshape的两个数组共享同一块内存数据，不过a的flags中OWNDATA为true，而b的flags中OWNDATA为false
    a = np.array([1,2,3,4,5,6])
    b = a.reshape((3,2))
    a[2] = 10
    print(b[1,0]) #结果为 10
+   a.resize((3,2)) #修改a本身
+   a.ravel() #平坦化，相当于a.reshape(-1)，如果a是其他数组的一个非连续切片，这一步可能会产生元素的复制。
    ```
 
-3. 一维数组可以看作是行向量，列向量实际上是只有一列的二维数组。
-
-4. reshape函数可以变换维度，而不改变数据，只是改变了解析数据的方式，所以速度很快。
-
-5. 如果reshape只传递一个参数`(-1,)`，则会将该数组变为1维数组。
-
-## 切片
-
-1. ndarray可以和列表一样进行切片操作，二者的用法和效果一摸一样，不同的是，ndarray通过整数或切片获得的只是原始数组的一个视图，二者共享数据，而list是复制了一份新的数据。
+3. 数组的转置：
 
    ```python
-   a1 = np.array([1, 2, 3, 4])
-   a2 = a1[0:2] #a2.flags的OWNDATA为false，而a1.flags的OWNDATA为true
-   a2[1] = 10 #此时a1也会变成[1, 10, 3, 4]
+   a = np.array([[1,2,3],[4,5,6]])
+   a.data == a.T.data #结果为False，都是memoryview对象，而该对象内保存了邻接性。
+   a.flags #结果为
+     C_CONTIGUOUS : True #默认是C连续的
+     F_CONTIGUOUS : False
+     OWNDATA : True      
+     WRITEABLE : True    
+     ALIGNED : True
+     WRITEBACKIFCOPY : False
+   a.T.flags #结果为
+     C_CONTIGUOUS : False
+     F_CONTIGUOUS : True #且现在是Fortran连续的
+     OWNDATA : False #可以看到不拥有数据
+     WRITEABLE : True
+     ALIGNED : True
+     WRITEBACKIFCOPY : False
+   #如果没有指定axis，那么如下结果恒成立
+   transpose(a).shape == a.shape[::-1]
    ```
 
-2. numpy还支持使用整数列表（数组）和布尔列表（数组）来获取不连续下标的元素，这不能称为切片操作，列表也不支持这一操作。通过这一方式获得的数组不和原数组共享数据：
+4. 一维数组可以看作是行向量，列向量实际上是只有一列的二维数组。
+
+5. reshape函数可以变换维度，而不改变数据，只是改变了解析数据的方式，所以速度很快。
+
+6. 如果reshape只传递一个参数`(-1,)`，则会将该数组变为1维数组。
+
+7. 二维数组最原始的理解应该是把一行或者一列数据进行分割，它和矩阵的关系不是天然的。
+
+8. 可以看到默认的1维数组可以看做列向量，因为他的shape是（9，)，如果要是和二维数组的shape含义统一，那么这个（9，）就表示（9，1）即9行1列，即是一个列向量。这两个还是不同的，(9,1)表示1维数组，(1,9)表示2维数组。遍历的时候需要注意。可以使用reshape来转换行列向量：
 
    ```python
-   a = np.array([1, 2, 3, 4])
-   a[[0,2,3]] #结果为 array([1, 3, 4])
-   a[np.array([0,2,3])] #结果同上
-   a[[True,False,True,False]] #结果为 array([1, 3])，获取第0和2个元素。这个操作在numpy1.10之前，会将True和False分别当作1和0，套用整数列表的方法。
-   a[[1,0,1,0]] #结果为 array([2, 1, 2, 1])，不会自动当作布尔数组。
-   #布尔数组和列表的形状尺寸需要和原数组一模一样。布尔数组一般不是手动构造的，而是通过函数运算得来的，例如
-   x = np.random.randint(0,10,6) #产生6个元素值为0到9的一维数组，结果为 array([5, 7, 7, 1, 0, 3])
-   x[x>5] #筛选出>5的值，结果为 array([7, 7])
+   import numpy as np
+   a1 = np.array([1,2,3,4,5]) #行向量，shape为(5,)，ndim为1
+   a2 = a1.reshape(1,5) #一列的矩阵，shape为(1, 5)，ndim为2
+   a3 = np.array([[1, 2, 3, 4, 5]]) #可以直接创建一列的矩阵，在原来的列表外边再加上一个[]即可
    ```
 
-3. 使用slice生成切片对象，可以用该对象来取切片：
+9. reshape还是复用内存块。如果不想复用，可以使用.copy()函数
 
-   ```python
-   a = np.array([1, 2, 3, 4])
-   idx = slice(None,None,2) #idx等价于::2
-   a[idx] #结果为 array([1, 3])
-   #使用python内置的
-   
-   ```
-
-4. numpy还提供了一个更方便的方法来创建slice对象：
-
-   ```python
-   np.s_[::2,2:]  #等价于(slice(None, None, 2), slice(2, None, None))。2个slice对象构成的元组，可以作为二维数组的下标。
-   #s_并不是np的一个函数，而是一个IndexExpression类的对象，对该对象使用[]下标语法，会调用它的__getitem__(self, index)方法。
-   
-   
-   
-   ```
-
-5. 
-
-6. 
-
-7. 
-
-8. 
-
-9. np把对ndarray对象操作的函数实现在np模块内，而不是作为ndarray类的方法。
-
-10. 
-
-11. 可以看到，对于6这个元素，应先索引到a2数组的第1个元素array([4,5,6])。然后再索引第2个元素，即a2[1,2] 
-
-12. 数组的下标从0开始。多维数组可以看做是数组的嵌套。
-
-13. 二维数组最原始的理解应该是把一行或者一列数据进行分割，它和矩阵的关系不是天然的。
-
-14. 可以看到默认的1维数组可以看做列向量，因为他的shape是（9，)，如果要是和二维数组的shape含义统一，那么这个（9，）就表示（9，1）即9行1列，即是一个列向量。这两个还是不同的，(9,1)表示1维数组，(1,9)表示2维数组。遍历的时候需要注意。
-
-15. 可以使用reshape来转换行列向量：
-
-16. ```python
-    import numpy as np
-    a1 = np.array([1,2,3,4,5])
-    a1
-    Out[8]: array([1, 2, 3, 4, 5])
-    a1.shape
-    Out[2]: (5,)
-    a1.ndim
-    Out[3]:1
-    a2 = a1.reshape(1,5)
-    a2
-    Out[7]: array([[1, 2, 3, 4, 5]])
-    a2.shape
-    Out[9]: (1, 5)
-    a2.ndim
-    Out[10]:2
-    ```
-
-17. 返回的shape是元组类型，使用 row,col = a1.shape来解析。
-
-18. ```python
-    import numpy as np
-    a1 = np.array([i+1 for i in range(8)])
-    a1.shape
-    a2 = a1.reshape(2,4)
-    a2
-    Out[6]: 
-    array([[1, 2, 3, 4],
-           [5, 6, 7, 8]])
-    a2.strides
-    Out[5]: (16, 4)  #这个16表示a2[0]和a2[1]头部相差的字节数，表示a2[0]或a2[1]的大小，1个元素4个字节，4个元素一共16字节。这个4表示a2[0][0]和a2[0][1]头部相差的字节数，即a2[0][0]的大小，1个元素就是4个字节。
-    a1.flags
-    Out[8]: 
-      C_CONTIGUOUS : True
-      F_CONTIGUOUS : True
-      OWNDATA : True
-      WRITEABLE : True
-      ALIGNED : True
-      WRITEBACKIFCOPY : False
-      UPDATEIFCOPY : False
-    a2.flags
-    Out[7]: 
-      C_CONTIGUOUS : True
-      F_CONTIGUOUS : False
-      OWNDATA : False
-      WRITEABLE : True
-      ALIGNED : True
-      WRITEBACKIFCOPY : False
-      UPDATEIFCOPY : False
-    ```
-
-19. reshape还是复用内存块。如果不想复用，可以使用.copy()函数
-
-20. ```python
+10. ```python
     a3 = a1.copy()
     a3.flags
     Out[10]: 
@@ -462,466 +599,439 @@
       UPDATEIFCOPY : False
     ```
 
-21. 之所以要这么多属性，是为了效率优化。
+11. 
 
-22. Python标准库中也有一个array库。Python下一共可用4种数组类型。
+## 索引
 
-    ```
-    numpy.array    array.array    list      collection.deque
-    ```
+1. ndarray可以和列表一样进行切片操作，二者的用法和效果一摸一样，不同的是，ndarray通过整数或切片获得的只是原始数组的一个视图，二者共享数据，而list是复制了一份新的数据。
 
-23. np支持修改数据的存储方式，大小端：
+   ```python
+   a1 = np.array([1, 2, 3, 4])
+   a2 = a1[0:2] #a2.flags的OWNDATA为false，而a1.flags的OWNDATA为true
+   a2[1] = 10 #此时a1也会变成[1, 10, 3, 4]
+   ```
 
-24. ```python
-    import numpy as np
-    a1 = np.array([i+1 for i in range(8)])
-    a1.dtype = '>i2' # <表示小端 >表示大端， int8 in16 in32 int64可以用 i1 i2 i4 i8来替代。
-    a1
-    Out[5]: 
-    array([ 256,    0,  512,    0,  768,    0, 1024,    0, 1280,    0, 1536,
-              0, 1792,    0, 2048,    0], dtype=int16)
-    ```
+2. 切片中的省略：
 
-25. numpy数组和矩阵的生成有如下几种方法：
+   ```python
+   #假设切片对应的维度一共有n个元素
+   a[::] #等价于a[:],都是a[slice(None,None,None)]
+   slice(None,None,None) #相当于slice(0,n,1)
+   slice(None,j,k) #如果k>0，相当于i = 0, 否则相当于i = n-1
+   slice(i,None,k) #如果k>0，相当于j = n, 否则相当于i = -n-1
+   slice(i,j,None) #如果省略k，那么k默认为1
+   ```
 
-    1. zeros，ones（和zeros用法相同，只不过是元素都是1），full（用法也相同，不过可以指定值）
+3. 高级索引（FancyIndex）：除了python序列本身就支持的整数或切片索引外，numpy还支持使用整数列表（数组）和布尔列表（数组）来获取不连续下标的元素，这不能称为切片操作，列表也不支持这一操作。这称之为高级索引。通过这一方式获得的数组不和原数组共享数据，但是可以通过对它的复制该改变原来的数据：
 
-       ```python
-       import numpy as np
-       a1 = np.zeros(10)    #默认是浮点数
-       a2 = np.zeros(10,dtype='int32')   #可以使用dtype来强制使用别的数据类型，这个dtype也可以用np.int32
-       a3 = np.zeros((2,3))  #生成多维数组需要使用元组
-       a5 = np.full((2,3),fill_value=3.2)
-       a5
-       Out[10]: 
-       array([[3.2, 3.2, 3.2],
-              [3.2, 3.2, 3.2]])
-       ```
+   ```python
+   #高级索引的特点是：索引对象是非元组的序列对象，dtype为整数或布尔类型的ndarray对象
+   x = np.array([10,  9,  8,  7,  6,  5,  4,  3,  2]) #
+   x[(1, 2, 3),] #选择对象为一个元组，即((1,2,3),)，该元组只有一个元素，也是一个元组。元组形式的选择对象会被拆包，因此等价于x[[1,2,3]]，结果为array([9, 8, 7])
+   x[(1, 2, 3)]  #等价于x[1,2,3]
+   x[np.array([3, 3, 2])]  #结果为 array([7, 7, 8])，等价于x[[3, 3, 2]]，但是不等于x[(3, 3, 2)]，因为后者会自动对元组进行拆包，等价于x[3, 3, 2]，将x当作一个3维数组，因此会报错。
+   ```
 
-       range()其实是有3个参数，range(2,10,3)是指从2开始数，间隔为3，最后一个数<10。第一和第三个参数默认为0和1。
+4. 如果用于索引的整数列表是多维的：
 
-       ```python
-       list(range(2,10,3))
-       Out[14]: [2, 5, 8]
-       ```
+   ```python
+   a = np.array([  0,   1,   4,   9,  16,  25,  36,  49,  64,  81, 100, 121])
+   j = np.array([[3, 4], [9, 7]])
+   a[j] #结果如下，结果为一个分块矩阵，块形状和j一样，每个元素分别为a[?]，其中?分别为对应位置的j的取值。即a[j][k,m,...] == a[j[k,m,...]]。这里实际上是只考虑a的第0维，因为j[k,m,...]是一个具体的数。
+   array([[ 9, 16],
+          [81, 49]])
+   #palette为调色板，二维数组
+   palette = np.array([[0, 0, 0],         # black
+                       [255, 0, 0],       # red
+                       [0, 255, 0],       # green
+                       [0, 0, 255],       # blue
+                       [255, 255, 255]])  # white
+   image = np.array([[0, 1, 2, 0],  # 索引图像中存储的像素颜色
+                     [0, 3, 4, 0]])
+   palette[image] #结果是一个三维数组，shape为(2,4,3)，可以看作2*4的2维数组，每个元素都是一个颜色三元组，也就是palette中的一个元素。
+   ```
 
-    2. arange(和range的用法一样，不同的是他返回的是ndarray而不是迭代器，同时Python自带的range所有参数只支持整数，而numpy的arange就可以是浮点数)和linspace（适用于知道要分段的数量，而不知道每段的 长度）
+5. 用于索引的整数列表也可以是多个：
 
-       ```python
-       np.arange(2,10,3)
-       Out[15]: array([2, 5, 8])
-       np.linspace(1,5,6)    #把1到5之间分为(6-1)段  即算上开头结尾，一共有6个数。
-       Out[20]: array([1. , 1.8, 2.6, 3.4, 4.2, 5. ])    #默认为浮点数
-       ```
+   ```python
+   a = np.array([[ 0,  1,  2,  3],
+                 [ 4,  5,  6,  7],
+                 [ 8,  9, 10, 11]])
+   i = [[0, 1],[1, 2]]
+   j = [[2, 1],[3, 3]]
+   a[i, j] #要求每个维的列表的形状必须一样，i.shape == j.shape 为True，或者可以广播成一样也行。结果为array([[ 2,  5],[ 7, 11]])
+   #结果的形状和i或j一样，a[i, j][k,m,...] = a[i[k,m,...], j[k,m,...]]，例如a[i,j]的[0,0]就是a[i[0,0], j[0,0]]。
+   #和一维的不同，多维情况下a[np.array([i,j])]会报错，必须写成a[i,j]或a[tuple(np.array([i,j]))]
+   a[i, 2] #会将标量2扩展为和i同形状的数组，等价于a[i, np.ones_like(i)*2]
+   a[:, j] #相当于np.array([a[0,j], a[1,j], a[2,j]])
+   a[i] #等价于a[i,:] 不等于 np.array([a[i,0], a[i,1], a[i,2], a[i,3]])
+   ```
 
-    3. 用随机数填充，numpy自带的随机数库为np.random
+6. 布尔索引：
 
-       ```python
-       np.random.randint(0,10)  #生成一个随机整数，不会取到10，但会取到0。均匀分布
-       Out[23]: 5
-       np.random.randint(0,10,size=(4,5))   #使用size来生成多个值，构成多维数组。size可以省略，只写元组
-       Out[45]: 
-       array([[5, 3, 6, 7, 9],
-              [5, 7, 7, 8, 5],
-              [5, 1, 1, 7, 3],
-              [4, 5, 4, 8, 6]])
-       np.random.seed(555)
-       np.random.randint(0,10,size=(4,5))
-       np.random.random(10)   #生成0到1之间的浮点数，10表示size参数。均匀分布
-       Out[52]: 
-       array([0.8926319 , 0.82475265, 0.56296713, 0.20633491, 0.51901626,
-              0.21315057, 0.70473498, 0.63847195, 0.71946907, 0.73001423])
-       np.random.normal(10,1,(5,5))   #均值，标准差，默认是标准正态分布，均值为0，标准差为1。
-       Out[56]: 
-       array([[10.09920756, 10.45973843, 10.46893251, 10.08586251, 10.38594659],
-              [12.38408029,  9.4892512 , 11.12220288,  9.98666508,  9.48738844],
-              [11.65244153, 10.09515018, 12.05926456,  9.69986765,  8.09086253],
-              [10.23936329, 10.90041123,  9.48025634,  8.96784637,  9.66475886],
-              [10.69037768, 10.68503437, 10.45207827, 10.52940481,  9.98909406]])
-       ```
+   ```python
+   a[[True,False,True,False]] #结果为 array([1, 3])，获取第0和2个元素。这个操作在numpy1.10之前，会将True和False分别当作1和0，套用整数列表的方法。
+   a[[1,0,1,0]] #结果为 array([2, 1, 2, 1])，不会自动当作布尔数组。
+   #布尔数组和列表的形状尺寸需要和原数组一模一样，索引的结果都是一维数组。布尔数组一般不是手动构造的，而是通过函数运算得来的，例如
+   x = np.array([5, 7, 7, 1, 0, 3])
+   x[x>5] #筛选出>5的值，结果为 array([7, 7])
+   x[x>5] = 0 #赋值会改变x本身，将x中比5大的元素都设为0，结果为 array([5, 0, 0, 1, 0, 3])
+   #不过这种修改可以通过reshape为1维，再直接修改，然后再reshape回来，比较简单。.flat属性也可以获得该多维数组的C风格的一维视图，这样就可以省略2次reshape的过程。
+   x = np.array([[0, 1], [1, 1], [2, 2]])
+   a = x == 1 #结果为
+   array([[False,  True],
+          [ True,  True],
+          [False, False]])
+   #如果要将x中值为1的元素都设置为-1，则可以使用
+   x[a] #相当于x[a.nonzero()]，其中a.nonzero()为(array([0, 1, 1], dtype=int64), array([1, 0, 1], dtype=int64))
+   #布尔索引可以和整数索引联合使用
+   x = np.array([[ 0,  1,  2],
+                 [ 3,  4,  5],
+                 [ 6,  7,  8],
+                 [ 9, 10, 11]])
+   rows = (x.sum(-1) % 2) == 0 #结果为array([False,  True, False,  True])
+   columns = [0, 2]
+   np.ix_(rows, columns) #结果为(array([[1],[3]]), array([[0, 2]])) ，因此rows的作用就相当于[1,3]
+   ```
 
-       每次生成随机数的时候，都会使用种子，如果没有设置（紧挨着这个生成的函数前设置才有效），就使用当前时间，如果种子一样，那么随机序列也是一样的。每次生成完成依次随机数，都会修改种子，所以要复现，就必须啊在每次生成前都设置一下随机数。在软件测试时会使用种子，确保测试环境的可重复性。
+7. 使用slice生成切片对象，可以用该对象来取切片：
 
-26. 基本操作：
+   ```python
+   a = np.array([1, 2, 3, 4])
+   idx = slice(None,None,2) #idx等价于::2
+   a[idx] #结果为 array([1, 3])
+   #使用python内置的
+   ```
 
-    1. 索引（==a [2] [3]，a [2,3]，a [(2,3)] 是一样的==）和切片(默认不会创建新的内存块)
+8. numpy还提供了一个更方便的方法来创建slice对象：
 
-       ```python
-       import numpy as np
-       np.arange(15)
-       Out[2]: array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14])
-       x = np.arange(15)
-       X = x.reshape(3,5)
-       x[3:8]    #切片操作用：  参数是下标，不包含最后一个下标。
-       Out[5]: array([3, 4, 5, 6, 7])
-       x[3:8:2]  #切片的第三个参数表示间隔，三个参数都可以省略，省略是分别表示从开头，到末尾，间隔为1。
-       Out[6]: array([3, 5, 7])
-       x[::-1]   #逆序的方法。
-       Out[7]: array([14, 13, 12, 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0])
-       
-       X
-       Out[9]: 
-       array([[ 0,  1,  2,  3,  4],
-              [ 5,  6,  7,  8,  9],
-              [10, 11, 12, 13, 14]])
-       X[:2,:3]	#类似于子矩阵一样，取第0，1行，和第0，1，2列相交的所有元素。不能使用x[:2][:3]因为这相当于分开去两次行的操作。所以推荐使用[,]来索引元素。但是Python的list不支持这种方法。
-       Out[28]: 
-       array([[0, 1, 2],
-              [5, 6, 7]])
-       ```
+   ```python
+   np.s_[::2,2:]  #等价于(slice(None, None, 2), slice(2, None, None))。2个slice对象构成的元组，可以作为二维数组的下标。
+   #s_并不是np的一个函数，而是一个IndexExpression类的对象，对该对象使用[]下标语法，会调用它的__getitem__(self, index)方法。
+   ```
 
-       不能离散的进行切片，例如x[1,4,7]不是把x的下标为1，4，7的元素提取出来，而是把取x [1] [4] [7]这个元素。
+9. ndarray对象除了支持元组索引的方式来获取多维数组的元素，还支持python自带的索引方式：
 
-       如果要跳过行（或者说是所有行），只取某些列，可以用a [:，::2]每隔两列取一个。
+   ```python
+   a = np.array([[[1,2,3],[4,5,6]],[[7,8,9],[10,11,12]]]) #定义了一个3维数组，shape为(2,2,3)
+   a[0] == a[0,:,:] #结果为2*3的全为True的二维数组，前者为python的风格，后者为numpy风格。二者都是：array([[1, 2, 3], [4, 5, 6]])
+   a[0][1] == a[0,1,:] #结果为1*3的全为True的二维数组。二者都是array([4, 5, 6])
+   ```
 
-       ```python
-       X[:,::2]
-       Out[29]: 
-       array([[ 0,  2,  4],
-              [ 5,  7,  9],
-              [10, 12, 14]])
-       ```
+10. 多维数组的每个维度都接收一个切片或索引，如果有的维度没有指定，则用：替代。python允许使用`...`来补全索引元组：
 
-    2. 合并（只能在维度相同的方向上进行合并）和分割（可以通过切片来完成，默认是复用原来的数据）
+   ```python
+   #假设x为5维数组
+   x[1,2,...] #等价于x[1,2,:,:,:]
+   x[...,3] #等价于x[:,:,:,:,3]
+   ```
 
-       ```python
-       import numpy as np
-       a1 = np.array([i+1 for i in range(8)])
-       a1
-       Out[2]: array([1, 2, 3, 4, 5, 6, 7, 8])
-       a2 = a1.reshape(2,4)
-       a3 = np.arange(10,18).reshape(2,4)
-       np.vstack([a2,a3])     #垂直方向合并，需要列数相同。可以用np.concatenate([a2,a3])
-       Out[5]: 
-       array([[ 1,  2,  3,  4],
-              [ 5,  6,  7,  8],
-              [10, 11, 12, 13],
-              [14, 15, 16, 17]])
-       np.hstack([a2,a3])     #水平方向合并，需要行数相同。可以用np.concatenate([a2,a3],axis=1)
-       Out[6]: 
-       array([[ 1,  2,  3,  4, 10, 11, 12, 13],
-              [ 5,  6,  7,  8, 14, 15, 16, 17]])
-       a4
-       Out[10]: array([30, 31])
-       np.hstack([a2,a4.reshape(2,1)])  #在进行合并的时候，向量默认看做是一个只有一行的矩阵，而不是列向量，所以此处需要reshape。
-       Out[12]: 
-       array([[ 1,  2,  3,  4, 30],
-              [ 5,  6,  7,  8, 31]])
-       
-       
-       a1
-       Out[14]: array([1, 2, 3, 4, 5, 6, 7, 8])
-       x1,x2,x3 = np.split(a1,[2,5])  #第二个参数是分割点的下标，分割点归后一段。
-       print(x1,x2,x3)
-       [1 2] [3 4 5] [6 7 8]
-       ```
-
-27. 数组的运算，从下面的例子可以看出numpy对大规模数组的操作效率很高：
+11. 对多维数组进行迭代时，是将其当作一维数组看待的，即只对第0维进行迭代：
 
     ```python
-    n=1000000
-    L=[i for i in range(n)]
-    A=[]
-    %timeit for i in L:A.append(i*2)     #花费167ms
-    N=np.array(L)
-    %timeit N*2         #花费3.09ms
+    a = np.array([[1,2,3],[4,5,6]])
+    for row in a:
+        print(row) #分两次输出[1 2 3]和[4 5 6]
+    #a.flat可以获得将其看作一维数组的迭代器
+    for ele in a.flat:
+        print(ele) #依次输出1 2 3 4 5 6
     ```
 
-28. 数组和数的加减乘除相当于对其中的每一个元素进行该运算
+12. 索引的结果可以直接进行赋值，修改的是原数组的数据，不过等号两侧的形状要相同，或者通过广播可以变得相同：
 
     ```python
-    import numpy as np
-    X = np.arange(15).reshape(3,-1)
-    X
-    Out[3]: 
-    array([[ 0,  1,  2,  3,  4],
-           [ 5,  6,  7,  8,  9],
-           [10, 11, 12, 13, 14]])
-    X+1
-    Out[4]: 
-    array([[ 1,  2,  3,  4,  5],
-           [ 6,  7,  8,  9, 10],
-           [11, 12, 13, 14, 15]])
-    X*2
-    Out[5]: 
-    array([[ 0,  2,  4,  6,  8],
-           [10, 12, 14, 16, 18],
-           [20, 22, 24, 26, 28]])
-    X/2
-    Out[6]: 
-    array([[0. , 0.5, 1. , 1.5, 2. ],
-           [2.5, 3. , 3.5, 4. , 4.5],
-           [5. , 5.5, 6. , 6.5, 7. ]])
-    X//2
-    Out[7]: 
-    array([[0, 0, 1, 1, 2],
-           [2, 3, 3, 4, 4],
-           [5, 5, 6, 6, 7]], dtype=int32)
-    1/X       #第一个元素是1/0，报错
-    <ipython-input-8-6b91d9b9bddc>:1: RuntimeWarning: divide by zero encountered in true_divide
-      1/X
-    Out[8]: 
-    array([[       inf, 1.        , 0.5       , 0.33333333, 0.25      ],
-           [0.2       , 0.16666667, 0.14285714, 0.125     , 0.11111111],
-           [0.1       , 0.09090909, 0.08333333, 0.07692308, 0.07142857]])
+    a = np.arange(5)
+    a[[1, 3, 4]] = 0#此时a为array([0, 0, 2, 0, 0])
+    a[[0, 0, 2]] = [1, 2, 3] #如果列表有重复的元素，则会进行多次赋值。不过不建议这么使用
+    ```
+
+13. 使用where来获得满足特定条件的元素的索引：
+
+    ```python
+    a = np.array([[0, 1, 2],[3, 4, 5]])
+    indices = np.where(a % 2 == 0) #获取a中偶数元素的索引，结果为(array([0, 0, 1]), array([0, 2, 1])，表示3个元素
+    a[indices] #结果为 array([0, 2, 4])
     
-    X**2    #乘方运算是对每个元素进行乘方，而不是矩阵的乘法。
-    Out[9]: 
-    array([[  0,   1,   4,   9,  16],
-           [ 25,  36,  49,  64,  81],
-           [100, 121, 144, 169, 196]], dtype=int32)
-    ```
-
-29. 除了一些Python中自带的基本运算，还可以使用numpy带的一些数学运算。
-
-    ```python
-    np.abs(X-5)
-    Out[10]: 
-    array([[5, 4, 3, 2, 1],
-           [0, 1, 2, 3, 4],
-           [5, 6, 7, 8, 9]])
-    ```
-
-    还有np.sin(X)   np.exp(X)  np.power(3,X) 第一个参数是指数。
-
-30. 矩阵运算：默认的操作都是针对数组的，矩阵运算要使用特殊的函数，例如：
-
-    ```python
-    import numpy as np
-    A = np.arange(9).reshape(3,3)
-    B = np.arange(10,22).reshape(3,-1)
-    A
-    Out[4]: 
-    array([[0, 1, 2],
-           [3, 4, 5],
-           [6, 7, 8]])
-    B
-    Out[5]: 
-    array([[10, 11, 12, 13],
-           [14, 15, 16, 17],
-           [18, 19, 20, 21]])
-    A.dot(B)      #矩阵乘法A×B，需要前一个矩阵的列数=后一个矩阵的行数
-    Out[11]: 
-    array([[ 50,  53,  56,  59],
-           [176, 188, 200, 212],
-           [302, 323, 344, 365]])
-    A*B          #数组乘法，需要数组的shape完全相同，否则会报错。
-    Traceback (most recent call last):
     
-      File "<ipython-input-12-47896efed660>", line 1, in <module>
-        A*B
     
-    ValueError: operands could not be broadcast together with shapes (3,3) (3,4) 
-    ```
-
-31. 其他操作：转置（A.T），求逆（np.linalg.inv(A)），求伪逆（对于非方阵使用，np.linalg.pinv(A)）     linalg表示linear algebra 线性代数
-
-32. 聚合运算（统计运算，此时只有数组（1维或多维），没有矩阵）：
-
-    ```python
-    A = np.random.random(10)
-    A
-    Out[35]: 
-    array([[0.09669092, 0.81631401, 0.60266394, 0.69922033, 0.15391563],
-           [0.11587795, 0.47536352, 0.5886525 , 0.69323412, 0.08176766]])  
-    A.min()    #等价于np.min(A)
-    Out[37]: 0.00255415634297651
-    A.max()    #等价于np.max(A)，不过类的成员方法不如np的函数丰富。
-    Out[38]: 0.9972413822675114
-    np.median(A)   #中位数，比平均数更能体现平均水平，因为不容易被个别不合常理数影响。
-    Out[41]: 0.6721791308516185
-    A.sum()      #求和
-    Out[50]: 6.0993883598269285
-    A.prod()
-    Out[52]: 2.4311519761696168e-05
-    np.percentile(A,q=50)    #分位值，50分位就是中位数。
-    Out[54]: 0.6721791308516185
-    np.var(A)    #方差  =np.std(A)**2
-    Out[55]: 0.10153859539741612
-    np.std(A)
-    Out[56]: 0.3186512127662723
-    ```
-
-33. 多维数组也可以进行上述的聚合运算，A.sum()是对所有元素求和，相当看做1维数组。如果要沿行或列方向求和，那么要设置axis值。对min，max等操作也都可以设置axis值。
-
-    ```python
-    A = np.arange(9).reshape(3,-1)
-    A
-    Out[59]: 
-    array([[0, 1, 2],
-           [3, 4, 5],
-           [6, 7, 8]])
-    A.sum()
-    Out[60]: 36
-    A.sum(axis=0)      #把二维数组当做多个列向量拼接起来的
-    Out[61]: array([ 9, 12, 15])
-    A.sum(axis=1)	   #把二维数组当做多个行向量拼接起来的
-    Out[62]: array([ 3, 12, 21])
-    ```
-
-34. 对于一个2维数组A，3行4列。那么使用A[1,1]来进行索引时，==就是对它的两个axis进行索引==，axis=0的那个轴，范围是0-2；axis=1的那个轴，范围是0-3，二维数组不能按照C语言那样当做一维数组进行索引，例如A[5]会报错，提示5超出了axis=0的范围。
-
-35. arg索引运算，例如a.min()是获得数组a的最小值，而对应的索引运算a.argmin()是获得该最小值的索引位置。
-
-    ```python
-    a1 = np.array([i+1 for i in range(8)])
-    a1.max()
-    Out[67]: 8
-    a1.argmax()
-    Out[68]: 7      #  a1[a1.argmax()] == a1.max()
-    ```
-
-36. 排序：
-
-    ```python
-    A = np.arange(16)
-    A
-    Out[72]: array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15])
-    np.random.shuffle(A)   #乱序功能
-    A
-    Out[78]: array([13, 14, 15,  6,  1, 12,  7,  8,  3,  4, 11, 10,  5,  2,  0,  9])
-    np.sort(A)       #不改变A的值
-    Out[77]: array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15])
-    np.argsort(A)  #返回的是索引，第一个14表示，排序后的第一个元素位于原序列的下标为14的地方
-    Out[89]: 
-    array([14,  4, 13,  8,  9, 12,  3,  6,  7, 15, 11, 10,  5,  0,  1,  2],
-          dtype=int64)
-    A[np.argsort(A)] == np.sort(A)     #讲一个数组传递给数组的索引，得到的也是一个数组，相当于是每个都去索引，然后再拼接成一个数组。
-    Out[92]: 
-    array([ True,  True,  True,  True,  True,  True,  True,  True,  True,
-            True,  True,  True,  True,  True,  True,  True])
-    A
-    Out[78]: array([13, 14, 15,  6,  1, 12,  7,  8,  3,  4, 11, 10,  5,  2,  0,  9])
-    A.sort()         #会改变A的值
-    A
-    Out[80]: array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15])
     
-    X = np.random.randint(0,10,size=(4,4))
-    X
-    Out[83]: 
-    array([[8, 9, 9, 5],
-           [9, 6, 9, 3],
-           [3, 4, 8, 2],
-           [6, 8, 2, 3]])
-    np.sort(X)   #对二维数组的操作，默认是按照行来进行的，axis=1，个行向量拼接而成的矩阵。
-    Out[84]: 
-    array([[5, 8, 9, 9],
-           [3, 6, 9, 9],
-           [2, 3, 4, 8],
-           [2, 3, 6, 8]])
-    np.sort(X,axis=1)
-    Out[85]: 
-    array([[5, 8, 9, 9],
-           [3, 6, 9, 9],
-           [2, 3, 4, 8],
-           [2, 3, 6, 8]])
-    np.sort(X,axis=0)
-    Out[86]: 
-    array([[3, 4, 2, 2],
-           [6, 6, 8, 3],
-           [8, 8, 9, 3],
-           [9, 9, 9, 5]])
-    np.partition(A,2)    #把A的最小的3个数放到前3个顺序，不排序，其余的乱序。这种方法用在不需要排序的地方，会大大缩减时间。
-    Out[99]: array([ 0,  1,  2,  6, 14, 12,  7,  8,  3,  4, 11, 10,  5, 15, 13,  9])
-    ```
-
-37. 比较运算和FancyIndex
-
-38. 如果想要单独取某几个元素，可以用以下FancyIndex方法（将一个索引数组（==可以是np.array，也可以是list==）传递到原数组（==只能是np.array==）的索引位置，然后根据索引数组来生成新的数组，这个方法对于Python的list是不成立的）：
-
-    ```python
-    import numpy as np
-    a1 = np.array([i+1 for i in range(8)])
-    a1[[1,3,7]] #相当于从a1从取出来下表为1，3，7的元素，构成一个新的array。
-    Out[2]: array([2, 4, 8])
-    a1[np.array([1,3,7])]
-    Out[5]: array([2, 4, 8])
-    a1[np.array([[1,2],[3,5]])]    #索引数组可以是任意维数的，结果数组和索引数组维数相同。
-    Out[6]: 
-    array([[2, 3],
-           [4, 6]])
-    ```
-
-39. 如果原数组是多维的，那么索引数组也要多个才可以。例如：
-
-    ```python
-    row =np.array([0,1,2])
-    col = np.array([0,1,0])
-    a1 = a1.reshape(4,-1)
-    a1
-    Out[30]: 
-    array([[1, 2],
-           [3, 4],
-           [5, 6],
-           [7, 8]])
-    a1[row,col]
-    Out[29]: array([1, 4, 5])
-    ```
-
-40. 还可以传递bool型数据来作为索引。
-
-    ```python
-    a1
-    Out[31]: 
-    array([[1, 2],
-           [3, 4],
-           [5, 6],
-           [7, 8]])
-    row = [True,True,False,True]   #True表示取该元素
     
-    a1[row,1]
-    Out[32]: array([2, 4, 8])
     ```
 
-41. 可以结合比较运算来对数组进行筛选，例如：
+14. 
+
+15. 网格：
 
     ```python
-    a1=a1.reshape(-1)
-    a1
-    Out[39]: array([1, 2, 3, 4, 5, 6, 7, 8])
-    a1>3
-    Out[40]: array([False, False, False,  True,  True,  True,  True,  True])
-    a1[a1>3]
-    Out[41]: array([4, 5, 6, 7, 8])
+    #numpy.ix_的参数为多个1维数组，可以是整数或布尔类型，
+    np.ix_([1,3],[2,5]) #结果为一个包含2个数组的元组(array([[1],[3]]), array([[2, 5]])) 第一个为2*1，第二个为1*2
+    
+    x = [0,2,3]
+    y = [1,4]
+    mx, my = np.meshgrid(x, y) #创建网格，接收多个一维序列，
+    #mx为
+    array([[0, 2, 3],
+           [0, 2, 3]])
+    #my为
+    array([[1, 1, 1],
+           [4, 4, 4]])
+    ix, iy = np.ix_(x,y)
+    #ix为
+    array([[0],
+           [2],
+           [3]])
+    #iy为
+    array([[1, 4]])
+    #当把ix和iy当作索引时，会分别进行列复制和行复制为ixx和iyy。
+    ixx = array([[0],[0]
+                 [2],[2]
+                 [3],[3]])
+    iyy = array([[1, 4],
+                 [1, 4],
+                 [1, 4]])
+    Matrix = np.array([[ 0,  1,  2,  3,  4], 
+                       [ 5,  6,  7,  8,  9], 
+                       [10, 11, 12, 13, 14], 
+                       [15, 16, 17, 18, 19]])
+    Matrix[tuple(np.meshgrid(x, y))] #由于meshgrid的结果是list，因此必须要转成tuple，否则会出错，结果为
+    array([[ 1, 11, 16],
+           [ 4, 14, 19]])
+    Matrix[np.ix_(x,y)] #结果如下，可以发现二者互为转置。不过.T的转置并非是修改数据，而是修改CONTIGUOUS标志属性，可以看作是原数组的一个view。
+    array([[ 1,  4],
+           [11, 14],
+           [16, 19]])
+    #可以看到ix_是C风格的，行优先。而meshgrid是Fortran风格的，列优先。
     ```
 
-42. 比较运算，它和fancyindex结合可以帮助更好地索引数据，方便数据预处理。
+16. 
 
-    ```python
-    np.any(a1 == 3)  #主要有一个为True，就输出True
-    Out[42]: True
-    np.all(a1 == 3)  #只有全部为True，才输出True
-    Out[43]: False
-    np.count_nonzero(a1 == 3)   #计算a1中=0的元素的个数  等价于  np.sum(a1 == 3) 
-    Out[44]: 1
-    ```
+17. 
 
-43. KNN（k个最近邻居）分类算法：
+18. 
 
-    ```python
-    import numpy as np
-    from sklearn import datasets
-    import matplotlib.pyplot as plt
-    from collections import Counter
-    iris = datasets.load_iris()
-    X = iris.data
-    y = iris.target
-    x = np.array([5.0,2.0,2.0,0.4])
-    k=7
-    plt.scatter(X[y == 0,0],X[y == 0,1])
-    plt.scatter(X[y == 1,0],X[y == 1,1])
-    plt.scatter(X[y == 2,0],X[y == 2,1])
-    plt.scatter(x[0],x[1])
-    plt.show()
-    plt.scatter(X[y == 0,2],X[y == 0,3])
-    plt.scatter(X[y == 1,2],X[y == 1,3])
-    plt.scatter(X[y == 2,2],X[y == 2,3])
-    plt.scatter(x[2],x[3])
-    plt.show()
-    def KNN_classify(k,x,X,y):
-        print(Counter(y[np.argpartition(np.sum((X-x)**2,axis=1)**0.5,7)[:7]]).most_common(1)[0][0])
-    KNN_classify(k,x,X,y)
-    ```
+## 广播
+
+1. 广播使得通用函数可以处理shape不一样的两个数组，广播需要遵守两个规则：
+
+   1. 
+   2. 
+
+2. 由于广播过程会在C语言级别进行，因此它的速度比直接在python中给出广播后的结果更快。广播并不会实际产生复制的数据，因为复制的数据都是重复的，没有必要。
+
+3. numpy会从后往前，依次比较待运算的两个数组的每一个维度的尺寸，如果一个是1或，二者相等，则认为是相同的。前者需要广播成后者的样子，一维一维处理。否则会产生异常`ValueError: operands could not be broadcast together`。
+
+   ```python
+   a = np.array([1,2,3,4,5,6]).reshape(2,3)
+   b = np.array([1,2,3]).reshape(1,3)
+   a + b #b会被广播成(2,3)，通过复制第一行的方式完成
+   ```
+
+4. 代运算的两个数组的维度不一定要相等。缺失维度的尺寸默认是1，可以和任意大小兼容。先用1将维度扩充成相同的数量，然后从后往前，依次广播。
+
+   ```python
+   A      (4d array):  8 x 1 x 6 x 1
+   B      (3d array):      7 x 1 x 5 #广播为1 x 7 x 1 x 5，从后往前进行。
+   Result (4d array):  8 x 7 x 6 x 5 #A和B运算产生Result
+   
+   A      (2d array):  5 x 4
+   B      (1d array):      1 #(1, 1)→(1, 4)→(5, 4)
+   Result (2d array):  5 x 4
+   
+   A      (2d array):      2 x 1
+   B      (3d array):  8 x 4 x 3 #倒数第二个维度不兼容，无法广播，会报错
+   ```
+
+5. 标量的shape为`()`，可以和任意数组兼容，相当于任意多个尺寸都是1的维度。
+
+6. 
+
+7. 
+
+8. 例子：
+
+   ```python
+   a = np.array([[1,2,3],[4,5,6]])
+   a = 10 #并不是给a的所有元素都复制为10，而是将变量a重新绑定到10上，这会导致ndarray对象被垃圾回收。
+   
+   x = np.array([[ 0,  1,  2],
+                 [ 3,  4,  5],
+                 [ 6,  7,  8],
+                 [ 9, 10, 11]])
+   #想要获取4个角点的元素构成的2*2的矩阵
+   #手动给出不需要广播的结果
+   rows = [[0, 0], [3, 3]]
+   columns = [[0, 2], [0, 2]]
+   x[rows, columns] #结果为array([[ 0,  2],[ 9, 11]])
+   #自动广播
+   rows = [[0], [3]]
+   columns = [[0, 2]]
+   x[rows, columns] #结果和上面的一样，不同的是，这里发生了广播，因为rows为2*1，而columns为1*2。二者都会被广播为2*2。
+   broadcasted_rows = [[0,0],[3,3]] #向右复制一列
+   broadcasted_columns = [[0, 2],[0, 2]] #向下复制一行
+   x[rows, columns] == x[broadcasted_rows, broadcasted_columns]
+   #使用numpy.ix_()函数来快速构造
+   rows = [0, 3]
+   columns = [0, 2]
+   np.ix_(rows, columns) #结果就是一个2元组，分别为array([[0],[3]])和array([[0, 2]])。因为是元组，因此可以直接送入索引
+   x[np.ix_(rows, columns)] #也可以得到正确的结果
+   ```
+
+9. 
+
+10. 
+
+## ufunc
+
+1. 对于那些包含axis参数的数组方法，默认是None，此时会将数组当作一个一维数组看待。
+
+2. 用随机数填充，numpy自带的随机数库为np.random
+
+   ```python
+   np.random.randint(0,10)  #生成一个随机整数，不会取到10，但会取到0。均匀分布
+   np.random.randint(0,10,size=(4,5))   #使用size来生成多个值，构成多维数组。size关键字可以省略
+   np.random.seed(555) #每次生成随机数的时候，都会使用种子，如果没有设置（紧挨着这个生成的函数前设置才有效），就使用当前时间，如果种子一样，那么随机序列也是一样的。每次生成完成依次随机数，都会修改种子，所以要复现，就必须在每次生成前都设置一下随机数。在软件测试时会使用种子，确保测试环境的可重复性。
+   np.random.randint(0,10,size=(4,5))
+   np.random.random(10)   #生成0到1之间的浮点数，10表示size参数。均匀分布
+   np.random.normal(10,1,(5,5))   #均值，标准差，默认是标准正态分布，均值为0，标准差为1。也就是说从正态分布中选取5*5=25个数值，构成5*5的二维数组。
+   ```
+
+3. 合并（只能在维度相同的方向上进行合并）和分割（可以通过切片来完成，默认是复用原来的数据），不建议对二维以上的数组使用这些函数，逻辑很复杂。
+
+   ```python
+   import numpy as np
+   #stack系列函数接收一个可迭代对象，逐个取出，按照规定方式合并
+   a1 = np.array([1, 2, 3, 4, 5, 6, 7, 8]).reshape(2,4)
+   a2 = np.arange(10,18).reshape(2,4)
+   np.vstack([a1,a2])   #垂直方向合并，需要列数相同。可以用np.concatenate([a1,a2])。结果为
+   array([[ 1,  2,  3,  4],
+          [ 5,  6,  7,  8],
+          [10, 11, 12, 13],
+          [14, 15, 16, 17]])
+   np.hstack([a1,a2])    #水平方向合并，需要行数相同。可以用np.concatenate([a2,a3],axis=1)，结果为
+   array([[ 1,  2,  3,  4, 10, 11, 12, 13],
+          [ 5,  6,  7,  8, 14, 15, 16, 17]])
+   a3 = np.array([30, 31])
+   np.hstack([a1,a3.reshape(2,1)])  #在进行合并的时候，向量默认看做是一个只有一行的矩阵，而不是列向量，所以此处需要reshape。结果为
+   array([[ 1,  2,  3,  4, 30],
+          [ 5,  6,  7,  8, 31]])
+   a = np.array([4, 2])
+   b = np.array([3, 8])
+   np.column_stack([a, b]) #结果如下，实际上是将行向量当作列向量来按列组合。因此不建议将向量当作矩阵使用。
+   array([[4, 3],
+          [2, 8]])
+   np.hstack([a, b]) #结果为array([4., 2., 3., 8.])，和上面的结果不同
+   #比较诡异的是
+   np.column_stack is np.hstack #结果为 False
+   np.row_stack is np.vstack #结果为 True
+   
+   x1,x2,x3 = np.split(a1,[2,5])  #第二个参数是分割点的下标，分割点归后一段。返回的是一个包含ndarray的list
+   print(x1,x2,x3)
+   [1 2] [3 4 5] [6 7 8]
+   ```
+
+4. 组装分块矩阵：
+
+   ```python
+   #使用block函数从嵌套的块中组装矩阵
+   A = np.eye(2) * 2
+   B = np.eye(3) * 3
+   np.block([[A,np.zeros((2, 3))],[np.ones((3, 2)),B]]) #分块矩阵为2行2列，用户需要保证各块之间的兼容性，结果为
+   array([[2., 0., 0., 0., 0.],
+          [0., 2., 0., 0., 0.],
+          [1., 1., 3., 0., 0.],
+          [1., 1., 0., 3., 0.],
+          [1., 1., 0., 0., 3.]])
+   ```
+
+5. 矩阵运算：默认的操作都是针对数组的，矩阵运算要使用特殊的函数，例如：
+
+   ```python
+   A.dot(B) #矩阵乘法A×B，需要前一个矩阵的列数=后一个矩阵的行数。python3.5后支持A@B
+   A*B      #数组乘法，需要数组的shape完全相同，否则会报错
+   A.T #数组转置，和矩阵的转置是一样的，结果为A的一个视图。等价于transpose(a)
+   np.linalg.inv(A) #求逆矩阵
+   np.linalg.pinv(A) #求伪逆，非方阵可以使用
+   ```
+
+6. 统计运算，默认将多维数组看作一维的：
+
+   ```python
+   A.min()      #等价于np.min(A)
+   A.max()      #等价于np.max(A)
+   np.median(A) #中位数，比平均数更能体现平均水平，因为不容易被个别不合常理数影响。
+   A.sum()      #所有元素求和
+   A.prod()     #所有元素连乘
+   np.percentile(A,q=50) #将所有元素从小到大排列，取分位值，50分位就是中位数。
+   np.var(A)    #方差  =np.std(A)**2
+   np.std(A)    #标准差
+   #针对布尔数组的统计
+   np.any(a == 3)  #只要有一个为True，就输出True
+   np.all(a == 3)  #只有全部为True，才输出True
+   np.count_nonzero(a1 == 3)  #计算a中=0的元素的个数，等价于np.sum(a1 == 3) 
+   ```
+
+7. 如果要沿行或列方向进行统计，那么要设置axis值。对min，max等操作也都可以设置axis值。
+
+   ```python
+   A = np.arange(9).reshape(3,-1) #结果为
+   array([[0, 1, 2],
+          [3, 4, 5],
+          [6, 7, 8]])
+   A.sum() #默认当作一维数组看，结果为36
+   A.sum(axis=0) #把二维数组当做多个列向量拼接起来的，结果为array([ 9, 12, 15])
+   A.sum(axis=1) #把二维数组当做多个行向量拼接起来的，结果为array([ 3, 12, 21])
+   ```
+
+8. arg索引运算，例如a.min()是获得数组a的最小值，而对应的索引运算a.argmin()是获得该最小值的索引位置。
+
+   ```python
+   A = np.arange(9).reshape(3,-1)
+   a1.max() #结果为8
+   a1.argmax() #结果为8。和max一样，它可以可以使用axis参数。
+   a1.reshape(-1)[a1.argmax()] == a1.max() #结果恒为True
+   ```
+
+9. 排序：
+
+   ```python
+   A = np.arange(16)
+   np.random.shuffle(A)   #就地乱序功能
+   np.sort(A)   #返回一个新的排序后的ndarray对象，不改变A本身
+   A.sort()     #就地排序
+   np.argsort(A)  #返回的是索引，第一个14表示，排序后的第一个元素位于原序列的下标为14的地方
+   Out[89]: 
+   array([14,  4, 13,  8,  9, 12,  3,  6,  7, 15, 11, 10,  5,  0,  1,  2],
+         dtype=int64)
+   A[np.argsort(A)] == np.sort(A)     #将一个数组传递给数组的索引，得到的也是一个数组，相当于是每个都去索引，然后再拼接成一个数组。结果为全True的数组
+   X = np.random.randint(0,10,size=(4,4)) #结果为
+   array([[8, 9, 9, 5],
+          [9, 6, 9, 3],
+          [3, 4, 8, 2],
+          [6, 8, 2, 3]])
+   np.sort(X)   #对二维数组的操作，默认是按照行来进行的，axis=1，个行向量拼接而成的矩阵。#结果为
+   array([[5, 8, 9, 9],
+          [3, 6, 9, 9],
+          [2, 3, 4, 8],
+          [2, 3, 6, 8]])
+   np.sort(X,axis=1) #结果为
+   array([[5, 8, 9, 9],
+          [3, 6, 9, 9],
+          [2, 3, 4, 8],
+          [2, 3, 6, 8]])
+   np.sort(X,axis=0)#结果为
+   array([[3, 4, 2, 2],
+          [6, 6, 8, 3],
+          [8, 8, 9, 3],
+          [9, 9, 9, 5]])
+   np.partition(A,2)    #把A的最小的3个数放到前3个顺序，不排序，其余的乱序。这种方法用在不需要排序的地方，会大大缩减时间。结果为
+   array([ 0,  1,  2,  6, 14, 12,  7,  8,  3,  4, 11, 10,  5, 15, 13,  9])
+   ```
+
+10. 
+
+11. 
+
+12. 
 
 # SciPy
 
@@ -2211,12 +2321,3 @@
 8. 
 9. 
 10. 
-11. 
-12. 
-13. 
-14. 
-15. 
-16. 
-17. 
-18. 
-19. 
