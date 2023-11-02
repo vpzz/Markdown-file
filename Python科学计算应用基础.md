@@ -947,13 +947,28 @@
 
    ```python
    A.dot(B) #矩阵乘法A×B，需要前一个矩阵的列数=后一个矩阵的行数。python3.5后支持A@B
+   
+   
+   
    A*B      #数组乘法，需要数组的shape完全相同，否则会报错
    A.T #数组转置，和矩阵的转置是一样的，结果为A的一个视图。等价于transpose(a)
    np.linalg.inv(A) #求逆矩阵
    np.linalg.pinv(A) #求伪逆，非方阵可以使用
    ```
 
-6. 统计运算，默认将多维数组看作一维的：
+6. 矩阵可以和向量的乘法，Numpy中可以和矩阵做乘法的向量有3种：
+
+   ```python
+   A = np.array([[1,2],[3,4],[5,6]]) #shape为(3,2)
+   b1 = np.array([[5],[6]]) #shape为(2,1)，A.dot(b1)可以正确执行，(3,1)的矩阵也是最推荐的。
+   b2 = np.array([[5,6]])   #shape为(1,2)，是一个2维数组，A.dot(b2.T)和A.dot(b1)等价，结果同上，都是array([[17],[39],[61]])。
+   #以上两种都是推荐的方法
+   b3 = np.array([5,6])     #shape为(2,)，是一个1维数组，也称作行向量。b3.T也是np.array([5,6])。不过A.dot(b3)和A.dot(b3.T)也都是可行的，结果为(3,)，都是array([17, 39, 61])。
+   A.dot(b3) == A.dot(b1).T #结果为True，这里只能对后者进行转置，因为前者转置不变。
+   #注意上面的矩阵和行向量的乘法，也不是左乘，这里都是右乘。
+   ```
+
+7. 统计运算，默认将多维数组看作一维的：
 
    ```python
    A.min()      #等价于np.min(A)
@@ -970,7 +985,7 @@
    np.count_nonzero(a1 == 3)  #计算a中=0的元素的个数，等价于np.sum(a1 == 3) 
    ```
 
-7. 如果要沿行或列方向进行统计，那么要设置axis值。对min，max等操作也都可以设置axis值。
+8. 如果要沿行或列方向进行统计，那么要设置axis值。对min，max等操作也都可以设置axis值。
 
    ```python
    A = np.arange(9).reshape(3,-1) #结果为
@@ -982,7 +997,7 @@
    A.sum(axis=1) #把二维数组当做多个行向量拼接起来的，结果为array([ 3, 12, 21])
    ```
 
-8. arg索引运算，例如a.min()是获得数组a的最小值，而对应的索引运算a.argmin()是获得该最小值的索引位置。
+9. arg索引运算，例如a.min()是获得数组a的最小值，而对应的索引运算a.argmin()是获得该最小值的索引位置。
 
    ```python
    A = np.arange(9).reshape(3,-1)
@@ -991,68 +1006,82 @@
    a1.reshape(-1)[a1.argmax()] == a1.max() #结果恒为True
    ```
 
-9. 排序：
+10. 排序：
 
-   ```python
-   A = np.arange(16)
-   np.random.shuffle(A)   #就地乱序功能
-   np.sort(A)   #返回一个新的排序后的ndarray对象，不改变A本身
-   A.sort()     #就地排序
-   np.argsort(A)  #返回的是索引，第一个14表示，排序后的第一个元素位于原序列的下标为14的地方
-   Out[89]: 
-   array([14,  4, 13,  8,  9, 12,  3,  6,  7, 15, 11, 10,  5,  0,  1,  2],
-         dtype=int64)
-   A[np.argsort(A)] == np.sort(A)     #将一个数组传递给数组的索引，得到的也是一个数组，相当于是每个都去索引，然后再拼接成一个数组。结果为全True的数组
-   X = np.random.randint(0,10,size=(4,4)) #结果为
-   array([[8, 9, 9, 5],
-          [9, 6, 9, 3],
-          [3, 4, 8, 2],
-          [6, 8, 2, 3]])
-   np.sort(X)   #对二维数组的操作，默认是按照行来进行的，axis=1，个行向量拼接而成的矩阵。#结果为
-   array([[5, 8, 9, 9],
-          [3, 6, 9, 9],
-          [2, 3, 4, 8],
-          [2, 3, 6, 8]])
-   np.sort(X,axis=1) #结果为
-   array([[5, 8, 9, 9],
-          [3, 6, 9, 9],
-          [2, 3, 4, 8],
-          [2, 3, 6, 8]])
-   np.sort(X,axis=0)#结果为
-   array([[3, 4, 2, 2],
-          [6, 6, 8, 3],
-          [8, 8, 9, 3],
-          [9, 9, 9, 5]])
-   np.partition(A,2)    #把A的最小的3个数放到前3个顺序，不排序，其余的乱序。这种方法用在不需要排序的地方，会大大缩减时间。结果为
-   array([ 0,  1,  2,  6, 14, 12,  7,  8,  3,  4, 11, 10,  5, 15, 13,  9])
-   ```
+    ```python
+    A = np.arange(16)
+    np.random.shuffle(A)   #就地乱序功能
+    np.sort(A)   #返回一个新的排序后的ndarray对象，不改变A本身
+    A.sort()     #就地排序
+    np.argsort(A)  #返回的是索引，第一个14表示，排序后的第一个元素位于原序列的下标为14的地方
+    Out[89]: 
+    array([14,  4, 13,  8,  9, 12,  3,  6,  7, 15, 11, 10,  5,  0,  1,  2],
+          dtype=int64)
+    A[np.argsort(A)] == np.sort(A)     #将一个数组传递给数组的索引，得到的也是一个数组，相当于是每个都去索引，然后再拼接成一个数组。结果为全True的数组
+    X = np.random.randint(0,10,size=(4,4)) #结果为
+    array([[8, 9, 9, 5],
+           [9, 6, 9, 3],
+           [3, 4, 8, 2],
+           [6, 8, 2, 3]])
+    np.sort(X)   #对二维数组的操作，默认是按照行来进行的，axis=1，个行向量拼接而成的矩阵。#结果为
+    array([[5, 8, 9, 9],
+           [3, 6, 9, 9],
+           [2, 3, 4, 8],
+           [2, 3, 6, 8]])
+    np.sort(X,axis=1) #结果为
+    array([[5, 8, 9, 9],
+           [3, 6, 9, 9],
+           [2, 3, 4, 8],
+           [2, 3, 6, 8]])
+    np.sort(X,axis=0)#结果为
+    array([[3, 4, 2, 2],
+           [6, 6, 8, 3],
+           [8, 8, 9, 3],
+           [9, 9, 9, 5]])
+    np.partition(A,2)    #把A的最小的3个数放到前3个顺序，不排序，其余的乱序。这种方法用在不需要排序的地方，会大大缩减时间。结果为
+    array([ 0,  1,  2,  6, 14, 12,  7,  8,  3,  4, 11, 10,  5, 15, 13,  9])
+    ```
 
-10. 
+11. 适用于浮点数组的近似比较：
 
-11. 
+    ```python
+    numpy.isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=False) #逐个比较数组a和b中对应的元素。rtol为相对差异，以b的元素为基准，atol为绝对差异，都应是正值。如果待比较的数字本身很小，则atol可能不合适。
+    #比较的公式为 abs(a - b) <= (atol + rtol * abs(b))。满足公式时，结果中对应的元素才为True。
+    np.isclose([1e10,1e-7], [1.00001e10,1e-8]) #第一个元素，公式左侧为1e5，右侧为1.00001e5+1e-8，满足等式；第二个元素，公式左侧为9e-8，右侧为1e-8+1e-13，不满足等式。因此结果为array([ True, False])。
+    numpy.allclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=False) #如果isclose比较的结果为全True，则allclose返回True，否则为False。
+    ```
 
 12. 
+
+13. 
 
 # SciPy
 
 1. SciPy的核心计算部分都是久经考验的Fortran数值计算库，例如线性代数（LAPACK），快速傅里叶变换（FFTPACK），常微分方程（ODEPACK），非线性方程组或最小值（MINPACK）。
 
-2. 主要功能：优化问题求解，插值，数值积分，线性代数，信号处理。
+2. 如果scipy使用了优化过的ATLAS LAPACK 和 BLAS库，可以获得很快的速度。
 
-3. scipy.constants模块包含了几乎所有的物理数学化学常数，例如：
+3. 由多个子模块组成，主要功能：聚类，常用常量和单位变换，优化和求根，插值，数值积分，线性代数，快速傅里叶变换，信号处理，N维图像处理，稀疏矩阵，特殊函数，统计分布。
+
+4. scipy.constants模块包含了几乎所有的物理数学化学常数，例如：
 
    ```python
-   import numpy as np
-   from scipy import constants as C
-   C.c
-   Out[11]: 299792458.0
-   C.h
-   Out[12]: 6.62607015e-34
-   C.pi
-   Out[13]: 3.141592653589793
+   import scipy #有量纲的值，其单位默认为国际单位
+   scipy.constants.c #光速 299792458.0
+   scipy.constants.h #普朗克常数 6.62607015e-34
+   scipy.constants.pi #圆周率: 3.141592653589793
+   #还包括国际单位的前缀，例如
+   scipy.constants.mega #结果为10^6
+   scipy.constants.nano #结果为10^{-9}
+   #包括各种非国际单位到国际单位的换算关系，即1个该单位相当于多少国际单位
+   scipy.constants.lb #结果为0.45359236999999997，表明，1 lb=0.45359236999999997 kg
+   #涉及的领域包括：质量(kg)，时间(s)，长度(m)，角度(弧度)，压力(Pa)，面积(m^2)，体积(m^3)，速度(m/s)，温度(K)，能量(J)，功率(W)，力(N)，
+   #温度比较特殊，因为它不是齐次线性的关系，因此提供了一个函数：
+   scipy.constants.convert_temperature(val, old_scale, new_scale) #val为待转换的数值，old_scale和new_scale分别为表示旧和新的单位的字符串。常用的有：摄氏度:"C"，开尔文:"K"，华氏度:"F"，兰金温标:"R"
+   scipy.constants.convert_temperature(0,"C","K") #0摄氏度 = 273.15 K
    ```
 
-4. scipy.special模块的精度比Python自带的函数要高，当要对一些数值做更精确的计算时，应该用特殊函数库，例如：
+5. scipy.special模块的精度比Python自带的函数要高，当要对一些数值做更精确的计算时，应该用特殊函数库，例如：
 
    ```python
    import math
@@ -1081,7 +1110,7 @@
    Out[27]: 4.84
    ```
 
-5. 排列组合：$A_5^3$，$C_5^3$。
+6. 排列组合：$A_5^3$，$C_5^3$。
 
    ```python
    sp.perm(5,3)     
@@ -1091,7 +1120,7 @@
    Out[29]: 10.0
    ```
 
-6. 优化问题，基本套路都是这样的：①通过分析问题，确定问题的损失函数或者效用函数②通过最优化损失函数或者效用函数，获得机器学习的模型。几乎所有的参数学习算法都是这样的套路。常用的最优化算法有两类：传统的，例如梯度下降，牛顿等；启发式的，例如粒子群，遗传，退火等算法。
+7. 优化问题，基本套路都是这样的：①通过分析问题，确定问题的损失函数或者效用函数②通过最优化损失函数或者效用函数，获得机器学习的模型。几乎所有的参数学习算法都是这样的套路。常用的最优化算法有两类：传统的，例如梯度下降，牛顿等；启发式的，例如粒子群，遗传，退火等算法。
 
    1. 最小二乘拟合（leastsq），步骤如下：
 
@@ -1240,150 +1269,220 @@
       plt.show()
       ```
 
-   9. 线性代数scipy.linalg，numpy下也有这个函数库，scipy的库更丰富。
+## linalg
 
-   10. 求解线性方程组：
+1. 线性代数scipy.linalg，包含了numpy.linalg的所有功能。scipy.linalg总是和配有高效的BLAS库，而numpy.linalg则不一定，因此推荐使用scipy.linalg。
 
-       ```python
-       import numpy as np
-       import matplotlib.pyplot as plt
-       import scipy.linalg as linalg
-       A = np.array([[1,3,5],[2,5,1],[2,3,8]])
-       b = np.array([10,8,3])
-       x = linalg.solve(A,b)     #求解线性方程组
-       x
-       Out[12]: array([-9.28,  5.16,  0.76])
-       A.dot(x)-b
-       Out[13]: array([ 0.00000000e+00, -1.77635684e-15, -1.77635684e-15])
-       linalg.det(A)
-       Out[14]: -25.000000000000004
-       
-       l,v = linalg.eig(A)
-       
-       l
-       Out[16]: array([10.5540456 +0.j, -0.5873064 +0.j,  4.03326081+0.j])
-       
-       v
-       Out[17]: 
-       array([[-0.51686204, -0.94195144,  0.11527992],
-              [-0.32845853,  0.31778071, -0.81936883],
-              [-0.79054957,  0.10836468,  0.56155611]])
-       A.dot(v[:,0])-l[0]*v[:,0]  #特征向量是一列一列的，对应的特征值也是l的对应列。
-       Out[19]: array([-1.77635684e-15+0.j, -1.77635684e-15+0.j,  0.00000000e+00+0.j])
-       A.dot(v[:,1])-l[1]*v[:,1]
-       Out[20]: array([-3.99680289e-15+0.j, -4.71844785e-16+0.j, -3.96904731e-15+0.j])
-       ```
+2. 虽然numpy.matrix比numpy.ndarray支持更方便的矩阵操作，但是不推荐使用它，因为后者更通用。
 
-   11. SVD（奇异值）分解：
+3. 接受的对象应为二维数组，结果也是二维数组。
 
-       ```python
-       import numpy as np
-       import scipy.linalg as linalg
-       A = np.array([[1,3,5],[2,5,1],[2,3,8]])
-       b = np.array([10,8,3])
-       x = linalg.solve(A,b)
-       X = np.array(     #7x5的矩阵
-       [[0,0,0,2,2],
-        [0,0,0,3,3],
-        [0,0,0,1,1],
-        [1,1,1,0,0],
-        [2,2,2,0,0],
-        [5,5,5,0,0],
-        [1,1,1,0,0]
-        ])
-       U,s,Vh = linalg.svd(X)
-       np.round(U,3)    #7x7的正交矩阵，U.dot(U.T)为单位矩阵。
-       Out[5]: 
-       array([[ 0.   , -0.535, -0.82 , -0.014,  0.118, -0.168,  0.007],
-              [-0.   , -0.802,  0.481, -0.004, -0.351, -0.043,  0.002],
-              [ 0.   , -0.267,  0.195,  0.04 ,  0.819,  0.467, -0.018],
-              [-0.18 ,  0.   ,  0.089,  0.883,  0.161, -0.393,  0.016],
-              [-0.359,  0.   ,  0.177, -0.417,  0.322, -0.619, -0.423],
-              [-0.898,  0.   , -0.106,  0.032, -0.193,  0.379, -0.015],
-              [-0.18 ,  0.   ,  0.089, -0.209,  0.161, -0.265,  0.906]])
-       np.round(s,3)    #5    奇异特征值，构成一个对角矩阵。
-       Out[6]: array([9.644, 5.292, 0.   , 0.   , 0.   ])
-       np.round(Vh,3)      #5x5的正交矩阵，Vh.dot(Vh.T)为单位矩阵。
-       Out[7]: 
-       array([[-0.577, -0.577, -0.577,  0.   ,  0.   ],
-              [-0.   ,  0.   ,  0.   , -0.707, -0.707],
-              [-0.62 , -0.151,  0.77 ,  0.   ,  0.   ],
-              [-0.   ,  0.   , -0.   ,  0.707, -0.707],
-              [ 0.532, -0.802,  0.271,  0.   , -0.   ]])
-       #SVD算法本身不会对数据进行压缩，而是找出那些非主要成分可以去除，使得矩阵中更多的数变得相同，然后后续由其他压缩算法来进行压缩。
-       ```
+4. 矩阵的逆：
 
-   12. 数值积分：
+   ```python
+   A = np.array([[1, 3, 5],
+                 [2, 5, 1],
+                 [2, 3, 8]])
+   InverseA = scipy.linalg.inv(A) #结果为
+   array([[-1.48,  0.36,  0.88],
+          [ 0.56,  0.08, -0.36],
+          [ 0.16, -0.12,  0.04]])
+   A.dot(InverseA) #结果如下，可以认为是单位矩阵
+   array([[ 1.00000000e+00, -1.11022302e-16,  4.85722573e-17],
+          [ 3.05311332e-16,  1.00000000e+00,  7.63278329e-17],
+          [ 2.22044605e-16, -1.11022302e-16,  1.00000000e+00]])
+   ```
 
-       ```python
-       import numpy as np
-       import scipy.linalg as linalg
-       from scipy import integrate
-       def f(x):
-           return x**2
-       integrate.quad(f,0,1)     #数值积分范围为[0,1]
-       Out[13]: (0.33333333333333337, 3.700743415417189e-15)
-       #二重积分
-       import numpy as np
-       import scipy.linalg as linalg
-       from scipy import integrate
-       def fc(x):
-           return (1-x**2)**0.5
-       def fs(x,y):
-           return (1-x**2-y**2)**0.5
-       integrate.dblquad(fs,-1,1,lambda x:-fc(x),lambda x:fc(x))
-       Out[15]: (2.094395102393199, 1.0002356720661965e-09)
-       ```
+5. 求解线性方程组：
 
-   13. 信号处理，设计滤波器，过滤噪声：
+   ```python
+   #也可以先对系数矩阵求逆，然后再进行乘法。不过linalg.solve速度更快，数值稳定性更好。
+   A = np.array([[1,3,5],[2,5,1],[2,3,8]])
+   b = np.array([10,8,3])
+   x = scipy.linalg.solve(A,b)  #求解线性方程组，结果为，array([-9.28,  5.16,  0.76])
+   A.dot(x)-b #检验，结果为array([ 0.00000000e+00, -1.77635684e-15, -1.77635684e-15])
+   ```
 
-       ```python
-       import numpy as np
-       import scipy.linalg as linalg
-       from scipy import integrate
-       import scipy.signal as signal
-       import matplotlib.pyplot as plt
-       t = np.arange(0,20,0.1)
-       noise = np.random.normal(size = t.shape)
-       x = np.sin(t)+noise*0.1
-       
-       x2 = signal.medfilt(x,7)  #中值滤波器，第二个参数表示取前3个，加后3个，加当前点的平均值作为当前点的滤波后的值，所以第二个参数必须为奇数，一般为5，7不宜太大。这个属于低通滤波器，过滤高频的干扰。
-       #medfile2d 可以对2维数组做平均，噪点多的图像可以通过中值滤波来变清晰。对清晰地图像进行中值滤波后会变模糊。
-       plt.plot(t,x)
-       plt.plot(t,x2)
-       plt.show()
-       
-       ```
+6. 求方阵的行列式：
 
-       ![image-20201007194028190](Python科学计算应用基础.assets/image-20201007194028190.png)
+   ```python
+   A = np.array([[1,3,5],[2,5,1],[2,3,8]])
+   scipy.linalg.det(A) #结果为 -25.000000000000004
+   ```
 
-   14. 傅里叶变换，将一个复杂的周期信号分解为多个正弦信号：
+7. 向量范数：$\begin{split}\left\Vert \mathbf{x}\right\Vert =\left\{ \begin{array}{cc} \max\left|x_{i}\right| & \textrm{ord}=\textrm{inf}\\ \min\left|x_{i}\right| & \textrm{ord}=-\textrm{inf}\\ \left(\sum_{i}\left|x_{i}\right|^{\textrm{ord}}\right)^{1/\textrm{ord}} & \left|\textrm{ord}\right|<\infty.\end{array}\right.\end{split}$
 
-       ```python
-       import numpy as np
-       import matplotlib.pyplot as plt
-       from scipy import fftpack
-       
-       def signal_sample(t):
-           return np.sin(np.pi*t)+np.sin(4*np.pi*t+0.5)  #最高频率为2Hz.
-       
-       N=1000
-       f_s=10
-       t = np.linspace(0,N/f_s,N)
-       f_t = signal_sample(t)    #模拟采样的过程，1秒采样10次，一共100秒，一共1000个点。
-       
-       F = fftpack.fft(f_t)   #复数数组，每一个复数表示一个三角函数，幅值和初相位由复数的幅值和幅角得出，频率是顺次变化的
-       f = fftpack.fftfreq(N, 1/f_s)   #频率域的自变量，从-5到+5。采样率被一分为2。
-       plt.plot(f,np.abs(F)/N)
-       plt.xlim(0,3)       #只看正半轴的情况
-       plt.show()
-       F_filter =  F*(abs(f)<1.5)
-       f_filter = fftpack.ifft(F_filter)     #逆变换，还原到时域。
-       plt.plot(t,f_t)
-       plt.plot(t,f_filter.real)
-       plt.xlim(0,5)    #只显示前5秒的信号。
-       plt.show()
-       ```
+8. 矩阵范数：$\begin{split}\left\Vert \mathbf{A}\right\Vert =\left\{ \begin{array}{cc} \max_{i}\sum_{j}\left|a_{ij}\right| & \textrm{ord}=\textrm{inf}\\ \min_{i}\sum_{j}\left|a_{ij}\right| & \textrm{ord}=-\textrm{inf}\\ \max_{j}\sum_{i}\left|a_{ij}\right| & \textrm{ord}=1\\ \min_{j}\sum_{i}\left|a_{ij}\right| & \textrm{ord}=-1\\ \max\sigma_{i} & \textrm{ord}=2\\ \min\sigma_{i} & \textrm{ord}=-2\\ \sqrt{\textrm{trace}\left(\mathbf{A}^{H}\mathbf{A}\right)} & \textrm{ord}=\textrm{'fro'}\end{array}\right.\end{split}$
+
+9. ```python
+   #对向量来说，默认为2范数，
+   b = np.array([1,2,3])
+   scipy.linalg.norm(b) #等于sqrt(1+4+9) = sqrt(14) = 3.7416573867739413
+   #对矩阵来说默认为Frobenius范数，可以使用上面的公式计算，等价于所有元素的模的平方和，再开平方。
+   A=np.array([[1,2],[3,4]])
+   scipy.linalg.norm(A) #等于sqrt(1+4+9+16) = sqrt(30) = 5.477225575051661
+   #无穷范数的ord应使用numpy.inf或-numpy.inf
+   ```
+
+10. 线性最小二乘：寻找预测模型中的线性参数，使得观测值和预测值之间的差的平方和取最小值，该平方和关于参数的梯度向量为0，是取最值的必要条件，对该等式进行变换就可以得到矩阵A伪逆的定义$\mathbf{A}^{\dagger}=\left(\mathbf{A}^{H}\mathbf{A}\right)^{-1}\mathbf{A}^{H}$。通过伪逆来求最小二乘解：$c=\mathbf{A}^{\dagger}y$，不过这个方法是比较繁琐低效的。
+
+11. 线性最小二乘法等价于求一个线性方程组的最小二乘解问题，$Ac=y$。linalg.lstsq函数要求提供A和y，求解c。
+
+    ```python
+    x = np.array([1, 2.5, 3.5, 4, 5, 7, 8.5]) #采样点
+    y = np.array([0.3, 1.1, 1.5, 2.0, 3.2, 6.6, 8.6]) #观测值
+    #计划采用的模型为： y = a + b*x**2，2个参数分别为(a,b)，对应的函数为(1, x**2)。根据函数向量来计算矩阵A
+    A = x.reshape(-1,1)**[0, 2]
+    #或者使用
+    A = np.column_stack(([1]*len(x),x**2)) #将多个向量按列堆叠。
+    c, res, rank, s = scipy.linalg.lstsq(A, y) #底层使用LAPACK的gelsd算法，会先进行矩阵的A奇异值分解，也可以用lapack_driver参数指定其他方法。
+    #c为 array([0.20925829, 0.12013861])，分别为参数a和b。
+    #res为  0.4082665237440342。为残差向量Ac-y的2范数的平方，即scipy.linalg.norm(A.dot(c)-y)**2
+    #rank为 2。A的有效秩
+    #s为 array([93.25228799,  1.7883749 ])。A的奇异值
+    #当求解不收敛时会报错LinAlgError。
+    ```
+
+12. 广义逆也就是伪逆，都是指最常用的Moore–Penrose逆：
+
+    ```python
+    A = np.array([[ 1.  ,  1.  ],
+                  [ 1.  ,  6.25],
+                  [ 1.  , 12.25],
+                  [ 1.  , 16.  ],
+                  [ 1.  , 25.  ],
+                  [ 1.  , 49.  ],
+                  [ 1.  , 72.25]]) #7*2，广义逆为2*7。
+    #也可以利用广义逆来求最小二乘解：
+    scipy.linalg.pinv(A).dot(y) #结果为array([0.20925829, 0.12013861])，和上面的c一样。
+    ```
+
+13. 只有可被相似对角化的方阵才可以进行特征值分解：$\mathbf{A}=\mathbf{V}\boldsymbol{\Lambda}\mathbf{V}^{-1}$。$\mathbf{V}$是特征向量构成的矩阵，$\Lambda$为特征值构成的对角矩阵。
+
+14. 方阵的特征值和特征向量：
+
+    ```python
+    l,v = scipy.linalg.eig(A)
+    # 特征值l构成的向量为 array([10.5540456 +0.j, -0.5873064 +0.j,  4.03326081+0.j])
+    # 特征向量v构成的列向量矩阵如下，每个特征向量长度都被归一化了。
+    array([[-0.51686204, -0.94195144,  0.11527992],
+           [-0.32845853,  0.31778071, -0.81936883],
+           [-0.79054957,  0.10836468,  0.56155611]])
+    #l[0]特征值对应的特征向量为v的第0列，v[:,0]
+    A.dot(v[:,0])-l[0]*v[:,0] #检验一下，结果为 array([-1.77635684e-15+0.j, -1.77635684e-15+0.j,  0.00000000e+00+0.j])
+    v.dot(np.diag(l)).dot(scipy.linalg.inv(v)) #特征值分解的检验结果和A相等。
+    #标准特征值问题是广义特征值问题的一个特例，即B为单位矩阵。
+    Av = λBv
+    ```
+
+15. SVD（奇异值）分解：
+
+    ```python
+    A = np.array([[1,3,5],[2,5,1],[2,3,8]])
+    b = np.array([10,8,3])
+    x = linalg.solve(A,b)
+    X = np.array(     #7x5的矩阵
+    [[0,0,0,2,2],
+     [0,0,0,3,3],
+     [0,0,0,1,1],
+     [1,1,1,0,0],
+     [2,2,2,0,0],
+     [5,5,5,0,0],
+     [1,1,1,0,0]
+     ])
+    U,s,Vh = linalg.svd(X)
+    np.round(U,3)    #7x7的正交矩阵，U.dot(U.T)为单位矩阵。
+    Out[5]: 
+    array([[ 0.   , -0.535, -0.82 , -0.014,  0.118, -0.168,  0.007],
+           [-0.   , -0.802,  0.481, -0.004, -0.351, -0.043,  0.002],
+           [ 0.   , -0.267,  0.195,  0.04 ,  0.819,  0.467, -0.018],
+           [-0.18 ,  0.   ,  0.089,  0.883,  0.161, -0.393,  0.016],
+           [-0.359,  0.   ,  0.177, -0.417,  0.322, -0.619, -0.423],
+           [-0.898,  0.   , -0.106,  0.032, -0.193,  0.379, -0.015],
+           [-0.18 ,  0.   ,  0.089, -0.209,  0.161, -0.265,  0.906]])
+    np.round(s,3)    #5    奇异特征值，构成一个对角矩阵。
+    Out[6]: array([9.644, 5.292, 0.   , 0.   , 0.   ])
+    np.round(Vh,3)      #5x5的正交矩阵，Vh.dot(Vh.T)为单位矩阵。
+    Out[7]: 
+    array([[-0.577, -0.577, -0.577,  0.   ,  0.   ],
+           [-0.   ,  0.   ,  0.   , -0.707, -0.707],
+           [-0.62 , -0.151,  0.77 ,  0.   ,  0.   ],
+           [-0.   ,  0.   , -0.   ,  0.707, -0.707],
+           [ 0.532, -0.802,  0.271,  0.   , -0.   ]])
+    #SVD算法本身不会对数据进行压缩，而是找出那些非主要成分可以去除，使得矩阵中更多的数变得相同，然后后续由其他压缩算法来进行压缩。
+    ```
+
+16. 数值积分：
+
+    ```python
+    import numpy as np
+    import scipy.linalg as linalg
+    from scipy import integrate
+    def f(x):
+        return x**2
+    integrate.quad(f,0,1)     #数值积分范围为[0,1]
+    Out[13]: (0.33333333333333337, 3.700743415417189e-15)
+    #二重积分
+    import numpy as np
+    import scipy.linalg as linalg
+    from scipy import integrate
+    def fc(x):
+        return (1-x**2)**0.5
+    def fs(x,y):
+        return (1-x**2-y**2)**0.5
+    integrate.dblquad(fs,-1,1,lambda x:-fc(x),lambda x:fc(x))
+    Out[15]: (2.094395102393199, 1.0002356720661965e-09)
+    ```
+
+17. 信号处理，设计滤波器，过滤噪声：
+
+    ```python
+    import numpy as np
+    import scipy.linalg as linalg
+    from scipy import integrate
+    import scipy.signal as signal
+    import matplotlib.pyplot as plt
+    t = np.arange(0,20,0.1)
+    noise = np.random.normal(size = t.shape)
+    x = np.sin(t)+noise*0.1
+    
+    x2 = signal.medfilt(x,7)  #中值滤波器，第二个参数表示取前3个，加后3个，加当前点的平均值作为当前点的滤波后的值，所以第二个参数必须为奇数，一般为5，7不宜太大。这个属于低通滤波器，过滤高频的干扰。
+    #medfile2d 可以对2维数组做平均，噪点多的图像可以通过中值滤波来变清晰。对清晰地图像进行中值滤波后会变模糊。
+    plt.plot(t,x)
+    plt.plot(t,x2)
+    plt.show()
+    
+    ```
+
+    ![image-20201007194028190](Python科学计算应用基础.assets/image-20201007194028190.png)
+
+18. 傅里叶变换，将一个复杂的周期信号分解为多个正弦信号：
+
+    ```python
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from scipy import fftpack
+    
+    def signal_sample(t):
+        return np.sin(np.pi*t)+np.sin(4*np.pi*t+0.5)  #最高频率为2Hz.
+    
+    N=1000
+    f_s=10
+    t = np.linspace(0,N/f_s,N)
+    f_t = signal_sample(t)    #模拟采样的过程，1秒采样10次，一共100秒，一共1000个点。
+    
+    F = fftpack.fft(f_t)   #复数数组，每一个复数表示一个三角函数，幅值和初相位由复数的幅值和幅角得出，频率是顺次变化的
+    f = fftpack.fftfreq(N, 1/f_s)   #频率域的自变量，从-5到+5。采样率被一分为2。
+    plt.plot(f,np.abs(F)/N)
+    plt.xlim(0,3)       #只看正半轴的情况
+    plt.show()
+    F_filter =  F*(abs(f)<1.5)
+    f_filter = fftpack.ifft(F_filter)     #逆变换，还原到时域。
+    plt.plot(t,f_t)
+    plt.plot(t,f_filter.real)
+    plt.xlim(0,5)    #只显示前5秒的信号。
+    plt.show()
+    ```
 
 # SymPy
 
