@@ -235,7 +235,7 @@
 28. ```shell
     ffmpeg -i 01.mp4 -vbsf h264_mp4toannexb -c copy 01.ts   #因为分离某些封装格式中的h264码流时，需要首先写入sps和pps，否则会导致分离出来的码流无法播放，使用该比特流过滤器可以完成该工作。
     
-    ffmpeg -i "concat:01.ts|02.ts" -c copy output.mp4
+    ffmpeg -i "concat:01.ts|02.ts" -c copy output.mp4 #拼接或合并
     ffmpeg -f concat -i tslist.txt -c copy output.mp4
     #要求ts.list.txt为如下格式:
     file '01.ts'
