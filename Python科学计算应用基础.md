@@ -947,15 +947,12 @@
 
    ```python
    A.dot(B) #矩阵乘法A×B，需要前一个矩阵的列数=后一个矩阵的行数。python3.5后支持A@B
-   
-   
-   
    A*B      #数组乘法，需要数组的shape完全相同，否则会报错
    A.T #数组转置，和矩阵的转置是一样的，结果为A的一个视图。等价于transpose(a)
    np.linalg.inv(A) #求逆矩阵
    np.linalg.pinv(A) #求伪逆，非方阵可以使用
    ```
-
+   
 6. 矩阵可以和向量的乘法，Numpy中可以和矩阵做乘法的向量有3种：
 
    ```python

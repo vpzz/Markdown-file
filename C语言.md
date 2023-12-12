@@ -76,208 +76,85 @@
 
     8. 执行链接
 
+11. 在64位系统上使用-m32选项来编译生成32位程序，可能会报以下错误，是因为没有安装32位的头文件和库，安装gcc-multilib库即可：
 
-
-## C 预处理器
-
-1. C预处理器(C preprocessor)，简写为cpp，是一个宏处理器，会被C编译器在编译前自动调用。它的目的是只是为了处理C、C++、Objective-C源代码，不过也被滥用为一个通用的文本处理器，而当输入文本不符合类C语言的语法时，C预处理器会报错退出。不能那它来处理Makefile，因为所有的制表符都会被删除，这样Makefile就不能正常工作了。如果需要真正的通用文本处理器，可以使用GNU M4，他是Autoconf体系的一部分。
-2. GNU C 预处理器提供了ISO C标准的一个超集。默认情况下，不严格按照标准的行为来。
-
-   ```shell
-   #如果要严格按照ISO C的标准来处理，可以使用如下选项之一:
-   -std=c90
-   -std=c99
-   -std=c11
-   -std=c17
-   #如果要做所有的强制诊断，需要使用如下选项:
-   -pedantic
-   ```
-3. 源代码的字符集处理十分复杂，C标准讨论了2种，但是常用的最少有4种。源文件可以是任意字符集的，C预处理器在一开始会先进行把源文件的字符集转化为ISO 10646。也就是Unicode字符集。C预处理器使用utf-8编码的Unicode字符集。C预处理器的输出也是utf-8编码的。超出ASCII表示范围的字符，可以用\u或\U来转义表示或者用户直接输入。
-
-   ```shell
-   #设定源文件使用的字符集
-   -finput-charset=
-   ```
-4. 输入文件会被读入到内存中，然后按照行进行分割。不同的系统使用不同的习惯来标识一行的末尾，常见的有有如下三种ASCII控制序列。C预处理器会自动处理这些，因此用户可以在不同平台之间相互拷贝源代码而不用考虑这些问题。不过当不同电脑通过NFS修改共享的文件时，可能会导致一个文件中出现不一致的行尾标记，这可能导致行号功能出问题。
-
-   ```shell
-   LF        # Unix
-   CR LF     # DOS和VMS
-   CR        # 经典Mac OS(在OS X之前)
-   ```
-5. 通常情况下，文件最后一行末尾也应该有一个行尾标记，否则gcc会报warning。
-6. 在以前的老式键盘中，某些符号是无法直接打出来的，因此就有了用三联符来表示一个字符的做法，类似于现在\转义字符。一共有9个。默认情况下，C预处理器忽略三联符，如果使用了-std或-trigraphs选项，则会处理，如果gcc使用了-Wtrigraphs选项，则会报warning。三联符可以和转义字符联合使用，例如''??/n'表示'\n'，也就是换行符。
-
-   ```
-   ??(	           [
-   ??)	           ]
-   ??<	           {
-   ??>	           }
-   ??=	           #
-   ??/	           \
-   ??!	           |
-   ??'	           ^
-   ??-	           ~
-   ```
-7. 基本字符集（也称为基本源代码字符集）包含95个字符，分为4个不可打印的字符和几段连续的字符。
-
-   ```c
-   U+0009 //水平制表符，等价于\t
-   U+000B //竖直制表符
-   U+000C //换页符，打字机遇到该字符时，会跳到下一页的开头
-   U+0020 //空格
-   U+0021-U+0023 //少了个U+0024即$
-   U+0025-U+003F //少了个U+0040即@
-   U+0041-U+005F //少了个U+0060即`，抑音符
-   U+0061-U+007E //少了个U+007F即删除符
-   
-   //C++语言的基本字符集比C语言的多个U+000A,即LF
-   ```
-8. 基本执行字符集是在基本字符集的基础上再加上5个额外的字符：
-
-   ```c
-   U+0000	// Null，空字符，一般作为字符串的结尾标识
-   U+0007	// Bell，会触发响铃
-   U+0008	// Backspace，效果和退格键一样
-   U+000A	// Line feed (LF)
-   U+000D	// Carriage return (CR)
-   ```
-9. CR，LF，FF：
-
-   ```c
-   CR //Carriage Return的缩写，表示仅回车不换行。字符为\r，0xD。
-   LF //Line Feed的缩写，表示仅换行不回车，字符为\n，0xA。也被称为New Line。feed在这里当作投喂，放入的意思，也就是将一个行放入到机器中。
-   FF //Form feed的缩写，表示分页。字符为\f,0xC。
-   
-   printf("stackoverflow\rnine") //仅回车的话，不同编译器的结果可能不同。
-   ninekoverflow //有的编译器会导致覆盖同行的开头部分字符。
-   nine //GCC会删除掉同行的所有字符再输出后续的字符。
-   printf("stackoverflow\nnine") //被理解为回车+换行
-   stackoverflow
-   nine
-   printf("stackoverflow\fnine") //被理解为仅换行不回车
-   stackoverflow
-                nine
-   ```
-10. 
-
-## GCC
-
-1. C源文件→预处理→编译→汇编→链接→可执行文件。
-
-2. 一般来说，文件的后缀名是无所谓的，但是编译器会根据不同的后缀名选择不同的操作，因此还是要写对后缀名。
-
-3. 程序中所有以#开头的部分(头文件的包含，条件编译等)都是在预处理中完成替换。
-
-4. 条件编译的主要目的是为了兼容不同的平台和处理器架构，最大程度复用代码。
-
-5. 有了预处理这个构成，就可以使用宏，使得编程方便，可以使用头文件，进行模块化。
-
-6. 预处理过程：
-
-   ```c
-   头文件展开 //将#include包含的文件插入到该指令的位置
-   宏展开    //展开所有的宏定义，并删除#define
-   条件编译  //处理所有的条件编译指令 #if #ifdef #ifndef #else #endif
-   删除注释
-   添加行号和文件名标识 //编译调试时可以显式行号信息
-   保留#pragma编译器指令
-   ```
-
-7. 条件编译的宏名取法：如果文件名为xx.h，宏一般为`__XX_H__`。因为内核中的头文件一般是前加下划线，用户程序使用后加下划线是为了和内核发生冲突。
-
-8. #include 头文件的时候，<>包含的文件会直接去系统指定的目录中寻找，而" "包含的文件会现在当前路径下寻找，如果没找到，再去系统目录下寻找。
-
-9. #pragma命令是用来设定编译器的状态，指定编译器完成一些特定的动作。
-
-   ```c
-   #pragmat pack([n]) //指示结构体和联合成员的对齐方式
-   #pragmat message("string") //输出编译信息
-   #pragma warning  //有选择地改变编译器的警告信息行为
-   #pragma once //在头文件中加入这条指令，可以防止被重复包含，可以替代条件编译宏的方法。
-   ```
-
-10. 广义的编译指的是源程序→可执行文件，狭义的编译指的是预处理后的文件→汇编文件。
-
-11. 汇编过程是将汇编文件转化为机器代码的目标文件。
-
-12. 链接是将使用到的外部库的函数实现找到，链接到可执行文件中。
-
-13. ```shell
-    gcc -E hello.c > hello.i  //预处理，默认输出到屏幕上，可以重定向到文件中。
-    gcc -S hello.i   //编译，默认产生.s文件。得到汇编语言书写的文件，即文本文件。
-    gcc -c hello.s   //汇编，默认产生.o的目标文件，二进制的，
-    gcc hello.o -o hello  //链接成可执行文件，并重命名为hello。默认产生可执行文件名为是a.out。
+    ```shell
+    zj@hit:~/linux_c/process$ gcc test.c -o test -m32
+    In file included from test.c:1:
+    /usr/include/stdio.h:27:10: fatal error: bits/libc-header-start.h: No such file or directory
+       27 | #include <bits/libc-header-start.h>
+          |          ^~~~~~~~~~~~~~~~~~~~~~~~~~
+    compilation terminated.
     ```
 
-14. 使用--verbose选项，可以使GCC打印出具体调用的命令细节，collect2程序是对ld链接器的一个封装。
+12. -m32：int，long，指针都是32位的。-m64：int是32位，long，指针都是64位的。
 
-15. 可以用make来编译一个文件，例如make hello，会执行 gcc hello.c -o hello。
+13. 在以前的老式键盘中，某些符号是无法直接打出来的，因此就有了用三联符来表示一个字符的做法，类似于现在\转义字符。一共有9个。默认情况下，C预处理器忽略三联符，如果使用了-std或-trigraphs选项，则会处理，如果gcc使用了-Wtrigraphs选项，则会报warning。三联符可以和转义字符联合使用，例如''??/n'表示'\n'，也就是换行符。
 
-16. -Wall 选项可以打开gcc的所有警告和报错开关，最严格的模式。一般来说，应该尽可能修改程序到所有的警告都消失，或者说是可控的警告。
+    ```
+    ??(	           [
+    ??)	           ]
+    ??<	           {
+    ??>	           }
+    ??=	           #
+    ??/	           \
+    ??!	           |
+    ??'	           ^
+    ??-	           ~
+    ```
 
-17. 使用任何的外部的函数都要包含头文件的定义。
-
-18. 头文件包含的重要性，如下程序：
+14. 基本字符集（也称为基本源代码字符集）包含95个字符，分为4个不可打印的字符和几段连续的字符。
 
     ```c
-    #include <stdio.h>
-    #include <stdlib.h>
-    int main(void){
-        int *p = NULL;
-        p = malloc(sizeof(int));
-        if(p == NULL)
-            return -1;
-    }
+    U+0009 //水平制表符，等价于\t
+    U+000B //竖直制表符
+    U+000C //换页符，打字机遇到该字符时，会跳到下一页的开头
+    U+0020 //空格
+    U+0021-U+0023 //少了个U+0024即$
+    U+0025-U+003F //少了个U+0040即@
+    U+0041-U+005F //少了个U+0060即`，抑音符
+    U+0061-U+007E //少了个U+007F即删除符
+    
+    //C++语言的基本字符集比C语言的多个U+000A,即LF
     ```
 
-    1. 上面的代码编译不会报任何警告，即使开启了Wall。但是如果不包含malloc函数的头文件，即stdlib.h，那么就会报一个警告，提示malloc函数的返回值类型和用于接受的变量类型不匹配。
-    2. 因为对于未定义的函数，gcc就会认为返回值的类型为int，因此在第5行将一个int类型的返回值赋值给int *类型的变量是不合理的，才会报这样的错误。
-    3. 有些人认为只要将malloc的返回值强制转化为int\*之后，在复制就没问题了，即用 (int\*) malloc(sizeof(int));实则不然，因为这种强制类型转化，在gcc看来，也是warning。解决办法就是包含上头文件即可。
-    4. 实际上malloc的返回值 void \*是一个特殊的类型，他可以赋值给任何类型的指针，也可以将任何类型的指针复制给他，编译器都不会报警告。其实也有一个例外，==就是==
-
-19. 有时候出现段错误的原因就隐藏在没有解决的警告中。例如下面的程序如果去掉对string.h的包含，编译时没有任何警告，运行时会报段错误。如果打开-Wall选项后，编译时回报警告，提示strerror的返回值和用于接受的变量类型不匹配，包含上该头文件就没事了。
+15. 基本执行字符集是在基本字符集的基础上再加上5个额外的字符：
 
     ```c
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <errno.h>
-    #include <string.h>
-    int main (){
-        FILE *fp;
-        fp = fopen("tmp", "r");
-        if (fp == NULL){
-            fprintf(stderr, "fopen:%s\n", strerror(errno));
-            exit(-1);
-        }
-        fclose(fp);
-        exit(0);
-    }
+    U+0000	// Null，空字符，一般作为字符串的结尾标识
+    U+0007	// Bell，会触发响铃
+    U+0008	// Backspace，效果和退格键一样
+    U+000A	// Line feed (LF)
+    U+000D	// Carriage return (CR)
     ```
 
-20. 如果编译的工程中有多个.c文件中都存在main函数，gcc也会报错。
-
-21. 链接选项：
+16. CR，LF，FF：
 
     ```c
-    //默认是动态链接，带--static前缀-l是静态链接
-    -lm //数学库math
-    -lstdc++ //标准c++库
-    -lc  //标准c库，由于gcc默认编译c文件和链接标准c库，因此可以省略
-    -lpthread //多线程库 pthread
+    CR //Carriage Return的缩写，表示仅回车不换行。字符为\r，0xD。
+    LF //Line Feed的缩写，表示仅换行不回车，字符为\n，0xA。也被称为New Line。feed在这里当作投喂，放入的意思，也就是将一个行放入到机器中。
+    FF //Form feed的缩写，表示分页。字符为\f,0xC。
+    
+    printf("stackoverflow\rnine") //仅回车的话，不同编译器的结果可能不同。
+    ninekoverflow //有的编译器会导致覆盖同行的开头部分字符。
+    nine //GCC会删除掉同行的所有字符再输出后续的字符。
+    printf("stackoverflow\nnine") //被理解为回车+换行
+    stackoverflow
+    nine
+    printf("stackoverflow\fnine") //被理解为仅换行不回车
+    stackoverflow
+                 nine
     ```
 
-## 注意事项
+17. 函数的声明和实现应该分开，声明应该都放在开头。
 
-15. 函数的声明和实现应该分开，声明应该都放在开头。
+18. main函数的返回值（退出码）是给它的父进程看的。如果是在shell中运行的，它的父进程就是shell，可以用echo $?查看。
 
-16. main函数的返回值（退出码）是给它的父进程看的。如果是在shell中运行的，它的父进程就是shell，可以用echo $?查看。
+19. C语言内的函数返回值人为习惯设置：成功为零，失败为非零，而shell脚本中返回值是成功，true（1）和失败，false（0），正好相反。
 
-17. C语言内的函数返回值人为习惯设置：成功为零，失败为非零，而shell脚本中返回值是成功，true（1）和失败，false（0），正好相反。
+20. 如下main函数没有设置返回值，默认他会把printf函数的返回值当做自己的返回值返回，即成功输出的字符个数。
 
-18. 如下main函数没有设置返回值，默认他会把printf函数的返回值当做自己的返回值返回，即成功输出的字符个数。
-
-19. ```c
+21. ```c
     #include <stdio.h>
     #include <stdlib.h>
     
@@ -286,7 +163,7 @@
     }
     ```
 
-20. 注释可以看作是代码内的文档：
+22. 注释可以看作是代码内的文档：
 
     ```c
     /*
@@ -315,20 +192,7 @@
     */
     ```
 
-21. 每条注释都会被替换为一个空格，这一过程发生在预处理阶段前，因此无法无法使用宏来形成注释：
-
-    ```c
-    #ifndef DEBUG
-        #define PRINTF //
-    #else
-        #define PRINTF printf
-    #endif
-    ...  
-    PRINTF("Error in file %s at line %i\n", __FILE__, __LINE__); //作者的本意是想在没有定义DEBUG时将PRINTF替换为//，将这句话作为一个注释，在定义了DEBUG后，把PRINTF替换为printf，这样就可以输出行号和文件号了。
-    //但是会事与愿违，因为在宏替换前，//就会被替换为一个空格，第二行变成了"#define PRINTF  \n"，因此在宏替换时PRINTF会被替换为一个空格。因此当没有定义DEBUG时，第7行会变为一个逗号表达式(-Wall时会报warning，提示逗号左侧的操作数没有效果)，结果就是最右侧的操作数的结果，即行号7，不过这样也能起到不输出的作用。
-    ```
-
-22. 特殊的注释：
+23. 特殊的注释：
 
     ```c
     //可以使用条件恒为0的条件编译来进行注释
@@ -343,7 +207,7 @@
     }
     ```
 
-23. C99中引入的//注释方法，可能会对某些C89的代码造成影响：
+24. C99中引入的//注释方法，可能会对某些C89的代码造成影响：
 
     ```c
     a = b //*divisor:*/ c
@@ -362,7 +226,7 @@
     int a; a = 1 + 2; printf("%d\n", a);
     ```
 
-24. 函数的注释可以用如下方式书写：
+25. 函数的注释可以用如下方式书写：
 
     ```c
     /**
@@ -377,8 +241,7 @@
     	}
     ```
 
-25. 防止写越界，防止内存泄露，谁打开谁关闭，谁申请谁释放。
-
+26. 防止写越界，防止内存泄露，谁打开谁关闭，谁申请谁释放。
 
 # 基本数据类型，运算符，表达式
 
@@ -479,70 +342,7 @@
    'ab' == 24930; //结果为true
    ```
 
-## #define的用法
-
-1. 可以用来定义标识常量，即该常量在程序的多处用到，后期有可能进行修改，例如3.14。也可以定义没有宏体的宏，这种宏一般用来做条件编译的站位。
-
-2. ```c
-   #define PI 3.14        //宏名+宏体
-   #define __STDIO__
-   ```
-   
-3. 预处理结束后，宏名会被替换为宏体，并不做语法检查。
-
-4. ```c
-   #define ADD 2+3
-   
-   ADD * ADD;       //结果并不是5*5，标识常量的使用应该在外边加上括号。
-   ```
-
-5. 带参数的宏，参数也应该加上括号，防止替换后的参数改变运算顺序。
-
-   ```c
-   #define MAX(a,b)  ((a) > (b) ? (a) : (b))
-   int i = 3,j = 5;
-   MAX(i,j);      //预处理后为(i > j ? i : j)
-   ```
-
-6. 带参数的宏可以用函数来替代，宏的使用会减小运行时的消耗，因为他的工作在编译时就完成了。内核的代码中有很多宏的应用。但是宏的应用容易出错。内核中使用宏非常多，因为这里的代码运行频率很高。
-
-7. 调用函数是有开销的，需要将当前的运行环境入栈，在函数调用完毕后再恢复。
-
-8. 宏毕竟不是函数，直接进行替换容易出现问题，例如：
-
-9. ```c
-   #define MAX(a,b)  ((a) > (b) ? (a) : (b))
-   int max(int a, int b){
-       return a > b ? a : b;
-   }
-   int main (){
-   	int i = 3,j = 5;
-   	
-   	printf("i=%d,j=%d\n",i,j);
-   	printf("%s\n",MAX(i++,j++));     //此时输出6。因为宏替换后为((i++) > (j++) ? (i++) : (j++))。
-   	printf("i=%d,j=%d\n",i,j);
-   }
-   ```
-
-10. 我们期望MAX达到的功能应该是函数max一样的，返回i和j中较大的那个数，然后对i和j分别自增1。第9行应该输出5，第10行应该输出4和6。而实际上第9行输出的是6，第10行输出的是4和7。这是因为较大的那个数在宏替换后还多进行了一次自增。出现这一问题的原因是因为宏参数没有被适当的变量接收。
-
-11. 进行大小比较的时候j=5，比较完的时候j就变成了6，i变成了4。然后返回6，第9行结束的时候j就变成了7。
-
-12. 对于函数max，实参分别为3和5。函数调用完毕返回后，i和j才会自增1。整个过程中i和j只自增了一次。
-
-13. 这个问题在标准C下无解，在linux下编程使用的是GNU C，他是标准C的扩展，使用glibc库，可以使用变量接受来解决该问题。
-
-    ```c
-    #define MAX(a,b)   ({typeof(a) A=(a),B=(b);((A)>(B)?(A):(B));})
-    
-    MAX(i,j);  //({int A=(i++),B=(j++);((A)>(B)?(A):(B));})  A=(i++)是先赋值再自增。
-    ```
-
-14. 宏被替换成了一个语句块，其中有两行语句，语句块的值为最后一行语句执行的结果。最外层加上一个大括号也是为了隔绝内外代码。
-
-15. 使用string.h中的strcpy函数时，会提示该函数不安全，推荐使用strcpy_s或者定义_CRT_SECURE_NO_WARNINGS 这个宏。定义该宏时，需要放在头文件string.h的包含之前才有用。
-
-## 变量
+## 变量的存储类型
 
 1. 变量的定义如下，数据类型可以是基本数据类型或构造类型。
 
@@ -585,7 +385,7 @@
    
    5. extern，前三种是定义型，这个是说明型。说明当前变量是定义在其他地方的，因此不能改变被说明的变量的值或类型，只能进行使用。
 
-### 变量的生命周期和作用范围
+## 变量的生命周期和作用范围
 
 1. 全局变量是定义在所有函数以外的变量。作用范围是从定义的位置开始直到当前程序结束。
 
@@ -1408,30 +1208,7 @@
     "abc" "def"  //等价于 "abcdef"
     ```
 
-4. ISO C提供了字符创建运算符(#@)，字符串创建运算符(#)，拼接操作(##)，
-
-    ```c
-    #define ToChar(x) #@x      //由于C语言字符串和字符的引号不同，因此需要分开处理
-    char a = ToChar(1); // 被替换为 char a = '1';
-    
-    #define doit(name) pr_limit(#name, name)
-    doit(RLIMIT_CORE);  //被替换为 pr_limit("RLIMIT_CORE", RLIMIT_CORE);
-    
-    #define Conn(x,y) x##y 
-    int  n = Conn(123,456);   // 被替换为 int n = 123456;
-    char* str = Conn("asdf", "adf")  // 被替换为 char* str = "asdf""adf";由于ISO C会再进行拼接因此为"asdfadf"
-    ```
-
-5. 使用##还有一个特点，就是当##对应的参数为空时，会删除前面的逗号：
-
-    ```c
-    #define LOG(_STRING, ...)   printf(__STRING, ##__VA_ARGS__)  //...表示可变参数，对应到__VA_ARGS__
-    
-    log_info("cout");  //__STRING为"cout"，__VA_ARGS__为空，因此结果为 printf("cout"); 由于__VA_ARGS__为空，因此删除了前面的逗号
-    log_info("cout: %d", count); //被替换为 printf("cout count: %d", count);
-    ```
-
-6. sizeof和strlen：
+4. sizeof和strlen：
 
     ```c
     int main() {
@@ -1447,9 +1224,9 @@
     //strlen计算字符的个数，不包括末尾的'\0'。sizeof则包括。sizeof是在编译阶段计算，strlen是函数调用。
     ```
 
-7. 标准C头文件 <string.h>提供了字符串的操作函数。
+5. 标准C头文件 <string.h>提供了字符串的操作函数。
 
-8. 字符串长度计算 strlen：
+6. 字符串长度计算 strlen：
 
    ```c
    size_t strlen(const char *s);  //计算字符串s的大小，不包括尾零。
@@ -1457,7 +1234,7 @@
    sizeof("hello\0abc"); //结果为10。sizeof(s)会计算尾零。
    ```
 
-9. 字符串拷贝 strcpy：
+7. 字符串拷贝 strcpy：
 
    ```c
    char *strcpy(char *dest, const char *src); //可以将一个字符串常量或一个字符数组逐字符拷贝给一个字符数组，包括尾零。由于数组名是一个常量，因此只能在初始化的时候进行赋值。
@@ -1466,20 +1243,20 @@
    strncpy(dest, "hello", STRSIZE);
    ```
 
-10. 字符串拼接 strcat：
+8. 字符串拼接 strcat：
 
     ```c
     char *strcat(char *dest, const char *src);   将src的内容附加到dest的末尾。src不会被改变，dest会被改变。会覆盖掉dest原来的尾零，添加新的尾零。该函数容易覆盖dest后面的内容，可以用strncat来避免越界。
     ```
 
-11. 字符串比较 strcmp：
+9. 字符串比较 strcmp：
 
      ```c
      int strcmp(const char *s1, const char *s2);    //实际是逐个进行ASCII码的比较。返回值为第一个不等的字符差距，＜0表示前一个小。
      strcmp("ab","aa"); //结果为1。       可以用strncmp来设定比较前n个字符。
      ```
 
-12. 字符串分隔strtok，strsep：
+10. 字符串分隔strtok，strsep：
 
       ```c
      char *strtok(char *str, const char *delim); //将一个字符串str通过分隔符delim拆分为0个或多个非空的子串。第一次调用时，str应为对应的字符串，如果后续要处理同一个串，则str应为NULL。这个函数应该被包含在一个循环内，delim可以包含多个分割字符，每次的分割中可以使用不同的分隔符。返回值为被分割出来的以'\0'结尾的子串，该子串不包含分隔符。
@@ -1493,87 +1270,87 @@
      //strsep是用来替换strtok的，因为strtok无法处理空的，但是strtok是C标准库函数，而strsep是BSD4.4的函数，移植性差。
       ```
 
-13. strtok_r的例子：
+11. strtok_r的例子：
 
-      ```c
-     #include <stdio.h>
-     #include <stdlib.h>
-     #include <string.h>
-     #include <stdbool.h>
-     int main(int argc, char* argv[]) {
-         char* str1, * str2, * token, * subtoken;
-         char* saveptr1, * saveptr2;
-         if (argc != 4) {
-             fprintf(stderr, "Usage: %s string delim subdelim\n", argv[0]);
-             exit(EXIT_FAILURE);
-         }
-         str1 = argv[1];
-         for (int j = 1; ;j++) {
-             token = strtok_r(str1, argv[2], &saveptr1);
-             if (token == NULL)
-                 break;
-             printf("%d: %s\n", j, token);
-             str2 = token;
-             while (true) {
-                 subtoken = strtok_r(str2, argv[3], &saveptr2);
-                 if (subtoken == NULL)
-                     break;
-                 printf(" --> %s\n", subtoken);
-                 str2 = NULL;
-             }
-             str1 = NULL;
-         }
-         exit(EXIT_SUCCESS);
-     }
-     //程序被编译链接为sep 执行命令为  ./sep "a/bbb///cc;xxx:yyy:" ":;" /
-     //之所以要为第二和第三个参数加上双引号(单引号也行)，是因为;在shell中被认为是多个命令之间的分割，例如 ls;date 会被认为是两个命令写在了一行中。
-     //在vscode调试时，需要在launch.json中添加命令行参数，只用添加./sep以后的参数，且都应该用" "包裹起来，因此原来的" "可以用' '代替。例如 "args": ["'a/bbb///cc;xxx:yyy:'", "':;'", "'/'"]
-     //程序运行的结果为：
-     1: a/bbb///cc
-      --> a
-      --> bbb
-      --> cc
-     2: xxx
-      --> xxx
-     3: yyy
-      --> yyy
-      ```
+       ```c
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <string.h>
+      #include <stdbool.h>
+      int main(int argc, char* argv[]) {
+          char* str1, * str2, * token, * subtoken;
+          char* saveptr1, * saveptr2;
+          if (argc != 4) {
+              fprintf(stderr, "Usage: %s string delim subdelim\n", argv[0]);
+              exit(EXIT_FAILURE);
+          }
+          str1 = argv[1];
+          for (int j = 1; ;j++) {
+              token = strtok_r(str1, argv[2], &saveptr1);
+              if (token == NULL)
+                  break;
+              printf("%d: %s\n", j, token);
+              str2 = token;
+              while (true) {
+                  subtoken = strtok_r(str2, argv[3], &saveptr2);
+                  if (subtoken == NULL)
+                      break;
+                  printf(" --> %s\n", subtoken);
+                  str2 = NULL;
+              }
+              str1 = NULL;
+          }
+          exit(EXIT_SUCCESS);
+      }
+      //程序被编译链接为sep 执行命令为  ./sep "a/bbb///cc;xxx:yyy:" ":;" /
+      //之所以要为第二和第三个参数加上双引号(单引号也行)，是因为;在shell中被认为是多个命令之间的分割，例如 ls;date 会被认为是两个命令写在了一行中。
+      //在vscode调试时，需要在launch.json中添加命令行参数，只用添加./sep以后的参数，且都应该用" "包裹起来，因此原来的" "可以用' '代替。例如 "args": ["'a/bbb///cc;xxx:yyy:'", "':;'", "'/'"]
+      //程序运行的结果为：
+      1: a/bbb///cc
+       --> a
+       --> bbb
+       --> cc
+      2: xxx
+       --> xxx
+      3: yyy
+       --> yyy
+       ```
 
-14. strsep的例子：
+12. strsep的例子：
 
-      ```c
-     #include <stdio.h>
-     #include <stdlib.h>
-     #include <glob.h>
-     #include <string.h>
-     #include <stdbool.h>
-     int main() {
-         char* linebuffer = NULL;
-         size_t linebuf_size = 0;
-         char* tok = NULL;
-         int i = 0;
-         if (getline(&linebuffer, &linebuf_size, stdin) < 0) { //从命令行获取一行输入,会包含\n
-             perror("getline()");
-             exit(1);
-         }
-         linebuffer[strlen(linebuffer) - 1] = 0;   //去除末尾的\n
-         while (true) {   //反复调用
-             tok = strsep(&linebuffer, " \t\n");   //三个分隔符，空格，制表符，换行
-             printf("[%d]:tok=[%s]\tlinebuffer=[%s]\n", i, tok, linebuffer);
-             if (tok == 0)
-                 break;
-             i++;
-         }
-         exit(0);
-     }
-     //输入为"ls -l   /etc" 输出为:
-     [0]:tok=[ls]     linebuffer=[-l   /etc]
-     [1]:tok=[-l]     linebuffer=[  /etc]
-     [2]:tok=[]       linebuffer=[ /etc]
-     [3]:tok=[]       linebuffer=[/etc]
-     [4]:tok=[/etc]   linebuffer=[(null)]
-     [5]:tok=[(null)] linebuffer=[(null)]
-      ```
+       ```c
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <glob.h>
+      #include <string.h>
+      #include <stdbool.h>
+      int main() {
+          char* linebuffer = NULL;
+          size_t linebuf_size = 0;
+          char* tok = NULL;
+          int i = 0;
+          if (getline(&linebuffer, &linebuf_size, stdin) < 0) { //从命令行获取一行输入,会包含\n
+              perror("getline()");
+              exit(1);
+          }
+          linebuffer[strlen(linebuffer) - 1] = 0;   //去除末尾的\n
+          while (true) {   //反复调用
+              tok = strsep(&linebuffer, " \t\n");   //三个分隔符，空格，制表符，换行
+              printf("[%d]:tok=[%s]\tlinebuffer=[%s]\n", i, tok, linebuffer);
+              if (tok == 0)
+                  break;
+              i++;
+          }
+          exit(0);
+      }
+      //输入为"ls -l   /etc" 输出为:
+      [0]:tok=[ls]     linebuffer=[-l   /etc]
+      [1]:tok=[-l]     linebuffer=[  /etc]
+      [2]:tok=[]       linebuffer=[ /etc]
+      [3]:tok=[]       linebuffer=[/etc]
+      [4]:tok=[/etc]   linebuffer=[(null)]
+      [5]:tok=[(null)] linebuffer=[(null)]
+       ```
 
 # 指针
 
@@ -2323,146 +2100,411 @@
 5. 树又称为有向无环图。
 6. 顺序存储的缺点是增加和删除比较费劲，需要复制很多数据。因为顺序存储使用的是一块连续的内存空间。
 
-# 条件编译
+# GCC
 
-1. vs在debug，x86编译时，分别会自动定义对应的宏，\_DEBUG，\_WIN64。如果没有对应的就是release或x64。
+1. C源文件→预处理→编译→汇编→链接→可执行文件。
+2. 一般来说，文件的后缀名是无所谓的，但是编译器会根据不同的后缀名选择不同的操作，因此还是要写对后缀名。后缀为.c的，gcc把它当作是C源程序，而g++当作是c++源程序；后缀为.cpp的，两者都会认为是c++程序，建议遵守默认的后缀名规则。
 
-2. 有时候需要在程序关键地方设置prinf打印信息，而在程序发布的时候又需要取消这些功能，实际上不用删除。只要用条件编译即可：
-
-   ```c
-   #ifdef _DEBUG
-   	printf("调试中");
-   #endif // _DEBUG
-   ```
-
-3. 如果使用的是gcc之类的命令行工具，可以在编译时手动加上对应的宏。
-
-4. 还可以设定不同的目标下使用不同的库。
+3. #pragma命令是用来设定编译器的状态，指定编译器完成一些特定的动作。
 
    ```c
-   #ifdef _DEBUG
-       #ifndef _WIN64 //64位
-       	#pragma comment(lib,"json/json_mtd.lib") //结尾的d表示debug
-       #else
-       	#pragma comment(lib,"json/json_mtd_x64.lib")
-       #endif
-   #else   //release
-       #ifndef _WIN64
-       	#pragma comment(lib,"json/json_mt.lib")
-       #else
-       	#pragma comment(lib,"json/json_mt_x64.lib")
-       #endif
-   #endif
+   #pragmat pack([n]) //指示结构体和联合成员的对齐方式
+   #pragmat message("string") //输出编译信息
+   #pragma warning  //有选择地改变编译器的警告信息行为
+   #pragma once //在头文件中加入这条指令，可以防止被重复包含，可以替代条件编译宏的方法。
    ```
 
-# GCC，GDB
+4. 广义的编译指的是源程序→可执行文件，狭义的编译指的是预处理后的文件→汇编文件。
 
-1. 使用GCC编译时，需要加入-g选项，才会在编译的时候加入符号表（源代码，行号等），从而可以调试。
+5. 汇编过程是将汇编文件转化为机器代码的目标文件。
 
-2. 在64位系统上使用-m32选项来编译生成32位程序，可能会报以下错误，是因为没有安装32位的头文件和库，安装gcc-multilib库即可：
+6. 链接是将使用到的外部库的函数实现找到，静态链接会将函数实现复制到可执行文件中，动态则不会。
 
-    ```shell
-    zj@hit:~/linux_c/process$ gcc test.c -o test -m32
-    In file included from test.c:1:
-    /usr/include/stdio.h:27:10: fatal error: bits/libc-header-start.h: No such file or directory
-       27 | #include <bits/libc-header-start.h>
-          |          ^~~~~~~~~~~~~~~~~~~~~~~~~~
-    compilation terminated.
+7. ```shell
+   gcc -E hello.c > hello.i  //预处理，默认输出到屏幕上，可以重定向到文件中。
+   gcc -S hello.i   //编译，默认产生.s文件。得到汇编语言书写的文件，即文本文件。
+   gcc -c hello.s   //汇编，默认产生.o的目标文件，二进制的，
+   gcc hello.o -o hello  //链接成可执行文件，并重命名为hello。默认产生可执行文件名为是a.out。
+   ```
+
+8. 使用`--verbose`选项，可以使GCC打印出具体调用的命令细节，collect2程序是对ld链接器的一个封装。
+
+9. 可以用make来编译一个文件，例如`make hello`，会执行 `gcc hello.c -o hello`。
+
+10. -Wall 选项可以打开gcc的所有警告和报错开关，最严格的模式。一般来说，应该尽可能修改程序到所有的警告都消失，或者说是可控的警告。
+
+11. 如果想要抑制某个warning，可以使用类似的编译选项`-Wno-unused-dummy-argument`。这个选项在-Wall时也有用。
+
+12. 使用任何的外部的函数都要包含头文件的定义，例如：
+
+    ```c
+    #include <stdio.h>
+    #include <stdlib.h>
+    int main(void){
+        int *p = NULL;
+        p = malloc(sizeof(int));
+        if(p == NULL)
+            return -1;
+    }
     ```
 
-3. -m32：int，long，指针都是32位的。-m64：int是32位，long，指针都是64位的。
+    1. 上面的代码编译不会报任何警告，即使开启了Wall。但是如果不包含malloc函数的头文件，即stdlib.h，那么就会报一个警告，提示malloc函数的返回值类型和用于接受的变量类型不匹配。
+    2. 因为对于未定义的函数，gcc就会认为返回值的类型为int，因此在第5行将一个int类型的返回值赋值给int *类型的变量是不合理的，才会报这样的错误。
+    3. 有些人认为只要将malloc的返回值强制转化为int\*之后，在复制就没问题了，即用`(int\*) malloc(sizeof(int));`实则不然，因为这种强制类型转化，在gcc看来，也是warning。解决办法就是包含上头文件即可。
+    4. 实际上malloc的返回值 void \*是一个特殊的类型，他可以赋值给任何类型的指针，也可以将任何类型的指针复制给他，编译器都不会报警告。其实也有一个例外，==就是==
 
-4. GDB常用命令：
+13. 有时候出现段错误的原因就隐藏在没有解决的警告中。例如下面的程序如果去掉对string.h的包含，编译时没有任何警告，运行时会报段错误。如果打开-Wall选项后，编译时会报警告，提示strerror的返回值和用于接受的变量类型不匹配，包含上该头文件就没事了。
 
-5. ![image-20210521135200025](C语言.assets/image-20210521135200025.png)
+    ```c
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <errno.h>
+    #include <string.h>
+    int main (){
+        FILE *fp;
+        fp = fopen("tmp", "r");
+        if (fp == NULL){
+            fprintf(stderr, "fopen:%s\n", strerror(errno));
+            exit(-1);
+        }
+        fclose(fp);
+        exit(0);
+    }
+    ```
 
-6. p命令可以执行函数，最后不用加；s命令需要有源程序才可以进入。list命令可以显示源代码。使用info命令来查看寄存器，内存等。
+14. 如果编译的工程中有多个.c文件中都存在main函数，gcc也会报错。
 
-7. 使用ulimit -a查看coredump文件的大小限制，默认是0，表示出错时不生成转储文件。修改后，再出错则会生成转储文件，文件名为 core.进程号 。使用gdb调试core文件：
+15. 链接选项：
+
+    ```c
+    //默认是动态链接，带--static前缀-l是静态链接
+    -lm //数学库math
+    -lstdc++ //标准c++库
+    -lc  //标准c库，由于gcc默认编译c文件和链接标准c库，因此可以省略
+    -lpthread //多线程库 pthread
+    ```
+
+16. 
+
+17. 
+
+# 预处理器相关
+
+1. C预处理器(C preprocessor)，简写为cpp，是一个宏处理器，会被C编译器在编译前自动调用。它的目的是只是为了处理C、C++、Objective-C源代码，不过也被滥用为一个通用的文本处理器，而当输入文本不符合类C语言的语法时，C预处理器会报错退出。不能那它来处理Makefile，因为所有的制表符都会被删除，这样Makefile就不能正常工作了。
+
+2. 如果需要真正的通用文本处理器，可以使用GNU M4，他是Autoconf体系的一部分。
+
+3. 程序中所有以#开头的部分(头文件的包含，条件编译等)都是在预处理中完成替换。
+
+4. 条件编译的主要目的是为了兼容不同的平台和处理器架构，最大程度复用代码。
+
+5. 有了预处理这个构成，就可以使用宏，使得编程方便，可以使用头文件，进行模块化。
+
+6. 预处理过程：
+
+   ```c
+   头文件展开 //将#include包含的文件插入到该指令的位置
+   宏展开    //展开所有的宏定义，并删除#define
+   条件编译  //处理所有的条件编译指令 #if #ifdef #ifndef #else #endif
+   删除注释
+   添加行号和文件名标识 //编译调试时可以显式行号信息
+   保留#pragma编译器指令
+   ```
+
+7. 条件编译的宏名取法：如果文件名为xx.h，宏一般为`XX_H__`或`__XX_H`。因为内核中的头文件一般是前加下划线，用户程序使用后加下划线是为了防止和内核发生冲突。
+
+8. #include 头文件的时候，<>包含的文件会直接去系统指定的目录中寻找，而" "包含的文件会先在当前路径下寻找，如果没找到，再去系统目录下寻找。
+
+9. GNU C 预处理器提供了ISO C标准的一个超集。默认情况下，不严格按照标准的行为来。
+
+   ```shell
+   #如果要严格按照ISO C的标准来处理，可以使用如下选项之一:
+   -std=c90
+   -std=c99
+   -std=c11
+   -std=c17
+   #如果要做所有的强制诊断，需要使用如下选项:
+   -pedantic
+   ```
+
+10. 源代码的字符集处理十分复杂，C标准讨论了2种，但是常用的最少有4种。源文件可以是任意字符集的，C预处理器在一开始会先进行把源文件的字符集转化为ISO 10646。也就是Unicode字符集。C预处理器使用utf-8编码的Unicode字符集。C预处理器的输出也是utf-8编码的。超出ASCII表示范围的字符，可以用\u或\U来转义表示或者用户直接输入。
+
+    ```shell
+    #设定源文件使用的字符集
+    -finput-charset=
+    ```
+
+11. 输入文件会被读入到内存中，然后按照行进行分割。不同的系统使用不同的习惯来标识一行的末尾，常见的有有如下三种ASCII控制序列。C预处理器会自动处理这些，因此用户可以在不同平台之间相互拷贝源代码而不用考虑这些问题。不过当不同电脑通过NFS修改共享的文件时，可能会导致一个文件中出现不一致的行尾标记，这可能导致行号功能出问题。
+
+    ```shell
+    LF        # Unix
+    CR LF     # DOS和VMS
+    CR        # 经典Mac OS(在OS X之前)
+    ```
+
+12. 通常情况下，文件最后一行末尾也应该有一个行尾标记，否则gcc会报warning。
+
+13. 可以用来定义标识常量，即该常量在程序的多处用到，后期有可能进行修改，例如3.14。也可以定义没有宏体的宏，这种宏一般用来做条件编译的占位。
+
+14. ```c
+    #define PI 3.14        //宏名+宏体
+    #define __STDIO__
+    ```
+
+15. 预处理结束后，宏名会被替换为宏体，并不做语法检查。
+
+16. ```c
+    #define ADD 2+3
+    
+    ADD * ADD;       //结果并不是5*5，标识常量的使用应该在外边加上括号。
+    ```
+
+17. 带参数的宏，参数也应该加上括号，防止替换后的参数改变运算顺序。
+
+    ```c
+    #define MAX(a,b)  ((a) > (b) ? (a) : (b))
+    int i = 3,j = 5;
+    MAX(i,j);      //预处理后为(i > j ? i : j)
+    ```
+
+18. 带参数的宏可以用函数来替代，宏的使用会减小运行时的消耗，因为他的工作在编译时就完成了。内核的代码中有很多宏的应用。但是宏的应用容易出错。内核中使用宏非常多，因为这里的代码运行频率很高。
+
+19. 调用函数是有开销的，需要将当前的运行环境入栈，在函数调用完毕后再恢复。
+
+20. 宏毕竟不是函数，直接进行替换容易出现问题，例如：
+
+21. ```c
+    #define MAX(a,b)  ((a) > (b) ? (a) : (b))
+    int max(int a, int b){
+        return a > b ? a : b;
+    }
+    int main (){
+    	int i = 3,j = 5;
+    	
+    	printf("i=%d,j=%d\n",i,j);
+    	printf("%s\n",MAX(i++,j++));     //此时输出6。因为宏替换后为((i++) > (j++) ? (i++) : (j++))。
+    	printf("i=%d,j=%d\n",i,j);
+    }
+    ```
+
+22. 我们期望MAX达到的功能应该是函数max一样的，返回i和j中较大的那个数，然后对i和j分别自增1。第9行应该输出5，第10行应该输出4和6。而实际上第9行输出的是6，第10行输出的是4和7。这是因为较大的那个数在宏替换后还多进行了一次自增。出现这一问题的原因是因为宏参数没有被适当的变量接收。
+
+23. 进行大小比较的时候j=5，比较完的时候j就变成了6，i变成了4。然后返回6，第9行结束的时候j就变成了7。
+
+24. 对于函数max，实参分别为3和5。函数调用完毕返回后，i和j才会自增1。整个过程中i和j只自增了一次。
+
+25. 这个问题在标准C下无解，在linux下编程使用的是GNU C，他是标准C的扩展，使用glibc库，可以使用变量接受来解决该问题。
+
+    ```c
+    #define MAX(a,b)   ({typeof(a) A=(a),B=(b);((A)>(B)?(A):(B));})
+    
+    MAX(i,j);  //({int A=(i++),B=(j++);((A)>(B)?(A):(B));})  A=(i++)是先赋值再自增。
+    ```
+
+26. 宏被替换成了一个语句块，其中有两行语句，语句块的值为最后一行语句执行的结果。最外层加上一个大括号也是为了隔绝内外代码。
+
+27. 使用string.h中的strcpy函数时，会提示该函数不安全，推荐使用strcpy_s或者定义_CRT_SECURE_NO_WARNINGS 这个宏。定义该宏时，需要放在头文件string.h的包含之前才有用。或者使用编译器的命令行参数来配置。
+
+28. 每条注释都会被替换为一个空格，这一过程发生在预处理阶段前，因此无法无法使用宏来形成注释：
+
+    ```c
+    #ifndef DEBUG
+        #define PRINTF //
+    #else
+        #define PRINTF printf
+    #endif
+    ...  
+    PRINTF("Error in file %s at line %i\n", __FILE__, __LINE__); //作者的本意是想在没有定义DEBUG时将PRINTF替换为//，将这句话作为一个注释，在定义了DEBUG后，把PRINTF替换为printf，这样就可以输出行号和文件号了。
+    //但是会事与愿违，因为在宏替换前，//就会被替换为一个空格，第二行变成了"#define PRINTF  \n"，因此在宏替换时PRINTF会被替换为一个空格。因此当没有定义DEBUG时，第7行会变为一个逗号表达式(-Wall时会报warning，提示逗号左侧的操作数没有效果)，结果就是最右侧的操作数的结果，即行号7，不过这样也能起到不输出的作用。
+    ```
+
+29. ISO C提供了字符创建运算符(#@)，字符串创建运算符(#)，拼接操作(##)，
+
+    ```c
+    #define ToChar(x) #@x      //由于C语言字符串和字符的引号不同，因此需要分开处理
+    char a = ToChar(1); // 被替换为 char a = '1';
+    
+    #define doit(name) pr_limit(#name, name)
+    doit(RLIMIT_CORE);  //被替换为 pr_limit("RLIMIT_CORE", RLIMIT_CORE);
+    
+    #define Conn(x,y) x##y 
+    int  n = Conn(123,456);   // 被替换为 int n = 123456;
+    char* str = Conn("asdf", "adf")  // 被替换为 char* str = "asdf""adf";由于ISO C会再进行拼接因此为"asdfadf"
+    ```
+
+30. 使用##还有一个特点，就是当##对应的参数为空时，会删除前面的逗号：
+
+    ```c
+    #define LOG(_STRING, ...)   printf(__STRING, ##__VA_ARGS__)  //...表示可变参数，对应到__VA_ARGS__
+    
+    log_info("cout");  //__STRING为"cout"，__VA_ARGS__为空，因此结果为 printf("cout"); 由于__VA_ARGS__为空，因此删除了前面的逗号
+    log_info("cout: %d", count); //被替换为 printf("cout count: %d", count);
+    ```
+
+31. gcc提供-D选项来进行编译时宏定义：
+
+    ```shell
+    gcc -DDEBUG #相当于 #define DEBUG 1
+    gcc -DDEBUG=DEFN #相当于 #define DEBUG DEFN
+    ```
+
+32. vs在debug，x86编译时，分别会自动定义对应的宏，\_DEBUG，\_WIN64。如果没有对应的就是release或x64。
+
+33. 有时候需要在程序关键地方设置prinf打印信息，而在程序发布的时候又需要取消这些功能，实际上不用删除。只要用条件编译即可，不过需要重新编译整个软件才可以：
+
+    ```c
+    #ifdef _DEBUG
+    	printf("调试中");
+    #endif // _DEBUG
+    ```
+
+34. 如果使用的是gcc之类的命令行工具，可以在编译时手动加上对应的宏。
+
+35. 还可以设定不同的目标下使用不同的库。
+
+    ```c
+    #ifdef _DEBUG
+        #ifndef _WIN64 //64位
+        	#pragma comment(lib,"json/json_mtd.lib") //结尾的d表示debug
+        #else
+        	#pragma comment(lib,"json/json_mtd_x64.lib")
+        #endif
+    #else   //release
+        #ifndef _WIN64
+        	#pragma comment(lib,"json/json_mt.lib")
+        #else
+        	#pragma comment(lib,"json/json_mt_x64.lib")
+        #endif
+    #endif
+    ```
+
+# GDB
+
+1. 使用GCC编译时，需要加入-g选项，才会在编译的时候加入符号表（源代码，行号等），从而可以调试。可以再发布给用户时，使用strip命令将这些调试信息都去掉，可以保证安全，同时也减小可执行文件的体积。
+
+2. 有些项目在编译代码时候，会加上-O/-O2/-O3等选项来让编译器对代码进行优化，但这样做的后果可能会过滤掉部分或者全部的调试信息，甚至获取到的调试信息不是程序真正异常的地方，很容易被误导。所以，在debug程序时候，可以去掉这些编译参数。
+
+3. GDB常用命令：
+
+    ```shell
+    set args xxx  #传递参数xxx
+    set var       #修改变量的值
+    file xxx      #载入目标程序xxx
+    attach pid    #通过PID链接程序
+    start/s       #启动运行 程序会停在main()函数的开始处
+    continue/c    #继续运行
+    run/r         #运行程序
+    quit/q        #退出gdb
+    ```
+    
+4. ![image-20210521135200025](C语言.assets/image-20210521135200025.png)
+
+5. p命令可以执行函数，最后不用加；s命令需要有源程序才可以进入。list命令可以显示源代码。使用info命令来查看寄存器，内存等。
+
+6. 使用ulimit -a查看coredump文件的大小限制，默认是0，表示出错时不生成转储文件。修改后，再出错则会生成转储文件，文件名为 core.进程号 。使用gdb调试core文件：
 
    ```shell
    gdb book core.11231
    ```
 
-8. 此时会直接到出错的行，显示如下：
+7. 此时会直接到出错的行，显示如下：
 
-9. ![image-20210521140537479](C语言.assets/image-20210521140537479.png)
+8. ![image-20210521140537479](C语言.assets/image-20210521140537479.png)
 
-10. 使用bt命令查看函数的调用栈。
+9. 使用bt命令查看函数的调用栈。
 
-11. ![image-20210521140617711](C语言.assets/image-20210521140617711.png)
+10. ![image-20210521140617711](C语言.assets/image-20210521140617711.png)
 
-12. 调试正在运行的程序：
+11. 调试正在运行的程序：
 
-    ```shell
-    gdb book1 -p 21495      #进程号为21495。 book1为可执行文件的路径。
-    ```
+     ```shell
+     gdb book1 -p 21495      #进程号为21495。 book1为可执行文件的路径。
+     ```
 
-13. ![image-20210521141037081](C语言.assets/image-20210521141037081.png)
+12. ![image-20210521141037081](C语言.assets/image-20210521141037081.png)
 
-14. 调试多进程程序：
+13. 调试多进程程序：
 
-    ```shell
-    set follow-fork-mode parent   #调试父进程，默认
-    set follow-fork-mode child    #调试子进程，默认
-    
-    set detach-on-fork [on|off]  #表示调试当前进程时，其他进程是否继续运行。默认是on
-    
-    info inferiors   #查看当前调试的进程
-    inferior 进程ID  #切换要调试的进程，这个ID不是PID而是gdb给进程的编号。
-    ```
+     ```shell
+     set follow-fork-mode parent   #调试父进程，默认
+     set follow-fork-mode child    #调试子进程，默认
+     
+     set detach-on-fork [on|off]  #表示调试当前进程时，其他进程是否继续运行。默认是on
+     
+     info inferiors   #查看当前调试的进程
+     inferior 进程ID  #切换要调试的进程，这个ID不是PID而是gdb给进程的编号。
+     ```
 
-15. ![image-20210521142233955](C语言.assets/image-20210521142233955.png)
+14. ![image-20210521142233955](C语言.assets/image-20210521142233955.png)
 
-16. 调试多线程程序：https://www.bilibili.com/video/BV1ei4y1V758?p=5
+15. 调试多线程程序：https://www.bilibili.com/video/BV1ei4y1V758?p=5
 
-17. ps -aL 可以查看当前运行的轻量级进程，也就是线程。pstree -p 主线程ID。
+16. ps -aL 可以查看当前运行的轻量级进程，也就是线程。pstree -p 主线程ID。
 
-    ```shell
-    zj@zjhit:~$ ps aux| grep rand
-    zj     2931  0.0  0.0 445036   632 pts/2    Sl+  15:17   0:00 ./rand_thread
-    zj     3238  0.0  0.0   6304   744 pts/1    S+   15:17   0:00 grep --color=auto rand
-    
-    zj@zjhit:~$ ps -aL |grep rand
-       2931    2931 pts/2    00:00:00 rand_thread    #主线程,线程ID和进程ID相同，这里的线程实际上是一种轻量级进程LWP。
-       2931    2932 pts/2    00:00:00 rand_thread
-       2931    2933 pts/2    00:00:00 rand_thread
-       2931    2934 pts/2    00:00:00 rand_thread
-       2931    2935 pts/2    00:00:00 rand_thread
-       2931    2936 pts/2    00:00:00 rand_thread
-       2931    2937 pts/2    00:00:00 rand_thread
-    ```
-    
-18. 相关命令：
+     ```shell
+     zj@zjhit:~$ ps aux| grep rand
+     zj     2931  0.0  0.0 445036   632 pts/2    Sl+  15:17   0:00 ./rand_thread
+     zj     3238  0.0  0.0   6304   744 pts/1    S+   15:17   0:00 grep --color=auto rand
+     
+     zj@zjhit:~$ ps -aL |grep rand
+        2931    2931 pts/2    00:00:00 rand_thread    #主线程,线程ID和进程ID相同，这里的线程实际上是一种轻量级进程LWP。
+        2931    2932 pts/2    00:00:00 rand_thread
+        2931    2933 pts/2    00:00:00 rand_thread
+        2931    2934 pts/2    00:00:00 rand_thread
+        2931    2935 pts/2    00:00:00 rand_thread
+        2931    2936 pts/2    00:00:00 rand_thread
+        2931    2937 pts/2    00:00:00 rand_thread
+     ```
 
-    ```shell
-    info threads  #查看所有线程
-    (gdb) info threads
-      Id   Target Id                                      Frame
-      1    Thread 0x7ffff7d95740 (LWP 3334) "rand_thread" clone ()
-        at ../sysdeps/unix/sysv/linux/x86_64/clone.S:78
-    * 2    Thread 0x7ffff7d94700 (LWP 3338) "rand_thread" producer (     # *表示当前正在运行的线程。
-        ptr=0x0) at rand_thread.c:19
-      3    Thread 0x7ffff7593700 (LWP 3339) "rand_thread" clone ()
-        at ../sysdeps/unix/sysv/linux/x86_64/clone.S:78
-    thread 1    #切换到ID为1的线程。
-    set scheduler-locking on #设置只运行当前线程
-    set scheduler-locking on #设置运行所有线程
-    thread apply 2 n         #指定ID为2的线程执行gdb命令n。
-    thread apply all n       #指定所有线程执行gdb命令n。
-    ```
+17. 相关命令：
 
-19. 设置断点或单步跟踪会严重干扰多进（线）程之间的竞争状态，导致调试的过程和实际运行的不一致。
+     ```shell
+     info threads  #查看所有线程
+     (gdb) info threads
+       Id   Target Id                                      Frame
+       1    Thread 0x7ffff7d95740 (LWP 3334) "rand_thread" clone ()
+         at ../sysdeps/unix/sysv/linux/x86_64/clone.S:78
+     * 2    Thread 0x7ffff7d94700 (LWP 3338) "rand_thread" producer (     # *表示当前正在运行的线程。
+         ptr=0x0) at rand_thread.c:19
+       3    Thread 0x7ffff7593700 (LWP 3339) "rand_thread" clone ()
+         at ../sysdeps/unix/sysv/linux/x86_64/clone.S:78
+     thread 1    #切换到ID为1的线程。
+     set scheduler-locking on #设置只运行当前线程
+     set scheduler-locking on #设置运行所有线程
+     thread apply 2 n         #指定ID为2的线程执行gdb命令n。
+     thread apply all n       #指定所有线程执行gdb命令n。
+     ```
 
-20. 屏幕输出日志的缺点：如果日志很多，屏幕会很乱。没有记录。应该讲日志写入到文件中比较好。
+18. 设置断点或单步跟踪会严重干扰多进（线）程之间的竞争状态，导致调试的过程和实际运行的不一致。
 
-21. 使用vscode remote插件进行远程调试时，可以在地下窗口的"调试控制台"中输入gdb的命令，不过要加上-exec 的前缀。
+19. 屏幕输出日志的缺点：如果日志很多，屏幕会很乱。没有记录。应该讲日志写入到文件中比较好。
 
+20. 使用vscode remote插件进行远程调试时，可以在地下窗口的"调试控制台"中输入gdb的命令，不过要加上-exec 的前缀：
 
-# C 标准
+     ```shell
+     -exec info breakpoints #和下面一行等价
+     `info breakpoints 
+     ```
 
-1. libc是指C标准，
+21. 
+
+# 标准库实现
+
+1. libc是指C标准。
 2. glibc指的是libc of GNU，也就是gnu组织对C标准的实现，它除了包含ISO C中规定的，还包含一些POSIX（类Unix操作系统都遵守）规定的和GNU（linux遵守）规定的。通过yum install glibc安装。
+3. 关于libc，glib，glibc，eglibc，libc++，libstdc++，gcc，g++：
+   1. libc是Linux下原来的标准C库，也就是当初写hello world时包含的头文件#include < stdio.h> 定义的地方。
+   2. 后来逐渐被glibc取代，也就是传说中的GNU C Library,在此之前除了有libc，还有klibc,uclibc。现在只要知道用的最多的是glibc就行了，主流的一些linux操作系统如 Debian, Ubuntu，Redhat等用的都是glibc（或者其变种，下面会说到)。
+   3. glibc是Linux系统中最底层的API，几乎其它任何的运行库都要依赖glibc。 glibc最主要的功能就是对系统调用的封装。glibc自身也提供了一些上层应用函数必要的功能,如string,malloc,stdlib,linuxthreads,locale,signal等等。
+   4. eglibc又是什么？ 这里的e是Embedded的意思，主要特性是为了更好的支持嵌入式架构，可以支持不同的shell(包括嵌入式)，但它是二进制兼容glibc的，就是说如果你的代码之前依赖eglibc库，那么换成glibc后也不需要重新编译。ubuntu系统用的就是eglibc（而不是glibc）。
+   5. 还有一个glib看起来也很相似，那它又是什么呢？glib也是个c程序库，不过比较轻量级，glib将C语言中的数据类型统一封装成自己的数据类型，提供了C语言常用的数据结构的定义以及处理函数，有趣的宏以及可移植的封装等(注：glib是可移植的，说明你可以在linux下，也可以在windows下使用它）。那它跟glibc有什么关系吗？其实并没有。著名的GTK+和Gnome底层用的都是glib库。
+   6. linux系统的ls,cd,mv,ps等等全都得依赖它，很多人在更换/升级都有过惨痛的教训，甚至让整个系统奔溃无法启动。所以，强烈不建议更换/升级这些库！
+   7. libc++和libstdc++，两个都是C++标准库。libc++是针对clang编译器特别重写的C++标准库，那libstdc++自然就是gcc的事儿了。libstdc++与gcc是捆绑在一起的，也就是说安装gcc的时候会把libstdc++装上。
+
+4. libstdc++虽然提供了c++程序的标准库，但它并不与内核打交道。对于系统级别的事件，libstdc++首先是会与glibc交互，才能和内核通信。
+5. 标准C库是由操作系统提供，系统调用也会以C语言形式给出，操作系统某些代码也会用到标准C库。标准C++库一般由C++编译器提供。
+6. clang是LLVM编译器工具集的一个用于编译C、C++、Objective-C的前端。LLVM项目的目标是提供一个GNU编译器套装（gcc）的替代品，由苹果公司的赞助开发。
+7. 直接使用gcc编译cpp文件，会报错，使用 -lstdc++链接即可。或者用g++编译。
 
 # C和C++兼容
 

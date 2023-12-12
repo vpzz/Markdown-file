@@ -3457,6 +3457,14 @@
 
 3. 可以通过curl google.com来检测是否配置成功代理。ping google.com是无效的，因为ping命令使用的是ICMP协议，而http代理只能代理http协议，在应用层；socks5代理只能代理tcp或udp协议。
 
+4. 以上设置的代理可能会对apt命令无效，可以单独为其设置代理：
+
+   ```shell
+   #新建一个文件/etc/apt/apt.conf.d/95proxy.conf 文件名不重要，之所以这么起是为了表明功能
+   Acquire::http::Proxy "http://192.168.80.1:10811";
+   Acquire::https::Proxy "http://192.168.80.1:10811";
+   ```
+
 
 # tmux
 
