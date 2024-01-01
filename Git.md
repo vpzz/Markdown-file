@@ -1044,10 +1044,6 @@
 
 45. 引用规范的格式由一个可选的+和其后的<src>:<dst>组成。其中src是一个模式，代表远程版本库的引用，dst是本地跟踪的远程引用的位置。
 
-46. 
-
-47. 
-
 # 高层命令
 
 1. 分为CURD     新增，修改，重命名删除，查询
@@ -1078,8 +1074,6 @@
     test v1
     
     ```
-
-12. 
 
 13. ```shell
     ~/.../.git/objects >>> tree
@@ -1284,7 +1278,7 @@
 
 1. 有时候，当在一个分支上进行了一定的工作，所有的东西都进入了混乱的状态，而此时想要切换到另一个分支进行别的工作，但是又不想为这些为晚上的工作使用一次提交。
 
-2. ```
+2. ```shell
    git stash			#将当前状态压入该分支对应的栈中。
    保存工作目录和索引状态 WIP on master: 99cb4bc fix conflict
    git stash list
@@ -1310,7 +1304,7 @@
 
    1. 撤销文件未暂存的修改：git restore b.txt
 
-      ```
+      ```shell
       git st
       位于分支 master
       尚未暂存以备提交的变更：
@@ -1334,7 +1328,7 @@
 
    2. 撤销文件的暂存状态，使之变为已修改的状态，不过工作目录中文件的内容不会变，但是暂存区的文件会变回文件上一次暂存的状态：git restore --staged b.txt
 
-      ```
+      ```shell
       git add .
       git st
       位于分支 master
@@ -1366,7 +1360,7 @@
    
    3. 覆盖之前的提交
 
-      ```
+      ```shell
       git add .
       git commit -m "b.txt 3line"
       [master 6d9b58d] b.txt 3line
@@ -1390,8 +1384,8 @@
 
 16. reset
 
-17. ```
-    git reset --soft HEAD~       #将HEAD指针移动到当前HEAD指针的上一次提交对象上。最后的参数也可以是commit对象的hash值。
+17. ```shell
+    git reset --soft HEAD~ #将HEAD指针移动到当前HEAD指针的上一次提交对象上。最后的参数也可以是commit对象的hash值。
     ```
 
 18. git reset 的操作和checkout不同，checkout是移动head指针到新的分支上，而reset是移动head和当前分支，指向新的commit对象，这里不涉及别的分支。本质上是撤销了上一次的commit命令。log中也看不到了。下一次再提交时，就会覆盖掉reset前的那个commit。
@@ -1400,7 +1394,7 @@
 
 20. --soft表示只移动head，不修改工作目录和暂存区。
 
-21. ```
+21. ```shell
     git reset [--mixed] HEAD~       #默认参数是--mixed，修改head和暂存区，不修改工作目录
     git reset --hard HEAD~          #修改head，暂存区和工作目录
     ```
@@ -1430,7 +1424,7 @@
 
    3. 项目经理为远程仓库配置别名和用户信息
 
-      ```
+      ```shell
       git remote add MyVimrc https://github.com/vpzz/MyVimrc.git    为远程仓库指定一个别名。
       git remote -v     #显示已配置的别名
       MyVimrc	https://github.com/vpzz/MyVimrc.git (fetch)
@@ -1440,13 +1434,13 @@
 
    4. 项目经理推送本地项目到远程仓库
 
-      ```
+      ```shell
       git push MyVimrc master	输入远程仓库的别名和要提交的分支。则会提交该分支的最新版本到github。
       ```
 
    5. 团队成员克隆远程仓库
 
-      ```
+      ```shell
       git clone https://github.com/vpzz/MyVimrc.git     #clone不需要init和新建文件夹。
       ```
 

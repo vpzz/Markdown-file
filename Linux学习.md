@@ -150,15 +150,13 @@
        3. CPU有支持PCI-E的通道上限数量。如果是16，则表示支持1个x16，或者2个x8，或者1个x8，2个x4。但是一般的主板上的PCI-E接口的都比这个多。主板上的PCI-E插槽离CPU最近的那个是和CPU直接相连的，一般给显卡用，其他的一般是和南桥芯片相连，南桥和CPU相连的DMI通道速度比PCI-E慢。
        4. 为了让所有的扩展卡都可以安装在主板上，因此都制作成x16的，而其中的通道数可能只有8或者4，其余的都是空的，没有金手指。一张x16的卡安装在x16的插槽上，如果这个插槽只有x4的电路，也可以使用，不过只有原来1/4的速度上限了。
 
-44. 有时命令行程序会征求用户的意见，是否执行某项操作，一般用y或n来回答，其中大写的字母表示默认的选项，直接敲回车就会执行默认的选项。
+45. 有时命令行程序会征求用户的意见，是否执行某项操作，一般用y或n来回答，其中大写的字母表示默认的选项，直接敲回车就会执行默认的选项。
 
-45. ![image-20230509101451951](assets/image-20230509101451951.png)
-
-46. 
-
-47. 
-
-48. 
+    ```shell
+    Need to get 4,986 B of archives.
+    After this operation, 1,024 B of additional disk space will be used.
+    Do you want to continue? [Y/n]
+    ```
 
 # 虚拟机使用
 
@@ -364,19 +362,13 @@
     touch /.autorelabel #创建这样一个文件其实就是在告诉SELinux放行这个策略
     ```
 
-21. 
-
-22. 一些发行版使用/etc/inittab文件来管理系统开机时要启动的程序。Ubuntu则在/etc/init.d目录下存放各种开机启动的脚本。
+21. 一些发行版使用/etc/inittab文件来管理系统开机时要启动的程序。Ubuntu则在/etc/init.d目录下存放各种开机启动的脚本。
 
 23. 使用init进程的linux有5个运行级别，运行级别决定了init进程选择/etc/rcX.d中哪一个目录中的脚本来启动。
 
     1. 运行级别1表示单用户模式，只启动基本的系统进程和一个控制台终端进程。通常在系统有问题时，紧急用来修复时使用。
     2. 运行级别3表示多用户模式，在该模式下，大多数软件都会启动。
     3. 运行级别5表示图形化模式。
-
-24. 
-
-25. 
 
 # Systemd
 
@@ -509,17 +501,17 @@
 2. unit的相关操作：
 
    ```shell
-   $ systemctl list-units                         # 列出正在运行的 Unit  192个
-   $ systemctl list-units --all                   # 列出所有Unit，包括没有找到配置文件的或者启动失败的 366个
-   $ systemctl list-units --all --state=inactive  # 列出所有没有运行的 Unit   107个
-   $ systemctl list-units --failed                # 列出所有加载失败的 Unit   0个
-   $ systemctl list-units --type=service          # 列出所有正在运行的、类型为 service 的 Unit
+   $ systemctl list-units                        # 列出正在运行的 Unit  192个
+   $ systemctl list-units --all                  # 列出所有Unit，包括没有找到配置文件的或者启动失败的 366个
+   $ systemctl list-units --all --state=inactive # 列出所有没有运行的 Unit   107个
+   $ systemctl list-units --failed               # 列出所有加载失败的 Unit   0个
+   $ systemctl list-units --type=service         # 列出所有正在运行的、类型为 service 的 Unit
    ```
 
 3. systemctl status命令用于查看系统状态和单个 Unit 的状态：
 
    ```shell
-   $ systemctl status                                          # 显示系统状态
+   $ systemctl status  # 显示系统状态
     zj-hit
        State: running
         Jobs: 0 queued
@@ -709,9 +701,7 @@
     AllowIsolate=yes      #允许使用systemctl isolate切换到
     ```
 
-15. 
-
-16. target的操作：
+15. target的操作：
 
     ```shell
     $ systemctl list-unit-files --type=target         # 查看当前系统的所有 Target
@@ -778,36 +768,6 @@
     Feb 24 09:55:25 zj-hit sshd[1048]: Accepted password for zj from 192.168.80.1 p>
     Feb 24 09:55:25 zj-hit sshd[1048]: pam_unix(sshd:session): session opened for u>
     ```
-
-22. 
-
-23. 
-
-24. 
-
-25. 
-
-26. 
-
-27. 
-
-28. 
-
-29. 
-
-30. 
-
-31. 
-
-32. 
-
-33. 
-
-34. 
-
-35. 
-
-36. 
 
 # SHELL
 
@@ -1021,7 +981,6 @@
 
 2. 一般用户只能修改自己的限制值，主动降低后就不能提高了。注销就能恢复默认的限制值。
 
-3. 
 
 ## 脚本文件
 
@@ -1390,8 +1349,6 @@
    echo ${var1:+3} #空
    echo ${var2:+3} #空
    ```
-
-3. 
 
 
 ## 运算
@@ -1873,18 +1830,6 @@
    210
    ```
 
-8. 
-
-9. 
-
-10. 
-
-11. 
-
-12. 
-
-13. 
-
 
 
 # 重定向
@@ -1936,11 +1881,7 @@
 
 13. /dev/zero，可以从中读取无限多的0。一般用来初始化文件。
 
-14. 
-
-15. 
-
-16. 重定向的本质是流的传输。输出重定向到文件时，如果文件不存在，会创建该文件：
+14. 重定向的本质是流的传输。输出重定向到文件时，如果文件不存在，会创建该文件：
 
     ```shell
     echo haha > ./test.txt  #将echo的输出重定向到./test.txt文件,默认是输出到屏幕,会覆盖原数据。
@@ -1959,21 +1900,16 @@
 
 
 
+
 # 磁盘分区
 
 1. 各个组件在linux下都是文件，这个是延续自Unix的。硬件的驱动程序一般由厂商提供，linux下一般提供C语言的源文件，用户自行编译；Windows下，一般提供二进制安装文件。驱动一般编译为内核模块 .ko文件。这样的好处是不用重新编译内核。
 
 2. 各个硬件在linux中的文件名，几乎所有的硬件文件都在/dev目录下。
 
-3. 
+3. 主流硬盘的尺寸分别为3.5和2.5英寸，分别用在台式机和笔记本上。
 
-4. 
-
-5. 主流硬盘的尺寸分别为3.5和2.5英寸，分别用在台式机和笔记本上。
-
-6. 
-
-7. 现在IDE已经被SATA取代，SCSI已经被SAS取代。SAS接口的硬盘主要用在服务器上，比SATA的贵。
+6. 现在IDE已经被SATA取代，SCSI已经被SAS取代。SAS接口的硬盘主要用在服务器上，比SATA的贵。
 
 8. 一个SATA接口的硬盘和系统有两条线相连，一条是信号线，一条是电源线。目前SATA已经升级到了第3代。理论带宽是6Gbit/s，但是速度为600Mbyte/s，因为每传输10个bit，就有2个是校验用的，另外8个是数据位。因此比率为1：10。而实际SATA3硬盘的速度也就是150~200Mbytes/s左右。
 
@@ -2036,8 +1972,6 @@
     10. 固态硬盘的容量越大，寿命就越长，它会自动将坏块屏蔽掉。
     9. 机械硬盘的随机读写速度比顺序读写差很多，固态硬盘在这方面就好多了。
     10. 由于少了机械硬盘的转动，固态硬盘更省电。机械硬盘不应该直接拔电源进行关机，因为在不使用时，应该让磁头归位，避免破坏。
-
-30. 
 
 # 特殊权限
 
@@ -2322,14 +2256,12 @@
     chage -d 0 用户名      #将最后一次修改密码的日期设为1970年1月1日。这意味着用户一登录就要修改密码。一般可以直接修改配置文件，这个命令可以用于批量创建新用户时，设置简单的密码，强制用户登录后必须修改密码，然后再登录才可以。
     ```
 
-    ![image-20201227092536582](Linux学习.assets/image-20201227092536582.png)
-
 42. ```shell
     userdel -r 用户名   #删除用户，并删除其家目录
     id 用户名           #查看用户的UID,GUID和附加组
     ```
 
-43. su切换身份       普通用户之间相互切换，普通用户切换为root都需要密码。root切换为普通用户不需要密码。
+43. su切换身份，普通用户之间相互切换，普通用户切换为root都需要密码。root切换为普通用户不需要密码。
 
 44. ```shell
     su 用户名        #输入密码后即可切换到该用户。不切换环境变量
@@ -2366,9 +2298,7 @@
     1. 对文件来说，只能在文件中增加数据，不能删除或修改数据。但是可以删除文件或重命名。
     2. 对目录来说，不能删除文件，只能新建或修改现有的文件。
 
-51. 
-
-52. linux中 > 表示覆盖原文件内容（文件的日期也会自动更新），>> 表示追加内容（会另起一行，文件的日期也会自动更新）。echo 333 >> a.txt   追加内容。
+51. linux中 > 表示覆盖原文件内容（文件的日期也会自动更新），>> 表示追加内容（会另起一行，文件的日期也会自动更新）。echo 333 >> a.txt   追加内容。
 
 53. chattr不是用来限制root用户的操作的(SELinux)，是防止用户误操作的。
 
@@ -2562,8 +2492,6 @@
     XFS      #高性能64位日志文件系统
     ```
 
-29. 
-
 
 # 进程管理
 
@@ -2571,8 +2499,8 @@
 
    2. ps命令查看系统中所有的进程，ps aux更常用：
 
-            1. ps aux    查看系统中所有的进程，使用BSD系统的命令格式，不加-。 a 表示所有前台进程，x 表示所有后台进程，u 查看产生进程的用户。
-            2. ps -le     查看系统中所有的进程，使用linux标准命令格式。 -l 是显示详细信息 -e 是显示所有进程。
+          1. ps aux    查看系统中所有的进程，使用BSD系统的命令格式，不加-。 a 表示所有前台进程，x 表示所有后台进程，u 查看产生进程的用户。
+          2. ps -le     查看系统中所有的进程，使用linux标准命令格式。 -l 是显示详细信息 -e 是显示所有进程。
 
    3. ```shell
       USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
@@ -2593,14 +2521,14 @@
 
    4. 一行表示一个进程：
 
-            1. %MEM：当前进程占用物理内存的百分比。
-            2. VSZ：当前进程占用虚拟内存的大小，单位是KB。
-            3. RSS：当前进程占用物理内存的大小，单位为KB。
-            4. TTY：当前进程是由哪一个终端产生的，绝大多数的系统进程不是由终端产生的。
-            5. STAT：当前进程的状态，R表示正在运行，S表示正在睡眠，T表示处于停止状态。s表示包含子进程，+表示位于后台。可以看到绝大多数的进程都处于休眠状态。
-            6. START：当前进程的启动时间，如果超过一天，则会显示日期。
-            7. TIME：进程占用CPU的运行时间。
-            8. COMMAND：产生此进程的命令名
+          1. %MEM：当前进程占用物理内存的百分比。
+          2. VSZ：当前进程占用虚拟内存的大小，单位是KB。
+          3. RSS：当前进程占用物理内存的大小，单位为KB。
+          4. TTY：当前进程是由哪一个终端产生的，绝大多数的系统进程不是由终端产生的。
+          5. STAT：当前进程的状态，R表示正在运行，S表示正在睡眠，T表示处于停止状态。s表示包含子进程，+表示位于后台。可以看到绝大多数的进程都处于休眠状态。
+          6. START：当前进程的启动时间，如果超过一天，则会显示日期。
+          7. TIME：进程占用CPU的运行时间。
+          8. COMMAND：产生此进程的命令名
 
    5. linux的终端有tty1-6（本地字符终端），tty7(本地图形终端)，pts/0-255代表虚拟终端，远程登录来的。各终端之间没有区别的，他就是为了方便用户的登录。如果在本地想要演示多个登录用户时，可以通过切换不同的终端来完成。还有就是如果一个中断中的程序卡死了，可以切换到其他中断，使用root登录，杀死该进程即可。
 
@@ -2634,7 +2562,7 @@
 
    17. pstree查看进程树，查看父子进程关系。-p显示进程的PID 。 -u 显示进程所属的用户。
 
-   18. ==buffer和cache的区别：==
+   18. buffer和cache的区别：
 
    19. buffer是缓冲，cache是缓存。二者的存在是由于内存和硬盘之间的速度存在较大的差异。一般来说内存从硬盘中读取的数据使用完后，不会立刻丢弃，还会滞留一会，为了下次使用更方便。而缓冲一般用在需要频繁写入硬盘时，可以先将内容写入到缓冲中，积累够一定的数据后再一次性写入硬盘。
 
@@ -2642,31 +2570,27 @@
 
    21. 终止进程的命令，父进程被终止时，子进程也会终止。
 
-                ```shell
-                kill -l   #查看可用的进程信号
-                kill 进程号 -信号代号    #默认发送15号信号，正常结束信号。
-
-
-          ​      
-                lfs@ubuntu:~$ kill -l
-                 1) SIGHUP       2) SIGINT       3) SIGQUIT      4) SIGILL       5) SIGTRAP
-                 6) SIGABRT      7) SIGBUS       8) SIGFPE       9) SIGKILL     10) SIGUSR1
-                11) SIGSEGV     12) SIGUSR2     13) SIGPIPE     14) SIGALRM     15) SIGTERM
-                16) SIGSTKFLT   17) SIGCHLD     18) SIGCONT     19) SIGSTOP     20) SIGTSTP
-                21) SIGTTIN     22) SIGTTOU     23) SIGURG      24) SIGXCPU     25) SIGXFSZ
-                26) SIGVTALRM   27) SIGPROF     28) SIGWINCH    29) SIGIO       30) SIGPWR
-                31) SIGSYS      34) SIGRTMIN    35) SIGRTMIN+1  36) SIGRTMIN+2  37) SIGRTMIN+3
-                38) SIGRTMIN+4  39) SIGRTMIN+5  40) SIGRTMIN+6  41) SIGRTMIN+7  42) SIGRTMIN+8
-                43) SIGRTMIN+9  44) SIGRTMIN+10 45) SIGRTMIN+11 46) SIGRTMIN+12 47) SIGRTMIN+13
-                48) SIGRTMIN+14 49) SIGRTMIN+15 50) SIGRTMAX-14 51) SIGRTMAX-13 52) SIGRTMAX-12
-                53) SIGRTMAX-11 54) SIGRTMAX-10 55) SIGRTMAX-9  56) SIGRTMAX-8  57) SIGRTMAX-7
-                58) SIGRTMAX-6  59) SIGRTMAX-5  60) SIGRTMAX-4  61) SIGRTMAX-3  62) SIGRTMAX-2
-                63) SIGRTMAX-1  64) SIGRTMAX
-                ```
+          ```shell
+          kill -l   #查看可用的进程信号
+          1) SIGHUP       2) SIGINT       3) SIGQUIT      4) SIGILL       5) SIGTRAP
+          6) SIGABRT      7) SIGBUS       8) SIGFPE       9) SIGKILL     10) SIGUSR1
+          11) SIGSEGV     12) SIGUSR2     13) SIGPIPE     14) SIGALRM     15) SIGTERM
+          16) SIGSTKFLT   17) SIGCHLD     18) SIGCONT     19) SIGSTOP     20) SIGTSTP
+          21) SIGTTIN     22) SIGTTOU     23) SIGURG      24) SIGXCPU     25) SIGXFSZ
+          26) SIGVTALRM   27) SIGPROF     28) SIGWINCH    29) SIGIO       30) SIGPWR
+          31) SIGSYS      34) SIGRTMIN    35) SIGRTMIN+1  36) SIGRTMIN+2  37) SIGRTMIN+3
+          38) SIGRTMIN+4  39) SIGRTMIN+5  40) SIGRTMIN+6  41) SIGRTMIN+7  42) SIGRTMIN+8
+          43) SIGRTMIN+9  44) SIGRTMIN+10 45) SIGRTMIN+11 46) SIGRTMIN+12 47) SIGRTMIN+13
+          48) SIGRTMIN+14 49) SIGRTMIN+15 50) SIGRTMAX-14 51) SIGRTMAX-13 52) SIGRTMAX-12
+          53) SIGRTMAX-11 54) SIGRTMAX-10 55) SIGRTMAX-9  56) SIGRTMAX-8  57) SIGRTMAX-7
+          58) SIGRTMAX-6  59) SIGRTMAX-5  60) SIGRTMAX-4  61) SIGRTMAX-3  62) SIGRTMAX-2
+          63) SIGRTMAX-1  64) SIGRTMAX
+          kill 进程号 -信号代号    #默认发送15号信号，正常结束信号
+          ```
 
    22. 常用信号的含义：
 
-          ```shell
+             ```shell
           1 SIGHUP   #该信号让进程立即关闭，然后重新读取配置文件后重启
           2 SIGINT   #该信号让程序终止，用于终止前台进程，相当于Ctrl+C
           8 SIGFPE   #该信号在发生指明的算数运算错误时发出，不仅包括浮点运算错误，还包括除数为0的其他所有算数错误。
@@ -2675,17 +2599,17 @@
           15 SIGTERM #该信号用来正常结束进程，kill命令默认发送该信号。有时当进程已经发生问题时，该信号是无法正常终止进程的，需要发送SIGKILL才可以终止。
           18 SIGCONT #该信号可以让暂停的进程恢复执行，不能被阻断。
           19 SIGSTOP #该信号可以暂停前台进程，相当于Ctrl+Z，不能被阻断。
-          ```
+             ```
 
    23. killall命令可以给同名的所有进程发送信号，和pkill的功能相同：
 
-       ```shell
-       killall -9 httpd    #给所有的进程名为httpd的进程发送信号。-i 表示交互式的，会逐个询问。-I表示忽略大小写区别。
-       ```
+          ```shell
+          killall -9 httpd    #给所有的进程名为httpd的进程发送信号。-i 表示交互式的，会逐个询问。-I表示忽略大小写区别。
+          ```
 
-   26. 可以通过kill用户的登录进程来将特定的用户踢出服务器。还可以通过pkill -9 -t tty1来根据终端名称踢特定的用户。
+   24. 可以通过kill用户的登录进程来将特定的用户踢出服务器。还可以通过pkill -9 -t tty1来根据终端名称踢特定的用户。
 
-   27. 一般来说，应该先通过systemctl来关闭服务，进而关闭进程。只有这样无法终止的进程，才会使用kill。
+   25. 一般来说，应该先通过systemctl来关闭服务，进而关闭进程。只有这样无法终止的进程，才会使用kill。
 
 # 工作管理
 
@@ -2998,7 +2922,6 @@
 2. centos6之后rsyslogd已经取代了syslogd服务，更先进。
 3. 一般通过判断进程是否存在来判断服务是否启动，例如 ps aux | grep 服务的进程名
 4. chkconfig
-5. 
 
 # 备份与恢复
 
@@ -3142,8 +3065,6 @@
     xfsrestore -f dump_boot.bak /boot #
     xfsrestore -f dump_boot.bak1 /boot #按照备份的顺序恢复。
     ```
-
-26. 
 
 # PACMAN包管理器
 
@@ -3294,16 +3215,13 @@
 
 4. 作为依赖被安装的软件包，会显示[automatic]。
 
-5. 软件源：/etc/apt/sources.list文件和/etc/apt/sources.list.d目录下的文件
-
-6. 
+5. 软件源：/etc/apt/sources.list文件和/etc/apt/sources.list.d目录下的文件。
 
 
 # snap，AppImage，Flatpak
 
 1. 这些软件封装格式是将软件本体和其所有的依赖共同打包的，可以较好地使用linux各个发行版之间的区别。不同的发行版配置的共享库的数量和版本是不同的。同时他们都自带沙箱，与宿主操作系统隔离，程序运行在容器中，允许安装同一个软件的多个版本。
-2. snap是Ubuntu的母公司Canonical开发的，也被移植到了其他的linux发行版上。安装软件的方式和apt类似，可以从官方的仓库安装，也可以自己下载对应的包来安装。 VB
-3. 
+2. snap是Ubuntu的母公司Canonical开发的，也被移植到了其他的linux发行版上。安装软件的方式和apt类似，可以从官方的仓库安装，也可以自己下载对应的包来安装。 
 
 # SSH
 
@@ -3485,8 +3403,6 @@
 22. authorized_keys文件的权限要设置为644，只有所有者可以写，其他人只能读，如果权限不正确，SSH服务器可能会拒绝登录。
 
 23. 不用客户端使用相同的用户名登录后，服务器无法分辨他们谁是谁，一般来说一个用户名应该只给予一个人。
-
-35. 
 
 # 代理
 
@@ -3775,8 +3691,6 @@
     msgstr "  缺失："
     ```
 
-16. 
-
 # Samba 服务
 
 1. SMB协议是Windows平台的局域网文件共享协议。Samba是Unix平台上为了兼容SMB协议而逆像开发的软件。
@@ -3810,9 +3724,7 @@
    available=yes
    ```
 
-4. 在Windows的我的电脑中选择映射网络驱动器：
-
-5. ![image-20220706224733564](Linux学习.assets/image-20220706224733564-16571968881571.png)
+4. 在Windows的我的电脑中选择映射网络驱动器。
 
 6. work为目标服务器上的samba配置文件中的用[ ]包裹起来的标签，就是之前在配置文件中添加的那部分。默认情况下会使用本机的用户名和密码来登录。也可以勾选“使用其他凭据连接”来手动输入用户名和密码。
 
@@ -3874,14 +3786,10 @@
    deb [arch=amd64] http://cn.archive.ubuntu.com/ubuntu focal main universe
    ```
 
-3. 
-
 
 # VSCode登录问题
 
 1. 一个虚拟机如果可以使用putty顺利登陆，双向ping也都顺畅，但是使用VSCode远程登陆虚拟机时，可能会报错如下：过程试图写入的管道不存在。这是由于：当前 known_hosts 文件保存的是之前连接的秘钥，现在没有更新。可以打开本地`C:\Users\你的用户名\.ssh\known_hosts`，并删掉远程主机对应的那行秘钥，重新连接即可。或者删掉整个文件即可。
-
-2. 
 
 
 # bash执行
@@ -3892,13 +3800,3 @@
    -bash: ./test.sh: /bin/bash^M: bad interpreter: No such file or directory
    #这是因为该脚本在Windows下编辑后保存的，行尾是CRLF，在VSCode右下角修改为LF即可。
    ```
-
-2. 
-
-3. 
-
-4. 
-
-5. 
-
-6. 

@@ -1,3 +1,19 @@
+# 编译记录
+
+1. 下载Calculix.tar.gz文件，解压后会出现CCX目录，内部含有SPOOLES2.2，ARAPCK和Calculix三个文件夹。
+2. 先构建SPOOLES2.2和ARAPCK，最后构建Calculix。三个文件夹放在同一级目录中，但不要求都放在用户家目录中，因为makefile中大多数为相对路径。
+3. SPOOLES2.2的Tree/src/makeGlobalLib文件中包含了一个错误的引用应该将 file drawTree.c 改成file draw.c，因为drawTree.c不存在。
+4. 进入SPOOLES.2.2中执行 make CC=gcc lib。如果不加CC=gcc会报错:/usr/lang-4.0/bin/cc: No such file or directory。
+5. 进入ARPACK文件夹，先根据README修改ARmake.inc文件。
+   1. 修改home为ARPACK文件夹路径
+   2. 修改PLAT = INTEL
+   3. 修改FFLAGS = -O -fallow-argument-mismatch。这里去除了-cg89的选项，增加了-fallow-argument-mismatch
+   4. 修改UTIL/second.f，在EXTERNAL ETIME的最开头添加*注释
+   5. 最后运行make lib即可
+6. 在Calculix/ccx_2.20/src中执行make。如果遇到 Interface mismatch in dummy procedure ‘f’ at (1): ‘fun’ is not a function的错误。单独编译该文件，应该加上 --std=legacy的选项。
+7. 执行 ./ccx_2.20 ../test/beamp，检查是否出现beamp.dat文件，可以beamp.dat.ref校对检验软件是否成功编译。
+8. 也可以调用test/compare脚本来检验软件是否成功编译。这一步会计算test中的所有inp文件并比较。
+
 # 文件结构
 
 1. 注意CalculiX.h的X是大写，书写Makefile的依赖和包含头文件时不要写错。
@@ -147,8 +163,6 @@
          PCI 02:03.0 (SATA)
    ```
 
-10. 
-
 # Calculix.h文件
 
 1. 在ccx_2.20.c中包含了，主要是定义了有些简短的宏，用来简化函数调用，：
@@ -211,8 +225,6 @@
    //C函数定义
    void* addmt(ITG* i);
    ```
-
-2. 
 
 # 自定义的内存分配和释放
 
@@ -484,10 +496,6 @@
 
 3. ![image-20231217161037674](E:\Markdown-file\Calculix.assets\image-20231217161037674.png)
 
-4. 
-
-5. 
-
 
 # VSCode 工程配置
 
@@ -603,8 +611,6 @@
        "version": 4
    }
    ```
-
-6. 
 
 # 所有文件的作用
 
@@ -1729,7 +1735,3 @@
    
    umat_dl.cpp #
    ```
-
-2. 
-
-3. 

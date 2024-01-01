@@ -24,13 +24,11 @@
 
 8. MySQL提供社区版和企业版。
 
-9. ```
+9. ```shell
    mysql -h localhost -P 3306 -u root -p               主机名和端口可以省略，使用默认。-p标识使用密码。
    ```
 
-   
-
-10. ```
+10. ```mysql
     show databases;    显示已有的数据库。mysql数据库保存用户信息。test是给用户练习用的
     use test;          进入test数据库。
     show tables;       显示当前数据库中的表。
@@ -41,18 +39,3 @@
 11. ![image-20201204185846576](MySQL.assets/image-20201204185846576.png)
 
 12. MySQL的命令要以;结尾。
-
-13. 
-
-14. 
-
-20. 
-
-21. 
-
-
-
-
-
-
-

@@ -104,54 +104,12 @@
 1. 该函数显示一个消息提示框，可以包含一个系统图标，一组按钮，一个标题和一个内容。
 
    ```c
-   int
-   WINAPI
-   MessageBoxW(
+   int WINAPI MessageBoxW(
        _In_opt_ HWND hWnd,
        _In_opt_ LPCWSTR lpText,
        _In_opt_ LPCWSTR lpCaption,
        _In_ UINT uType);
    ```
-
-2. 
-
-3. 
-
-4. 
-
-5. 
-
-6. 
-
-7. 
-
-8. 
-
-9. 
-
-10. 
-
-11. 
-
-12. 
-
-13. 
-
-14. 
-
-15. 
-
-16. 
-
-17. 
-
-18. 
-
-19. 
-
-20. 
-
-21. 
 
 
 # 控制台输出调试信息
@@ -172,19 +130,3 @@
 2. 一个进程最多可以附加一个控制台，进程可以使用FreeConsole函数将其自身从其控制台分离。 如果其他进程共享控制台，则控制台不会被销毁，但是调用FreeConsole的进程不能引用它。 当连接到它的最后一个进程终止或调用FreeConsole时，控制台关闭。 在进程调用FreeConsole之后，它可以调用AllocConsole函数来创建一个新的控制台或AttachConsole来附加到另一个控制台。
 
 3. 在使用完控制台程序之后一定要记得调用FreeConsole函数释放该控制台，否则会造成内存泄露。free前应该先fclose掉stdin和stdout两个流。
-
-4. 
-
-5. 
-
-6. 
-
-7. 
-
-8. 
-
-9. 
-
-10. 
-
-11. 

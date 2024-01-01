@@ -724,74 +724,22 @@
    let firstName = "John";
    let lastName = 'Jacob';
    let lastName = `Jingleheimerschmidt`
-   
-   
    ```
+   
+2. 可以将js代码编写到按钮的onclick中，或者超链接中。
 
-2. 
-
-3. 
-
-4. 
-
-5. 
-
-6. 
-
-7. 
-
-8. 
-
-9. 
-
-10. 
-
-11. 
-
-12. 
-
-13. 
-
-14. 
-
-15. 
-
-16. 
-
-17. 
-
-18. 
-
-19. 
-
-20. 
-
-21. 
-
-22. 
-
-23. 
-
-24. 
-
-25. 
-
-26. 可以将js代码编写到按钮的onclick中，或者超链接中
-
-    ```html
-    <button onclick = "alert('点我干嘛');">点我一下</button>
-    <a href = "javascript:alert('又点我');">你也点一下</a>
-    
-    有时候希望超链接不起作用，可以写成如下方式    javascript:;
-    ```
+   ```html
+   <button onclick = "alert('点我干嘛');">点我一下</button>
+   <a href = "javascript:alert('又点我');">你也点一下</a>
+   
+   有时候希望超链接不起作用，可以写成如下方式    javascript:;
+   ```
 
 27. 书写在.js文件中，然后在HTML中引入该文件，类似于css，写在外部可以利用浏览器的缓存机制：
 
     ```html
     <Script type="text/javascript" src = "js/test.js">此时内部的js代码会被浏览器忽略</Script>
     ```
-
-28. j
 
 29. ```js
     document.write("向浏览器的页面写入内容");
@@ -800,17 +748,7 @@
     document.write(1+"<br />") 
     ```
 
-30. 
-
-31. 
-
-32. 
-
-33. 
-
-34. 字符串可以用单引号或双引号都行，方便嵌套使用。也可以使用\转义引号。
-
-35. 
+30. 字符串可以用单引号或双引号都行，方便嵌套使用。也可以使用\转义引号。
 
 36. Number.MAX_VALUE     JS中数值的最大值，以常量保存。如果数值超过了改值，则结果会变为Infinity，表示正无穷，-Infinity表示负无穷。Infinity就是个字面量，也是number类型，不是字符串。
 
@@ -961,7 +899,7 @@
 
 2. 条件分支语句，switch。 依次判断条件表达式 =\=\= 表达式1，2，3，4。进入case后，直到遇到break，才会退出switch语句。
 
-   ```
+   ```javascript
    switch(条件表达式){
    	case 表达式1:
    		语句;
@@ -1104,10 +1042,9 @@
 
     ```js
     var func = function([形参1,形参2,形参3]){
-    
     };
     ```
-
+    
 18. 上面等号右边为匿名函数，可以在创建的时候调用，直接在后面加()。定义匿名函数的时候需要在整个函数的定义外边加上括号，否则不会识别，如果时赋值给变量，则不用加括号。
 
 19. 函数的形参就相当于在函数内声明了一个变量，但是并不赋值，当函数被调用的时候，可以用实参给形参赋值。
@@ -1122,10 +1059,9 @@
 
     ```js
     func(function func2(){
-            
     })
     ```
-
+    
 24. JavaScript 函数有个内置的对象 arguments 。argument 对象包含了函数调用的参数数组。可以方便地进行参数的使用。
 
 25. 在函数的声明内部也可以声明函数。
@@ -1134,10 +1070,9 @@
 
     ```js
     (function(){
-    
     })();             //函数定义完毕后，立即调用，也可以在后面的括号中传入参数。1
     ```
-
+    
 27. 当一个函数称为对象的属性时，称之为对象的方法。
 
 28. for in，可以枚举出对象内的属性和方法：
@@ -1181,15 +1116,12 @@
     ```js
     fun1();        //由于声明的提前，可以在此处正常调用fun1。
     function fun1(){
-        
     }
-    
     fun2();       //会报错。
     var fun2 = function(){
-        
     };
     ```
-
+    
 34. 函数作用域，在调用函数时创建，函数执行完毕时销毁。每次调用都会创建一个新的，独立。
 
 35. 在函数作用域可以访问到全局变量。反之，不行。
@@ -1243,12 +1175,11 @@
 
     ```js
     function Person(){
-    
     }
     var per1 = Person();      //per1为undefined，因为该函数没有返回值。
     var per2 = new Person();  //per2为object，因为使用了new。
     ```
-
+    
 45. 构造函数的执行流程：
 
     1. 调用时立刻创建一个对象
@@ -1273,20 +1204,18 @@
     ```js
     function Person(name){
     	this.name = name;
-        this.sayName = function sayName(){
-            
+    	this.sayName = function sayName(){
         };
     }
     //修改为如下，但是这样会把类的内部方法暴露出来，也会污染全局作用域的命名空间，容易造成命名冲突。
     function sayName(){
-            
     }
     function Person(name){
     	this.name = name;
         this.sayName = sayName;  
     }
     ```
-
+    
 50. 我们所创建的每一个函数，解析器都会向函数中添加一个属性，prototype。每个函数的prototype都不同。
 
 51. prototype就是所谓的原型对象。
@@ -1296,71 +1225,63 @@
 
 52. ```js
     function Person(){
-    
     }
     var mc = new Person();
     console.log(mc.__proto__ == Person.prototype);  //结果为true。
     ```
-
+    
 53. 原型对象相当于类的一个公共区域，所有该类的实例都共享该对象。可以将对象中共有的内容设置到prototype中。
 
 54. ```js
     function Person(){
-    
     }
     Person.prototype.a = 123;
     var mc = new Person();
     console.log(mc.a);        //结果输出为123.
     ```
-
     
-
 55. 当访问对象的属性或者方法时，会现在对象自身中寻找，如果找的到，就地返回。如果找不到，则会去对象的原型对象中寻找，即mc.\_\_proto\_\_.a。
 
 56. ```js
     function Person(){
-    
     }
     Person.prototype.sayName = function (){
-            
     };
     var mc = new Person();
     console.log("sayName" in mc);                //in检查会考虑，也会返回true。
     console.log(mc.hasOwnProperty("sayName") );  //返回false。该函数检查对象自身是否有该属性。
     ```
-
+    
 57. 以后，可以在书写类的构造函数时，将所有对象共有的属性和方法添加到类的原型对象中。
 
 58. 原型对象也有原型对象。直到找到object对象，因为该对象没有原型对象，但是也有个\_\_proto\_\_属性，值为null。
 
     ```js
     function Person(){
-    
     }
     var mc = new Person();
     mc.__proto__.__proto__.hasOwnProperty("hasOwnProperty");   //返回true。可以看到hasOwnProperty方法是mc的爷爷中的，也就是Object对象的。
     console.log(mc.__proto__.__proto__.__proto__);   //结果为null。
     ```
-
+    
 59. 从上面可以看出，用户自定义的类，一般都是Object类的孙子。
 
 60. 当使用console.log打印对象时，实际上是调用该对象的toString()，将该函数的返回值打印。
 
 61. toString()也在该对象的爷爷object中，可以为该类添加一个共有的toString方法，即给该类的父亲添加一个方法。
 
-    ```js
+    ```javascript
     Person.prototype.toString(){
-    
     }
     ```
-
+    
 62. 由此可以看出，用户自定义类没有直接继承自object，而是中间还有一个中介的原因。该中介用来存放用户自定义类的共有属性和方法。 如果没有该中介，则定义用户自定义类的共有属性时就会修改到object类，进而会影响到所有的类。
 
 63. 垃圾回收 garbage collection。
 
-    ```js
+    ```javascript
     var obj = new Object();
-    obj = null;      
+    obj = null;
     ```
 
 64. 当一个对象没有被任何变量引用时，就永远无法再操作该对象。这种对象就是垃圾，过多会占用大量内存空间。JS解析会自动进行垃圾回收，销毁垃圾对象。用户能做的就是讲所有指向该对象的引用赋值为null。这样垃圾回收器会适时回收。
@@ -1483,8 +1404,6 @@
 
 4. arguments还有一个属性，callee，指向当前正在执行的函数对象。
 
-5. 
-
 # 内建对象
 
 1. Date对象
@@ -1516,13 +1435,9 @@
    Math.round(Math.random()*10);
    ```
 
-6. 
-
 # 包装类
 
 1. JS提供了三个包装类，可以将三个基本类型数据转化为对象。String，Number，Boolean。这样就可以使用面向对象的特性了。
-
-2. 
 
    ```js
    var n = new Number(3);
@@ -1535,10 +1450,9 @@
 4. ```js
    var b = new Boolean(false);
    if (b){        //由于b是对象，因此将其转化为bool值，始终为true。
-   
    }
    ```
-
+   
 5. 方法和属性只能添加给对象，不能添加给基本数据类型。但是基本数据类型可以使用包装类的属性和方法。
 
    ```js
@@ -1554,8 +1468,6 @@
    var s = "asd";
    var sa = ["a","s","d"];
    ```
-
-7. 
 
 # DOM和BOM
 
@@ -1596,10 +1508,9 @@
 
     ```js
     document.getElementById("btn").onclick = function (){
-    
     };
     ```
-
+    
 11. 第一种方法不推荐使用，一般来说，HTML标签的属性只包含一些class，id，name就好了。
 
 12. 浏览器加载页面时是按照自上而下的顺序，如果在head中写的JS程序想要获取body中的标签，则会获取到null。也可以将JS程序放在开头，不过设置在页面加载完毕后执行即可。
@@ -1608,10 +1519,9 @@
 
 14. ```js
     window.onload = function(){
-    
     };
     ```
-
+    
 15. 追求性能的话，可以将js代码写到后面。为了方便管理使用，可以写到前面。
 
 16. 通过document对象，获取元素节点。
@@ -1809,11 +1719,8 @@
 6. V8引擎包含以下三个部分，解析器(parser)，解释器(interpreter)，编译器(compiler)。V8本身就是一个C++程序。
 7. 解析器将JS代码解析为抽象语法树AST。解释器负责将AST解释成字节码，解释器也可以解释执行代码，编译器负责将字节码编译成运行更加高效的机器代码。
 8. 字节码是和平台无关的。
-9. 
-10. 浏览器的工作原理：
-    1. 首先根据网页地址，获取html文件。
-    2. 解析该文件，构建DOM树。
-    3. 构建DOM树的同时遇到CSS和图片，JS文件同时发送请求。
-    4. CSS和图片不会阻塞DOM树的构建，而JS可能会改变DOM树，因此会等待JS下载，执行完成JS后再继续解析HTML，构建DOM树。因此JS代码的位置十分重要。
-12. 
-13. 
+9. 浏览器的工作原理：
+   1. 首先根据网页地址，获取html文件。
+   2. 解析该文件，构建DOM树。
+   3. 构建DOM树的同时遇到CSS和图片，JS文件同时发送请求。
+   4. CSS和图片不会阻塞DOM树的构建，而JS可能会改变DOM树，因此会等待JS下载，执行完成JS后再继续解析HTML，构建DOM树。因此JS代码的位置十分重要。

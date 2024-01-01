@@ -6,13 +6,13 @@
 
 3. 没有缩进，AHK脚本也可以正常运行。
 
-4. 默认提供了多种ahk可执行程序。![image-20210125130043916](AHK.assets/image-20210125130043916.png)
+4. 默认提供了多种ahk可执行程序。
 
-   ```
-   默认的是A64。	
-   A32 或 /ANSI: ANSI 32 位.
-   U64 或 /x64: Unicode 64 位(仅在 64 位系统中有效).
-   U32: Unicode 32 位.
+   ```shell
+   AutoHotkey.exe
+   AutoHotkeyA32.exe #A32 或 /ANSI: ANSI 32 位
+   AutoHotkeyU32.exe #U32: Unicode 32 位
+   AutoHotkeyU64.exe #默认的是A64。U64 或 /x64: Unicode 64 位(仅在 64 位系统中有效)
    ```
 
 5. AHK的计数默认从1开始。AutoHotkey 没有特定的布尔类型，因此它使用整数值 `0` 表示假，而 `1` 表示真。单词 `true` 和 `false` 是值分别为 1 和 0 的内置变量。使用它们可以增加脚本的可读性。
@@ -23,8 +23,8 @@
 
 8. 两种对脚本的特殊操作：
 
-   1.  Suspend Hotkeys，挂起热键，即通过::定义的热键暂时失效
-   2.  Pause Script          暂停脚本，脚本定义的所有功能，包含热键和正在进行的循环都会停止。
+   1.  Suspend Hotkeys，挂起热键，即通过::定义的热键暂时失效。
+   2.  Pause Script，暂停脚本，脚本定义的所有功能，包含热键和正在进行的循环都会停止。
 
 9. \#NoTrayIcon    可以隐藏托盘图标。；后面的内容是注释。
 
@@ -50,7 +50,7 @@
 
 14. <img src="AHK.assets/image-20210124210202635.png" alt="image-20210124210202635" style="zoom: 50%;" />
 
-15. 定义组合热键
+15. 定义组合热键：
 
     ```
     Numpad0 & Numpad1::       ;按住小键盘数字键0的同时，再按下小键盘数字键1。顺序不能乱。
@@ -105,11 +105,10 @@
     Send, AutoHotkey
     Return
     
-    
     Send, Multiple Enter lines have Enter been sent. ; 错误
     Send, Multiple{Enter}lines have{Enter}been sent. ; 正确       不会输出Enter这几个字符，而是按下Enter键。
     ```
-
+    
 27. 当时用Send命令时，如果后面的内容不再特殊按键列表中，那么就没必要加上{}。
 
 28. 想要表示按住或松开某个按键, 可以将这个键用花括号围起来, 同时加上单词 UP 或 DOWN
@@ -275,7 +274,3 @@
     Banana.Consistency := "Mushy"      ;同上
     如果想要往对象中添加一个新的键值对，指定给一个原本不存在的键即可。
     ```
-
-65. 
-
-66. 

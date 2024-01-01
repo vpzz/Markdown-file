@@ -213,11 +213,7 @@
 13. 二维实体单元都是三维问题的简化，必须在1-2平面内定义。且单元内节点的序号序号满足右手定则，否则面积为负值。
 14. 平面应力和平面应变单元可以指定单元的厚度，默认为1。
 15. 实体单元如果发生了大转动，它的积分点的坐标系仍然是按照未变化全局坐标系来的，输出可能会不方便。用户可以为单元变量定义一个局部坐标系，该坐标系跟随积分点旋转，方便输出。
-16. 
-18. 
-19. 
-20. 
-21. 如果受弯构件在厚度方向上，分层少于4层，则不应使用缩减积分。使用incompatible。
+16. 如果受弯构件在厚度方向上，分层少于4层，则不应使用缩减积分。使用incompatible。
 22. wedge 楔形体，实际是三棱柱，是六面体的退化得到的。
 23. mesh模块根据指定的划分网格的方法来显示不同的==region==。
 24. 绿色表示使用结构网格，黄色表示使用扫略，粉色表示使用自由网格，橙色表示划分技术使用不正确。
@@ -235,9 +231,6 @@
 
 1. 只有在job提交后，才会生成对应的job.inp，计算完成后生成job.odb。也可以使用write input来只生成inp文件而不计算。
 2. Job内并没有存储模型的内容，因此如果计算失败，然后修改模型，再进行计算时，可以不用新建Job，直接Submit之前的那个Job即可。这样会覆盖掉之前的那个job对应的结果文件。
-3. 
-4. 
-9. 
 
 # 后处理
 
@@ -278,8 +271,6 @@
 19. 使用探针查看单元的数据时，可以在积分点上查看，可以在单元的中心查看，也可以是单元的节点，也可以是单元的面。
 
 20. ![image-20200616014209105](Abaqus.assets/image-20200616014209105.png)
-
-21. 
 
 22. ```
     单元的积分点
@@ -707,28 +698,27 @@
 
 23. 对于两个相邻的C3D20R单元来说，element Nodal是按照单元来组织的，2个单元，每个20个，但是其中会有重复的，相邻的face上的所有Node都有重复。而Unique Nodal是不考虑单元，只考虑这些node，不重复出现。一共有2x20-8=32个。
 
-24. 
 
 # 命令
 
 1. ABAQUS的两个主要模块为cae和viewer。可以使用如下命令启动。在cae中可以打开.cae和.odb文件，但是在viewer中只能打开.odb文件。replay选项支持一个Python脚本，启动后会立即执行该脚本。
 
-   ```
+   ```shell
    abaqus cae or viewer 
-                                                       [database=database-file]
-                                                       [replay=replay-file]
-                                                       [recover=journal-file]
-                                                       [startup=startup-file]
-                                                       [script=script-file]
-                                                       [noGUI=[noGUI-file]]
-                                                       [noenvstartup]
-                                                       [noSavedOptions]
-                                                       [noSavedGuiPrefs]
-                                                       [noStartupDialog]
-                                                       [custom=script-file]
-                                                       [guiTester=[GUI-script]]
-                                                       [guiRecord]
-                                                       [guiNoRecord]
+          [database=database-file]
+          [replay=replay-file]
+          [recover=journal-file]
+          [startup=startup-file]
+          [script=script-file]
+          [noGUI=[noGUI-file]]
+          [noenvstartup]
+          [noSavedOptions]
+          [noSavedGuiPrefs]
+          [noStartupDialog]
+          [custom=script-file]
+          [guiTester=[GUI-script]]
+          [guiRecord]
+          [guiNoRecord]
    ```
 
 2. 通过命令行给Python脚本传递参数，这些参数会被CAE忽略，但是会传递给Python解释器。
@@ -737,16 +727,18 @@
    import sys
    print sys.argv[-1]     #获取最后一个参数，即argument1。
    
-   abaqus cae script=try.py -- argument1      #运行该命令，会打开ABAQUS，在Python输出窗口输出argument1
+   abaqus cae script=try.py -- argument1  #运行该命令，会打开ABAQUS，在Python输出窗口输出argument1
    ```
 
 3. 从下面可以看出：除了额外输入的3个参数，一共还有8个参数。
 
-   ```
+   ```shell
    G:\Abaqus file>abaqus cae noGui=checkPartValidity.py -- test.cae Model-1 Part-1
+   
    Abaqus License Manager checked out the following license(s):
    "cae" release 6.14 from Flexnet server 20190927ZJ
    <1023 out of 1024 licenses remain available>.
+   
    D:\SIMULIA\Abaqus\6.14-1\code\bin\ABQcaeK.exe
    -cae
    -noGUI
@@ -760,11 +752,7 @@
    Part-1
    ```
 
-4. 不打开ABAQUS图形界面运行。这个可以和参数结合使用。
-
-   ```python
-   abaqus cae noGui=checkPartValidity.py
-   ```
+4. 不打开ABAQUS图形界面运行。这个可以和参数结合使用。`abaqus cae noGui=checkPartValidity.py`。
 
 5. ABAQUS会将用户对GUI界面的设置保存在abaqus_v6.14.gpr文件中，还会将用户的操作保存在abaqus.rpy文件（Python脚本）中，方便用户复现之前的操作。每次打开CAE都会新建一个rpy文件，并将之前存在的rpy文件重命名。
 
@@ -803,15 +791,3 @@
     ```
 
 16. 如果不打开cae的话，是不会产生.rpy文件的。例如只使用命令行提交.inp文件。
-
-17. 
-
-18. 
-
-19. 
-
-20. 
-
-21. 
-
-22. 

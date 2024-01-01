@@ -46,28 +46,18 @@
 
 19. python2.X 中的 urllib.urlopen()被废弃, urllib2.urlopen()相当于python3.X中的urllib.request.urlopen() 
 
-20. 
-
-21. urllib库一共分为4个模块：
+20. urllib库一共分为4个模块：
 
     1.  request：主要负责构造和发起网络请求,定义了适用于在各种复杂情况下打开 URL (主要为 HTTP) 的函数和类
     2. error：处理异常
     3. parse：解析各种数据格式
     4. robotparser：解析robot.txt文件
 
-22. 
-
-23. 
-
-24. 
-
-25. Python3中对字符串和二进制数据流做了明确的区分，本文总是Unicode编码，使用string封装。二进制数据流则由bytes类型封装，
+22. Python3中对字符串和二进制数据流做了明确的区分，本文总是Unicode编码，使用string封装。二进制数据流则由bytes类型封装，
 
 26. 编码就是把一个字符用二进制表示出来。字符串就是由很多字符构成的。
 
-27. 
-
-28. 形如：
+27. 形如：
 
 29. ```html
     &name;
@@ -106,9 +96,7 @@
     [\u4e00-\u9fa5]
     ```
 
-40. ![1591094386594](Python 爬虫实战.assets/1591094386594.png)
-
-41. 
+35. ![1591094386594](Python 爬虫实战.assets/1591094386594.png)
 
 # 网络信息爬取
 

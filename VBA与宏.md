@@ -75,15 +75,13 @@
 
 31. 编写的模块可以保存为.bas文件。VBA程序会自动进行大小写和括号修正。
 
-32. ```
+32. ```vb
     '注释
     Sub 第一个宏()
         MsgBox "第一个VBA代码"                        '缩进不是必要的
         MsgBox "B9的内容为" & Range("B9").Value       '&进行字符串连接，range来获取单元格cell范围。
     End Sub
     ```
-
-    
 
 33. 一个模块中可以有多个子程序。可以在VBE中调出立即窗口，输入   Call 子程序名    来调用对应的子程序。
 
@@ -99,8 +97,6 @@
     MsgBox date1             '显示的结果和本机日期格式一致
     ```
 
-    
-
 37. 字符串要用双引号包裹起来。
 
 38. 同时定义多个变量：
@@ -109,8 +105,6 @@
     Dim Score As Integer,date1 As Date   
     Dim i,j,k As Integer
     ```
-
-    
 
 39. Dim后面如果没有加As来给变量指定数据类型，那么变量的类型为variant，可变数据类型。可以进行混乱的赋值。不过不推荐使用。
 
@@ -143,8 +137,6 @@
     Public Const Pi As Double = 3.14
     ```
 
-    
-
 51. 在面向对象编程中，VB内置了很多的常量，例如vbRed，vbBlue等。      在立即窗口中输入?vbRed可以查看vbRed常量的值。
 
 52. 数学运算符 + - * / ^ Mod    最后两个是乘方和取余。/除法运算是浮点运算，不取整。20 Mod 3 的结果为2，余数。
@@ -162,8 +154,6 @@
 58. ```vb
     Result = (10 = 20)
     ```
-
-    
 
 59. 逻辑运算符  And Not Or  结果也是Boolean类型。
 
@@ -191,8 +181,6 @@
     End If
     ```
 
-    
-
 61. For Next循环，Next标识了for循环的结尾。
 
     ```vb
@@ -206,8 +194,6 @@
     Next num    '等同于 num = num + 2 。
     ```
 
-    
-
 62. vbNewLine表示换行。
 
 63. ```vb
@@ -219,8 +205,6 @@
     Next num
     ```
 
-    
-
 64. Do While 循环
 
     ```vb
@@ -230,8 +214,6 @@
     Loop
     ```
 
-    
-
 65. Do Until循环
 
     ```vb
@@ -240,8 +222,6 @@
     	num = num+1
     Loop
     ```
-
-    
 
 66. 子过程，子程序，子函数都是一样的。
 
@@ -255,8 +235,6 @@
     End Sub 
     子程序名称()   '即可调用子程序，如果是无参数的子程序，可以不加括号。有参数的可以用空格来代替括号。
     ```
-
-    
 
 67. 函数过程，使用Function关键字。函数过程有返回值，子过程没有。函数过程可以在Excel单元格中使用，类似于Excel自带的函数一样。
 
@@ -280,9 +258,8 @@
    For i = 1 To 100
    	Range("A" & i) = 1             '执行100次，修改A1→A100为1。
    Next
-   
    ```
-
+   
 4. For循环中可以倒序，例如 For i = 10 To 2 Step -1。需要标明step为负数。
 
 5. Worksheets，工作表对象：
@@ -295,11 +272,9 @@
    Sheet1           'Sheet1，这个和表的名称无关。按照顺序排。Sheet1始终表示第一个表的对象。
    Sheets("1月")    '名称为"1月"的那个表。
    Sheets(1)        '第一张表。以Excel左下角显示的为准，计数从1开始。
-   
-   
    Sheets           '当前所有表的集合
    ```
-
+   
 9. 单元格对象的表示方法：
 
    ```vb
@@ -319,12 +294,8 @@
     Application.DisplayAlerts = True
     Sheet1.Copy   '这个函数会将Sheet1复制到一个单独的Excel文件中。
     Sheet1.Copy After:=Sheet3    '将Sheet1复制到Sheet3后面，仍然在当前Excel文件中。
-    
-    
-    
-    
     ```
-
+    
 11. 模块中的代码，在执行时，会以当前的表为操作对象，如果没有指定表的话。
 
 12. 工作簿中至少要有一个工作表，即最后一个工作表是删除不掉的。
@@ -380,7 +351,7 @@
 
 90. 单元格对象Range。表示单元格对象的方式：
 
-    ```
+    ```vb
     [C2]          'C2单元格，不支持变量拼接
     cells(2,3)    '第2行第3列的单元格，即C2。
     Range("C2")   'C2单元格，最广泛地方式，灵活
@@ -405,13 +376,10 @@
 
 92. <img src="VBA与宏.assets/image-20210215211238211.png" alt="image-20210215211238211" style="zoom:67%;" />
 
-93. 
-
-94. 筛选：
+93. 筛选：
 
     ```vb
     Sheet1.Range("A1:F1048").AutoFilter Field:=4, Criterial:="一车间"    '筛选，第4列，值等于“一车间”
-    
     Sheet1.Range("A1:F1048").AutoFilter         '再运行一次就表示关闭筛选功能。
     ```
 
@@ -428,7 +396,6 @@
     Sheet1.Range("A1") = 23
     Sheet2.Range("B3") = 45
     
-    
     '上述代码等价于下面的代码。
     With Sheet1
         .name = "12"
@@ -436,7 +403,7 @@
     	Sheet2.Range("B3") = 45      '不以.开头的按照常规进行索引。
     End With
     ```
-
+    
 97. 对齐的设置
 
 98. ![在这里插入图片描述](VBA与宏.assets/2020050522052860.png)
@@ -451,9 +418,7 @@
 
 104. <img src="VBA与宏.assets/20200505220938485.png" alt="在这里插入图片描述" style="zoom: 50%;" />
 
-105. 
-
-106. <img src="VBA与宏.assets/20200505220938455.png" alt="在这里插入图片描述" style="zoom:50%;" />
+105. <img src="VBA与宏.assets/20200505220938455.png" alt="在这里插入图片描述" style="zoom:50%;" />
 
 106. 有时候需要关闭事件侦测功能，可以用一下设定：
 
@@ -469,14 +434,14 @@
 111. ```vb
      Application.WorksheetFunction.Cos(Range("A1"))      'Application可以省略，等价于单元格中的工作表函数       =Cos("A1")
      
-     VBA.Strings.Left()         'VBA函数，字符串截取左侧
+     VBA.Strings.Left()        'VBA函数，字符串截取左侧
      ```
 
 112. ![1613577860036](VBA与宏.assets/1613577860036.png)
 
 113. 一整行或一整列的表示方法：
 
-     ```
+     ```vb
      Range("A:A")     Range("3:3")
      Range("A3").EntireRow     Range("A3").EntireColumn
      ```
@@ -496,7 +461,3 @@
      InStr("2015-07-27", "-")   '在字符串中寻找字符-，返回位置，结果为5，如果找不到则返回0。
      Split("2015-07-27", "-")  '用第二个参数讲第一个参数分割，返回一个字符串数组。
      ```
-
-117. 
-
-121. 

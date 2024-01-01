@@ -162,7 +162,7 @@
     -f flv    #设置输出封装格式为flv，一般不会使用该选项，而是让程序根据输出文件的后缀名来判断封装格式。
     ```
     
-10. 10个编码器预设 
+10. 10个编码器预设 ：
 
     ```
     -preset选项的参数
@@ -292,8 +292,6 @@
 
 13. 生成器也要选择对应的x64。
 
-14. ![image-20210327220900758](FFMPEG使用指南.assets/image-20210327220900758.png)
-
 15. 测试环境代码：
 
     ```c
@@ -409,13 +407,7 @@
 
 16. av_register_all函数是所有基于ffmpeg的应用程序中第一个被调用的函数，只有调用了该函数，才能正常使用ffmpeg的各项功能，如复用/解复用器，编码/解码器，以及各种协议等等。 现在的av_register_all()是ffmpeg的过时函数(deprecated)。ffmpeg5.0中这个函数已经被删除了。
 
-17. 
-
-18. 
-
-27. 
-
-26. AVFormatContext常见的成员介绍：
+17. AVFormatContext常见的成员介绍：
 
     ```c
     typedef struct AVFormatContext {
@@ -495,11 +487,7 @@
     } AVFormatContext;
     ```
 
-29. 
-
-32. 
-
-33. AVInputFormat结构体中常用的成员介绍：
+29. AVInputFormat结构体中常用的成员介绍：
 
 34. ```c
     typedef struct AVInputFormat {
@@ -635,9 +623,3 @@
         int pts_wrap_bits;
     } AVStream;
     ```
-    
-33. 
-
-34. 
-
-41. 

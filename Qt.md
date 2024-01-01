@@ -63,6 +63,7 @@
    ```
    vcvarsall.bat x64 -vcvars_ver=14.16
    ```
+   
 2. 需要注意的是，这个脚本需要在cmd中执行，power shell不行。执行上述命令后，可以运行C/C++编译器cl，观察输出：
 
    ```
@@ -72,7 +73,6 @@
    
    用法: cl [ 选项... ] 文件名... [ /link 链接选项... ]
    ```
-3. 
 
 # 错误
 
@@ -180,10 +180,6 @@
    setFixedSize(this->geometry().size());  //在窗口类的ui->setupUi(this)之后。
    ```
 
-2. 
-
-3. 
-
 
 # Qt Creator 格式化
 
@@ -194,40 +190,31 @@
    2. 然后下载Artistic style软件，在tool→option→Beautifier→General中选中Artistic style。
 
    3. 勾选Enable auto format on file save。保存时自动格式化。在Artistic style标签页中指定可执行程序的地址。然后在最下面勾选Use Customized style，右边add，name随便，在value中粘贴下面的内容即可。
-
-
-   ```
-   --style=stroustrup  #GNU 风格格式和缩进
-   --indent=spaces=4  # 缩进4个空格
-   --indent-preproc-block  # 条件编译预处理缩进
-   --indent-preproc-define   # -w  设置宏定义模块缩进
-   --indent-namespaces       # -N  设置 namespace 整体缩进
-   #--indent-col1-comments   # 注释也缩进
-   --pad-oper  #操作符两端插入一个空格
-   --pad-header
-   --unpad-paren  # 刪除括号外多余的空格
-   --max-continuation-indent=80 #最大行长度80
-   --indent-col1-comments  # 注释和代码一起缩进
-   --suffix=none
-   --align-pointer=name  # 指针符号等附在变量上 如 char *foo1;
-   --lineend=linux  # 以linux话的格式显示
-   --indent=tab=4  # TAB 转4个空格
-   --convert-tabs  #TAB转换为空格
-   --indent-switches  #switch case 缩进-S
-   #--indent-cases 	    # -K  设置 cases 整体缩进
-   --break-one-line-headers  #if 语句一行分两行写
-   --add-braces  # 在'if', 'for', 'while'等句块中只有一行也加入大括号
-   --attach-return-type-decl # 函数返回类型和函数名搞成一行
-   --unpad-paren #移除括号两端多余空格
-   --delete-empty-lines      # -xe 删除多余空行
-   --break-blocks            # if while等前增加一空行
-   --verbose
-   ```
-
-2. 
-
-3. 
-
-4. 
-
-5. 
+   
+      ```shell
+      --style=stroustrup  #GNU 风格格式和缩进
+      --indent=spaces=4  # 缩进4个空格
+      --indent-preproc-block  # 条件编译预处理缩进
+      --indent-preproc-define   # -w  设置宏定义模块缩进
+      --indent-namespaces       # -N  设置 namespace 整体缩进
+      #--indent-col1-comments   # 注释也缩进
+      --pad-oper  #操作符两端插入一个空格
+      --pad-header
+      --unpad-paren  # 刪除括号外多余的空格
+      --max-continuation-indent=80 #最大行长度80
+      --indent-col1-comments  # 注释和代码一起缩进
+      --suffix=none
+      --align-pointer=name  # 指针符号等附在变量上 如 char *foo1;
+      --lineend=linux  # 以linux话的格式显示
+      --indent=tab=4  # TAB 转4个空格
+      --convert-tabs  #TAB转换为空格
+      --indent-switches  #switch case 缩进-S
+      #--indent-cases 	    # -K  设置 cases 整体缩进
+      --break-one-line-headers  #if 语句一行分两行写
+      --add-braces  # 在'if', 'for', 'while'等句块中只有一行也加入大括号
+      --attach-return-type-decl # 函数返回类型和函数名搞成一行
+      --unpad-paren #移除括号两端多余空格
+      --delete-empty-lines      # -xe 删除多余空行
+      --break-blocks            # if while等前增加一空行
+      --verbose
+      ```

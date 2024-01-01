@@ -81,7 +81,6 @@
 
 15. 还有一种旋转的表示方法，四元数。由于旋转矩阵不适合做插值，即旋转30度和20度的两个矩阵的平均值不是旋转25度的。
 
-16. 
 
 ## 视图变换
 
@@ -144,17 +143,9 @@
     1. 先将棱台的远处平面缩放成和近处平面同样大小。近平面上的坐标不变，远处平面的Z值不变，远平面的中心不动。
     2. 再做正交投影即可。
 
-15. 
-
 16. ![image-20210522002800072](计算机图形学和OpenGL.assets/image-20210522002800072.png)
 
-17. 
-
-18. 
-
-19. 
-
-20. 近平面上的矩形和相机组成一个视锥，有两个重要参数，长宽比 width/height 和垂直可视角度 fovY。通过这两个参数也可以计算出水平可视角度：
+17. 近平面上的矩形和相机组成一个视锥，有两个重要参数，长宽比 width/height 和垂直可视角度 fovY。通过这两个参数也可以计算出水平可视角度：
 
 21. $$
     Aspect\quad ratio=\tan(fovX/2)/\tan(fovY/2)
@@ -162,15 +153,7 @@
 
     
 
-22. ![image-20210522004728129](计算机图形学和OpenGL.assets/image-20210522004728129.png)
-
-23. 
-
-24. 
-
-25. 
-
-26. 
+18. ![image-20210522004728129](计算机图形学和OpenGL.assets/image-20210522004728129.png)
 
 # 光栅化
 
@@ -317,11 +300,7 @@
 44. 待插值的属性通过重心坐标加权求和。
 45. <img src="计算机图形学和OpenGL.assets/image-20210522213810819.png" alt="image-20210522213810819" style="zoom:50%;" />
 46. 中心坐标的缺点是投影前后同一个点在模型三角形和投影三角形中的重心坐标会变化。因此应该用三维空间的坐标来插值，不能使用投影之后的三角形坐标。因此计算像素中心点的属性时，应该先求得像素中心点对应的模型空间的坐标，然后插值。
-47. 
-48. 
-49. 
-50. 
-51. 图形管线也叫实时渲染管线，就是如何从场景到最后屏幕上显示的图片。可以认为一个fragment就是一个像素，如果使用了MSAA，那就是多个fragment会形成一个像素的颜色。
+47. 图形管线也叫实时渲染管线，就是如何从场景到最后屏幕上显示的图片。可以认为一个fragment就是一个像素，如果使用了MSAA，那就是多个fragment会形成一个像素的颜色。
 52. 之所以称之为管线，是因为显卡在设计时，就是不同的部件进行不同的工作。
 53. 三角形的记录可以通过两部分来完成：顶点坐标的记录，构成一个三角形的顶点编号。投影只改变顶点坐标，不改变构成三角形的顶点编号之间的关系。
 54. ![image-20210522202435176](计算机图形学和OpenGL.assets/image-20210522202435176.png)
@@ -470,19 +449,6 @@
     3. catmull-clark细分，可以对一般网格面进行。下图左边是细分前的网格，有四边形也有三角形。其中将度≠4的点称为奇异点。经过一次细分后，所有的三角形面都变成了四边形。每个三角形的中心都会增加一个奇异点。之后在进行细分则不会增加奇异点。
     4. 
 
-35. 
-
-36. 
-
-37. 
-
-38. 
-
-39. 
-
-40. 
-
-41. 
 
 # Introduction
 
@@ -578,24 +544,21 @@
     		glfwSwapBuffers(window);   //交换显示和绘制缓冲区
     		glfwPollEvents();        //进行事件处理，键盘鼠标等。
     	}
-    
     	glfwTerminate();
     	return 0;
     }
     //当窗口大小改变时，视口也应该跟着改变，这个函数用来重置视口的大小。
-    void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-    {
+    void framebuffer_size_callback(GLFWwindow* window, int width, int height){
     	glViewport(0, 0, width, height);
     }
-    void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
-    {
+    void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode){
     	// 当用户按下ESC键,我们设置window窗口的WindowShouldClose属性为true
     	// 关闭应用程序
     	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     		glfwSetWindowShouldClose(window, GL_TRUE);
     }
     ```
-
+    
 22. 回调函数一般在创建窗口后，渲染循环前注册。可以用来对键盘的鼠标的动作进行处理。
 
 23. 如果使用单缓冲来绘制图片，会出现闪烁，这是因为绘制也需要时间，通常是从左向右，从上往下。为了克服这种问题，一般会使用双缓冲，前缓冲是最终显示在屏幕上的图像，所有的渲染命令都作用在后缓冲，当渲染结束时，切换前后缓冲，这样画面是瞬间呈现的，没有之前的问题。
@@ -609,12 +572,9 @@
 27. 使用扩展的代码大多看上去这样子：
 
 28. ```c
-    if(GL_ARB_extension_name)
-    {
+    if(GL_ARB_extension_name){
         // 使用硬件支持的全新的现代特性
-    }
-    else
-    {
+    }else{
         // 不支持此扩展: 用旧的方式去做
     }
     ```
@@ -724,13 +684,12 @@
     int  success;
     char infoLog[512];
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success); //success结果为1表示编译成功。
-    if (!success)
-    {
+    if (!success){
         glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
     	printf("ERROR::SHADER::VERTEX::COMPILATION_FAILED:%s\n",infoLog);
     }
     ```
-
+    
 21. 要使用shader之前，必须将其链接到shader program上，然后激活该shader program，已激活着色器程序的shader会在渲染时被调用。
 
 22. ```c
@@ -810,9 +769,9 @@
 
 40. ![img](计算机图形学和OpenGL.assets/vertex_array_objects_ebo.png)  
 
-41. 创建1个VAO对象
+41. 创建1个VAO对象：
 
-42. ```c
+    ```c
     unsigned int VAO;
     glGenVertexArrays(1, &VAO);  //此方法支持创建多个。
     ```
@@ -853,9 +812,9 @@
 
 50. 可以使用EBO来对点做索引，避免重复定义。EBO也是一个缓冲对象，类型:GL_ELEMENT_ARRAY_BUFFER，因此需使用要bufferdata从CPU传入到GPU中。
 
-51. glDrawElements按照（当前绑定到Context的GL_ELEMENT_ARRAY_BUFFER接口的EBO）索引绘图，第一个参数是要绘制的图元类型，第二个参数是要绘制的顶点个数，第三个参数是索引的类型，使用GL_UNSIGNED_INT，不能使用unsigned int或GLuint，因为那些都是关键字，只能用于定义，而这个是用来标记的，是一个枚举值。最后一个参数是EBO中的起始偏移量。
+50. glDrawElements按照（当前绑定到Context的GL_ELEMENT_ARRAY_BUFFER接口的EBO）索引绘图，第一个参数是要绘制的图元类型，第二个参数是要绘制的顶点个数，第三个参数是索引的类型，使用GL_UNSIGNED_INT，不能使用unsigned int或GLuint，因为那些都是关键字，只能用于定义，而这个是用来标记的，是一个枚举值。最后一个参数是EBO中的起始偏移量。
 
-52. ```c
+    ```c
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     ```
 
@@ -888,40 +847,37 @@
    
    uniform type uniform_name;
    
-   int main()
-   {
+   int main(){
      // 处理输入并进行一些图形操作
      ...
      // 输出处理过的结果到输出变量
      out_variable_name = weird_stuff_we_processed;
    }
    ```
-
+   
 5. 顶点着色器源代码如下：它必须要输出顶点位置
 
 6. ```glsl
    #version 330 core  //声明GLSL版本号，这个版本号要和OpenGL匹配的，同时声明使用核心模式。
    layout (location = 0) in vec3 aPos;  //in关键字设定着色器的输入变量。用VAO的0号顶点属性读取VBO中的数据，赋值给aPos这个vec3类型的变量。
    out vec4 vertexColor;
-   void main()
-   {
+   void main(){
        gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f); //顶点着色器预定义的输出，vec4类型，要把输入的vec3类型的数据添加w分量，变成齐次坐标，最后补1表示点，补0表示向量。这是最简单的顶点着色器。
        vertexColor=vec4(1.0f,0.5f,0.8f,1.0f);
    }
    ```
-
+   
 7. 片元着色器的源代码如下：它必须要输出片元的颜色。
 
    ```glsl
    #version 330 core
    out vec4 FragColor;//out关键字，设定着色器的输出变量。该着色器需要输出一个四维的向量，名称无所谓。
    in vec4 vertexColor;
-   void main()
-   {
+   void main(){
        FragColor = vertexColor;  //设置片元着色器输出的每个像素的颜色,OpenGL使用RGBA的颜色空间，每个强度分量在0.0-1.0之间。
    } 
    ```
-
+   
 8. GLSL中一个向量可以有1，2，3或4个分量，vec.x，vec.y，vec.z，vec.w。除了一些和C语言一样的基础数据类型意外，GLSL还提供了两种容器类型，向量和矩阵。大多数情况下float就够了，不用double。
 
 9. ![image-20210523232438213](计算机图形学和OpenGL.assets/image-20210523232438213.png)
@@ -941,7 +897,7 @@
 
 11. 顶点着色器中每个输入变量又叫做顶点属性，一般有16个，由硬件决定。OpenGL确保有16个包含4分量的顶点属性可用。属性一般有位置，颜色，法向量，纹理坐标等等。可以使用location来指定从哪里获得输入变量。 layout (location = 0) 。
 
-12. 如果打算从一个着色器向另一个着色器发送数据，则必须在发送方着色器中声明一个输出，在接收方着色器中声明一个同类型同名称的输入。只有类型和名字都一样的时候，OpenGL就会把两个变量链接到一起，它们之间就能发送数据了
+12. 如果打算从一个着色器向另一个着色器发送数据，则必须在发送方着色器中声明一个输出，在接收方着色器中声明一个同类型同名称的输入。只有类型和名字都一样的时候，OpenGL就会把两个变量链接到一起，它们之间就能发送数据了。
 
 13. CPU如果要传送顶点数据以外的数据（例如时间）给shader，就需要通过uniform变量输入。uniform是CPU的应用向GPU的着色器发送数据的一种方式。uniform变量是全局的，不能重复，可以被着色器程序在任意着色器在任意阶段使用。
 
@@ -1020,70 +976,8 @@
     }
     ```
 
-19. 
-
-20. 
-
-21. 一个常见的错误是，将放大过滤的选项设置为多级渐远纹理过滤选项之一。这样没有任何效果，因为多级渐远纹理主要是使用在纹理被缩小的情况下的：纹理放大不会使用多级渐远纹理，为放大过滤设置多级渐远纹理的选项会产生一个GL_INVALID_ENUM错误代码。
-
-22. 
-
-23. 
+19. 一个常见的错误是，将放大过滤的选项设置为多级渐远纹理过滤选项之一。这样没有任何效果，因为多级渐远纹理主要是使用在纹理被缩小的情况下的：纹理放大不会使用多级渐远纹理，为放大过滤设置多级渐远纹理的选项会产生一个GL_INVALID_ENUM错误代码。
 
 24. GLSL中的数学运算：
 
 25. 向量和向量乘法可以用dot(a,b)，cross(a,b)来计算内积和外积。而a*b是进行元素对应乘法。
-
-26. 
-
-27. 
-
-28. 
-
-29. 
-
-30. 
-
-31. 
-
-32. 
-
-33. 
-
-34. 
-
-35. 
-
-36. 
-
-37. 
-
-38. 
-
-39. 
-
-40. 
-
-41. 
-
-42. 
-
-43. 
-
-44. 
-
-45. 
-
-46. 
-
-47. 
-
-48. 
-
-49. 
-
-50. 
-
-51. 
-
-52. 
