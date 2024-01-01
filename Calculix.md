@@ -1,11 +1,21 @@
 # 文件结构
 
-1. 源文件目录中
+1. 注意CalculiX.h的X是大写，书写Makefile的依赖和包含头文件时不要写错。
+
+2. 程序内有Bug，如果修改SFREE的宏，使得其每次释放内存后，都将指针置为NULL，则运行时会报错，卡住在extraploate.f90，ielorien指针在这里已经是NULL了，结果这里还使用了它。当然也不排除是因为修改了太多的源代码导致的。
+
+3. dyna.c文件中出现如下笔误：
+
+   ```c
+   SFREE(xboundiff), SFREE(xbodydiff); //如果SFREE不包含将指针置为NULL的动作，则不会有问题，反之则会报错。
+   ```
+
+4. 源文件目录中
 
    1. 一共有942个.f90文件，但是gauss.f90和xlocal.f90只是被include到其他文件中，并不会单独编译，因此Makifile.inc中SCCXF一共包含940个.f90文件。
    2. 一共有176个.c源文件，而主文件ccx_2.20.c需要单独编译，因此Makefile.inc中SCCXC只包含175个.c文件
 
-2. Makefile的实际执行顺序为
+5. Makefile的实际执行顺序为
 
    ```shell
    #1.编译ccx_2.20.c主文件
@@ -24,7 +34,7 @@
    gfortran  -Wall -O2 -o ccx_2.20 ccx_2.20.o ccx_2.20.a ../../../SPOOLES.2.2/spooles.a ../../../ARPACK/libarpack_INTEL.a -lpthread -lm -lc -fopenmp
    ```
 
-3. Makefile：
+6. Makefile：
 
    ```makefile
    CFLAGS =  -Wall -O2  -I ../../../SPOOLES.2.2 -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DNETWORKOUT -g #指定SPOOLES头文件的目录，定义宏SPOOLES和ARPACK表示使用这两个库，-g调试
@@ -57,7 +67,7 @@
    	rm -f *.o *.a
    ```
 
-4. date.pl，功能是在ccx_2.20.c，ccx_2.20step.c，frd.c中插入当前编译的时间，方便编译调试：
+7. date.pl，功能是在ccx_2.20.c，ccx_2.20step.c，frd.c中插入当前编译的时间，方便编译调试：
 
    ```perl
    #!/usr/bin/env perl
@@ -88,7 +98,7 @@
    system "rm -f frd.c.old";
    ```
 
-5. cleanupcode，功能是清理编译产生的中间文件和可执行文件，不过这个功能已经被集成到makefile中了，使用make clean即可：
+8. cleanupcode，功能是清理编译产生的中间文件和可执行文件，不过这个功能已经被集成到makefile中了，使用make clean即可：
 
    ```shell
    #!/bin/sh
@@ -116,7 +126,7 @@
    done
    ```
 
-6. hwloc可以显示CPU拓扑，比较方面地查看CPU各级缓存以及各个核、物理CPU之间，可以共享哪一级别的CPU cache。
+9. hwloc可以显示CPU拓扑，比较方面地查看CPU各级缓存以及各个核、物理CPU之间，可以共享哪一级别的CPU cache。
 
    ```shell
    zj@zj-hit:~/CCX/ARPACK$ hwloc-ls
@@ -137,7 +147,7 @@
          PCI 02:03.0 (SATA)
    ```
 
-7. 
+10. 
 
 # Calculix.h文件
 
@@ -440,21 +450,43 @@
    #Fortran文件
    write(*,*) 'Call file = '
    
-   
    #C文件
    #ifdef DEBUG_CALL_TRACE
      printf("Call file = %s\n", __FILE__);
    #endif
    
-   
-   
-   使用宏定义，有一点不太好，就是修改Makefile的CFLAGS后，还必须全部编译所有的文件才会生效。
-   可以使用一个全局变量，从环境变量读入，然后再每个函数内进行判断，决定是否调用call trace
+   #使用宏定义，有一点不太好，就是修改Makefile的CFLAGS后，还必须全部编译所有的文件才会生效。
+   #可以使用一个全局变量，从环境变量读入，然后再每个函数内进行判断，决定是否调用call trace
    ```
 
-2. 
 
-3. 
+# 使用到的工程文件
+
+1. 流号和文件名对应，所有的文件都是使用Fortran的open函数打开。
+
+   ```shell
+   流号  文件名
+   1    jobname.inp #输入文件
+   5    jobname.dat #输出的结果
+   7    jobname.frd #结果数据库文件，类似于abaqus的.odb文件
+   8    jobname.sta #
+   11   jobname.cvg #收敛状态文件
+   12   jobname.fcv #
+   15   jobname.rout#重启动相关
+   27   jobname.cel #接触单元
+   ```
+
+2. Fortran使用//拼接字符串，这句代码会被翻译成多个函数调用：
+
+   ```fortran
+   fndat=jobname(1:i)//'.dat' !如果再调试时，需要跳过过程
+   ```
+
+3. ![image-20231217161037674](E:\Markdown-file\Calculix.assets\image-20231217161037674.png)
+
+4. 
+
+5. 
 
 
 # VSCode 工程配置
@@ -1701,13 +1733,3 @@
 2. 
 
 3. 
-
-4. 
-
-5. 
-
-6. 
-
-7. 
-
-8. 

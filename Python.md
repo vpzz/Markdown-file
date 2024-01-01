@@ -2,7 +2,7 @@
 
 1. Python诞生于1990年，完成同一功能所需要的代码量一般为C语言的10%不到，有庞大的第三方库，C和Python可以互相调用。2009年发布了python3.0版本。
 
-2. Python的名称来源于巨蟒剧团 Monty Python，python作为英文单词，意思是蟒蛇，
+2. Python的名称来源于巨蟒剧团 Monty Python，python作为英文单词，意思是蟒蛇。
 
 3. Python Package Index（PyPI）是Python的官方软件仓库。现在已经有6万多个库了。
 
@@ -907,9 +907,9 @@
    os.path.normpath("C:/Users/zj/xxx.txt") #结果为 'C:\\Users\\zj\\xxx.txt'
    
    os.path.relpath(path)     #返回在当前工作目录下找到path所需要的相对路径
-   os.path.relpath("c:/pye") #结果为 '..\\..\\pye'   其中当前工作目录为 'C:\\Users\\zj'。Windows操作系统中需要path和当前工作目录在同一个磁盘。
+   os.path.relpath("c:/pye") #结果为 '..\\..\\pye'   其中当前工作目录为 'C:\\Users\\zj'。Windows操作系统中需要path和当前工作目录在同一个磁盘
    
-   #以下两个函数不涉及文件系统操作，可以看作是纯字符串的操作。不过会自动识别/和\\路径分隔符。
+   #以下两个函数不涉及文件系统操作，可以看作是纯字符串的操作。不过会自动识别/和\\路径分隔符
    os.path.dirname(path)     #返回路径path中的目录名称。
    os.path.dirname("C:\\Users\\zj\\xxx.txt")  #结果为  'C:\\Users\\zj'
    os.path.basename(path)                     #返回path中最后一段，可能是文件，也可能是目录。
@@ -925,6 +925,12 @@
 4. 文件和目录处理的函数：
 
    ```python
+   import os
+   import glob
+   base_dir = "E:/Code/wiznote"
+   files = glob.glob(base_dir + "/*") # 获取base_dir目录下所有文件，完整路径名。使用"*"参数可以获取文件名。
+   files = [os.path.join(base_dir, file) for file in os.listdir(base_dir)] #使用目录名+文件名拼接。不拼接即可获得文件名。
+   
    os.path.exists(path) #判断path对应的文件或目录是否存在，返回True或False
    os.path.exists("c:/Users")   #结果为 True
    

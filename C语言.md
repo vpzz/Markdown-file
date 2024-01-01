@@ -844,7 +844,7 @@
 
    ```c
    d i //带符号十进制方式输出整数，d和i在printf时相同，但是在scanf时不同。
-   u    //无符号十进制方式输出整数
+   u   //无符号十进制方式输出整数
    b B //无符号二进制方式输出整数，区别是，当存在#flag时，%b会导致数字的前导为0b，而%B会使用0B，类似于%x和%X的区别。不过%b为ISO C2X的特征，%B为ISO C2X的可选特征。C2X为2016年开始为预计发布于202X年的下一代C标准所起的名字。现在新一代标准已经发布，就是C23。不过在gcc11.4中使用--std=c2x也会报warning，unknown conversion type character ‘B’ in format。
    o    //无符号八进制方式输出整数
    x X  //十六进制方式输出整数
@@ -2194,47 +2194,173 @@
 
 2. 如果需要真正的通用文本处理器，可以使用GNU M4，他是Autoconf体系的一部分。
 
-3. 程序中所有以#开头的部分(头文件的包含，条件编译等)都是在预处理中完成替换。
+3. 预处理指令都是以#开头的，然后是预处理指令，再接着是参数（可能没有），最后是换行符。
 
-4. 条件编译的主要目的是为了兼容不同的平台和处理器架构，最大程度复用代码。
+4. 如果一行中只有一个#和换行符，则是控指令，没有任何作用。
 
-5. 有了预处理这个构成，就可以使用宏，使得编程方便，可以使用头文件，进行模块化。
+5. 功能如下：
+   1. 条件编译源文件的一部分，通过：`#if #else #elif #endif #ifdef #ifndef #elifdef #elifndef`完成。后两个是C23新增的。
 
-6. 预处理过程：
+   2. 文本替换，通过：`#define #undef # ##`。后两个是引用和连接运算符。
+
+   3. 引入其他文件，通过：`#include __has_include `。后一个是C23新增的可以用来检测是否include了。
+
+   4. 产生错误或警告，通过：`#error #warning`。后一个是C23新增的。
+
+   5. 由实现定义的行为，通过`#pragma _Pragma`。后一个是运算符，在C99增加的。
+
+   6. 文件名和行信息，通过：`#line`。
+
+6. 其他以#开头，但是不属于上面的行，产生的行为可能是被编译器忽略，或者报错。
+
+
+## 条件编译
+
+1. 语法：
 
    ```c
-   头文件展开 //将#include包含的文件插入到该指令的位置
-   宏展开    //展开所有的宏定义，并删除#define
-   条件编译  //处理所有的条件编译指令 #if #ifdef #ifndef #else #endif
-   删除注释
-   添加行号和文件名标识 //编译调试时可以显式行号信息
-   保留#pragma编译器指令
+   #if expression
+   
+   #ifdef identifier
+   
+   #ifndef identifier
+   
+   #elif expression
+   
+   #elifdef identifier		(since C23)
+   
+   #elifndef identifier		(since C23)
+   
+   #else
+   
+   #endif
    ```
 
-7. 条件编译的宏名取法：如果文件名为xx.h，宏一般为`XX_H__`或`__XX_H`。因为内核中的头文件一般是前加下划线，用户程序使用后加下划线是为了防止和内核发生冲突。
+2. #else最多只有一个，#endif有且只有一个。
 
-8. #include 头文件的时候，<>包含的文件会直接去系统指定的目录中寻找，而" "包含的文件会先在当前路径下寻找，如果没找到，再去系统目录下寻找。
+3. 和if相关的，后面是表达式，和def相关的，后面是标识符。
 
-9. GNU C 预处理器提供了ISO C标准的一个超集。默认情况下，不严格按照标准的行为来。
+4. 表达式只能使用常量或#define定义的标识符来构成，还可以使用一些逻辑运算符。
 
-   ```shell
-   #如果要严格按照ISO C的标准来处理，可以使用如下选项之一:
-   -std=c90
-   -std=c99
-   -std=c11
-   -std=c17
-   #如果要做所有的强制诊断，需要使用如下选项:
-   -pedantic
+5. 如果经过了所有的宏替换，最终还不是常数，则会被当作0，这里边包括没有被定义的标识符。
+
+6. 任何非字面值的包括没有定义的标识符都会被当作0。不过C23中新增了，将true当作1。
+
+7. 一元操作符，用来检查标识符是否被#define定义过：`defined identifier`或`defined identifier`，结果是1或0。
+
+8. 组合的指令：
+
+   ```c
+   #ifdef identifier    等价于   #if defined identifier
+   #ifndef identifier   等价于   #if !defined identifier
+   #elifdef identifier  等价于   #elif defined identifier
+   #elifndef identifier 等价于   #elif !defined identifier
    ```
 
-10. 源代码的字符集处理十分复杂，C标准讨论了2种，但是常用的最少有4种。源文件可以是任意字符集的，C预处理器在一开始会先进行把源文件的字符集转化为ISO 10646。也就是Unicode字符集。C预处理器使用utf-8编码的Unicode字符集。C预处理器的输出也是utf-8编码的。超出ASCII表示范围的字符，可以用\u或\U来转义表示或者用户直接输入。
+9. 例子：
+
+   ```c
+   #define ABCD 2
+   #include <stdio.h>
+   int main(void){
+   #ifdef ABCD  //因为前面定义了这个宏，因此结果为真
+       printf("1: yes\n"); //执行这行
+   #else
+       printf("1: no\n");
+   #endif
+   
+   #ifndef ABCD  //结果为假
+       printf("2: no1\n");
+   #elif ABCD == 2 //继续判断这个，通过宏替换，然后判断2==2为真，因此结果为真
+       printf("2: yes\n"); //会执行这行
+   #else
+       printf("2: no2\n");
+   #endif
+    
+   #if !defined(DCBA) && (ABCD < 2 * 4 - 3) //两个部分，第一个部分DCBA没有被定义过，因此!defined(DCBA)为真，因此继续判断第二部分，计算得到2<5为真，因此总的为真，
+       printf("3: yes\n"); //会执行这行
+   #endif
+   // C23 directives #elifdef #elifndef
+   #ifdef CPU  //因为没有定义CPU标识符，因此为假
+       printf("4: no1\n");
+   #elifdef GPU //继续判断这个，也为假
+       printf("4: no2\n");
+   #elifndef RAM //继续判断这个，为真
+       printf("4: yes\n"); //会执行这行
+   #else
+       printf("4: no3\n"); // may be selected in pre-C23 mode
+   #endif
+   }
+   ```
+
+
+## 文本替换
+
+1. 语法：
+
+   ```c
+   #define identifier replacement-list (optional)
+   #define identifier (parameters) replacement-list
+   #define identifier (parameters, ...) replacement-list  //(since C99)
+   #define identifier (...) replacement-list //(since C99)
+   #undef identifier
+   ```
+
+2. 对一个已经定义的标识符，重新定义，除非定义的替换列表相同，否则会报错。
+
+3. 
+
+4. 
+
+5. 
+
+6. 
+
+7. 
+
+8. 
+
+9. 程序中所有以#开头的部分(头文件的包含，条件编译等)都是在预处理中完成替换。
+
+10. 条件编译的主要目的是为了兼容不同的平台和处理器架构，最大程度复用代码。
+
+11. 有了预处理这个构成，就可以使用宏，使得编程方便，可以使用头文件，进行模块化。
+
+12. 预处理过程：
+
+    ```c
+    头文件展开 //将#include包含的文件插入到该指令的位置
+    宏展开    //展开所有的宏定义，并删除#define
+    条件编译  //处理所有的条件编译指令 #if #ifdef #ifndef #else #endif
+    删除注释
+    添加行号和文件名标识 //编译调试时可以显式行号信息
+    保留#pragma编译器指令
+    ```
+
+13. 条件编译的宏名取法：如果文件名为xx.h，宏一般为`XX_H__`或`__XX_H`。因为内核中的头文件一般是前加下划线，用户程序使用后加下划线是为了防止和内核发生冲突。
+
+14. #include 头文件的时候，<>包含的文件会直接去系统指定的目录中寻找，而" "包含的文件会先在当前路径下寻找，如果没找到，再去系统目录下寻找。
+
+15. GNU C 预处理器提供了ISO C标准的一个超集。默认情况下，不严格按照标准的行为来。
+
+    ```shell
+    #如果要严格按照ISO C的标准来处理，可以使用如下选项之一:
+    -std=c90
+    -std=c99
+    -std=c11
+    -std=c17
+    #如果要做所有的强制诊断，需要使用如下选项:
+    -pedantic
+    ```
+
+16. 源代码的字符集处理十分复杂，C标准讨论了2种，但是常用的最少有4种。源文件可以是任意字符集的，C预处理器在一开始会先进行把源文件的字符集转化为ISO 10646。也就是Unicode字符集。C预处理器使用utf-8编码的Unicode字符集。C预处理器的输出也是utf-8编码的。超出ASCII表示范围的字符，可以用\u或\U来转义表示或者用户直接输入。
 
     ```shell
     #设定源文件使用的字符集
     -finput-charset=
     ```
 
-11. 输入文件会被读入到内存中，然后按照行进行分割。不同的系统使用不同的习惯来标识一行的末尾，常见的有有如下三种ASCII控制序列。C预处理器会自动处理这些，因此用户可以在不同平台之间相互拷贝源代码而不用考虑这些问题。不过当不同电脑通过NFS修改共享的文件时，可能会导致一个文件中出现不一致的行尾标记，这可能导致行号功能出问题。
+17. 输入文件会被读入到内存中，然后按照行进行分割。不同的系统使用不同的习惯来标识一行的末尾，常见的有有如下三种ASCII控制序列。C预处理器会自动处理这些，因此用户可以在不同平台之间相互拷贝源代码而不用考虑这些问题。不过当不同电脑通过NFS修改共享的文件时，可能会导致一个文件中出现不一致的行尾标记，这可能导致行号功能出问题。
 
     ```shell
     LF        # Unix
@@ -2242,24 +2368,24 @@
     CR        # 经典Mac OS(在OS X之前)
     ```
 
-12. 通常情况下，文件最后一行末尾也应该有一个行尾标记，否则gcc会报warning。
+18. 通常情况下，文件最后一行末尾也应该有一个行尾标记，否则gcc会报warning。
 
-13. 可以用来定义标识常量，即该常量在程序的多处用到，后期有可能进行修改，例如3.14。也可以定义没有宏体的宏，这种宏一般用来做条件编译的占位。
+19. 可以用来定义标识常量，即该常量在程序的多处用到，后期有可能进行修改，例如3.14。也可以定义没有宏体的宏，这种宏一般用来做条件编译的占位。
 
-14. ```c
+20. ```c
     #define PI 3.14        //宏名+宏体
     #define __STDIO__
     ```
 
-15. 预处理结束后，宏名会被替换为宏体，并不做语法检查。
+21. 预处理结束后，宏名会被替换为宏体，并不做语法检查。
 
-16. ```c
+22. ```c
     #define ADD 2+3
     
     ADD * ADD;       //结果并不是5*5，标识常量的使用应该在外边加上括号。
     ```
 
-17. 带参数的宏，参数也应该加上括号，防止替换后的参数改变运算顺序。
+23. 带参数的宏，参数也应该加上括号，防止替换后的参数改变运算顺序。
 
     ```c
     #define MAX(a,b)  ((a) > (b) ? (a) : (b))
@@ -2267,13 +2393,13 @@
     MAX(i,j);      //预处理后为(i > j ? i : j)
     ```
 
-18. 带参数的宏可以用函数来替代，宏的使用会减小运行时的消耗，因为他的工作在编译时就完成了。内核的代码中有很多宏的应用。但是宏的应用容易出错。内核中使用宏非常多，因为这里的代码运行频率很高。
+24. 带参数的宏可以用函数来替代，宏的使用会减小运行时的消耗，因为他的工作在编译时就完成了。内核的代码中有很多宏的应用。但是宏的应用容易出错。内核中使用宏非常多，因为这里的代码运行频率很高。
 
-19. 调用函数是有开销的，需要将当前的运行环境入栈，在函数调用完毕后再恢复。
+25. 调用函数是有开销的，需要将当前的运行环境入栈，在函数调用完毕后再恢复。
 
-20. 宏毕竟不是函数，直接进行替换容易出现问题，例如：
+26. 宏毕竟不是函数，直接进行替换容易出现问题，例如：
 
-21. ```c
+27. ```c
     #define MAX(a,b)  ((a) > (b) ? (a) : (b))
     int max(int a, int b){
         return a > b ? a : b;
@@ -2287,13 +2413,13 @@
     }
     ```
 
-22. 我们期望MAX达到的功能应该是函数max一样的，返回i和j中较大的那个数，然后对i和j分别自增1。第9行应该输出5，第10行应该输出4和6。而实际上第9行输出的是6，第10行输出的是4和7。这是因为较大的那个数在宏替换后还多进行了一次自增。出现这一问题的原因是因为宏参数没有被适当的变量接收。
+28. 我们期望MAX达到的功能应该是函数max一样的，返回i和j中较大的那个数，然后对i和j分别自增1。第9行应该输出5，第10行应该输出4和6。而实际上第9行输出的是6，第10行输出的是4和7。这是因为较大的那个数在宏替换后还多进行了一次自增。出现这一问题的原因是因为宏参数没有被适当的变量接收。
 
-23. 进行大小比较的时候j=5，比较完的时候j就变成了6，i变成了4。然后返回6，第9行结束的时候j就变成了7。
+29. 进行大小比较的时候j=5，比较完的时候j就变成了6，i变成了4。然后返回6，第9行结束的时候j就变成了7。
 
-24. 对于函数max，实参分别为3和5。函数调用完毕返回后，i和j才会自增1。整个过程中i和j只自增了一次。
+30. 对于函数max，实参分别为3和5。函数调用完毕返回后，i和j才会自增1。整个过程中i和j只自增了一次。
 
-25. 这个问题在标准C下无解，在linux下编程使用的是GNU C，他是标准C的扩展，使用glibc库，可以使用变量接受来解决该问题。
+31. 这个问题在标准C下无解，在linux下编程使用的是GNU C，他是标准C的扩展，使用glibc库，可以使用变量接受来解决该问题。
 
     ```c
     #define MAX(a,b)   ({typeof(a) A=(a),B=(b);((A)>(B)?(A):(B));})
@@ -2301,11 +2427,11 @@
     MAX(i,j);  //({int A=(i++),B=(j++);((A)>(B)?(A):(B));})  A=(i++)是先赋值再自增。
     ```
 
-26. 宏被替换成了一个语句块，其中有两行语句，语句块的值为最后一行语句执行的结果。最外层加上一个大括号也是为了隔绝内外代码。
+32. 宏被替换成了一个语句块，其中有两行语句，语句块的值为最后一行语句执行的结果。最外层加上一个大括号也是为了隔绝内外代码。
 
-27. 使用string.h中的strcpy函数时，会提示该函数不安全，推荐使用strcpy_s或者定义_CRT_SECURE_NO_WARNINGS 这个宏。定义该宏时，需要放在头文件string.h的包含之前才有用。或者使用编译器的命令行参数来配置。
+33. 使用string.h中的strcpy函数时，会提示该函数不安全，推荐使用strcpy_s或者定义_CRT_SECURE_NO_WARNINGS 这个宏。定义该宏时，需要放在头文件string.h的包含之前才有用。或者使用编译器的命令行参数来配置。
 
-28. 每条注释都会被替换为一个空格，这一过程发生在预处理阶段前，因此无法无法使用宏来形成注释：
+34. 每条注释都会被替换为一个空格，这一过程发生在预处理阶段前，因此无法无法使用宏来形成注释：
 
     ```c
     #ifndef DEBUG
@@ -2318,7 +2444,7 @@
     //但是会事与愿违，因为在宏替换前，//就会被替换为一个空格，第二行变成了"#define PRINTF  \n"，因此在宏替换时PRINTF会被替换为一个空格。因此当没有定义DEBUG时，第7行会变为一个逗号表达式(-Wall时会报warning，提示逗号左侧的操作数没有效果)，结果就是最右侧的操作数的结果，即行号7，不过这样也能起到不输出的作用。
     ```
 
-29. ISO C提供了字符创建运算符(#@)，字符串创建运算符(#)，拼接操作(##)，
+35. ISO C提供了字符创建运算符(#@)，字符串创建运算符(#)，拼接操作(##)，
 
     ```c
     #define ToChar(x) #@x      //由于C语言字符串和字符的引号不同，因此需要分开处理
@@ -2332,7 +2458,7 @@
     char* str = Conn("asdf", "adf")  // 被替换为 char* str = "asdf""adf";由于ISO C会再进行拼接因此为"asdfadf"
     ```
 
-30. 使用##还有一个特点，就是当##对应的参数为空时，会删除前面的逗号：
+36. 使用##还有一个特点，就是当##对应的参数为空时，会删除前面的逗号：
 
     ```c
     #define LOG(_STRING, ...)   printf(__STRING, ##__VA_ARGS__)  //...表示可变参数，对应到__VA_ARGS__
@@ -2341,16 +2467,16 @@
     log_info("cout: %d", count); //被替换为 printf("cout count: %d", count);
     ```
 
-31. gcc提供-D选项来进行编译时宏定义：
+37. gcc提供-D选项来进行编译时宏定义：
 
     ```shell
     gcc -DDEBUG #相当于 #define DEBUG 1
     gcc -DDEBUG=DEFN #相当于 #define DEBUG DEFN
     ```
 
-32. vs在debug，x86编译时，分别会自动定义对应的宏，\_DEBUG，\_WIN64。如果没有对应的就是release或x64。
+38. vs在debug，x86编译时，分别会自动定义对应的宏，\_DEBUG，\_WIN64。如果没有对应的就是release或x64。
 
-33. 有时候需要在程序关键地方设置prinf打印信息，而在程序发布的时候又需要取消这些功能，实际上不用删除。只要用条件编译即可，不过需要重新编译整个软件才可以：
+39. 有时候需要在程序关键地方设置prinf打印信息，而在程序发布的时候又需要取消这些功能，实际上不用删除。只要用条件编译即可，不过需要重新编译整个软件才可以：
 
     ```c
     #ifdef _DEBUG
@@ -2358,9 +2484,9 @@
     #endif // _DEBUG
     ```
 
-34. 如果使用的是gcc之类的命令行工具，可以在编译时手动加上对应的宏。
+40. 如果使用的是gcc之类的命令行工具，可以在编译时手动加上对应的宏。
 
-35. 还可以设定不同的目标下使用不同的库。
+41. 还可以设定不同的目标下使用不同的库。
 
     ```c
     #ifdef _DEBUG
@@ -2396,7 +2522,7 @@
     run/r         #运行程序
     quit/q        #退出gdb
     ```
-    
+
 4. ![image-20210521135200025](C语言.assets/image-20210521135200025.png)
 
 5. p命令可以执行函数，最后不用加；s命令需要有源程序才可以进入。list命令可以显示源代码。使用info命令来查看寄存器，内存等。
@@ -2417,23 +2543,23 @@
 
 11. 调试正在运行的程序：
 
-     ```shell
-     gdb book1 -p 21495      #进程号为21495。 book1为可执行文件的路径。
-     ```
+      ```shell
+      gdb book1 -p 21495      #进程号为21495。 book1为可执行文件的路径。
+      ```
 
 12. ![image-20210521141037081](C语言.assets/image-20210521141037081.png)
 
 13. 调试多进程程序：
 
-     ```shell
-     set follow-fork-mode parent   #调试父进程，默认
-     set follow-fork-mode child    #调试子进程，默认
-     
-     set detach-on-fork [on|off]  #表示调试当前进程时，其他进程是否继续运行。默认是on
-     
-     info inferiors   #查看当前调试的进程
-     inferior 进程ID  #切换要调试的进程，这个ID不是PID而是gdb给进程的编号。
-     ```
+      ```shell
+      set follow-fork-mode parent   #调试父进程，默认
+      set follow-fork-mode child    #调试子进程，默认
+      
+      set detach-on-fork [on|off]  #表示调试当前进程时，其他进程是否继续运行。默认是on
+      
+      info inferiors   #查看当前调试的进程
+      inferior 进程ID  #切换要调试的进程，这个ID不是PID而是gdb给进程的编号。
+      ```
 
 14. ![image-20210521142233955](C语言.assets/image-20210521142233955.png)
 
@@ -2441,39 +2567,39 @@
 
 16. ps -aL 可以查看当前运行的轻量级进程，也就是线程。pstree -p 主线程ID。
 
-     ```shell
-     zj@zjhit:~$ ps aux| grep rand
-     zj     2931  0.0  0.0 445036   632 pts/2    Sl+  15:17   0:00 ./rand_thread
-     zj     3238  0.0  0.0   6304   744 pts/1    S+   15:17   0:00 grep --color=auto rand
-     
-     zj@zjhit:~$ ps -aL |grep rand
-        2931    2931 pts/2    00:00:00 rand_thread    #主线程,线程ID和进程ID相同，这里的线程实际上是一种轻量级进程LWP。
-        2931    2932 pts/2    00:00:00 rand_thread
-        2931    2933 pts/2    00:00:00 rand_thread
-        2931    2934 pts/2    00:00:00 rand_thread
-        2931    2935 pts/2    00:00:00 rand_thread
-        2931    2936 pts/2    00:00:00 rand_thread
-        2931    2937 pts/2    00:00:00 rand_thread
-     ```
+      ```shell
+      zj@zjhit:~$ ps aux| grep rand
+      zj     2931  0.0  0.0 445036   632 pts/2    Sl+  15:17   0:00 ./rand_thread
+      zj     3238  0.0  0.0   6304   744 pts/1    S+   15:17   0:00 grep --color=auto rand
+      
+      zj@zjhit:~$ ps -aL |grep rand
+         2931    2931 pts/2    00:00:00 rand_thread    #主线程,线程ID和进程ID相同，这里的线程实际上是一种轻量级进程LWP。
+         2931    2932 pts/2    00:00:00 rand_thread
+         2931    2933 pts/2    00:00:00 rand_thread
+         2931    2934 pts/2    00:00:00 rand_thread
+         2931    2935 pts/2    00:00:00 rand_thread
+         2931    2936 pts/2    00:00:00 rand_thread
+         2931    2937 pts/2    00:00:00 rand_thread
+      ```
 
 17. 相关命令：
 
-     ```shell
-     info threads  #查看所有线程
-     (gdb) info threads
-       Id   Target Id                                      Frame
-       1    Thread 0x7ffff7d95740 (LWP 3334) "rand_thread" clone ()
-         at ../sysdeps/unix/sysv/linux/x86_64/clone.S:78
-     * 2    Thread 0x7ffff7d94700 (LWP 3338) "rand_thread" producer (     # *表示当前正在运行的线程。
-         ptr=0x0) at rand_thread.c:19
-       3    Thread 0x7ffff7593700 (LWP 3339) "rand_thread" clone ()
-         at ../sysdeps/unix/sysv/linux/x86_64/clone.S:78
-     thread 1    #切换到ID为1的线程。
-     set scheduler-locking on #设置只运行当前线程
-     set scheduler-locking on #设置运行所有线程
-     thread apply 2 n         #指定ID为2的线程执行gdb命令n。
-     thread apply all n       #指定所有线程执行gdb命令n。
-     ```
+      ```shell
+      info threads  #查看所有线程
+      (gdb) info threads
+        Id   Target Id                                      Frame
+        1    Thread 0x7ffff7d95740 (LWP 3334) "rand_thread" clone ()
+          at ../sysdeps/unix/sysv/linux/x86_64/clone.S:78
+      * 2    Thread 0x7ffff7d94700 (LWP 3338) "rand_thread" producer (     # *表示当前正在运行的线程。
+          ptr=0x0) at rand_thread.c:19
+        3    Thread 0x7ffff7593700 (LWP 3339) "rand_thread" clone ()
+          at ../sysdeps/unix/sysv/linux/x86_64/clone.S:78
+      thread 1    #切换到ID为1的线程。
+      set scheduler-locking on #设置只运行当前线程
+      set scheduler-locking on #设置运行所有线程
+      thread apply 2 n         #指定ID为2的线程执行gdb命令n。
+      thread apply all n       #指定所有线程执行gdb命令n。
+      ```
 
 18. 设置断点或单步跟踪会严重干扰多进（线）程之间的竞争状态，导致调试的过程和实际运行的不一致。
 
@@ -2481,12 +2607,277 @@
 
 20. 使用vscode remote插件进行远程调试时，可以在地下窗口的"调试控制台"中输入gdb的命令，不过要加上-exec 的前缀：
 
-     ```shell
-     -exec info breakpoints #和下面一行等价
-     `info breakpoints 
-     ```
+      ```shell
+      -exec info breakpoints #和下面一行等价
+      `info breakpoints 
+      ```
 
 21. 
+
+
+# 调用图
+
+1. 使用工具生成函数调用图可以更直观地理解一个新的项目。
+
+2. egypt是一个perl脚本，它会调用graphviz来生成调用图（静态代码分析），步骤如下：
+
+    1. 使用`-fdump-rtl-expand`编译所有的源代码，这会生成对应的`.c.229r.expand`文件。
+
+    2. 使用egypt处理所有的.expand文件，它会生成DOT语言的代码。
+
+    3. 使用graphviz工具库的dot命令，读取上述DOT代码，绘制图片，这一步可以和上一步使用管道连接。
+
+        ```shell
+        egypt *.expand | dot -Gsize=3000,3000 -Grankdir=LR -Tpng -o callgraph.png #表示生成一个3000*3000像素的png图片，LR表示从左到右，也可以为BT，从上到下。
+        egypt *.expand | dot -Gsize=8.5,11 -Grankdir=LR -Tpdf -o callgraph.pdf #也可以生成pdf，8.5英寸*11英寸
+        
+        --callees getnewline #仅显示getnewline调用的函数
+        --callers getnewline #仅显示调用getnewline的函数。
+        --summarize-callers 5 #如果一个函数被调用超过5次，则不显示箭头，只显示一个数字标记。
+        ```
+
+3. egypt的安装：
+
+    ```shell
+    wget https://www.gson.org/egypt/download/egypt-1.11.tar.gz #下载源代码
+    x egypt-1.11.tar.gz #解压
+    cd egypt-1.11
+    perl Makefile.PL
+    make
+    make install
+    ```
+
+4. 节点表示函数，实线表示直接调用，虚线表示使用指针调用。
+
+5. 不过这个对于大项目来说，生成的图片过于复杂，不太实用。虽然egypt说可以处理C程序，实际上任何语言都可以处理，因为GCC在编译时，会产生中间表示IR，egypt是利用改描述来生成调用关系的。IR是和具体语言没关系的。
+
+6. caller为调用者，主动发起调用；callee为被调用者。
+
+7. 可以看到，大部分的函数都由main函数调用，但是也有一些函数不和任何函数相关联，这一般有两种情况：
+
+    1. 该函数实际上也不会被调用。可能只是一个无关的函数，或者是被注释了。
+
+    2. 嵌入式代码的中断服务例程
+
+8. 由于调用图不会显示全局变量，因此通过全局变量传递参数的情况，则无法在图中表示。这会导致调试困难，因此不建议使用。
+
+9. 另一个可以使用的是cflow，不太推荐使用，她不是使用IR，因此一些编译指令或选项对于他来说无效，例如-D的宏设置。
+
+# Valgrind
+
+1. Valgrind 是一个基于仿真技术的内存调试、内存泄漏检测和性能分析的开源工具。代码在编译时最好都加上`-g`选项进行编译（用来在结果中输出行号）。
+
+2. 如果程序是用优化选项（如 `-O2` 或 `-O3`）编译的，某些优化可能会使得行号信息变得不准确。如果可能，应该在没有优化的情况下编译程序进行内存泄漏检测。
+
+3. Valgrind的不同工具（如 Memcheck、Callgrind、Massif 等）不能同时运行。每次运行Valgrind时，你必须选择一个要使用的工具。这是因为每个工具都有自己的特定目标和方法，它们不能同时应用于同一个程序运行实例。如果你想同时进行内存泄漏检测和性能分析，你需要分别运行两次Valgrind，一次使用 Memcheck，一次使用Callgrind。
+
+4. 使用 `kill -9` 杀死正在运行的 Valgrind 进程会影响检测结果。`kill -9` 会立即终止进程，不给它机会进行任何清理工作。在 Valgrind 的情况下，这意味着它可能无法生成完整的报告，因为它通常在被检测的程序正常结束时生成报告。
+
+5. 如果你需要在 Valgrind 运行时停止它，最好的方法是尝试使用 `kill` 命令（没有 `-9` 选项）发送一个 TERM 信号。这将请求 Valgrind 优雅地终止，它应该能够生成一个报告，然后退出。
+
+6. Valgrind 默认在程序结束时报告内存泄漏和其他问题。然而，如果你的程序是一个长时间运行的服务或者你希望在运行过程中查看报告，你可以使用 Valgrind 的 gdbserver 模式，这允许你在运行时与 Valgrind 交互。
+
+    ```shell
+    #首先使用 --vgdb=yes 选项(也可以省略，因为默认就是yes)来启动valgrind。vgdb是Valgrind to GDB。
+    #然后在另一个终端中，使用gdb连接到valgrind，使用gdb prog启动gdb
+    #在gdb内执行命令target remote | vgdb
+    ```
+
+7. 常用的功能有：
+
+     ```shell
+     memcheck #检查程序中的内存问题，如泄漏、越界、非法指针等。--tool=选项的默认值
+     callgrind #检测程序代码的运行时间和调用过程，以及分析程序性能。
+     cachegrind #Cache分析器，它模拟CPU中的一级缓存和二级缓存，能够精确地指出程序中cache的丢失和命中。如果需要，它还能够为我们提供cache丢失次数，内存引用次数，以及每行代码，每个函数，每个模块，整个程序产生的指令数。这对优化程序有很大的帮助。
+     helgrind #它主要用来检查多线程程序中出现的竞争问题。Helgrind寻找内存中被多个线程访问，而又没有一贯加锁的区域，这些区域往往是线程之间失去同步的地方，而且会导致难以发觉的错误。不过，Helgrind仍然处于实验状态。
+     massif #堆栈分析器，它能测量程序在堆栈中使用了多少内存，告诉我们堆块，堆管理块和栈的大小。Massif能帮助我们减少内存的使用，在带有虚拟内存的现代系统中，它还能够加速我们程序的运行，减少程序停留在交换区中的几率。
+     ```
+
+8. 用法：
+
+     ```shell
+     valgrind [options] prog-and-args # prog-and-args是直接运行程序时的名称和命令行参数
+     --trace-children # 是否跟踪子进程，默认值为no;
+     --track-fds # 是否追踪打开的文件描述符，默认为no
+     --log-file=<file> # 指定将消息打印到某个文件，可以避免和程序本身的输出
+     ```
+
+9. memcheck，所有对内存的读写都会被检测到，一切对`malloc`、`free`、`new`、`delete`的调用都会被捕获。能够检测如下问题：
+
+     ```shell
+     1、使用未初始化的内存。如果在定义一个变量时没有赋初始值，后边即使赋值了，使用这个变量的时候Memcheck也会报"uninitialised value"错误。使用中会发现，valgrind提示很多这个错误，由于关注的是内存泄漏问题，所以可以用--undef-value-errors=选项把这个错误提示屏蔽掉，具体可以看后面的选项解释。
+     2、读/写释放后的内存块；
+     3、内存读写越界（数组访问越界／访问已经释放的内存),读/写超出malloc分配的内存块；
+     4、读/写不适当的栈中内存块；
+     5、内存泄漏，指向一块内存的指针永远丢失；
+     6、不正确的malloc/free或new/delete匹配（重复释放／使用不匹配的分配和释放函数）；
+     7、内存覆盖，memcpy()相关函数中的dst和src指针重叠。
+     ```
+
+10. 例子：
+
+      ```cpp
+      #include <string.h>
+      void func() {
+          char* ptr = new char[10];//分配了1块，10个字节
+          ptr[10] = 'a';   //内存越界，可用下标为0-9
+          memcpy(ptr + 1, ptr, 5);   // 踩内存
+          delete[]ptr;
+          delete[]ptr; // 重复释放
+          char* p;
+          *p = 1;   // 非法指针，未初始化p就使用了，即读写*p。
+      }
+      int main() {
+          func();
+          return 0;
+      }
+      ```
+
+11. memcheck结果为：
+
+      ```shell
+      g++ -g -o main main.cpp #编译
+      valgrind --tool=memcheck --leak-check=full ./main
+      --leak-check=yes #会告诉 Valgrind 进行内存泄漏检测，但它只会提供每个泄漏点的总体信息，例如泄漏的总字节数和泄漏的块数。
+      --leak-check=full #则会提供更详细的信息。除了泄漏点的总体信息，它还会显示每个单独的泄漏块的信息，包括它的大小和分配它的函数的堆栈跟踪。这可以帮助你更准确地定位内存泄漏的位置。
+      
+      ==8686== Command: ./main#运行的命令行，8686为进程号
+      #第一个内存错误如下：
+      ==8686== Invalid write of size 1 #非法写入一个字节
+      ==8686==    at 0x1091AB: func() (main.cpp:4) #出错的位置，调用栈为main→func
+      ==8686==    by 0x109206: main (main.cpp:12)
+      ==8686==  Address 0x4ddec8a is 0 bytes after a block of size 10 alloc'd #所写的内存地址为0x4ddec8a，是在一块分配了的为10字节的块之后写入。
+      ==8686==    at 0x484A2F3: operator new[](unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so) #这个内存块分配的细节，调用栈为main→func→operator new[]。
+      ==8686==    by 0x10919E: func() (main.cpp:3)
+      ==8686==    by 0x109206: main (main.cpp:12)
+      #到此一个内存错误结束。
+      ==8686== Invalid free() / delete / delete[] / realloc() #非法释放，删除(数组)或重新分配。
+      ==8686==    at 0x484CA8F: operator delete[](void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)#非法释放的调用栈
+      ==8686==    by 0x1091EF: func() (main.cpp:7)
+      ==8686==    by 0x109206: main (main.cpp:12)
+      ==8686==  Address 0x4ddec80 is 0 bytes inside a block of size 10 free'd #正常释放的调用栈
+      ==8686==    at 0x484CA8F: operator delete[](void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+      ==8686==    by 0x1091DC: func() (main.cpp:6)
+      ==8686==    by 0x109206: main (main.cpp:12)
+      ==8686==  Block was alloc'd at #内存块申请的调用栈
+      ==8686==    at 0x484A2F3: operator new[](unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+      ==8686==    by 0x10919E: func() (main.cpp:3)
+      ==8686==    by 0x109206: main (main.cpp:12)
+      #综上，第3行申请，第6行释放，第7行又重新释放，因此产生错误
+      ==8686== Use of uninitialised value of size 8 #使用了未初始化的值，大小为8字节。读或写都会报这个错误。
+      ==8686==    at 0x1091F4: func() (main.cpp:9)
+      ==8686==    by 0x109206: main (main.cpp:12)
+      ==8686== 
+      ==8686== Invalid write of size 1
+      ==8686==    at 0x1091F4: func() (main.cpp:9) #非法写入
+      ==8686==    by 0x109206: main (main.cpp:12)
+      ==8686==  Address 0x0 is not stack'd, malloc'd or (recently) free'd #内存地址为0，既不是栈上，也不在堆上，也不是
+      ==8686== 
+      ==8686== Process terminating with default action of signal 11 (SIGSEGV) #进程收到段错误的信号而终止。
+      ==8686==  Access not within mapped region at address 0x0
+      ==8686==    at 0x1091F4: func() (main.cpp:9)
+      ==8686==    by 0x109206: main (main.cpp:12)
+      ==8686==  If you believe this happened as a result of a stack
+      ==8686==  overflow in your program's main thread (unlikely but
+      ==8686==  possible), you can try to increase the size of the
+      ==8686==  main thread stack using the --main-stacksize= flag. #如果认为是由于栈溢出造成的错误，可以在编译时设置一个较大的栈。
+      ==8686==  The main thread stack size used in this run was 8388608. #当前主线程的栈大小。
+      ==8686== 
+      ==8686== HEAP SUMMARY:#堆总结，程序在堆上分配内存的情况
+      ==8686==     in use at exit: 72,704 bytes in 1 blocks #退出时还在使用
+      ==8686==   total heap usage: 2 allocs, 2 frees, 72,714 bytes allocated #一共2此分配，1次free
+      ==8686== LEAK SUMMARY:#泄露汇总
+      ==8686==    definitely lost: 0 bytes in 0 blocks #必定泄露的，应尽快修复。当程序结束时如果一块动态分配的内存没有被释放并且通过程序内的指针变量均无法访问这块内存（泄露），则会报这个错误；
+      ==8686==    indirectly lost: 0 bytes in 0 blocks #非直接泄露，当使用了含有指针成员的类或结构体时可能会报这个错误。无需直接修复，它们总是与definitely lost一起出现，只要修复definitely lost即可。
+      ==8686==      possibly lost: 0 bytes in 0 blocks #可能泄露，也需要认真处理。当程序结束时如果一块动态分配的内存没有被释放并且通过程序内的指针变量均无法访问这块内存的起始地址，但可以访问其中的某一部分数据，则会报这个错误。例如程序让一个指针指向一块动态分配的内存（但不是这块内存的起始地址），然后通过运算得到这块内存的起始地址，再释放它。
+      ==8686==    still reachable: 72,704 bytes in 1 blocks #可以访问，未丢失但也未释放。如果程序是正常结束的，那么它可能不会造成程序崩溃，但长时间运行有可能耗尽系统资源。
+      ==8686==         suppressed: 0 bytes in 0 blocks #抑制
+      ==8686== ERROR SUMMARY: 4 errors from 4 contexts (suppressed: 0 from 0) #错误总结
+      Segmentation fault (core dumped) #最后发生了段错误，因为非法的内存写入
+      ```
+
+12. 丢失意味着，不存在任何一个指针指向该内存块，即没法利用，也没法释放了。
+
+13. callgrind：收集程序运行时的一些数据，建立函数调用关系图，还可以有选择地进行`cache`模拟。在运行结束时，它会把分析数据写入一个文件。和`gprof`类似的分析工具，但它对程序的运行观察更为入微，能给我们提供更多的信息。和`gprof`不同的是，它不需要在编译源代码时附加特殊选项，但还是推荐加上调试选项`-g`。
+
+       ```shell
+       valgrind --tool=callgrind --compress-strings=no --compress-pos=no --collect-jumps=yes ./ccx_2.20 -i ../test/beamp
+       ```
+
+14. `callgrind_annotate`可以把这个文件的内容转化成可读的形式，也可以使用`Kcachegrind`来进行可视化分析。如果代码中包含很多递归调用，则必须使用`Kcachegrind`，因为`callgrind_annotate`不会进行循环检测。
+
+15. 例子：
+
+    ```c
+     #include <stdio.h>
+     #include <unistd.h>
+     void test() {
+         sleep(1);
+     }
+     void func() {
+         for (int i = 0; i < 10; i++) {
+             test();
+         }
+     }
+     int main() {
+         func();
+         printf("process is over!\n");
+         return 0;
+     }
+    ```
+
+16. callgrind：
+
+      ```shell
+      g++ -g -o main main.cpp #编译
+      valgrind --tool=callgrind ./main #结果都写入到了callgrind.out.9172中，命令行输出的内容较少。9k多行
+      ```
+
+17. 每个函数都会有一个统计数据：
+
+         ```shell
+         Incl.     Self  Called   Function   Location
+         124593089 13392   1       main      ccx_2.20:ccx_2.20.c
+         #Incl. 表示inclusive cost，也就是由该函数产生所有后续调用的总开销，数字表示的是执行指令数量。也可以用百分比的角度来查看。
+         #Self  表示该函数本身调用的开销，不包含由它产生的对其他函数的调用。
+         #Called 表示该函数被调用的次数
+         #Function 表示函数名
+         #Location 表示该函数的位置在ccx_2.20模块的ccx_2.20.c文件。有的函数位于动态库中
+         ```
+
+19. 一般来说main的includsive cost会占据大头，也不一定是100%，尤其是多线程应用中，因为main只是主线程，其他线程也会产生开销。
+
+20. 另外，main执行前还会有一些其他开销，例如链接器初始化，C++全局对象的构造等事宜。
+
+21. 包括函数调用次数、指令读取次数等。然而，它并不直接测量函数的执行时间。虽然指令读取次数和函数调用次数可以提供一些关于程序性能的信息，但它们并不能直接告诉你哪些函数是耗时的
+
+22. 
+
+23. 指令读取次数"是一个度量，它表示在程序执行过程中，一个特定函数中的指令被读取（并可能被执行）的次数。这个度量可以帮助你了解哪些函数在你的程序中被频繁地执行
+
+24. 
+
+25. 然而，指令读取次数并不直接等于函数的执行时间。一个函数可能有很多指令，但如果这些指令都很快地执行，那么这个函数的执行时间可能仍然很短。另一方面，一个函数可能只有少量的指令，但如果这些指令需要很长时间来执行（例如，如果它们包含了磁盘 I/O 或网络通信），那么这个函数的执行时间可能会很长。
+
+26. 磁盘 I/O 或网络通信
+
+27. `--collect-jumps=yes`：这个选项让 Callgrind 收集程序中的跳转信息。这可以帮助你了解你的程序的控制流，但也会使 Callgrind 运行得更慢，并生成更大的输出文件。
+
+28. "Ir" 代表 "Instruction read"，也就是读取的指令数。这个数字表示在程序执行过程中，处理器读取了多少条指令。这个度量可以帮助你了解你的程序的性能瓶颈在哪里。如果一个函数的指令读取次数占比很高，那么这可能意味着这个函数是你的程序的一个热点，你可能需要优化这个函数以提高程序的性能。
+
+29. Massif只能测量堆内存的使用情况，不能测量栈内存或其他类型的内存。
+
+      ```bash
+      --pages-as-heap=yes #这个选项会让Massif把所有的内存页都当作堆来处理，这可以让你看到所有的内存分配，而不仅仅是通过malloc、new等函数分配的内存。
+      ```
+
+30. 
+
+31. 
+
+32. 
+
+33. 
 
 # 标准库实现
 

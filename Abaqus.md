@@ -731,7 +731,7 @@
                                                        [guiNoRecord]
    ```
 
-3. 通过命令行给Python脚本传递参数，这些参数会被CAE忽略，但是会传递给Python解释器。
+2. 通过命令行给Python脚本传递参数，这些参数会被CAE忽略，但是会传递给Python解释器。
 
    ```python
    import sys
@@ -740,7 +740,7 @@
    abaqus cae script=try.py -- argument1      #运行该命令，会打开ABAQUS，在Python输出窗口输出argument1
    ```
 
-4. 从下面可以看出：除了额外输入的3个参数，一共还有8个参数。
+3. 从下面可以看出：除了额外输入的3个参数，一共还有8个参数。
 
    ```
    G:\Abaqus file>abaqus cae noGui=checkPartValidity.py -- test.cae Model-1 Part-1
@@ -760,33 +760,58 @@
    Part-1
    ```
 
-5. 不打开ABAQUS图形界面运行。这个可以和参数结合使用。
+4. 不打开ABAQUS图形界面运行。这个可以和参数结合使用。
 
    ```python
    abaqus cae noGui=checkPartValidity.py
    ```
 
-6. ABAQUS会将用户对GUI界面的设置保存在abaqus_v6.14.gpr文件中，还会将用户的操作保存在abaqus.rpy文件（Python脚本）中，方便用户复现之前的操作。每次打开CAE都会新建一个rpy文件，并将之前存在的rpy文件重命名。
+5. ABAQUS会将用户对GUI界面的设置保存在abaqus_v6.14.gpr文件中，还会将用户的操作保存在abaqus.rpy文件（Python脚本）中，方便用户复现之前的操作。每次打开CAE都会新建一个rpy文件，并将之前存在的rpy文件重命名。
 
-7. 如果启动CAE时，使用了noSavedOptions 选项。CAE将不会读取abaqus_v6.14.gpr中的设置。
+6. 如果启动CAE时，使用了noSavedOptions 选项。CAE将不会读取abaqus_v6.14.gpr中的设置。
 
-8. 默认情况下，启动CAE时，会依次读取家目录和启动CAE是的目录中的.gpr文件。关闭CAE时，会自动保存当前的GUI设置到家目录中的文件。也可以删除该文件，来还原设置。
+7. 默认情况下，启动CAE时，会依次读取家目录和启动CAE是的目录中的.gpr文件。关闭CAE时，会自动保存当前的GUI设置到家目录中的文件。也可以删除该文件，来还原设置。
 
-9. CAE内部包含了一个非活动的计时器，如果应用长时间不活动，license就会被服务器收回，给其他用户使用。默认时间是60分钟。可以通过修改环境变量文件abaqus_v6.env中的cae_timeout来更改时间。
+8. CAE内部包含了一个非活动的计时器，如果应用长时间不活动，license就会被服务器收回，给其他用户使用。默认时间是60分钟。可以通过修改环境变量文件abaqus_v6.env中的cae_timeout来更改时间。
 
-10. 系统的abaqus_v6.env文件放在/SMA/site路径下。也可以在用户家目录，启动目录中存放该文件。CAE启动的时候会依次读取。使用的是Python语法。
+9. 系统的abaqus_v6.env文件放在/SMA/site路径下。也可以在用户家目录，启动目录中存放该文件。CAE启动的时候会依次读取。使用的是Python语法。
 
-11. 视图中的部分，在打印出图时会用到：
+10. 视图中的部分，在打印出图时会用到：
 
     1. viewport decorations→title border
     2. viewport annotations→legend, state block, title block, view orientation triad, and 3D compass
 
-12. 链接的窗口只能有一个，打开该功能后，勾选需要链接的窗口即可。链接的窗口可以选择要同步的选项。一般来说就同步位置和视角就行了，而具体的field output就按照各个
+11. 链接的窗口只能有一个，打开该功能后，勾选需要链接的窗口即可。链接的窗口可以选择要同步的选项。一般来说就同步位置和视角就行了，而具体的field output就按照各个
 
-13. <img src="Abaqus.assets/image-20210320111520801.png" alt="image-20210320111520801" style="zoom: 80%;" />
+12. <img src="Abaqus.assets/image-20210320111520801.png" alt="image-20210320111520801" style="zoom: 80%;" />
 
-14. 
+13. 
 
-15. 
+14. 如果工作目录有空格，则在使用cae提交inp形式的job时，会报错，有两种方案：①修改工作目录，删掉其中的空格，不过可能会触发下一个错误②使用命令行`abaqus job=xxx`，不用.inp的后缀。
 
-16. 
+    ```shell
+    Abaqus Error: Command line option "input" value must not contain whitespace characters.
+    Abaqus/Analysis exited with error(s).
+    ```
+
+15. 如果修改了工作目录的文件名，启动时会报错，这是由于想要在不存在的目录产生一个新的abaqus.rpy文件，因此会报错。此时可以修改快捷方式的起始位置为新的工作目录。
+
+    ```python
+    IOError: abaqus.rpy: Permission denied
+    
+    Abaqus Error: Abaqus/CAE Kernel exited with an error.
+    ```
+
+16. 如果不打开cae的话，是不会产生.rpy文件的。例如只使用命令行提交.inp文件。
+
+17. 
+
+18. 
+
+19. 
+
+20. 
+
+21. 
+
+22. 
