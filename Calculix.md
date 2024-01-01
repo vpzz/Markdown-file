@@ -494,8 +494,6 @@
    fndat=jobname(1:i)//'.dat' !如果再调试时，需要跳过过程
    ```
 
-3. ![image-20231217161037674](E:\Markdown-file\Calculix.assets\image-20231217161037674.png)
-
 
 # VSCode 工程配置
 

@@ -1,6 +1,6 @@
 import os
 
-target_directory = r"G:\MarkDown file"
+target_directory = "."
 os.chdir(target_directory)  # 切换工作目录
 
 with open("dirs.txt", encoding="utf-8") as dirstxt:

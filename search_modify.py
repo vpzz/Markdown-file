@@ -3,7 +3,6 @@ import re
 import os
 import shutil
 
-
 # 主要处理函数 delimit_char为正则表达式末尾的界定字符 flag表示文件是否需要重新修改
 def match_replace(match, md_file_name, linenumber, delimit_char, flag):
     if not match.group(3):
@@ -28,7 +27,7 @@ def match_replace(match, md_file_name, linenumber, delimit_char, flag):
 
 
 # 文件目录处理
-target_directory = r"G:\MarkDown file"
+target_directory = "."
 os.chdir(target_directory)  # 切换工作目录
 # 获取所有的md文件和目录中的图片
 files = []  # 保存外层的.md文件

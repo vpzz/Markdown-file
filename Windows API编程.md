@@ -21,7 +21,7 @@
    }
    ```
 
-2. ![image-20230314203053410](assets/image-20230314203053410.png)
+2. ![image-20230314203053410](Windows API编程.assets/image-20230314203053410.png)
 
 3. Windows.h是Windows编程中最重要的头文件，主要包含了如下头文件：
 

@@ -227,8 +227,6 @@
       # fdisk环境下，所有的操作不会立即生效，只有在最后保存推出时才会生效，类似于BIOS的设置。m指令可以查看帮助
       ```
 
-   2. ![image-20231223022413980](E:\Markdown-file\Linux学习.assets\image-20231223022413980.png)
-
    3. 如果需要支持大于 2TB 的分区，则需要使用 parted命令。要注意的是，parted中所有的操作都是立即生效的（交互式环境也是如此），这一点和 fdisk 交互命令明显不同。
 
       ```shell
@@ -238,7 +236,7 @@
       mklabel msdos #创建一个mbr的分区表类型
       set 1 esp on #将编号1的分区设置为EFI系统分区
       ```
-
+   
 2. fdisk和parted都只能将disk label从一个设置成另一个，但是图形软件Utilities/Disk可以将disk label设置成无。
 
 3. MBR格式的硬盘，安装系统时，是不需要花费EFI系统分区的。
@@ -251,31 +249,19 @@
    
 5. 如果将硬盘进行格式化时，分区表类型设置为MBR/DOS格式，则fdisk -l 会显示如下结果，Disklabel type：dos。
 
-6. ![image-20231223020439321](E:\Markdown-file\Linux学习.assets\image-20231223020439321.png)
-
 7. 全新的硬盘要先创建分区表，默认的类型为GPT分区表格式。这一点可以通过新建一个logical分区，观察是否为sda5来确定。若为sda5，则表示为MBR，否则为GPT。还有就是GPT格式创建新分区时，会在硬盘的开头多出来一个1MB的空间，留作Grub bios分区，这个分区不用也不能格式化。
 
 8. 也可以通过fdisk命令手动设置为MBR分区格式。或者在live CD中启动Utilities/Disk软件，进行图形界面设置。点击右上角的三个点的图标，选择Format Disk，第一行默认选择快速格式化，即不实际删除数据。第二行选择MBR/DOS。
 
-9. ![image-20231223021120454](E:\Markdown-file\Linux学习.assets\image-20231223021120454.png)
+8. 然后逐个建立分区：
 
-10. ![image-20231223021214903](E:\Markdown-file\Linux学习.assets\image-20231223021214903.png)
-
-11. ![image-20231223021436160](E:\Markdown-file\Linux学习.assets\image-20231223021436160.png)
-
-12. ![image-20231223020912163](E:\Markdown-file\Linux学习.assets\image-20231223020912163.png)
-
-15. 然后逐个建立分区：
-
-    ```shell
-    bios grub分区 #大小1MB就够。设置类型为Reserved BIOS boot area，没有挂载点。
-    eif分区 #大小100MB就够。设置类型为EFI System Partition，没有挂载点。
-    boot分区 #200MB以上，一般500MB。普通的文件分区，挂载点为/boot。
-    swap分区 #2048MB即可，类型为swap area，没有挂载点。
-    根分区 #剩余所有的空间，普通的文件分区，挂载点为/。
-    ```
-
-16. ![image-20231223033643106](E:\Markdown-file\Linux学习.assets\image-20231223033643106.png)
+   ```shell
+   bios grub分区 #大小1MB就够。设置类型为Reserved BIOS boot area，没有挂载点。
+   eif分区 #大小100MB就够。设置类型为EFI System Partition，没有挂载点。
+   boot分区 #200MB以上，一般500MB。普通的文件分区，挂载点为/boot。
+   swap分区 #2048MB即可，类型为swap area，没有挂载点。
+   根分区 #剩余所有的空间，普通的文件分区，挂载点为/。
+   ```
 
 17. 如果是全新的硬盘，如果没有分配这1MB的bios grub分区，则会提示。如果已经安装了Windows系统，则不会提示，因为它会公用Windows的那块区域。
 
