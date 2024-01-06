@@ -1922,7 +1922,7 @@
 
    ```c
    void *malloc(size_t size);  //memory allocate 内存分配函数,开辟size个字节的空间，将起始地址返回。因为函数只知道要分配多少个字节，并不知道将来用来存储何种类型的数据，因此返回值指针为void*。
-   void *calloc(size_t nmemb, size_t size); //连续开辟size个大小为nmemb个大小的内存空间。等价于malloc(size*nmemb).
+   void *calloc(size_t nmemb, size_t size); //连续开辟size个大小为nmemb个大小的内存空间。等价于malloc(size*nmemb)，还有一点不同就是，malloc分配的内存没有初始化，calloc的分配的内存都初始化为0。
    void free(void *ptr);  //释放空间。从这里可以看出OS是记录着ptr当初malloc了多少个字节的。
    void *realloc(void *ptr, size_t size); //在ptr的地址上扩充或缩小内存空间，如果在原来的地址上剩余的可用空间不够，则会在其他地方开辟空间，并将现在的数据复制过去，同时会释放掉旧的空间，返回值为新的空间地址（如果不发生后一种情况的话，返回值等于第一个参数）。
    ```

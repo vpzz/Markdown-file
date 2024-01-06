@@ -48,19 +48,11 @@
 
    2. 常见的开源许可证，License：GNU GPL（Linux内核），BSD，Apache，MPL（Mozilla项目使用），MIT（限制最少的）。
 
-   7. ```shell
-      systemctl start 服务名         #开启服务
-      systemctl restart 服务名       #重启服务
-      systemctl stop 服务名          #停止服务
-      systemctl status 服务名        #查看服务的状态
-      systemctl enable 服务名        #设置开机启动服务
-      ```
-
-   8. RHEL6和7的管理差异
-
+   7. RHEL6和7的管理差异
+      
       1. RHEL7之前的初始进程都是init，管理服务使用service。
       2. RHEL7的初始进程为systemd，管理服务使用systemctl。一个是服务名称，一个是管理服务的工具。
-
+      
    8. Linux中的文件扩展名是为了方便用户识别文件类型，对于程序来说并没有实际的意义。不过有些程序会只读取特定后缀名的文件。
 
    9. Linux可以分为以下4个部分：linux内核，GNU工具链，图形桌面环境，应用软件。
@@ -532,13 +524,11 @@
    ```shell
    sudo systemctl start|stop|restart apache.service            #立即启动，停止，重启一个Unit。
    sudo systemctl kill apache.service                          #杀死一个Unit的所有子进程。有时候，stop命令可能没有响应，服务停不下来。这时候就不得不"杀进程"了，向正在运行的进程发出kill信号。
-   sudo systemctl reload apache.service                        #重新加载一个Unit的配置文件。
-   sudo systemctl daemon-reload                                #重新加载所有修改过的配置文件。
-   systemctl show httpd.service                                #显示某个Unit的所有底层参数。
+   sudo systemctl show httpd.service                           #显示某个Unit的所有底层参数。
    $ systemctl show -p CPUShares httpd.service                 # 显示某个Unit的指定属性的值。
    $ sudo systemctl set-property httpd.service CPUShares=500   # 设置某个Unit的指定属性。
    ```
-
+   
 6. Unit之间存在依赖关系，例如A依赖于B，这意味着systemd在启动A的时候，会先去启动B。
 
    ```shell
@@ -547,7 +537,7 @@
 
 ## 配置文件
 
-1. 每个Unit都有一个配置文件，告诉systemd怎么去启动这个Unit，配置文件完全决定了Unit是如何启动的。systemd默认从/etc/systemd/system目录中读取配置文件。但是这里边存放的大多数是符号链接，指向/usr/lib/systemd/system，这里才是真正存放配置文件的地方。systemctl enable命令用于在两个目录之间建立符号链接，systemctl disable 用于撤销符号链接。
+1. 每个Unit都有一个配置文件，告诉systemd怎么去启动这个Unit，配置文件完全决定了Unit是如何启动的。systemd默认从/etc/systemd/system目录中读取配置文件，开机时，systemd只会启动 /etc/systemd/system目录下的配置文件。但是这里边存放的大多数是符号链接，指向 /usr/lib/systemd/system，这里才是真正存放配置文件的地方。systemctl enable命令用于在两个目录之间建立符号链接（因此为设置开机启动该Unit），systemctl disable 用于撤销符号链接。
 
    ```shell
    $ sudo systemctl enable clamd@scan.service
@@ -555,33 +545,36 @@
    Synchronizing state of ssh.service with SysV service script with /lib/systemd/systemd-sysv-install.
    Executing: /lib/systemd/systemd-sysv-install enable ssh
    Created symlink /etc/systemd/system/sshd.service → /lib/systemd/system/ssh.service.
-   Created symlink /etc/systemd/system/multi-user.target.wants/ssh.service → /lib/systemd/system/ssh.service.
+   Created symlink /etc/systemd/system/multi-user.target.wants/ssh.service → /lib/systemd/system/ssh.service. #如果unit包含WantedBy参数，则还会在对应的target的wants文件夹中添加符号链接。
    
    # 等同于
    $ sudo ln -s '/usr/lib/systemd/system/clamd@scan.service' '/etc/systemd/system/multi-user.target.wants/clamd@scan.service'
    ```
 
-2. 配置文件的后缀名，就是该 Unit 的种类，比如sshd.socket。如果省略，Systemd 默认后缀名为.service，所以sshd会被理解成sshd.service。
+2. 对于支持systemd的软件，安装时都会在/usr/lib/systemd/system目录下生成一个配置文件。
 
-3. 每个配置文件的状态有以下4种，注意并非unit的状态，而是unit-file的状态：
+3. 配置文件的后缀名，就是该 Unit 的种类，比如sshd.socket。如果省略，Systemd 默认后缀名为.service，所以sshd会被理解成sshd.service。
+
+4. 每个配置文件的状态有以下4种，注意并非unit的状态，而是unit-file的状态：
 
    1. enabled：已建立启动链接。
    2. disabled：没建立启动链接。
    3. static：该配置文件没有`[Install]`部分（无法执行），只能作为其他配置文件的依赖。
    4. masked：该配置文件被禁止建立启动链接。
 
-4. 从配置文件的状态无法看出该unit是否在运行，必须要使用systemctl status xxx.unit来查看。
+5. 从配置文件的状态无法看出该unit是否在运行，必须要使用systemctl status xxx.unit来查看。
 
-5. 一旦修改某个unit的配置文件，则要先让systemd载入配置文件，然后再重启该unit。
+6. 一旦修改某个unit的配置文件，则要先让systemd载入配置文件，然后再重启该unit。
 
    ```shell
-   sudo systemctl daemon-reload  #这个是重新加载所有修改过的配置文件，也可以只加载某个配置文件 systemctl reload httpd.service
+   sudo systemctl daemon-reload  #这个是重新加载所有修改过的配置文件
+   sudo systemctl reload httpd.service #也可以只加载某个配置文件
    sudo systemctl restart httpd.service
    ```
 
-6. systemctl cat就是输出配置文件，和cat一样。
+7. systemctl cat就是输出配置文件，和cat一样。
 
-7. 配置文件分为几个区块，每个区块的第一行用中括号括起来。配置文件的内容都是区分大小写的。
+8. 配置文件分为几个区块，每个区块的第一行用中括号括起来。配置文件的内容都是区分大小写的。
 
    ```shell
    [Unit]  #区块
@@ -595,7 +588,7 @@
    WantedBy=multi-user.target
    ```
 
-8. [Unit]区块通常是配置文件的第一个区块，用来定义整个unit的元数据，以及与其他unit之间的关系。主要字段如下：
+9. [Unit]区块通常是配置文件的第一个区块，用来定义整个unit的元数据，以及与其他unit之间的关系。主要字段如下：
 
    ```shell
    Description：简短描述
@@ -616,30 +609,30 @@
    After=network.target auditd.service
    ```
 
-9. [Install]区块通常是配置文件的最后一个区块，定义如何安装这个配置文件，即如何设置启动，主要字段如下：
+10. [Install]区块通常是配置文件的最后一个区块，定义如何安装这个配置文件，即如何设置启动，主要字段如下：
 
-   ```shell
-   WantedBy：它的值是一个或多个 Target(空格分隔)，当前 Unit 激活时（enable）,其配置文件的符号链接会放入/etc/systemd/system目录下面以 Target 名 + .wants后缀构成的子目录中,例如multi-user.target.wants
-   RequiredBy：它的值是一个或多个 Target，当前 Unit 激活时，符号链接会放入/etc/systemd/system目录下面以 Target 名 + .required后缀构成的子目录中
-   Alias：当前 Unit 可用于启动的别名
-   Also：当前 Unit 激活（enable）时，会被同时激活的其他 Unit
-   
-   #例如ssh.service:
-   [Install]
-   WantedBy=multi-user.target
-   Alias=sshd.service
-   ```
+    ```shell
+    WantedBy：它的值是一个或多个 Target(空格分隔)，当前 Unit 激活时（enable）,其配置文件的符号链接会放入/etc/systemd/system目录下面以 Target 名 + .wants后缀构成的子目录中,例如multi-user.target.wants
+    RequiredBy：它的值是一个或多个 Target，当前 Unit 激活时，符号链接会放入/etc/systemd/system目录下面以 Target 名 + .required后缀构成的子目录中
+    Alias：当前 Unit 可用于启动的别名
+    Also：当前 Unit 激活（enable）时，会被同时激活的其他 Unit
+    
+    #例如ssh.service:
+    [Install]
+    WantedBy=multi-user.target
+    Alias=sshd.service
+    ```
 
-10. 系统开机会启动  `systemctl get-default`这个target，即在/etc/systemd/system/multi-user.target.wants目录下的所有Unit。如果要将将一个Unit设置为开机启动，则要先在其配置文件中的WantedBy字段添加默认的target，然后使用命令`sudo systemctl enable`建立符号链接。
+11. 系统开机会启动  `systemctl get-default`这个target，即在/etc/systemd/system/multi-user.target.wants目录下的所有Unit。如果要将将一个Unit设置为开机启动，则要先在其配置文件中的WantedBy字段添加默认的target，然后使用命令`sudo systemctl enable`建立符号链接。
 
-11. WantedBy字段只是表明可以使用enable来将当前Unit添加到某个target的启动列表里，并不表示该Unit会被启动，也不表示会开机启动。
+12. WantedBy字段只是表明可以使用enable来将当前Unit添加到某个target的启动列表里，并不表示该Unit会被启动，也不表示会开机启动。
 
-12. [Service]区块用来 Service 的配置，只有 Service 类型的 Unit 才有这个区块，主要字段如下：
+13. [Service]区块用来 Service 的配置，只有 Service 类型的 Unit 才有这个区块，主要字段如下：
 
     ```shell
     Type：定义启动时的进程行为。它有以下几种值。
-    Type=simple：默认值，执行ExecStart指定的命令，启动主进程
-    Type=forking：以 fork 方式从父进程创建子进程，创建后父进程会立即退出
+    Type=simple：默认值，执行ExecStart指定的命令，启动主进程。即服务进程在启动后会一直运行，并占据终端。当服务进程退出时，Systemd 认为服务已经停止运行。
+    Type=forking：以 fork 方式从父进程创建子进程，创建后父进程会立即退出。守护进程推荐这种方式。在启动服务后，服务主进程会将控制权交给子进程来执行实际的任务。此时，服务主进程会退出，但服务并没有结束。当子进程退出时，Systemd 认为服务已经停止运行。不过守护进程需要脱离终端，因此需要程序将输出写入到日志中。
     Type=oneshot：一次性进程，Systemd 会等当前服务退出，再继续往下执行
     Type=dbus：当前服务通过D-Bus启动。   一个为应用程序间通信的消息总线系统, 用于进程之间的通信。
     Type=notify：当前服务启动完毕，会通知Systemd，再继续往下执行
@@ -667,13 +660,13 @@
     Restart=on-failure   #定义了服务退出后，system的重启它的方式 on-faliure表示非正常退出(退出状态码≠0)才会重启。对于守护进程，推荐设置为on-faliure
     RestartPreventExitStatus=255
     Type=notify
-    RuntimeDirectory=sshd
+    RuntimeDirectory=sshd  #在/run目录下会创建一个对应的运行时目录，可供使用，不能是绝对目录。
     RuntimeDirectoryMode=0755
     ```
 
-13. 启动计算机时，需要启动大量的unit，这是可以将一些关联的unit作为一个target组，当systemd启动某个target时，会启动其中包含的所有unit。target类似于状态点，启动某个target就好像达到了某个状态点。这个类似于传统的init启动模式中的运行级别runlevel，但是不同的运行级别是互斥的，不能同时启动，而target则不存在这个限制。
+14. 启动计算机时，需要启动大量的unit，这是可以将一些关联的unit作为一个target组，当systemd启动某个target时，会启动其中包含的所有unit。target类似于状态点，启动某个target就好像达到了某个状态点。这个类似于传统的init启动模式中的运行级别runlevel，但是不同的运行级别是互斥的，不能同时启动，而target则不存在这个限制。
 
-14. target配置文件中没有启动命令：
+15. target配置文件中没有启动命令：
 
     ```shell
     $ systemctl cat multi-user.target
@@ -687,7 +680,7 @@
     AllowIsolate=yes      #允许使用systemctl isolate切换到
     ```
 
-15. target的操作：
+16. target的操作：
 
     ```shell
     $ systemctl list-unit-files --type=target         # 查看当前系统的所有 Target
@@ -727,11 +720,7 @@
     journalctl -b   #查看本次启动的日志
     ```
 
-19. 对于支持systemd的软件，安装时都会在/usr/lib/systemd/system目录下生成一个配置文件。
-
-20. 开机时，systemd只会启动/etc/systemd/system目录下的配置文件。
-
-21. unit的状态查看：
+19. unit的状态查看：
 
     ```shell
     zj@zj-hit:~$ systemctl status ssh.service
@@ -755,6 +744,32 @@
     Feb 24 09:55:25 zj-hit sshd[1048]: pam_unix(sshd:session): session opened for u>
     ```
 
+
+## 开机启动的例子
+
+1. 设置开机启动pvserver程序，用于paraview远程处理。
+
+   ```shell
+   [Unit]
+   Description=Paraview remote server
+   After=network.target multi-user.target #这两个target是独立的
+   ConditionPathExists=/usr/bin/pvserver
+   ConditionPathExists=/home/zj/OpenFOAM/zj-11/run
+   ConditionPathExists=/usr/bin/start-pvserver.sh
+   
+   [Service]
+   ExecStart=/usr/bin/start-pvserver.sh
+   KillMode=process
+   Restart=on-failure
+   RestartPreventExitStatus=255
+   Type=simple
+   RuntimeDirectory=pvserver
+   RuntimeDirectoryMode=0755
+   
+   [Install]
+   WantedBy=multi-user.target
+   ```
+
 # SHELL
 
 ## 基础
@@ -771,7 +786,7 @@
 3. 系统支持的shell，可以在/etc/shells文件中查看。如果安装了新的shell，也会写入到此文件中，系统的某些服务在运行中，会检查当前用户可用的shell，就会查询这个文件。
 
    ```shell
-   zj@ubuntu:~$ cat /etc/shells 
+   zj@ubuntu:~$ cat /etc/shells
    # /etc/shells: valid login shells
    /bin/sh
    /bin/bash
@@ -3203,6 +3218,8 @@
 
 5. 软件源：/etc/apt/sources.list文件和/etc/apt/sources.list.d目录下的文件。
 
+6. 可以在`/var/log/dpkg.log`文件中查看apt日志。
+
 
 # snap，AppImage，Flatpak
 
@@ -3732,7 +3749,17 @@
 
 2. ![image-20220707105841023](Linux学习.assets/image-20220707105841023-16571968881573.png)
 
-3. 还有Reverse Connection 也就是反向链接，将本机当作服务端，由远程的服务器连接本机。这用在某些服务器不能正常开启pvserver的情况。
+3. 还有Reverse Connection 也就是反向链接，将本机当作服务端，由远程的服务器主动连接客户端。这用在某些服务器不能正常开启pvserver的情况。此时-p就不表示服务器端监听的端口，而是客户端监听的端口。
+
+4. 这个pvserver设计有个不太好的点，就是在客户端断开连接后，服务端会自动终止。如果要避免这种情况，就需要书写一个shell脚本`start-pvserver.sh`来控制：
+
+   ```shell
+   #!/usr/bin/bash
+   # start pvserver
+   while true; do #repeatedly execute after disconnect
+       pvserver
+   done
+   ```
 
 
 # VMware和主机剪贴板互通
@@ -3751,7 +3778,7 @@
 
 # 缺少libgfortran.so.4
 
-1. Calculix2.20需要链接libgfortran.so.4，而ubuntu22.04后，默认使用gcc-11，默认仓库也不再提供libgfortran.so.4。
+1. Calculix2.20需要链接libgfortran.so.4，而ubuntu22.04后，默认使用gcc-11，默认仓库也不再提供libgfortran.so.4。使用ldd命令来查看可执行文件需要的动态库，参数需要是完整路径名。=>表示在本机匹配到的具体路径名。
 
    ```shell
    zj@zj-virtual-machine:~$ ldd /usr/local/bin/ccx
@@ -3786,3 +3813,7 @@
    -bash: ./test.sh: /bin/bash^M: bad interpreter: No such file or directory
    #这是因为该脚本在Windows下编辑后保存的，行尾是CRLF，在VSCode右下角修改为LF即可。
    ```
+
+# 默认编辑器
+
+1. 第一次使用ranger或某些命令行程序时，会提示要使用的默认编辑器，安装过Vim后，可能会出现vim.basic和vim.tiny两个，如果要使用vim，选择basic即可。后续如果要更改默认的编辑器，可以运行select-editor命令，重新选择即可。

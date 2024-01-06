@@ -499,7 +499,9 @@
 
 1. 如果要进行debug，不建议打开O2，因为有些代码可能会被gcc优化的变形严重，跳转的位置不对。同时还有可能出现局部变量被优化，在调试器的变量面板中出现optimized out的情况。
 
-2. task.json，用于生成可执行文件：
+2. 使用Fortran宏包括的Fortran函数，需要使用ctags才可以在vscode内跳转。安装Exuberant CTags扩展，使用Ctrl+Shift+P，输入regenerate，选择第一个运行即可生成，不过这个扩展存在一个bug，就是会卡死，此时可以推出vscode，然后重新进入，再执行该命令即可。或者在终端执行`ctags -R -f .vscode-ctags`，手动生成ctags文件。
+
+3. task.json，用于生成可执行文件：
 
    ```json
    {
@@ -532,7 +534,7 @@
    }
    ```
 
-3. launch.json，用于启动调试：
+4. launch.json，用于启动调试：
 
    ```json
    {
@@ -570,7 +572,7 @@
    }
    ```
 
-4. settings.json：
+5. settings.json：
 
    ```json
    {
@@ -584,7 +586,7 @@
    }
    ```
 
-5. c_cpp_properties.json，用于控制IntelliSense的高亮：
+6. c_cpp_properties.json，用于控制IntelliSense的高亮：
 
    ```json
    {
