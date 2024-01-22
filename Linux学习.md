@@ -774,35 +774,41 @@
 
 ## 基础
 
-1. 脚本的扩展名一般为.sh，也可以没有。脚本可以用来做环境配置，日志分析等。shell解释器使用C语言编写的。Shell具有以下功能：命令解释，启动程序，输入输出重定向，管道，文件名置换，变量维护，运行环境控制。
+1. Shell脚本的扩展名一般为.sh，也可以没有。脚本可以用来做环境配置，日志分析等。shell解释器是用C语言编写的。Shell具有以下功能：命令解释，启动程序，输入输出重定向，管道，文件名置换（字符串处理），变量维护，运行环境控制。
 
 2. 常见的shell版本：
 
-   1. Bourne shell，这是第一个流行的的shell，路径为 /bin/sh
-   2. Bourne again shell，Linux下默认的shell，是Bourne shell的增强版，由GNU计划提供。路径为 /bin/bash
-   3. C shell，使用C语言兼容的语法，由Berkeley大学的Bill Joy研发的，随BSD系统分发。Sun公司的创始人就是Bill Joy，BSD最早就是他在Berkeley搞出来的，后来的Solaris也是Sun公司开发的，也将C shell作为默认的shell。路径为/bin/csh
-   4. tcsh，整合了C shell，提供更多的功能。路径为/bin/tcsh
+   1. Bourne shell，这是第一个流行的的shell，由Steven Bourne开发，可以简称为sh，路径为 /bin/sh。
+   2. Bourne again shell，Linux下默认的shell，是Bourne shell的增强版，由GNU计划提供。路径为 /bin/bash。
+   3. C shell，使用C语言兼容的语法，由Berkeley大学的Bill Joy研发的，随BSD系统分发。Sun公司的创始人就是Bill Joy，BSD最早就是他在Berkeley搞出来的，后来的Solaris也是Sun公司开发的，也将C shell作为默认的shell。路径为/bin/csh。
+   4. tcsh，整合了C shell，提供更多的功能，更优化。路径为/bin/tcsh。
 
 3. 系统支持的shell，可以在/etc/shells文件中查看。如果安装了新的shell，也会写入到此文件中，系统的某些服务在运行中，会检查当前用户可用的shell，就会查询这个文件。
 
    ```shell
    zj@ubuntu:~$ cat /etc/shells
    # /etc/shells: valid login shells
-   /bin/sh
+   /bin/sh -> /usr/bin/bash
+   /usr/bin/sh -> /usr/bin/bash
    /bin/bash
    /usr/bin/bash
-   /bin/rbash
-   /usr/bin/rbash
-   /usr/bin/sh
+   /bin/rbash -> bash
+   /usr/bin/rbash -> bash
    /bin/dash
    /usr/bin/dash
+   /bin/zsh
+   /usr/bin/zsh
+   /bin/csh -> /bin/bsd-csh
+   /usr/bin/csh
    /usr/bin/tmux
    /usr/bin/screen
    ```
 
-4. 在用户登录时，系统会根据/etc/passwd文件中对应的用户的shell路径来打开一个shell供用户使用。
+4. 在用户登录时，系统会根据/etc/passwd文件中对应的用户的shell路径（一般为绝对路径）来打开一个shell供用户使用。
 
-5. 每个用户家目录下的.bash_history文件会记录bash的历史命令。不过这里只会记录本次登录以前执行过的命令，而本次登录执行过的命令都缓存在内存中，登出时会再写入到该文件中，也可以手动要求写入到文件中。
+5. 还有一些shell不是给用户使用的，因此没有列出在/etc/shells文件中，例如/sbin/nologin，/bin/false，它们用于给特定的账号使用。
+
+6. 每个用户家目录下的.bash_history文件会记录bash的历史命令。不过这里只会记录本次登录以前执行过的命令，而本次登录执行过的命令都缓存在内存中，退出登录时才会写入到该文件中，也可以手动要求写入到文件中。每次登录后，shell会从历史记录文件中读取内容，
 
    ```shell
    zj@ubuntu:~$ echo $HISTFILE  #历史记录文件的位置
@@ -811,15 +817,17 @@
    2000
    zj@ubuntu:~$ echo $HISTSIZE  #历史记录条目数量
    1000
-   history -c #清除当前shell中的历史记录
-   history
-   
-   
+   history #查看历史记录文件和本次登录后运行的命令。
+   -c #清除当前shell中的历史记录
+   -n #列出最近的n条历史记录
+   -a [histfile] #将新增的命令写入到histfile文件中，如果没有提供可选参数，则写入默认的位置。
+   -w [histfile] #将目前的history记录写入到histfile中，如果没有提供可选参数，则写入默认的位置。
+   -r [histfile] #将histfiles的内容读入到当前shell的history有中。
    ```
 
-6. bash自带了命令和路径补全。如果安装了 bash-completion软件，可以为某些命令的选项或参数提供补充。
+7. bash自带了命令和路径补全。如果在一串命令的第一个字后面按[Tab]，则会补全命令。如果在一串命令的第一个字后面按[Tab]，则会补全路径。如果安装了bash-completion软件，可以为某些命令的选项或参数提供补充。在`/usr/share/bash-completion/completions`目录下存放着各个应用程序的补全提示文件，安装新软件时，如果支持这个功能，则会向该目录添加自己的提示文件。
 
-7. bash支持使用内置命令alias为命令设置别名。输入alias来查看已经定义的所有别名。alias的定义规则和变量的一样。例如：
+8. bash支持使用内置命令alias为命令设置别名。输入alias来查看已经定义的所有别名。alias的定义规则和变量的一样，=两侧不能有空格。例如：
 
    ```bash
    alias ll="ls -lh --color=auto"   #命令可以有参数，包含空格的需要用单或双引号包括
@@ -833,7 +841,7 @@
    alias less="less -i"
    ```
 
-8. 在命令前加上\，例如\ll，可以强制不进行alias转换。使用unalias取消别名设置。
+9. 在命令前加上\，例如`\ll`，可以强制不使用alias转换。使用unalias取消别名设置。
 
    ```shell
    zj@ubuntu:~$ ll  #会被alias替换为 ls -lh --color=auto
@@ -845,15 +853,15 @@
    ll: command not found
    ```
 
-9. DOS的清屏是cls，Linux的清屏是clear。
+10. DOS的清屏是cls，Linux的清屏是clear。
 
-10. bash还支持作业管理，前后台控制，使得可以在单一登录环境下，达到多任务的目的。
+11. bash还支持作业管理，前、后台控制，使得可以在单一登录环境下，达到多任务的目的。
 
-11. bash支持将命令写成脚本，然后批量执行。
+12. bash支持将命令写成脚本，然后批量执行，此时就是一个小型的编程语言。
 
-12. bash还支持使用通配符。例如ls -l /usr/bin/*sh 可以查询该目录下有多少以sh结尾的文件或目录。
+13. bash还支持使用通配符。例如`ls -l /usr/bin/*sh`可以查询该目录下有多少以sh结尾的文件或目录。
 
-13. 为了方便shell的操作，bash内置了很多命令，例如cd，umask等。使用type来确定命令是内置还是外部的。使用man来查看内部命令的帮助会跳转到man bash其中的一节。type的结果有三种可能，内置，外部，别名。type只查找可执行文件，和which类似，用来查找命令。
+14. 为了方便shell的操作，bash内置了很多命令，例如cd，umask等。使用type来确定命令是内置还是外部的。使用man来查看内部命令的帮助时会跳转到man bash其中的一节。type的结果有三种可能，内置，外部，别名。type只查找可执行文件，和which类似，用来查找命令。
 
     ```shell
     zj@ubuntu:~$ type cd
@@ -862,30 +870,46 @@
     systemctl is /usr/bin/systemctl   #外部命令
     zj@ubuntu:~$ type ll
     ll is aliased to 'ls -lh --color=auto'  #别名
+    zj@ubuntu:~$ type -t cd #以builtin，file或alias来输出结果，方便其他命令使用这个结果。
+    builtin
+    zj@ubuntu:~$ type -p systemctl #如果是外部文件，则只输出文件的路径。
+    /usr/bin/systemctl
     zj@ubuntu:~$ type type 
-    type is a shell builtin     #type本身也是内置命令
-    
+    type is a shell builtin    #type本身也是内置命令
     zj@ubuntu:~$ type -a ls    #将和命令相关的所有条目都显示出来。
     ls is aliased to 'ls --color=auto'     #最先使用
     ls is /usr/bin/ls
     ls is /bin/ls
-    
     zj@ubuntu:~$ type -a echo   #有些命令既有内置的又有外部版本,使用which只能查看到外部版本,不能因此断定使用的就是这个版本。
     echo is a shell builtin
     echo is /usr/bin/echo
     echo is /bin/echo
     ```
 
-14. 如果命令太长，可以使用 \\[Enter\]来换行，\后面不能有空格，要紧挨着Enter。因为\是用来转义[Enter]的。
+15. type只会查找可执行文件，而不是一般文件名。
+
+    ```shell
+    zj@ubuntu:~$ type systemctl
+    systemctl 是 /usr/bin/systemctl
+    systemctl 是 /bin/systemctl
+    zj@ubuntu:~$ sudo chmod a-x /usr/bin/systemctl
+    [sudo] zj 的密码：
+    zj@ubuntu:~$ type systemctl  #此时systemctl没有了可执行权限，则不会被type列出。
+    bash: type: systemctl: 未找到
+    ```
+
+16. 如果命令太长，可以使用`\[Enter]`来换行，\后面不能有空格，要紧挨着Enter。因为\是用来转义[Enter]的。
 
     ```shell
     zj@ubuntu:~$ ls \
-    > .                       #第二行会在开头自动出现一个 > 提示符。这个命令相当于 ls .
+    > .                       #第二行会在开头自动出现一个>提示符。这个命令相当于 ls .
     ```
 
-15. 如果不想执行已经输入了的命令，可以用Ctrl+C终止此行的输入，另起一行。
+17. 如果不想执行已经输入了的命令，可以用Ctrl+C终止此行的输入，另起一行。
 
-16. shell中的特殊符号：
+18. 
+
+19. shell中具有特殊含义的符号：
 
     ```shell
     ~       #用户的家目录 可以和cd结合使用。
@@ -901,13 +925,13 @@
     ;       #如果要在一行中执行多条命令，需要用分号分隔。
     |       #管道符,前一个命令的输出作为下一个命令的输入
     \       #转义符,例如将通配符*转义为乘号。
-    `date`  #在命令中执行命令,例如  echo "dotay is `date +%F`"
+    `date`  #在命令中执行命令,例如 echo "dotay is `date +%F`"
     "ABC"   #字符串,不解释变量。echo "$USER"    输出为 root
     'ABC'   #字符串,会解释变量。echo '$USER'    输出为 $USER
     ''ABC'' #等价于"ABC"
     ```
 
-17. 数学计算，expr和let都是shell的内建命令，都只能进行整数计算，不同的是let使用变量不用加$，而expr必须加
+20. 数学计算，expr和let都是shell的内建命令，都只能进行整数计算，不同的是let使用变量不用加$，而expr必须加
 
     ```shell
     expr 1 + 2  #expr只能计算整数的运算。符号和数字之间必须要有空格, expr 1 +2 也会报错。
@@ -929,7 +953,7 @@
     let var1+=5  #此时var1的结果为9
     ```
 
-18. bc命令支持小数运算，它不是shell内建命令，不过bc是交互式的使用，shell脚本要通过管道来使用它。
+21. bc命令支持小数运算，它不是shell内建命令，不过bc是交互式的使用，shell脚本要通过管道来使用它。
 
     ```shell
     10/3     #结果为3
@@ -940,47 +964,13 @@
     echo "mem usage:`echo "scale=2;212*100/1024"|bc`%"    #这里涉及到了echo的嵌套使用。` `内部的字符串会被当做命令执行，用执行的结果替换。
     ```
 
-19. $((  ))也可以进行整数计算，最为方便，格式也比较自由，内部可以自由加空格和括号：
+22. $((  ))也可以进行整数计算，最为方便，格式也比较自由，内部可以自由加空格和括号：
 
     ```shell
     echo $(((1+2)*3))     #计算(1+2)*3的结果。
     i=1
     i=$((i + 1))          #此时变量i为2
     ```
-
-## ulimit
-
-1. 根据用户来进行资源管理，ulimit是shell内置功能。
-
-   ```shell
-   ulimit -a #列出所有的限制大小，注意单位，使用对应的选项来修改
-   real-time non-blocking time  (microseconds, -R) unlimited
-   core file size              (blocks, -c) 0          #转储文件的允许大小，0表示不允许生成该文件。
-   data seg size               (kbytes, -d) unlimited  #进程数据段的大小上限
-   scheduling priority                 (-e) 0          #最大调度优先级，也就是nice值
-   file size                   (blocks, -f) unlimited  #可建立的单个文件大小上限，block的大小和文件系统有关。
-   pending signals                     (-i) 15115      #等待的信号数量上限
-   max locked memory           (kbytes, -l) 497896     #可用于锁定的内存最大大小
-   max memory size             (kbytes, -m) unlimited  #驻留集最大大小
-   open files                          (-n) 1024       #可以同时开启的文件最大数量
-   pipe size                (512 bytes, -p) 8          #管道缓冲区大小
-   POSIX message queues         (bytes, -q) 819200     #POSIX消息队列的最大大小。
-   real-time priority                  (-r) 0          #实时调度的最大优先级
-   stack size                  (kbytes, -s) 8192       #栈的最大大小
-   cpu time                   (seconds, -t) unlimited  #可使用的最大CPU时间
-   max user processes                  (-u) 15115      #用户进程的最大数量
-   virtual memory              (kbytes, -v) unlimited  #虚拟内存大小
-   file locks                          (-x) unlimited  #文件锁的最大数量
-   
-   ulimit -H #严格的限制，绝对不允许超过
-   ulimit -h #警告的限制，允许超过对应值，但会给予警告。因此通常<上面的值。
-   
-   
-   ulimit -f 10240  #设置创建的文件最大为10240块，这里1block=1KB，因此限制为10240KB=10MB。
-   dd if=/dev/zero of=123 bs=1M count=20  #只会写入10M的内容，同时提示File size limit exceeded (core dumped)
-   ```
-
-2. 一般用户只能修改自己的限制值，主动降低后就不能提高了。注销就能恢复默认的限制值。
 
 
 ## 脚本文件
@@ -1017,7 +1007,7 @@
 
 ## 格式化输入输出
 
-1. echo可以将内容输出到屏幕，
+1. echo可以将内容输出到屏幕。
 
    ```shell
    echo "Hello World"  #输出对应字符串，并换行(LF,相当于C语言的\n)。 加上-n,可以取消默认的换行。一个空的echo表示一个换行
@@ -1031,34 +1021,38 @@
 2. read接受键盘的输入，回车结束输入。用于脚本编写的时候进行互动。
 
    ```shell
-   read -p "please input user name:" username  #用变量username存储输入的内容。-p后面是提示字符。-s选项可以取消回显。-t 5设置倒计时5秒,超时不允许输入。-n 6 表示最多接受6个字符。
+   read -p "please input user name:" username  #用变量username存储输入的内容。
+   -p   #后面是提示字符。
+   -s   #选项可以取消回显，此时不会显示read命令本身。
+   -t 5 #设置倒计时5秒,超时不允许输入，用于无人值守的情况，不会一直等待下去。
+   -n 6 #表示最多接受6个字符。
    ```
 
 ## 变量
 
-1. 每个用户登录系统，都会获取一个bash，大家都可以用mail命令接受属于自己的右键，bash通过MAIL变量来区分那个邮箱是自己的。当用户zj登录时，它的bash中就存在一个MAIL变量，值为/bar/spool/mail/zj。使用变量就可以让mail一个命令来被多个用户使用。
+1. 每个用户登录后，都会获取一个bash，可以用mail命令接受属于自己的邮件，bash通过MAIL变量来区分那个邮箱是自己的。当用户zj登录时，他的bash中就存在一个MAIL变量，值为/bar/spool/mail/zj。使用变量就可以让mail一个命令来被多个用户使用。
 
-2. 环境变量就是在用户使用bash之前就设置好了的，用来控制bash执行环境的。例如PATH，HOME，MAIL，SHELL。为了和自定义的变量进行区别，环境变量都是全大写字符表示。变量名严格区分大小写。
+2. 环境变量实际上是进程相关的概念，main函数的一个变体就接受环境变量字符串数组的指针。在shell进程中，环境变量一般是在用户使用bash之前就设置好了的，用来控制bash执行环境的。例如PATH，HOME，MAIL，SHELL。为了和自定义的变量进行区别，环境变量都是全大写字符表示。变量名严格区分大小写。
 
 3. 使用echo查看变量的内容：
 
    ```shell
-   zj@ubuntu:~$ echo $PATH   #也可以用${PATH}来获取变量的内容。由于变量名不能有空格，所以第一种的$后面的单词会被认为是变量名。
-   /home/zj/.vscode-server/bin/dfd34e8260c270da74b5c2d86d61aee4b6d56977/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/zj/.local/bin:/home/zj/.local/bin #PATH使用:分隔的多个路径，Windows上的path使用;分隔。
-   zj@ubuntu:~$ echo $hh   #变量hh并没有被设置，但是echo它也不会报错，默认的内容为空。在某些shell中echo一个不存在的变量会报错。
+   zj@ubuntu:~$ echo $PATH   #也可以用${PATH}来获取变量的内容，这种方式更好，边界清晰。由于变量名不能有空格，所以第一种的$后面的单词会被认为是变量名。
+   /home/zj/.vscode-server/bin/dfd34e8260c270da74b5c2d86d61aee4b6d56977/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/zj/.local/bin:/home/zj/.local/bin #PATH使用:分隔的多个路径，Windows上的Path使用;分隔。
+   zj@ubuntu:~$ echo $hh   #变量hh并没有被设置，但是echo它也不会报错，默认的内容为空。在某些shell中获取一个不存在变量的值会报错。
    
    hh=3    #定义一个变量，此时不需要加$，否则会报错。
    echo 12 34     #会输出12 34，如果要去掉中间的空格，可以用\b转义。\b表示删除光标前的那个字符。
-   echo -e "12 \b34"  #但是需要使用-e选项来启用转义功能。结果为 1234
+   echo -e "12 \b34"  #但是需要使用-e选项来启用转义功能。结果为1234
    ```
 
 4. 变量的定义和赋值都要符合以下规则：
 
    1. 等号两边都不能直接接空格，否则会被认为是命令和参数。
 
-   2. 变量名称只能是英文字母，数字和下划线，但不能以数字开头。不能用bash关键字和标点符号。区分大小写
+   2. 变量名称只能是英文字母，数字和下划线，但不能以数字开头。不能用bash关键字和标点符号。区分大小写。
 
-   3. 变量内容中如果含有空格，可使用单或双引号包括起来，或者使用\\[空格]为空格转义。
+   3. 变量内容中如果含有空格，可使用单或双引号包括起来，或者使用`\[空格]`转义。
 
       ```shell
       zj@ubuntu:~$ abc=12\ 3   #变量abc包含4个字符。也可以写为abc="12 3"或abc='12 3'。
@@ -1066,27 +1060,20 @@
       12 3
       ```
 
-5. 双引号内的特殊字符如$，可以保持原有的特性：
+5. 双引号和单引号是有区别的：双引号内的特殊字符如$，可以保持原有的特性；单引号内的特殊字符仅为一般字符，不进行转义：
 
    ```shell
    zj@ubuntu:~$ echo $LANG   #默认的环境变量，代表系统的语言。
    en_US.UTF-8
-   zj@ubuntu:~$ var="lang is $LANG"
-   zj@ubuntu:~$ echo $var
+   zj@ubuntu:~$ var1="lang is $LANG"
+   zj@ubuntu:~$ echo $var1
    lang is en_US.UTF-8
-   ```
-
-6. 单引号内的特殊字符仅为一般字符，不进行转义：
-
-   ```shell
-   zj@ubuntu:~$ echo $LANG
-   en_US.UTF-8
-   zj@ubuntu:~$ var='lang is $LANG'
-   zj@ubuntu:~$ echo $var
+   zj@ubuntu:~$ var2='lang is $LANG'
+   zj@ubuntu:~$ echo $var2
    lang is $LANG  #没有进行变量替换
    ```
 
-7. \为转义符，可以为回车，空格，$，\，'，"，等转义。
+6. \为转义符，可以为回车，空格，$，\，'，"，等字符转义。
 
    ```shell
    zj@ubuntu:~$ var=vbird\     #实现对回车的转义，
@@ -1100,21 +1087,20 @@
    zj@ubuntu:~$ name=vbird\'s\ name   #将'和空格都进行了转义。
    ```
 
-8. 可以嵌套执行命令，使用\`命令\`或\$(命令)，例如将一个命令的输出作为另一个命令的一部分：
+7. 可以嵌套执行命令，使用\`命令\`或\$(命令)，例如将一个命令的输出作为另一个命令的一部分：
 
    ```shell
-   zj@ubuntu:~$ echo `uname`    #先执行``内部的命令，然后将命令的输出替换到对应的位置，再执行剩下的命令。
+   zj@ubuntu:~$ echo `uname`    #先执行` `内部的命令，然后将命令的输出替换到对应的位置，再执行剩下的命令。
    Linux
-   zj@ubuntu:~$ echo $(uname)   #注意和${uname},括号内的uname被当做命令执行，{}内的uname被当做变量解读。
+   zj@ubuntu:~$ echo $(uname)   #注意和${uname}不一样，括号内的uname被当做命令执行，{}内的uname被当做变量解读。
    Linux
    zj@ubuntu:~$ cd /lib/modules/$(uname -r)/kernel  #进入到内核的模块目录，即/lib/modules/5.15.0-30-generic/kernel
-   
    zj@ubuntu:~$ ll `locate crontab`  #将locate和ll结合，来查看详细的文件信息。
    -rw-r--r-- 1 root root    1.2K Mar 23 13:49 /etc/crontab
    -rw-r--r-- 1 root root    1.2K Feb  2  2020 /snap/core20/1405/usr/share/bash-completion/completions/crontab
    ```
 
-9. 扩增变量内容的常用方法，以PATH为例：
+8. 扩增变量内容的常用方法，以PATH为例：
 
    ```shell
    zj@ubuntu:~$ PATH="$PATH":/home/zj     #在环境变量PATH的末尾添加一个新的目录，要手动添加分隔符:。shell会先计算=右侧的结果，在赋值给左侧变量。必须要用双引号。
@@ -1122,40 +1108,46 @@
    zj@ubuntu:~$ PATH=$PATH:/home/zj       #结果同上，不建议用，因为等号右侧$所取变量之所以是PATH，是因为:不是有效的变量名字符。但不应这样假设其他情况也这么幸运。
    ```
 
-10. export 可以新增，修改和删除环境变量。
+9. export 可以新增，修改和删除环境变量。可以export一个已经存在的变量，或者不存在的，此时会一并定义并export：
 
-11. 使用export来将一个自定义变量导出成环境变量，由于exec时会传递环境变量给子进程，因此就可以在子进程（不一定要是另一个shell）中也使用该变量了。环境变量是隶属于进程的，普通的shell变量是隶属于shell的。除此之外，二者没有区别，都是一样的使用。export的效力仅限于该次登录操作，除非写入到配置文件中。环境变量会存在以所有后代进程，包括孙子进程中。
+   ```shell
+   abc=3
+   export abc #导出一个已经存在的变量
+   export def=4 #定义的同时导出
+   ```
+
+10. 使用export来将一个自定义变量导出成环境变量，由于exec时会传递环境变量给子进程，因此就可以在子进程（不一定要是另一个shell）中也使用该变量了。环境变量是隶属于进程的，普通的shell变量是隶属于shell的。除此之外，二者没有区别，都是一样的使用。export的效力仅限于该次登录操作，除非写入到配置文件中。环境变量会存在以所有后代进程，包括孙子进程中。
 
     ```shell
     zj@ubuntu:~$ var=3      #var不是环境变量，因此在子进程中变量var是未定义
     zj@ubuntu:~$ bash       #进入子进程
     zj@ubuntu:~$ echo $var  #结果为空，因为没有定义过var变量
     
-    zj@ubuntu:~$            #退出子进程，回到刚才的bash
+    zj@ubuntu:~$exit        #退出子进程，回到刚才的bash
     exit
     zj@ubuntu:~$ echo $var  #结果为3，变量还在
     3
-    #---------------------------------------
+    #-------------------------------------------------
     zj@ubuntu:~$ var=3      #自定义变量
     zj@ubuntu:~$ export var #将var导出为环境变量,后续在其子进程中也都会有var的定义。
     zj@ubuntu:~$ bash       #进入子进程
     zj@ubuntu:~$ echo $var  #结果为3，var是子进程的环境变量
     3
-    zj@ubuntu:~$            #退出子进程，回到刚才的bash
+    zj@ubuntu:~$exit        #退出子进程，回到刚才的bash
     exit
-    zj@ubuntu:~$ echo $var  #结果为3，变量还在
+    zj@ubuntu:~$ echo $var  #结果为3，环境变量还在
     3
-    zj@ubuntu:~$ export -n var #将var取消设置为环境变量,不过并不会删除该变量，还原为自定义变量。
+    zj@ubuntu:~$ export -n var #将var取消设置为环境变量，不过并不会删除该变量，还原为自定义变量。
     zj@ubuntu:~$ bash       #进入子进程
     zj@ubuntu:~$ echo $var  #结果为空，因为var在父进程中不是环境变量了。
     
-    zj@ubuntu:~$            #退出子进程，回到刚才的bash
+    zj@ubuntu:~$exit        #退出子进程，回到刚才的bash
     exit
     zj@ubuntu:~$ echo $var  #结果为3，变量还在
     3
     ```
 
-12. 使用unset来取消变量的设置，unset一个未设置的变量不会报错：
+11. 使用unset来取消变量的设置（对环境变量也有效），unset一个未设置的变量不会报错：
 
     ```shell
     zj@ubuntu:~$ var=3
@@ -1164,24 +1156,24 @@
     
     ```
 
-13. 使用env命令来查看当前进程所有的环境变量。export的变量会出现在这里。执行export也会显示这些变量，只不过形式不同。
+12. 使用env命令来查看当前shell的所有环境变量。export命令的内容相同，只不过形式不同。
 
     ```shell
     zj@ubuntu:~$ env
     SHELL=/bin/bash  #当前正在使用的shell的路径
     PWD=/home/zj     #当前工作目录(进程属性)
-    LOGNAME=zj       #登录名
+    LOGNAME=zj       #用来登录的账号名
     XDG_SESSION_TYPE=tty
     MOTD_SHOWN=pam
     HOME=/home/zj    #用户的家目录     cd ~就会使用到该环境变量
-    LANG=en_US.UTF-8 #语系相关。
+    LANG=en_US.UTF-8 #语系相关
     LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:  #这里只显示一部分，这个环境变量控制ls命令的颜色。:分隔不同的设置。可以根据文件后缀名来设置不同的颜色。
     SSH_CONNECTION=192.168.80.1 6703 192.168.80.144 22
     LESSCLOSE=/usr/bin/lesspipe %s %s
     XDG_SESSION_CLASS=user
     TERM=xterm     #终端类型
     LESSOPEN=| /usr/bin/lesspipe %s  #控制less的行为
-    USER=zj    #用户名
+    USER=zj    #使用者的名称
     SHLVL=1
     XDG_SESSION_ID=15
     XDG_RUNTIME_DIR=/run/user/1000
@@ -1198,20 +1190,7 @@
     23
     ```
 
-14. 默认情况下，变量的类型为字符串，因此int1=1+2+3，是不是计算=右边的。bash中只能进行整数间的运算。
-
-15. declare和typeset都可以用来声明变量的类型。如果declare后没有任何参数，则会显示所有的变量，就像set一样。
-
-    ```shell
-    declare -a arr1  #将变量定义为数组
-    declare -i int1=1+2+3  #将变量定义为整型，int1最终为6。不能先定义int1=1+2+3，然后再declare -i int1，这样不会计算1+2+3的，必须在定义的时候赋值。
-    declare -r rovar #将变量设置为只读的，不能修改内容，也不能unset。只读变量不能变回一般变量，没有+r选项。只能通过重新登录来恢复变量的类型。
-    declare -x exp1  #将exp1变为环境变量，等价于 export exp1
-    declare +x exp1  #将环境变量exp1变为自定义变量。
-    declare -p int1  #显示变量的属性和值。如果int1从未设置过，则会报错。根据这个可以区分空值变量和未设置的变量。
-    ```
-
-16. 使用set命令可以查看所有变量，包括环境变量和用户自定义的变量。实际上自定义变量中也不都是由用户定义的，有些是系统的配置脚本定义的。下面都是自定义变量：
+13. 使用set命令可以查看所有变量，包括环境变量和用户自定义的变量，因此这里的结果比env的多。实际上自定义变量中也不都是由用户定义的，有些是系统的配置脚本定义的。下面都是自定义变量：
 
     ```shell
     BASH_VERSINFO=([0]="5" [1]="1" [2]="16" [3]="1" [4]="release" [5]="x86_64-pc-linux-gnu")  #数组标识的版本号,使用${BASH_VERSINFO[4]}来获取数组内的元素，结果为release。
@@ -1234,12 +1213,12 @@
     ?=0                #刚执行完的命令执行的返回值。正常的返回值为0。
     ```
 
-17. PS1变量，每次执行完命令后，都要读取该变量的值，来显示新的命令提示符。详细的转义字符可以在man bash的PROMPTING一节中找到。
+14. PS1变量，每次执行完命令后，都要读取该变量的值，来显示新的命令提示符。详细的转义字符可以在man bash的PROMPTING一节中找到。
 
     ```shell
     zj@ubuntu:~$ echo $PS1
     \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\u@\h:\w\$
-    #-------
+    #-------------------这些符号都有特殊的含义，可以设置颜色
     \u  #用户名
     \H  #完整的主机名，例如 study.cemtos.vbrid
     \h  #主机名的第一个小数点之前的名字，主机名一般是域名。例如study
@@ -1248,6 +1227,72 @@
     \$  #如果有效UID=0,则为#，否则为$。一般作为提示符的最后一个字符。
     \#  #命令的计数
     ```
+
+15. 默认情况下，变量的类型为字符串，因此int1=1+2+3，是不是计算=右边的。bash中只能进行整数间的运算。
+
+16. declare和typeset都可以用来声明变量的类型。如果declare后没有任何参数，则会显示所有的变量，就像set一样。
+
+    ```shell
+    declare -a arr1  #将变量定义为数组
+    declare -i int1=1+2+3  #将变量定义为整型，int1最终为6。不能先定义int1=1+2+3，然后再declare -i int1，这样不会计算1+2+3的，必须在定义的时候赋值。
+    declare -r rovar #将变量设置为只读的，不能修改内容，也不能unset。只读变量不能变回一般变量，没有+r选项。只能通过重新登录来恢复变量的类型。
+    declare -x exp1  #将exp1变为环境变量，等价于 export exp1
+    declare +x exp1  #将环境变量exp1变为自定义变量。
+    declare -p int1  #显示变量的属性和值。如果int1从未设置过，则会报错。根据这个可以区分空值变量和未设置的变量。
+    ```
+
+## 变量内容的微调
+
+1. 匹配删除，查找替换，注意以下方法都不会修改变量本身：
+
+   ```shell
+   ${变量#关键词}   #从变量内容的开头对关键词进行匹配，将符合条件的最短数据删除。
+   ${变量##关键词}  #从变量内容的开头对关键词进行匹配，将符合条件的最长数据删除。也就是贪婪匹配。
+   ${变量%关键词}   #从变量内容的末尾对关键词进行匹配，将符合条件的最短数据删除。
+   ${变量%%关键词}  #从变量内容的末尾对关键词进行匹配，将符合条件的最长数据删除。也是贪婪匹配。
+   ${变量/旧字符串/新字符串}   #在变量内容中查找旧字符串替换新字符串，只有第一个会被替换。
+   ${变量//旧字符串/新字符串} #在变量内容中查找旧字符串替换新字符串，所有都会被被替换。注意第二个/还是只有一个
+   
+   path=/usr/local/bin:/usr/bin:/home/dmtsai/.local/bin:/home/dmtsai/bin
+   echo ${path#*:}  #只删除第一项。通配符*匹配任意多个字符，包括0个。匹配到了/usr/local/bin:，因此将其从path中删除，结果为/usr/bin:/home/dmtsai/.local/bin:/home/dmtsai/bin
+   echo ${path##*:} #只保留最后一项
+   echo ${path%:*}  #只删除最后一项
+   echo ${path%%:*} #只保留第一项
+   echo ${path/dmtsai/zj} #将第一个dmtsai替换为zj，结果为/usr/local/bin:/usr/bin:/home/zj/.local/bin:/home/dmtsai/bin
+   echo ${path//dmtsai/zj} #将所有的dmtsai替换为zj，结果为/usr/local/bin:/usr/bin:/home/zj/.local/bin:/home/zj/bin 
+   ```
+
+2. 测试与内容替换，这种工作也可以通过if then来完成：
+
+   ```shell
+   #有时候需要判断变量是否设置，如果存在的话就使用它，否则赋予一个新的值。有时也会判断变量是否为空。
+   ${str-expr}   #如果str设置，结果为str的值，否则为expr的值。
+   ${str:-expr}  #如果str设置且不为空，结果为str的值，否则为expr的值。
+   ${str+expr}   #如果str没设置，结果为str的值(也就是空)，否则为expr的值。正好和${str-expr}相反
+   ${str:+expr}  #如果str没设置或为空，结果为str的值(也就是空)，否则为expr的值。
+   
+   ${str=expr}   #如果str没设置，则执行赋值操作，表达式结果为${str}。=和-类似，只是前者会修改str，后者不会。
+   ${str:=expr}  #如果str没设置或为空，则执行赋值操作，表达式结果为${str}
+   ${str?expr}   #如果str没设置，将expr输出到stderr，否则结果为str的值。
+   ${str:?expr}  #如果str没设置或为空，将expr输出到stderr，否则结果为str的值。
+   #-----------------------------
+   var=0   #var  已设置且不为空
+   var1=   #var1 已设置但为空
+           #var2 是未设置
+   echo ${var-3}   #0
+   echo ${var1-3}  #空
+   echo ${var2-3}  #3
+   echo ${var:-3}  #0
+   echo ${var1:-3} #3
+   echo ${var2:-3} #3
+   #-----------------------------
+   echo ${var+3}   #3
+   echo ${var1+3}  #3
+   echo ${var2+3}  #空
+   echo ${var:+3}  #3
+   echo ${var1:+3} #空
+   echo ${var2:+3} #空
+   ```
 
 ## 数组
 
@@ -1271,7 +1316,7 @@
    declare -a ARR=([0]="cg" [1]="linux" [2]="OpenFOAM" [3]="test" [4]="test.sh" [5]="ThirdParty-8-version-8.tar.gz")
    ```
 
-2. 访问元素：
+2. 访问元素，不能省略`{ }`，因为这样会将ARR当作一个单独的变量，[作为前一个变量的结束标志：
 
    ```shell
    echo ${ARR[@]}     #访问数组中所有元素，等价于echo ${ARR[*]}   这里*匹配任何长度的字符
@@ -1297,58 +1342,6 @@
    zj@ubuntu:~$ declare -A |grep ARR*   #可以通过declare -A查看已经定义了的关联数组
    declare -A ARR=([age]="18" [name]="test" )
    declare -A ARR1=([age]="18" [name]="test" )
-   ```
-
-## 变量内容的查找和替换
-
-1. 匹配删除，查找替换，以下方法都不会修改变量本身：
-
-   ```shell
-   ${变量#关键词}   #从变量内容的开头对关键词进行匹配，将符合条件的最短数据删除。
-   ${变量##关键词}  #从变量内容的开头对关键词进行匹配，将符合条件的最长数据删除。也就是贪婪匹配。
-   ${变量%关键词}   #从变量内容的末尾对关键词进行匹配，将符合条件的最短数据删除。
-   ${变量%%关键词}  #从变量内容的末尾对关键词进行匹配，将符合条件的最长数据删除。也是贪婪匹配。
-   ${变量/旧字符串/新字符串}   #在变量内容中查找旧字符串替换新字符串，只有第一个会被替换。
-   ${变量//旧字符串/新字符串} #在变量内容中查找旧字符串替换新字符串，所有都会被被替换。注意第二个/还是只有一个
-   
-   path=/usr/local/bin:/usr/bin:/home/dmtsai/.local/bin:/home/dmtsai/bin
-   echo ${path#*:}  #只删除第一项。通配符*匹配任意多个字符，包括0个。
-   echo ${path##*:} #只保留最后一项
-   echo ${path%:*}  #只删除最后一项
-   echo ${path%%:*} #只保留第一项
-   echo ${path/dmtsai/zj} /usr/local/bin:/usr/bin:/home/zj/.local/bin:/home/dmtsai/bin #将第一个dmtsai替换为zj
-   echo ${path//dmtsai/zj} /usr/local/bin:/usr/bin:/home/zj/.local/bin:/home/zj/bin #将所有的dmtsai替换为zj
-   ```
-
-2. 测试与内容替换，这种工作也可以通过if then来完成：
-
-   ```shell
-   #有时候需要判断变量是否设置，如果存在的话就使用它，否则赋予一个新的值。有时也会判断变量是否为空。
-   ${str-expr}   #如果str设置，结果为str的值，否则为expr的值。
-   ${str:-expr}  #如果str设置且不为空，结果为str的值，否则为expr的值。
-   ${str+expr}   #如果str没设置，结果为str的值(也就是空)，否则为expr的值。
-   ${str:+expr}  #如果str没设置或为空，结果为str的值(也就是空)，否则为expr的值。
-   ${str=expr}   #如果str没设置，则执行赋值操作，表达式结果为${str}。=和-类似，只是前者会修改str，后者不会。
-   ${str:=expr}  #如果str没设置或为空，则执行赋值操作，表达式结果为${str}
-   ${str?expr}   #如果str没设置，将expr输出到stderr，否则结果为str的值。
-   ${str:?expr}  #如果str没设置或为空，将expr输出到stderr，否则结果为str的值。
-   #------------------------
-   var=0   #var  已设置且不为空
-   var1=   #var1 已设置但为空
-           #var2 是未设置
-   echo ${var-3}   #0
-   echo ${var1-3}  #空
-   echo ${var2-3}  #3
-   echo ${var:-3}  #0
-   echo ${var1:-3} #3
-   echo ${var2:-3} #3
-   #------------------------
-   echo ${var+3}   #3
-   echo ${var1+3}  #3
-   echo ${var2+3}  #空
-   echo ${var:+3}  #3
-   echo ${var1:+3} #空
-   echo ${var2:+3} #空
    ```
 
 
@@ -1722,7 +1715,7 @@
    -f awk.sh     #从awk.sh文件中读取命令
    -v var=value  #指定可以附加变量和值,可以在awk中使用
    ```
-   
+
 3. 数据提取：
 
    ```shell
@@ -1830,6 +1823,40 @@
    190
    210
    ```
+
+## ulimit
+
+1. 根据用户来进行资源管理，ulimit是shell内置功能。
+
+   ```shell
+   [zj@manjaro ~]$ ulimit -a #列出所有的限制大小，注意单位，使用对应的选项来修改
+   real-time non-blocking time  (microseconds, -R) unlimited
+   core file size              (blocks, -c) 0          #转储文件core dump的允许大小，单位为块，0表示不允许生成该文件。
+   data seg size               (kbytes, -d) unlimited  #进程数据段的大小上限
+   scheduling priority                 (-e) 0          #最大调度优先级，也就是nice值
+   file size                   (blocks, -f) unlimited  #可建立的单个文件大小上限，block的大小和文件系统有关。
+   pending signals                     (-i) 15115      #等待的信号数量上限
+   max locked memory           (kbytes, -l) 497896     #可用于锁定的内存最大大小
+   max memory size             (kbytes, -m) unlimited  #驻留集最大大小
+   open files                          (-n) 1024       #可以同时开启的文件最大数量
+   pipe size                (512 bytes, -p) 8          #管道缓冲区大小
+   POSIX message queues         (bytes, -q) 819200     #POSIX消息队列的最大大小。
+   real-time priority                  (-r) 0          #实时调度的最大优先级
+   stack size                  (kbytes, -s) 8192       #栈的最大大小
+   cpu time                   (seconds, -t) unlimited  #可使用的最大CPU时间
+   max user processes                  (-u) 15115      #用户进程的最大数量
+   virtual memory              (kbytes, -v) unlimited  #虚拟内存大小
+   file locks                          (-x) unlimited  #文件锁的最大数量
+   #设置
+   ulimit -H #严格的限制，绝对不允许超过。
+   ulimit -h #警告的限制，允许超过对应值，但会给予警告。因此通常<上面的值。
+   ulimit -f 10240  #设置创建的文件最大为10240块，这里1block=1KB，因此限制为10240KB=10MB。
+   dd if=/dev/zero of=123 bs=1M count=20  #只会写入10M的内容，同时提示File size limit exceeded (core dumped)
+   ```
+
+2. 一般用户只能修改降低自己的限制值，主动降低后就不能提高了。注销重新登陆就能恢复默认的限制值。
+
+3. 如果管理员要管控用户的ulimit值，可以使用pam。
 
 
 

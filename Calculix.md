@@ -31,7 +31,71 @@
    1. 一共有942个.f90文件，但是gauss.f90和xlocal.f90只是被include到其他文件中，并不会单独编译，因此Makifile.inc中SCCXF一共包含940个.f90文件。
    2. 一共有176个.c源文件，而主文件ccx_2.20.c需要单独编译，因此Makefile.inc中SCCXC只包含175个.c文件
 
-5. Makefile的实际执行顺序为
+5. 使用代码统计工具cloc统计文件数，空白行，注释行，代码行的总数：
+
+   ```shell
+   zj@zj-hit:~/CCX/CalculiX/ccx_2.20/src$ cloc *.f90 *.c *.h
+       1127 text files.
+       1127 unique files.
+          0 files ignored.
+   
+   github.com/AlDanial/cloc v 1.90  T=0.78 s (1439.7 files/s, 384720.1 lines/s)
+   -------------------------------------------------------------------------------
+   Language                     files          blank        comment           code
+   -------------------------------------------------------------------------------
+   Fortran 90                     942            489          65562         144406
+   C                              176          10206          10620          64229
+   C/C++ Header                     9            794            168           4681
+   -------------------------------------------------------------------------------
+   SUM:                          1127          11489          76350         213316
+   -------------------------------------------------------------------------------
+   ```
+
+6. 经过统计，代码行比较多的文件如下：
+
+   ```shell
+   cloc *.f90 *.c *.h --by-file -out stat.cloc
+       1127 text files.
+       1127 unique files.
+          0 files ignored.
+   
+   github.com/AlDanial/cloc v 1.90  T=0.82 s (1373.6 files/s, 367056.2 lines/s)
+   ----------------------------------------------------------------------------------
+   File                                           blank        comment           code
+   ----------------------------------------------------------------------------------
+   CalculiX.h                                       681             52           4040
+   nonlingeo.c                                      584            425           3653
+   steadystate.c                                    486            273           3294
+   bdfill.c                                         147            274           2572
+   arpackcs.c                                       325            182           2486
+   allocation.f90                                     0            124           2174
+   trafontmortar2.c                                 150            275           2119
+   frd.c                                            406            159           2066
+   objectivemain_se.c                               513            244           2054
+   dyna.c                                           299            194           1961
+   complexfreq.c                                    304            169           1899
+   readfrd.c                                        105            145           1780
+   electromagnetics.c                               308            209           1587
+   ccx_2.20.c                                        10            171           1553
+   ccx_2.20step.c                                     1            238           1535
+   e_c3d_se.f90                                       0            219           1495
+   e_c3d.f90                                          0            159           1428
+   e_c3d_duds.f90                                     0            215           1413
+   compfluidfem.c                                   284            153           1346
+   e_c3d_cs_se.f90                                    2            246           1338
+   calinput.f90                                       0             77           1322
+   ddebdf.f90                                         8           1606           1306
+   multimortar.c                                    150            272           1208
+   dgesv.f90                                          0            853           1143
+   ddeabm.f90                                        10           2785           1118
+   arpack.c                                         175            106           1096
+   umat_single_crystal.f90                            0            160           1095
+   pastix.c                                         239            196           1045
+   linstatic.c                                      206            116           1029
+   us3_sub.f90                                        6            459           1009
+   ```
+
+7. Makefile的实际执行顺序为：
 
    ```shell
    #1.编译ccx_2.20.c主文件
@@ -50,7 +114,7 @@
    gfortran  -Wall -O2 -o ccx_2.20 ccx_2.20.o ccx_2.20.a ../../../SPOOLES.2.2/spooles.a ../../../ARPACK/libarpack_INTEL.a -lpthread -lm -lc -fopenmp
    ```
 
-6. Makefile：
+8. Makefile：
 
    ```makefile
    CFLAGS =  -Wall -O2  -I ../../../SPOOLES.2.2 -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DNETWORKOUT -g #指定SPOOLES头文件的目录，定义宏SPOOLES和ARPACK表示使用这两个库，-g调试
@@ -83,7 +147,7 @@
    	rm -f *.o *.a
    ```
 
-7. date.pl，功能是在ccx_2.20.c，ccx_2.20step.c，frd.c中插入当前编译的时间，方便编译调试：
+9. date.pl，功能是在ccx_2.20.c，ccx_2.20step.c，frd.c中插入当前编译的时间，方便编译调试：
 
    ```perl
    #!/usr/bin/env perl
@@ -114,7 +178,7 @@
    system "rm -f frd.c.old";
    ```
 
-8. cleanupcode，功能是清理编译产生的中间文件和可执行文件，不过这个功能已经被集成到makefile中了，使用make clean即可：
+10. cleanupcode，功能是清理编译产生的中间文件和可执行文件，不过这个功能已经被集成到makefile中了，使用make clean即可：
 
    ```shell
    #!/bin/sh
@@ -142,26 +206,26 @@
    done
    ```
 
-9. hwloc可以显示CPU拓扑，比较方面地查看CPU各级缓存以及各个核、物理CPU之间，可以共享哪一级别的CPU cache。
+11. hwloc可以显示CPU拓扑，比较方面地查看CPU各级缓存以及各个核、物理CPU之间，可以共享哪一级别的CPU cache。
 
-   ```shell
-   zj@zj-hit:~/CCX/ARPACK$ hwloc-ls
-   Machine (1923MB total)
-     Package L#0
-       NUMANode L#0 (P#0 1923MB)
-       L3 L#0 (9216KB)
-         L2 L#0 (256KB) + L1d L#0 (32KB) + L1i L#0 (32KB) + Core L#0 + PU L#0 (P#0)
-         L2 L#1 (256KB) + L1d L#1 (32KB) + L1i L#1 (32KB) + Core L#1 + PU L#1 (P#1)
-     HostBridge
-       PCI 00:07.1 (IDE)
-       PCI 00:0f.0 (VGA)
-       PCI 00:10.0 (SCSI)
-         Block(Disk) "sda"
-       PCIBridge
-         PCI 02:00.0 (Ethernet)
-           Net "ens32"
-         PCI 02:03.0 (SATA)
-   ```
+    ```shell
+    zj@zj-hit:~/CCX/ARPACK$ hwloc-ls
+    Machine (1923MB total)
+      Package L#0
+        NUMANode L#0 (P#0 1923MB)
+        L3 L#0 (9216KB)
+          L2 L#0 (256KB) + L1d L#0 (32KB) + L1i L#0 (32KB) + Core L#0 + PU L#0 (P#0)
+          L2 L#1 (256KB) + L1d L#1 (32KB) + L1i L#1 (32KB) + Core L#1 + PU L#1 (P#1)
+      HostBridge
+        PCI 00:07.1 (IDE)
+        PCI 00:0f.0 (VGA)
+        PCI 00:10.0 (SCSI)
+          Block(Disk) "sda"
+        PCIBridge
+          PCI 02:00.0 (Ethernet)
+            Net "ens32"
+          PCI 02:03.0 (SATA)
+    ```
 
 # Calculix.h文件
 

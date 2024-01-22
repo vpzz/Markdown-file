@@ -61,6 +61,8 @@
 
     3. 关于Python的提案，但不针对Python语言本身
 
+15. python2中True是一个变量，可以对它赋予其他的值，但是不建议这么做，会造成混乱，因此while True就不会被python2优化掉，因为用户可能会修改True的值。在python3中，True作为一个关键字存在，不允许赋值，因此while True会被优化。
+
 
 # 字符串
 
