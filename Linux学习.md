@@ -808,7 +808,7 @@
 
 5. 还有一些shell不是给用户使用的，因此没有列出在/etc/shells文件中，例如/sbin/nologin，/bin/false，它们用于给特定的账号使用。
 
-6. 每个用户家目录下的.bash_history文件会记录bash的历史命令。不过这里只会记录本次登录以前执行过的命令，而本次登录执行过的命令都缓存在内存中，退出登录时才会写入到该文件中，也可以手动要求写入到文件中。每次登录后，shell会从历史记录文件中读取内容，
+6. 每个用户家目录下的.bash_history文件会记录bash的历史命令。不过这里只会记录本次登录以前执行过的命令，而本次登录执行过的命令都缓存在内存中，退出登录时才会写入到该文件中，也可以手动要求写入到文件中。每次登录后，shell会从历史记录文件中读取内容。
 
    ```shell
    zj@ubuntu:~$ echo $HISTFILE  #历史记录文件的位置
@@ -823,11 +823,17 @@
    -a [histfile] #将新增的命令写入到histfile文件中，如果没有提供可选参数，则写入默认的位置。
    -w [histfile] #将目前的history记录写入到histfile中，如果没有提供可选参数，则写入默认的位置。
    -r [histfile] #将histfiles的内容读入到当前shell的history有中。
+   #下面的快捷命令都会被转化成正式的命令，记录在history中。
+   !p      #在命令历史记录寻找以p开头的最近的那个命令，并执行。
+   !!      #执行上一次命令。
+   !35     #执行第35号历史命令,在history命令的输出中有编号。
    ```
 
-7. bash自带了命令和路径补全。如果在一串命令的第一个字后面按[Tab]，则会补全命令。如果在一串命令的第一个字后面按[Tab]，则会补全路径。如果安装了bash-completion软件，可以为某些命令的选项或参数提供补充。在`/usr/share/bash-completion/completions`目录下存放着各个应用程序的补全提示文件，安装新软件时，如果支持这个功能，则会向该目录添加自己的提示文件。
+7. 如果同时使用一个账号进行了多次ssh登录，或者在gui环境下，同时打开了多个终端，则每个bash都会有自己的history记录。每个bash退出时都会写入到文件中，后面退出的写入会覆盖前面的。这样会导致历史记录出现混乱。
 
-8. bash支持使用内置命令alias为命令设置别名。输入alias来查看已经定义的所有别名。alias的定义规则和变量的一样，=两侧不能有空格。例如：
+8. bash自带了命令和路径补全。如果在一串命令的第一个字后面按[Tab]，则会补全命令。如果在一串命令的第一个字后面按[Tab]，则会补全路径。如果安装了bash-completion软件，可以为某些命令的选项或参数提供补充。在`/usr/share/bash-completion/completions`目录下存放着各个应用程序的补全提示文件，安装新软件时，如果支持这个功能，则会向该目录添加自己的提示文件。
+
+9. bash支持使用内置命令alias为命令设置别名。输入alias来查看已经定义的所有别名。alias的定义规则和变量的一样，=两侧不能有空格。例如：
 
    ```bash
    alias ll="ls -lh --color=auto"   #命令可以有参数，包含空格的需要用单或双引号包括
@@ -841,7 +847,7 @@
    alias less="less -i"
    ```
 
-9. 在命令前加上\，例如`\ll`，可以强制不使用alias转换。使用unalias取消别名设置。
+10. 在命令前加上\，例如`\ll`，可以强制不使用alias转换。使用unalias取消别名设置。
 
    ```shell
    zj@ubuntu:~$ ll  #会被alias替换为 ls -lh --color=auto
@@ -853,15 +859,15 @@
    ll: command not found
    ```
 
-10. DOS的清屏是cls，Linux的清屏是clear。
+11. DOS的清屏是cls，Linux的清屏是clear。
 
-11. bash还支持作业管理，前、后台控制，使得可以在单一登录环境下，达到多任务的目的。
+12. bash还支持作业管理，前、后台控制，使得可以在单一登录环境下，达到多任务的目的。
 
-12. bash支持将命令写成脚本，然后批量执行，此时就是一个小型的编程语言。
+13. bash支持将命令写成脚本，然后批量执行，此时就是一个小型的编程语言。
 
-13. bash还支持使用通配符。例如`ls -l /usr/bin/*sh`可以查询该目录下有多少以sh结尾的文件或目录。
+14. bash还支持使用通配符。例如`ls -l /usr/bin/*sh`可以查询该目录下有多少以sh结尾的文件或目录。
 
-14. 为了方便shell的操作，bash内置了很多命令，例如cd，umask等。使用type来确定命令是内置还是外部的。使用man来查看内部命令的帮助时会跳转到man bash其中的一节。type的结果有三种可能，内置，外部，别名。type只查找可执行文件，和which类似，用来查找命令。
+15. 为了方便shell的操作，bash内置了很多命令，例如cd，umask等。使用type来确定命令是内置还是外部的。使用man来查看内部命令的帮助时会跳转到man bash其中的一节。type的结果有三种可能，内置，外部，别名。type只查找可执行文件，和which类似，用来查找命令。
 
     ```shell
     zj@ubuntu:~$ type cd
@@ -886,7 +892,7 @@
     echo is /bin/echo
     ```
 
-15. type只会查找可执行文件，而不是一般文件名。
+16. type只会查找可执行文件，而不是一般文件名。
 
     ```shell
     zj@ubuntu:~$ type systemctl
@@ -898,27 +904,49 @@
     bash: type: systemctl: 未找到
     ```
 
-16. 如果命令太长，可以使用`\[Enter]`来换行，\后面不能有空格，要紧挨着Enter。因为\是用来转义[Enter]的。
+17. 某些名字既有可执行文件版本，也有shell内置命令版本，例如echo。
+
+    ```shell
+    zj@zj-hit:~$ type -a echo
+    echo 是 shell 内建
+    echo 是 /usr/bin/echo
+    echo 是 /bin/echo
+    ```
+
+18. bash寻找命令的顺序：
+
+    1. 以相对/绝对路径执行命令，例如/usr/bin/ls或./ls。
+
+    2. 由alias找到的命令。
+
+    3. bash的内置命令。
+
+    4. 通过$PATH这个变量指定的目录按顺序查找到的。
+
+19. 如果命令太长，可以使用`\[Enter]`来换行，\后面不能有空格，要紧挨着Enter。因为\是用来转义[Enter]的。
 
     ```shell
     zj@ubuntu:~$ ls \
     > .                       #第二行会在开头自动出现一个>提示符。这个命令相当于 ls .
     ```
 
-17. 如果不想执行已经输入了的命令，可以用Ctrl+C终止此行的输入，另起一行。
+20. 如果不想执行已经输入了的命令，可以用Ctrl+C终止此行的输入，另起一行。
 
-18. 
+21. shell的通配符有：
 
-19. shell中具有特殊含义的符号：
+    ```shell
+    *   #代表0到无穷多个任意字符
+    ?   #代表1个任意字符
+    []  #中括号范围内的任意1个字符
+    [-] #类似上面，连续的字符可以使用-连接，例如[a-d]等价于[abcd]
+    [^] #除了[]内的字符以外的任意1个字符
+    ```
+
+22. shell中具有特殊含义的符号：
 
     ```shell
     ~       #用户的家目录 可以和cd结合使用。
     -       #上一次的目录
-    !p      #在命令历史记录寻找以p开头的最近的那个命令，并执行.  使用history命令来查看shell命令历史
-    !!      #执行上一次命令
-    !35     #执行第35号历史命令,在history命令的输出中有编号。
-    $ABC    #获取变量ABC的内容
-    +  -  *  /  %  #加减乘除，取余运算。
     &       #后台执行
     *       #shell中的通配符,匹配任意多个字符
     ?       #shell中的通配符,匹配除回车以外的1个字符。
@@ -926,12 +954,10 @@
     |       #管道符,前一个命令的输出作为下一个命令的输入
     \       #转义符,例如将通配符*转义为乘号。
     `date`  #在命令中执行命令,例如 echo "dotay is `date +%F`"
-    "ABC"   #字符串,不解释变量。echo "$USER"    输出为 root
-    'ABC'   #字符串,会解释变量。echo '$USER'    输出为 $USER
     ''ABC'' #等价于"ABC"
     ```
 
-20. 数学计算，expr和let都是shell的内建命令，都只能进行整数计算，不同的是let使用变量不用加$，而expr必须加
+23. 数学计算，expr和let都是shell的内建命令，都只能进行整数计算，不同的是let使用变量不用加$，而expr必须加
 
     ```shell
     expr 1 + 2  #expr只能计算整数的运算。符号和数字之间必须要有空格, expr 1 +2 也会报错。
@@ -953,7 +979,7 @@
     let var1+=5  #此时var1的结果为9
     ```
 
-21. bc命令支持小数运算，它不是shell内建命令，不过bc是交互式的使用，shell脚本要通过管道来使用它。
+24. bc命令支持小数运算，它不是shell内建命令，不过bc是交互式的使用，shell脚本要通过管道来使用它。
 
     ```shell
     10/3     #结果为3
@@ -964,13 +990,579 @@
     echo "mem usage:`echo "scale=2;212*100/1024"|bc`%"    #这里涉及到了echo的嵌套使用。` `内部的字符串会被当做命令执行，用执行的结果替换。
     ```
 
-22. $((  ))也可以进行整数计算，最为方便，格式也比较自由，内部可以自由加空格和括号：
+25. $((  ))也可以进行整数计算，最为方便，格式也比较自由，内部可以自由加空格和括号：
 
     ```shell
     echo $(((1+2)*3))     #计算(1+2)*3的结果。
     i=1
     i=$((i + 1))          #此时变量i为2
     ```
+
+26. split命令可以将一个大文件划分为多个小文件，方便传输，之后可以使用cat命令拼接起来：
+
+    ```shell
+    zj@zj-hit:~$ split -b 2k /etc/services services #将/etc/services按照2k来分块，单位为字节。可以使用-l来按照行划分。最后一个参数services表示，分割后的一系列文件的前缀名。结果会在当前目录下产生多个文件，名称分别为
+    zj@zj-hit:~$ ll services*
+    -rw-rw-r-- 1 zj zj 2.0K  1月 24 12:57 servicesaa
+    -rw-rw-r-- 1 zj zj 2.0K  1月 24 12:57 servicesab
+    -rw-rw-r-- 1 zj zj 2.0K  1月 24 12:57 servicesac
+    -rw-rw-r-- 1 zj zj 2.0K  1月 24 12:57 servicesad
+    -rw-rw-r-- 1 zj zj 2.0K  1月 24 12:57 servicesae
+    -rw-rw-r-- 1 zj zj 2.0K  1月 24 12:57 servicesaf
+    -rw-rw-r-- 1 zj zj  813  1月 24 12:57 servicesag
+    zj@zj-hit:~$ cat servicesa* >> services.bak #追加拼接
+    zj@zj-hit:~$ sha1sum services.bak /etc/services  #可以看到2个文件的内容完全相同
+    a0d7a229bf049f7fe17e8445226236e4024535d0  services.bak
+    a0d7a229bf049f7fe17e8445226236e4024535d0  /etc/services
+    ```
+
+27. xargs从标准输入读入数据，以空格或换行符作为识别符，将其分隔成参数，默认将结果输出到屏幕。如果提供了命令，则会依次调用该命令，配备刚才解析出的参数。
+
+    ```shell
+    #例如main程序只能接收一个参数，然后输出它，现在有一个文件abc.txt，一共3行，分别为1 2 3，现在需要对每行都调用该程序，希望达到的效果为：./main 1;./main 2;./main 3。
+    ./main abc.txt       #错误，main并不知道abc.txt是存储参数的文件，而是会将它作为单个的参数
+    cat abc.txt | ./main #错误，因为main不支持管道符，并不会从标准输入读入内容，而是将输入丢弃
+    ./main `cat abc.txt` #错误，此时相当于./main 1 2 3，会提示参数过多。
+    zj@zj-hit:~$ cat abc.txt |xargs -n 1 ./main #-n表示每次只给./main 1个参数。使用-p选项可以在每次执行命令前将其打印出来并询问，输入y确认。-e"6" 遇到6时，xargs就停止解析了，6本身也会被丢弃。
+    accept: 1
+    accept: 2
+    accept: 3
+    #一个复杂的例子：对用户ID前三个的用户使用id命令。
+    zj@zj-hit:~$ cut -d ":" -f 1 /etc/passwd |head -n 3 | xargs -n 1 id
+    uid=0(root) gid=0(root) 组=0(root)
+    uid=1(daemon) gid=1(daemon) 组=1(daemon)
+    uid=2(bin) gid=2(bin) 组=2(bin)
+    #早先版本的id命令不支持多个参数，现在也可以这样：
+    id `cut -d ":" -f 1 /etc/passwd |head -n 3`
+    #某些命令不支持管道符，可以使用xargs使之支持。
+    zj@zj-hit:~/test/C$ find /usr/bin/ -perm /7000 |xargs -n 1 ls -l #这里不能使用ll，因为xargs不支持alias的命令。
+    zj@zj-hit:~/test/C$ find /usr/bin/ -perm /7000 |xargs ls -l #这里也可以不加-n 1，因为ls 命令支持多个参数，实际上同时传递多个参数时，还会进行排序。find是按照搜索到的先后顺序来输出的，-n 1会保持这个顺序，如果没有-n 1，则会在ls时重新对这些文件排序。
+    ```
+
+28. main程序：
+
+    ```c
+    #include <stdio.h>
+    int main(int argc, char *argv[]) //只有命令行参数个数argc为2时才正确工作
+    {
+        if (argc == 1)
+        {
+            printf("need 1 argument\n");
+            return 1;
+        }
+        if (argc > 2)
+        {
+            printf("error too much arguments\n");
+            return 1;
+        }
+        printf("accept: %s\n", argv[1]);
+        return 0;
+    }
+    ```
+
+29. 
+
+30. 
+
+## SHLVL
+
+1. SHLVL是记录多个Bash进程实例嵌套深度的累加器，而BASH_SUBSHELL是记录一个Bash进程实例中多个子Shell（subshell）嵌套深度的累加器。
+
+2. 前者是child shell，实际是父子进程关系。后者是sub shell，同一个进程。因此SHLVL变量是记录了child shell的嵌套深度，而BASH_SUBSHELL记录了subshell的嵌套深度。
+
+3. 实际上在Bash里面再执行一次Bash，或者再执行一个Shell脚本，都不是进入了subshell。这只能描述成当前Shell启动了个外部命令，而这个外部命令刚好是个Shell。真正的subshell是不需要重新执行硬盘上的外部命令的，全部是内存中的操作。可以认为subshell是bash自己模拟出来的一套多进程系统，不过不用创建新的进程，效率更高。
+
+4. subshell和父shell的变量隔离，修改后互不影响。
+
+5. 在Bash里面，只有特定的语法才会让代码进入子Shell，比如管道两边的命令，比如用小括号括起来等：
+
+   ```shell
+   #!/usr/bin/bash
+   echo $$ #PID为8456
+   unset a
+   a="in subshell"
+   (
+       echo $BASH_SUBSHELL #结果为1
+       echo $a             #输出 in subshell
+       echo $$             #PID为8456
+       a="modified in subshell"
+       echo $a #结果为modified in subshell
+   )
+   echo $a #结果仍为in subshell。
+   sh -c 'echo "$a"'        #输出为空，因为a仅仅是一个自定义变量，并没有export为环境变量。
+   sh -c 'echo "$$"'        #PID为8459
+   ( (echo $BASH_SUBSHELL)) #结果为2。嵌套的括号要注意，前两个括号中间的空格不能省略。
+   
+   ```
+
+6. 真正的子Shell可以访问其父Shell的任何变量，而通过再执行一次bash命令所启动的Shell只能访问其父 Shell传来的环境变量，普通的父子进程之间都能达到后一种效果。
+
+7. 
+
+8. 不同的登录情况下，bash的进程关系：
+
+   ```sh
+   systemd→login→bash #在物理机前直接登录
+   systemd→sshd→sshd→sshd→bash #使用putty进行ssh登录
+   systemd→sshd→sshd→sshd→bash→sh→node→node→node→bash #使用vscode的远程连接登录
+   ```
+
+9. 以上两种情况的$SHLVL的值都为1，后一种情况为2。
+
+10. 在登录shell退出时会执行`~/.bash_logout`文件：
+
+    ```shell
+    # ~/.bash_logout: executed by bash(1) when login shell exits.
+    
+    # when leaving the console clear the screen to increase privacy
+    #下面的功能是在退出时，清除控制台的内容，增加隐私性。这个命令对终端无效，终端使用clear来清除。
+    if [ "$SHLVL" = 1 ]; then
+        [ -x /usr/bin/clear_console ] && /usr/bin/clear_console -q
+    fi
+    ```
+
+## 环境配置
+
+1. bash的登录欢迎信息保存在/etc/issue文件中，一些信息使用\转义输出。/etc/issue.net是在远程登录到本机时显示的。
+
+2. 如果管理员想要给之后登录的用户发送一些提示，例如服务器将在某个时间段维护，可以将内容添加到/etc/motd文件中。
+
+3. 登录shell和非登录shell的区别：
+
+   1. 登录shell：取得shell需要完整的登录流程，例如从tty1-6登录，需要输入账号密码。
+   2. 非登录shell：取得shell时，不需要进行重复登录操作，例如从X Window登录后，再启动一个终端，此时的shell就是非登录shell，因为没有要求输入账号密码。或者在原来的shell中执行bash，进入一个新的shell，这也成为非登录shell。
+
+4. 之所以要区分二者，是因为它们读取的配置文件不同。登录shell只会读取：
+
+   1. `/etc/profile`，这是系统的配置文件。
+
+      ```shell
+      if [ "${PS1-}" ]; then #测试PS1变量是否定义且不为空，之所以后面有一个-，是为了兼容某些获取未定义的变量时会报错的shell。
+        if [ "${BASH-}" ] && [ "$BASH" != "/bin/sh" ]; then #若当前shell是bash，而不是sh时
+          # The file bash.bashrc already sets the default PS1.
+          # PS1='\h:\w\$ '
+          if [ -f /etc/bash.bashrc ]; then #测试/etc/bash.bashrc是否存在，且为普通文件
+            . /etc/bash.bashrc #执行该文件
+          fi
+        else
+          if [ "$(id -u)" -eq 0 ]; then #id -u获得当前用户的ID
+            PS1='# ' #如果ID等于0，则用#提示符
+          else
+            PS1='$ '
+          fi
+        fi
+      fi
+      
+      if [ -d /etc/profile.d ]; then #如果/etc/profile.d存在且为目录。如果需要为所有用户增加一些配置，可以在这个目录下新增一些.sh的文件。
+        for i in /etc/profile.d/*.sh; do #执行该目录下的所有.sh文件
+          if [ -r $i ]; then #检测文件名是否存在，且具有可读权限
+            . $i
+          fi
+        done
+        unset i #删除用过的变量i
+      fi
+      ```
+
+   2. `~/.bash_profile`或`~/.bash_login`或`~/.profile`，这是用户个人的配置文件。只会按顺序读取其中存在的第一个文件，之所以这样，是为了适应从其他shell转过来的用户的习惯。Ubuntu22.04下只有`~/.profile`这个文件。
+
+      ```shell
+      # ~/.profile: executed by the command interpreter for login shells.
+      # This file is not read by bash(1), if ~/.bash_profile or ~/.bash_login
+      # exists.
+      
+      # the default umask is set in /etc/profile; for setting the umask
+      # for ssh logins, install and configure the libpam-umask package.
+      #umask 022
+      
+      # if running bash
+      if [ -n "$BASH_VERSION" ]; then
+          # include .bashrc if it exists 如果~/.bashrc存在，则执行它
+          if [ -f "$HOME/.bashrc" ]; then
+      	. "$HOME/.bashrc"
+          fi
+      fi
+      
+      # set PATH so it includes user's private bin if it exists
+      if [ -d "$HOME/bin" ] ; then
+          PATH="$HOME/bin:$PATH"
+      fi
+      
+      # set PATH so it includes user's private bin if it exists
+      if [ -d "$HOME/.local/bin" ] ; then
+          PATH="$HOME/.local/bin:$PATH"
+      fi
+      ```
+
+5. 非登录shell只会读取`~/.bashrc`文件。
+
+   ```shell
+   # ~/.bashrc: executed by bash(1) for non-login shells. 非登录shell会执行
+   
+   # If not running interactively, don't do anything
+   case $- in
+   *i*) ;;
+   *) return ;;
+   esac
+   
+   # don't put duplicate lines or lines starting with space in the history.
+   # See bash(1) for more options
+   HISTCONTROL=ignoreboth
+   
+   # append to the history file, don't overwrite it 追加历史记录，而非覆盖
+   shopt -s histappend
+   
+   # for setting history length see HISTSIZE and HISTFILESIZE in bash(1) 设置history的相关变量
+   HISTSIZE=1000
+   HISTFILESIZE=2000
+   
+   # check the window size after each command and, if necessary,
+   # update the values of LINES and COLUMNS.
+   shopt -s checkwinsize
+   
+   # If set, the pattern "**" used in a pathname expansion context will
+   # match all files and zero or more directories and subdirectories.
+   #shopt -s globstar
+   
+   # make less more friendly for non-text input files, see lesspipe(1)
+   [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
+   
+   # set variable identifying the chroot you work in (used in the prompt below)
+   if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
+       debian_chroot=$(cat /etc/debian_chroot)
+   fi
+   
+   # set a fancy prompt (non-color, unless we know we "want" color)
+   case "$TERM" in
+   xterm-color | *-256color) color_prompt=yes ;;
+   esac
+   
+   # uncomment for a colored prompt, if the terminal has the capability; turned
+   # off by default to not distract the user: the focus in a terminal window
+   # should be on the output of commands, not on the prompt
+   #force_color_prompt=yes
+   
+   if [ -n "$force_color_prompt" ]; then
+       if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+           # We have color support; assume it's compliant with Ecma-48
+           # (ISO/IEC-6429). (Lack of such support is extremely rare, and such
+           # a case would tend to support setf rather than setaf.)
+           color_prompt=yes
+       else
+           color_prompt=
+       fi
+   fi
+   
+   if [ "$color_prompt" = yes ]; then
+       PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+   else
+       PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+   fi
+   unset color_prompt force_color_prompt
+   
+   # If this is an xterm set the title to user@host:dir
+   case "$TERM" in
+   xterm* | rxvt*)
+       PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+       ;;
+   *) ;;
+   esac
+   
+   # enable color support of ls and also add handy aliases
+   if [ -x /usr/bin/dircolors ]; then
+       test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+       alias ls='ls --color=auto'
+       #alias dir='dir --color=auto'
+       #alias vdir='vdir --color=auto'
+   
+       alias grep='grep --color=auto'
+       alias fgrep='fgrep --color=auto'
+       alias egrep='egrep --color=auto'
+   fi
+   
+   # colored GCC warnings and errors
+   #export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+   
+   # some more ls aliases
+   alias ll='ls -alF'
+   alias la='ls -A'
+   alias l='ls -CF'
+   
+   # Add an "alert" alias for long running commands.  Use like so:
+   #   sleep 10; alert
+   alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+   
+   # Alias definitions.
+   # You may want to put all your additions into a separate file like
+   # ~/.bash_aliases, instead of adding them here directly.可以将所有的alias放在同一个文件中。
+   
+   if [ -f ~/.bash_aliases ]; then
+       . ~/.bash_aliases
+   fi
+   
+   # enable programmable completion features (you don't need to enable
+   # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
+   # sources /etc/bash.bashrc).
+   if ! shopt -oq posix; then
+       if [ -f /usr/share/bash-completion/bash_completion ]; then
+           . /usr/share/bash-completion/bash_completion
+       elif [ -f /etc/bash_completion ]; then
+           . /etc/bash_completion
+       fi
+   fi
+   #---------------------------下面都是自定义的
+   alias tmux="tmux -2"
+   #export TERM=screen-256color
+   alias ll="ls -lh --color=auto"
+   alias la="ls -lah --color=auto"
+   alias s=neofetch
+   alias updatedb="sudo updatedb"
+   alias r=ranger
+   alias cls=clear
+   alias df="df -Th"
+   alias du="du -sh"
+   alias less="less -i"
+   alias type="type -a"
+   alias rm="rm -I"
+   alias paraFoam="paraFoam -builtin"
+   PATH=$PATH:~/.local/bin
+   export http_proxy=192.168.80.1:10811
+   export https_proxy=192.168.80.1:10811
+   # source /opt/openfoam11/etc/bashrc
+   source /home/zj/OpenFOAM/OpenFOAM-11/etc/bashrc
+   # PATH=$PATH:/opt/paraviewopenfoam510/bin
+   export CCX_LOG_ALLOC=1
+   
+   # function Extract for common file formats 一键解压大多数的压缩文件
+   SAVEIFS=$IFS
+   IFS="$(printf '\n\t')"
+   function x {
+       if [ -z "$1" ]; then
+           # display usage if no parameters given
+           echo "Usage: extract <path/file_name>.<zip|rar|bz2|gz|tar|tbz2|tgz|Z|7z|xz|ex|tar.bz2|tar.gz|tar.xz>"
+           echo "       extract <path/file_name_1.ext> [path/file_name_2.ext] [path/file_name_3.ext]"
+       else
+           for n in "$@"; do
+               if [ -f "$n" ]; then
+                   case "${n%,}" in
+                   *.cbt | *.tar.bz2 | *.tar.gz | *.tar.xz | *.tbz2 | *.tgz | *.txz | *.tar)
+                       tar xvf "$n"
+                       ;;
+                   *.lzma) unlzma ./"$n" ;;
+                   *.bz2) bunzip2 ./"$n" ;;
+                   *.cbr | *.rar) unrar x -ad ./"$n" ;;
+                   *.gz) gunzip ./"$n" ;;
+                   *.cbz | *.epub | *.zip) unzip ./"$n" ;;
+                   *.z) uncompress ./"$n" ;;
+                   *.7z | *.apk | *.arj | *.cab | *.cb7 | *.chm | *.deb | *.dmg | *.iso | *.lzh | *.msi | *.pkg | *.rpm | *.udf | *.wim | *.xar)
+                       7z x ./"$n"
+                       ;;
+                   *.xz) unxz ./"$n" ;;
+                   *.exe) cabextract ./"$n" ;;
+                   *.cpio) cpio -id <./"$n" ;;
+                   *.cba | *.ace) unace x ./"$n" ;;
+                   *.zpaq) zpaq x ./"$n" ;;
+                   *.arc) arc e ./"$n" ;;
+                   *.cso) ciso 0 ./"$n" ./"$n.iso" &&
+                       extract $n.iso && \rm -f $n ;;
+                   *)
+                       echo "extract: '$n' - unknown archive method"
+                       return 1
+                       ;;
+                   esac
+               else
+                   echo "'$n' - file does not exist"
+                   return 1
+               fi
+           done
+       fi
+   }
+   IFS=$SAVEIFS #还原IFS变量
+   
+   function ranger { #使用q退出ranger回到之前的目录，使用Q退出ranger时会改变当前目录
+       local IFS=$'\t\n'
+       local tempfile="$(mktemp -t tmp.XXXXXX)"
+       local ranger_cmd=(
+           command
+           ranger
+           --cmd="map Q chain shell echo %d > "$tempfile"; quitall"
+       )
+   
+       ${ranger_cmd[@]} "$@"
+       if [[ -f "$tempfile" ]] && [[ "$(cat -- "$tempfile")" != "$(echo -n $(pwd))" ]]; then
+           cd -- "$(cat "$tempfile")" || return
+       fi
+       command rm -f -- "$tempfile" 2>/dev/null
+   }
+   ```
+
+6. 非登录shell只能从登录shell中派生出来。
+
+7. Red Hat系统的~/.bashrc会读取/etc/bashrc，Ubuntu中没有/etc/bashrc文件。
+
+8. /etc/bash.bashrc，由/etc/profile读取：
+
+   ```shell
+   # System-wide .bashrc file for interactive bash(1) shells. 交互式shell
+   
+   # To enable the settings / commands in this file for login shells as well,
+   # this file has to be sourced in /etc/profile. 这个文件必须被/etc/profile 使用source执行
+   
+   # If not running interactively, don't do anything
+   [ -z "$PS1" ] && return #如果PS1为空，则是非交互式shell，条件为真，直接返回。
+   
+   # check the window size after each command and, if necessary,
+   # update the values of LINES and COLUMNS.
+   shopt -s checkwinsize
+   
+   # set variable identifying the chroot you work in (used in the prompt below)
+   if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then #检查是否在chroot环境中，从而设置debian_chroot变量
+       debian_chroot=$(cat /etc/debian_chroot)
+   fi
+   
+   # set a fancy prompt (non-color, overwrite the one in /etc/profile)
+   # but only if not SUDOing and have SUDO_PS1 set; then assume smart user.
+   if ! [ -n "${SUDO_USER}" -a -n "${SUDO_PS1}" ]; then
+     PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+   fi
+   
+   # Commented out, don't overwrite xterm -T "title" -n "icontitle" by default.
+   # If this is an xterm set the title to user@host:dir
+   #case "$TERM" in
+   #xterm*|rxvt*)
+   #    PROMPT_COMMAND='echo -ne "\033]0;${USER}@${HOSTNAME}: ${PWD}\007"'
+   #    ;;
+   #*)
+   #    ;;
+   #esac
+   
+   # enable bash completion in interactive shells
+   #if ! shopt -oq posix; then
+   #  if [ -f /usr/share/bash-completion/bash_completion ]; then
+   #    . /usr/share/bash-completion/bash_completion
+   #  elif [ -f /etc/bash_completion ]; then
+   #    . /etc/bash_completion
+   #  fi
+   #fi
+   
+   # sudo hint
+   if [ ! -e "$HOME/.sudo_as_admin_successful" ] && [ ! -e "$HOME/.hushlogin" ] ; then
+       case " $(groups) " in *\ admin\ *|*\ sudo\ *) #groups命令返回所有的用户组
+       if [ -x /usr/bin/sudo ]; then
+   	cat <<-EOF
+   	To run a command as administrator (user "root"), use "sudo <command>".
+   	See "man sudo_root" for details.
+   	
+   	EOF
+       fi
+       esac
+   fi
+   
+   # if the command-not-found package is installed, use it 使用command-not-found来报错，这样会从apt数据库中提示一些类似的命令，否则只会提示command not found。
+   if [ -x /usr/lib/command-not-found -o -x /usr/share/command-not-found/command-not-found ]; then #两个地方有一个存在该文件即可
+   	function command_not_found_handle {
+   	        # check because c-n-f could've been removed in the meantime
+                   if [ -x /usr/lib/command-not-found ]; then
+   		   /usr/lib/command-not-found -- "$1"
+                      return $?
+                   elif [ -x /usr/share/command-not-found/command-not-found ]; then
+   		   /usr/share/command-not-found/command-not-found -- "$1"
+                      return $?
+   		else
+   		   printf "%s: command not found\n" "$1" >&2
+   		   return 127
+   		fi
+   	}
+   fi
+   ```
+
+9. shopt，设定或取消shell选项，它是一个shell内置命令。
+
+   ```shell
+   zj@zj-hit:~/test/C$ shopt
+   autocd          off
+   assoc_expand_once       off
+   cdable_vars     off
+   cdspell         off
+   checkhash       off
+   checkjobs       off
+   checkwinsize    on
+   cmdhist         on
+   compat31        off
+   compat32        off
+   compat40        off
+   compat41        off
+   compat42        off
+   compat43        off
+   compat44        off
+   complete_fullquote      on
+   direxpand       off
+   dirspell        off
+   dotglob         off
+   execfail        off
+   expand_aliases  on
+   extdebug        off
+   extglob         on
+   extquote        on
+   failglob        off
+   force_fignore   on
+   globasciiranges on
+   globstar        off
+   gnu_errfmt      off
+   histappend      on
+   histreedit      off
+   histverify      off
+   hostcomplete    off
+   huponexit       off
+   inherit_errexit off
+   interactive_comments    on
+   lastpipe        off
+   lithist         off
+   localvar_inherit        off
+   localvar_unset  off
+   login_shell     off
+   mailwarn        off
+   no_empty_cmd_completion off
+   nocaseglob      off
+   nocasematch     off
+   nullglob        off
+   progcomp        on
+   progcomp_alias  off
+   promptvars      on
+   restricted_shell        off
+   shift_verbose   off
+   sourcepath      on
+   xpg_echo        off
+   ```
+
+10. IFS(Internal Field Seperator)是Linux的shell中预设的分隔符，当shell处理"命令替换"和"参数替换"时，shell 根据IFS的值，来拆解读入的变量。默认是space，tab，newline，重新定义前应保存旧的。
+
+11. 如果修改的是非登录shell会读取的配置文件，只需要重新开启一个终端即可。如果修改了登录shell才会读取的配置文件，那么需要注销后重新登陆才可以生效。以上两种情况，也可以通过source来手动执行配置文件。
+
+12. source和`.`的功能是一样的。都是将指定的文件读入到当前的shell中。不会重新开启一个新的子进程。
+
+13. 如果在一台电脑上安装了多个OpenFOAM版本，可以通过source不同的配置文件，来切换环境。
+
+14. 
+
+15. 
+
+16. 
+
+17. 
+
+18. 
+
+19. 
+
+20. 
+
+21. 
+
+22. 
+
+23. 
+
+24. 
 
 
 ## 脚本文件
@@ -1252,7 +1844,6 @@
    ${变量%%关键词}  #从变量内容的末尾对关键词进行匹配，将符合条件的最长数据删除。也是贪婪匹配。
    ${变量/旧字符串/新字符串}   #在变量内容中查找旧字符串替换新字符串，只有第一个会被替换。
    ${变量//旧字符串/新字符串} #在变量内容中查找旧字符串替换新字符串，所有都会被被替换。注意第二个/还是只有一个
-   
    path=/usr/local/bin:/usr/bin:/home/dmtsai/.local/bin:/home/dmtsai/bin
    echo ${path#*:}  #只删除第一项。通配符*匹配任意多个字符，包括0个。匹配到了/usr/local/bin:，因此将其从path中删除，结果为/usr/bin:/home/dmtsai/.local/bin:/home/dmtsai/bin
    echo ${path##*:} #只保留最后一项
@@ -1261,7 +1852,7 @@
    echo ${path/dmtsai/zj} #将第一个dmtsai替换为zj，结果为/usr/local/bin:/usr/bin:/home/zj/.local/bin:/home/dmtsai/bin
    echo ${path//dmtsai/zj} #将所有的dmtsai替换为zj，结果为/usr/local/bin:/usr/bin:/home/zj/.local/bin:/home/zj/bin 
    ```
-
+   
 2. 测试与内容替换，这种工作也可以通过if then来完成：
 
    ```shell
@@ -1393,7 +1984,7 @@
 5. 逻辑运算：
 
    ```shell
-   #  &&  ||  !   分别表示与或非
+   #  &&  ||  !   分别表示与或非，中间不能有空格
    test 1 -lt 2 && test 4 -lt 2;echo $?  #结果为1
    test 1 -lt 2 && test 4 -lt 5;echo $?  #结果为0
    test ! 1 -lt 2;echo $?                #结果为1,对test 1 -lt 2的结果取反。
@@ -1404,9 +1995,12 @@
    else
    	echo "Not OK"
    fi
-   #shell中的逻辑运算都是短路的，可以用它来设置出错报警
-   ls || echo "bad"       #当第一个命令执行失败，才会执行第二个命令。
-   ls && echo "good"      #当第一个命令执行成功，才会执行第二命令
+   #shell中的逻辑运算都是短路的，可以用它来设置出错报警。shell内部通过$?来判断前一个命令是否成功
+   ls /tmp/abc || mkdir /tmp/abc      #当第一个命令执行失败(该目录不存在)，才会执行第二个命令。
+   ls /tmp/abc && touch /tmp/abc/def  #当第一个命令执行成功(该目录存在)，才会执行第二命令。不过这个最好使用[]来判断，更方便。
+   ls /tmp/abc || mkdir /tmp/abc && touch /tmp/abc/def #不论/tmp/abc目录是否存在，都要在其下创建一个def的文件。这样有一个好处，重复执行这样命令，不会重复创建文件或目录。
+   #上面的例子，相当于如下加括号的操作
+   (ls /tmp/abc || mkdir /tmp/abc) && touch /tmp/abc/def
    ```
 
 6. `[[ ]]`是shell的内置命令。支持字符串的模式匹配。
@@ -1824,6 +2418,19 @@
    210
    ```
 
+## cut和grep
+
+1. cut命令按行处理输入，将每行的指定部分打印到标准输出。两种工作模式，使用特定字符分隔，或者使用特定长度分隔。
+
+   ```shell
+   #将PATH=的第3段选取出来，其中PATH为/home/zj/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+   echo ${PATH} |cut -d ":" -f 3,5 #结果为/usr/local/bin:/usr/bin。 -d后面是用来分割的字符，-f后面是要选区的下标，从1开始计数，有多个时使用,分隔，输出的结果会自动用分隔符连接。
+   #如果遇到多个连续的分隔符，则不会当成一个，而是会分割出空字符。
+   export |cut -c 12- #选取export输出的每行的第12及以后的字符。也可以使用 -12或12-20来指定范围
+   ```
+
+2. grep也是按行处理的，当该行能够匹配时，将该行整个输出。使用 --color=auto可以将该行中匹配的内容在输出中高亮显示。它可以配合正则表达式使用。
+
 ## ulimit
 
 1. 根据用户来进行资源管理，ulimit是shell内置功能。
@@ -1854,10 +2461,58 @@
    dd if=/dev/zero of=123 bs=1M count=20  #只会写入10M的内容，同时提示File size limit exceeded (core dumped)
    ```
 
-2. 一般用户只能修改降低自己的限制值，主动降低后就不能提高了。注销重新登陆就能恢复默认的限制值。
+2. 一般用户只能修改降低自己的限制值，主动降低后就不能提高了。注销重新登录就能恢复默认的限制值。
 
 3. 如果管理员要管控用户的ulimit值，可以使用pam。
 
+
+## stty
+
+1. stty命令可以输出或变更终端的特性。某些快捷键可能对模拟的终端不起作用。
+
+   ```shell
+   zj@zj-hit:~$ stty -a #显示所有的特性
+   speed 38400 baud; rows 28; columns 130; line = 0; #28行，130列
+   intr = ^C; quit = ^\; erase = ^?; kill = ^U; eof = ^D; eol = M-^?; eol2 = M-^?; swtch = <undef>; start = ^Q; stop = ^S; susp = ^Z; #^C表示Ctrl+C快捷键
+   rprnt = ^R; werase = ^W; lnext = ^V; discard = ^O; min = 1; time = 0;
+   -parenb -parodd -cmspar cs8 hupcl -cstopb cread -clocal -crtscts
+   -ignbrk brkint -ignpar -parmrk -inpck -istrip -inlcr -igncr icrnl ixon -ixoff -iuclc ixany imaxbel iutf8
+   opost -olcuc -ocrnl onlcr -onocr -onlret -ofill -ofdel nl0 cr0 tab0 bs0 vt0 ff0
+   isig icanon iexten echo echoe echok -echonl -noflsh -xcase -tostop -echoprt echoctl echoke -flusho -extproc
+   ```
+
+2. 重要的关键词和含义：
+
+   ```shell
+   intr  #发送一个interrupt信号给当前的程序。
+   quit  #发送一个quit信号给当前的程序。
+   erase #向后删除字符
+   kill  #从光标位置，向前删除目前命令行上的所有文字
+   eof   #End of file，结束输入
+   start #在某个程序停止后，重启它的output
+   stop  #停止目前屏幕的输出
+   susp  #发送一个terminal stop信号给当前的程序
+   ```
+
+3. 除了stty之外，bash还有自定义的一些值来设置终端的属性。存储在变量-中。
+
+   ```shell
+   zj@zj-hit:~$ echo $- #结果的某些选项可以使用set进行开关
+   himBHs
+   zj@zj-hit:~/test/C$ set -u #开启u选项，，此时$-为himuBHs。使用set +u来反转选项。
+   -u #当使用未定义的变量时，会报错，默认关闭
+   -v #在信息被输出前，会线显示信息的原始内容，默认开启
+   -x #执行命令时打印命令及其参数。前面有++号，默认开启
+   -h #与历史命令有关，默认开启
+   -H #与历史命令有关，默认开启
+   -m #与任务管理有关，默认开启
+   -B #与[]的作用有关，默认开启
+   -C #使用>重定向时，若文件存在，则不会被覆盖，默认关闭
+   ```
+
+4. 交互式和非交互式shell：
+
+5. 
 
 
 # 重定向
@@ -1870,50 +2525,52 @@
       lsss 2> ls.txt    #命令运行错误,标准输出没有内容，标准错误输出有内容且被重定向，所以输出到该文件。
       ```
 
-   3. ```bash
+   3. 要注意，`1>`和`1>>`在数字和>之间不能有空格，否则会报错。
+
+   4. ```bash
       cat file1 file2 > file3    #合并两个文件。
       #也可以将上面的步骤拆分为两次重定向
       cat file1 > file3
       cat file2 >> file3         #第二个文件需要追加写入。重定向默认是覆盖，而不是追加。>>表示追加。
       ```
 
-   4. ```bash
+   5. ```bash
       >file1      #对于已存在的文件，会被清空内容。对于不存在的文件， 会新建该文件。
       ```
 
-   5. ```bash
-      ls > ls.txt 2>&1        #将标准输出重定向到文件，同时将标准错误重定向到标准输出。&不能省略
-      ls &> ls.txt            #和上一行有同样的效果，这样任何内容都不会输出到屏幕上了。
+   6. ```bash
+      ll main noexist > ls.txt 2>&1     #将标准输出重定向到文件，同时将标准错误重定向到标准输出，也就是将二者都输出到同一个文件中。&不能省略
+      ll main noexist &> ls.txt         #和上一行有同样的效果，这样任何内容都不会输出到屏幕上了。
+      ll main noexist > ls.txt 2> ls.txt #这样也会有内容写入ls.txt，但是会乱序。
+      ll main noexist > ls.txt 2> ls.bak #将标准输出重定向到文件ls.txt，将标准错误重定向到另一个文件ls.bak。此时屏幕上将不会有任何输出。
       ```
 
-   6. 输出重定向的目标如果为/dev/null，则表示丢弃输出的内容。
+   7. 输出重定向的目标如果为/dev/null，则表示丢弃输出的内容。
 
-   7. 标准输入的文件描述符为0，默认来自于键盘。标准输入重定向是将本来应该有键盘输入的内容改为从文件读取。
+   8. 标准输入的文件描述符为0，默认来自于键盘。标准输入重定向是将本来应该有键盘输入的内容改为从文件读取。
 
-   8. ```bash
+   9. ```bash
       read A                 #从键盘输入的内容会作为变量A的值
       
       read B < input.txt     #input.txt文件的内容会作为变量B的值。
       ```
 
-   9. 管道符  |  是将前一个命令的输出作为后一个命令的输入。
+   10. 管道符  |  是将前一个命令的标准输出作为后一个命令的标准输入。对于标准错误没有处理的能力，不过可以使用2>&1来将标准错误重定向到标准输出，这样就可以处理标准错误了。
 
-   10. 输出和输入重定向的目标和源都只能是文件，不能讲输出重定向到一个命令中。管道符是命令之间传输数据。
+   11. 输出和输入重定向的目标和源都只能是文件，不能讲输出重定向到一个命令中。管道符是命令之间传输数据。
 
-   11. ```bash
+   12. ```bash
        grep ed               #该命令会从标准输入中查找对应的内容。
        ls /bin | grep ed     #会从标准输入读入ls命令的输出。
        ```
 
-   12. /dev/null，外号叫无底洞，输入到这里的任何数据都会消失，一般用来丢弃输出的数据，重定向到这里即可。
+   13. /dev/null，外号叫无底洞，输入到这里的任何数据都会消失，一般用来丢弃输出的数据，重定向到这里即可。
 
-13. /dev/zero，可以从中读取无限多的0。一般用来初始化文件。
+14. /dev/zero，可以从中读取无限多的0。一般用来初始化文件。
 
-14. 重定向的本质是流的传输。输出重定向到文件时，如果文件不存在，会创建该文件：
+15. 重定向的本质是流的传输。相当多的命令行文件支持输入重定向，然后从标准输入读取数据，这样的命令称为管道命令，即可以在`|`后面出现，例如less，more，head，tail，wc等。这样可以使一些交互式的程序被脚本非交互式地调用：
 
     ```shell
-    echo haha > ./test.txt  #将echo的输出重定向到./test.txt文件,默认是输出到屏幕,会覆盖原数据。
-    cat a.txt >> b.txt      #将a.txt的内容复制追加到b.txt的末尾。>> 是追加到末尾。
     wc -l < /etc/passwd     #将wc命令的输入重定向到一个文件,默认是从键盘接受输入。这里会统计/etc/passwd文件的行数。
     wc -l /etc/passwd       #这里不使用输入重定向流,而是使用文件。
     fdisk /dev/sdb <<EOF    #<< 是追加,交互式的命令需要用到这个。这个命令会在sdb硬盘上新建一个1G的主分区
@@ -1925,6 +2582,33 @@
     w
     EOF
     ```
+
+16. 有些命令的参数需要是文件，但是也允许使用-来作为参数，此时会从标准输入读取：
+
+    ```shell
+    zj@zj-hit:~$ cat /etc/services |split -b 2k serv #不能缺省-，否则会将serv当作要被拆分的文件
+    split: 无法以读模式打开 'serv': 没有那个文件或目录
+    zj@zj-hit:~$ cat /etc/services |split -b 2k - serv #使用-来占位，使用管道符从标准输入中读取文件。
+    ```
+
+17. cat命令会从键盘接收输入，然后直接将其输出到标准输出上，在空行上使用CTRL+D结束输入：
+
+    ```shell
+    cat > abc.txt #这样会将cat从键盘获取的输入都输出到abc.txt文件中。
+    cat < def.txt #cat将从def.txt文件中获取输入，而非键盘
+    cat < def.txt > abc.txt #相当于将def.txt的内容复制到abc.txt
+    cat > abc.txt <<"eof" #当输入的一行只有eof这三个字符时，会被认为结束，相当于Ctrl+D
+    ```
+
+18. tee命令可以数据流分送到文件和屏幕，相当于标准输出流被复制了一份。这样可以一边查看输出，以便保存：
+
+    ```shell
+    ls -l /home/zj |tee abc.txt #tee的-a选项表示追加到文件。
+    ```
+
+19. 
+
+20. 
 
 
 
@@ -2572,7 +3256,7 @@
       MiB Swap:   2048.0 total,   2048.0 free,      0.0 used.   2453.5 avail Mem
       ```
 
-   9. 21:53:55表示系统的当前时间，up后面是当前系统运行的时间，精确到分钟。1 user 表示当前登陆了一个用户。
+   9. 21:53:55表示系统的当前时间，up后面是当前系统运行的时间，精确到分钟。1 user 表示当前登录了一个用户。
 
    10. load average后面的三个数字分别表示系统在之前的1，5，15分钟内的平均负载。一般以逻辑核数作为参考。
 
@@ -3308,7 +3992,7 @@
    ssh-keygen -R hostname   #将本机保存的hostname对应的公钥指纹删除，此时再重新连接即可。
    ```
 
-10. 登陆之后就显示的是远程主机的命令行提示符，不过也可以利用ssh来单独执行一条命令然后自动退出：
+10. 登录之后就显示的是远程主机的命令行提示符，不过也可以利用ssh来单独执行一条命令然后自动退出：
 
     ```shell
     ssh user@hostname cat /etc/ssh/ssh_config   #登录后立即执行  cat /etc/ssh/ssh_config  不过这样对于需要交互式shell的程序会报错，例如vim。此时需要使用-t 选项。
@@ -3829,7 +4513,7 @@
 
 # VSCode登录问题
 
-1. 一个虚拟机如果可以使用putty顺利登陆，双向ping也都顺畅，但是使用VSCode远程登陆虚拟机时，可能会报错如下：过程试图写入的管道不存在。这是由于：当前 known_hosts 文件保存的是之前连接的秘钥，现在没有更新。可以打开本地`C:\Users\你的用户名\.ssh\known_hosts`，并删掉远程主机对应的那行秘钥，重新连接即可。或者删掉整个文件即可。
+1. 一个虚拟机如果可以使用putty顺利登录，双向ping也都顺畅，但是使用VSCode远程登录虚拟机时，可能会报错如下：过程试图写入的管道不存在。这是由于：当前 known_hosts 文件保存的是之前连接的秘钥，现在没有更新。可以打开本地`C:\Users\你的用户名\.ssh\known_hosts`，并删掉远程主机对应的那行秘钥，重新连接即可。或者删掉整个文件即可。
 
 
 # bash执行
