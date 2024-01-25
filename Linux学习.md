@@ -996,6 +996,11 @@
     echo $(((1+2)*3))     #计算(1+2)*3的结果。
     i=1
     i=$((i + 1))          #此时变量i为2
+    #参与运算的变量可以不是数值类型，字符串也可以
+    read -p "first number" firstnumber
+    read -p "second number" secondnumber
+    total=$((${firstnumber}+${secondnumber}))
+    #或者declare -i total=${firstnumber}+${secondnumber}也可以，不过还是推荐上一种写法。
     ```
 
 26. split命令可以将一个大文件划分为多个小文件，方便传输，之后可以使用cat命令拼接起来：
@@ -1567,35 +1572,52 @@
 
 ## 脚本文件
 
-1. Shell第一行必须指定脚本运行的环境，即解释器程序的路径。shell中使用#来表示注释，#!不是注释。开头还应该加上说明部分，这个可以在vim中自动配置。
+1. Shell第一行（称为shebang行）必须指定脚本运行的环境，即解释器程序的路径。shell中使用#来表示注释。开头还应该加上说明部分，这个可以在vim中自动配置。
 
    ```shell
-   #!/usr/bin/bash         如果找不到该文件，执行时会报错。也可以写为    #!/usr/bin/env bash
+   #!/usr/bin/bash
+   #如果找不到/usr/bin/bash文件，执行时会报错。也可以写为 #!/usr/bin/env bash。这种情况通用性更好，当bash放在其他目录中时也有效。
+   #如果使用bash xx.sh执行该脚本，则这一行会被当作普通的注释
+   #注释一般包括：内容与功能，作者与联系方式，版本信息，创建文件的时间，修改记录（每次修改的人应该同时在此记录）
    #Author: Jian Zhang
    #Create Time: 2021/09/01/ 13:55
    #Description: First study shell script
    ```
 
-2. Shell脚本要用chmod给予执行权限。如果使用解释器，则不需要有执行权限：
+2. `/usr/bin/env [选项]... [-] [名称=值]... [命令 [参数]...]`。功能是将给定的键值对参数设置为环境变量，然后运行命令。
 
-   ```shell
-   chmod 700 test.sh
-   ./test.sh
-   ##或者##
-   chmod 600 test.sh #现在该文件不具备执行权限了
-   bash test.sh      #也可以执行成功。这里的bash换成sh也可以，sh是bash的符号连接。/etc/shells文件中记录了支持的shell。
-   ```
+3. shebang行的运作模式：`./xx.sh`相当于`/usr/bin/bash xx.sh`。
 
-3. exit NUM  退出脚本，释放资源，NUM为返回值，有效的是0-255。可以在shell中用echo $?查看。
+4. 如果没有指定shebang行，则默认用当前shell（即$SHELL）去解释脚本。
 
-4. 脚本可以接受命令行参数：
+5. 如果shebang行指定的文件没有x权限，那么该行会被忽略，转而交给当前的SHELL去执行这个脚本。
+
+6. shebang行需要使用绝对路径，因为这里不会自动到$PATH中寻找解释器的。
+
+7. exit NUM  退出脚本，释放资源，NUM为返回值，有效的是0-255。可以在shell中用echo $?查看。
+
+8. 脚本可以接受命令行参数：
 
    ```shell
    ./test.sh 3 5    #3个命令行参数，$0为./test.sh   $1为3   $2为5
    bash test.sh 3 5 #也是只有3个命令行参数，bash不计入
    ```
 
-   
+9. 空白行会被忽略，tab按键所产生的空白会被当作空格键。
+
+10. 如果读取到一个回车符，则会尝试执行该行命令。
+
+11. 使用`\[enter]`来续行。
+
+12. 执行脚本的方法：
+
+    1. 使用绝对或相对路径执行，也可以将脚本文件放在PATH的路径中来简化，此时脚本需要有rx权限。
+    2. 通过bash程序调用，`bash xx.sh`或`sh xx.sh`，此时只需要有r权限即可。这里还可以添加选项和参数。-n表示，，-x表示。
+    3. `source xx.sh`或`. xx.sh`方式执行。此时相当于将脚本的每一行都依次复制到命令行执行一样。
+
+13. 上面的前两种方式都会以子进程的方式来执行，因此子进程对环境变量的修改不会影响到父进程。执行脚本文件内的命令时，也是以子进程的形式调用的。
+
+14. shell脚本的开头应该临时设置PATH和LANG变量，并export它们，这样可以保证运行环境统一，在结束时应该使用exit n来设置返回值。
 
 ## 格式化输入输出
 
@@ -1942,8 +1964,8 @@
 
    ```shell
    test 3 -gt 2 ;echo $?    #0
-   [ 3 -gt 2 ];echo $?      #
-   ((3>2));echo $?          #
+   [ 3 -gt 2 ];echo $?      #0
+   ((3>2));echo $?          #0
    ```
 
 2. 整数比较大小，一共6种，不能直接使用<之类的符号，只可以使用-lt之类的选项：
@@ -1957,15 +1979,16 @@
 3. 文件的比较和检查：
 
    ```shell
-   -d #检查文件是否存在，且为目录 directory
    -e #检查文件是否存在          exist
    -f #检查文件是否存在，且为文件 file
+   -d #检查文件是否存在，且为目录 directory
+   -L #检查文件是否存在，且为链接文件 link
    -r #检查文件是否存在，且可读   read    读写执行权限的检查对root无效。
    -w #检查文件是否存在，且可写   write
    -x #检查文件是否存在，且可执行 excute
    -s #检查文件是否存在，且不为空 
    -O #检查文件是否存在，且拥有者是否为当前用户  owner
-   -G #检查文件是否存在，且当前用户在文件的所属组内 group
+   -G #检查文件是否存在，且当前用户是否在文件的所属组内 group
    file -nt file2 #检查file1是否比file2新，这里比较的是最后修改时间  newer than
    file -ot file2 #检查file1是否比file2旧                          older than
    file -ef file2 #检查file1和file2的iNode号是否相同。硬链接的两个文件具有相同的iNode号。
@@ -1984,7 +2007,7 @@
 5. 逻辑运算：
 
    ```shell
-   #  &&  ||  !   分别表示与或非，中间不能有空格
+   #  &&  ||  !   分别表示与或非，中间不能有空格。&&和||可以使用-a -o来替代
    test 1 -lt 2 && test 4 -lt 2;echo $?  #结果为1
    test 1 -lt 2 && test 4 -lt 5;echo $?  #结果为0
    test ! 1 -lt 2;echo $?                #结果为1,对test 1 -lt 2的结果取反。
