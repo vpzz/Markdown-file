@@ -1065,9 +1065,7 @@
     }
     ```
 
-29. 
-
-30. 
+    
 
 ## SHLVL
 
@@ -1101,8 +1099,6 @@
    ```
 
 6. 真正的子Shell可以访问其父Shell的任何变量，而通过再执行一次bash命令所启动的Shell只能访问其父 Shell传来的环境变量，普通的父子进程之间都能达到后一种效果。
-
-7. 
 
 8. 不同的登录情况下，bash的进程关系：
 
@@ -1541,33 +1537,19 @@
 
 10. IFS(Internal Field Seperator)是Linux的shell中预设的分隔符，当shell处理"命令替换"和"参数替换"时，shell 根据IFS的值，来拆解读入的变量。默认是space，tab，newline，重新定义前应保存旧的。
 
-11. 如果修改的是非登录shell会读取的配置文件，只需要重新开启一个终端即可。如果修改了登录shell才会读取的配置文件，那么需要注销后重新登陆才可以生效。以上两种情况，也可以通过source来手动执行配置文件。
+11. `set -- text`可以将text使用IFS分隔，然后存储在`$1`，`$2`，等。
 
-12. source和`.`的功能是一样的。都是将指定的文件读入到当前的shell中。不会重新开启一个新的子进程。
+    ```shell
+    zj@zj-hit:~$ ls
+    OpenFOAM-11  set.txt  ThirdParty-11  zj-11
+    set -- `ls` #此时$1为OpenFOAM-11，$2为set.txt，$3为ThirdParty-11，$4为zj-11。
+    ```
 
-13. 如果在一台电脑上安装了多个OpenFOAM版本，可以通过source不同的配置文件，来切换环境。
+12. 如果修改的是非登录shell会读取的配置文件，只需要重新开启一个终端即可。如果修改了登录shell才会读取的配置文件，那么需要注销后重新登陆才可以生效。以上两种情况，也可以通过source来手动执行配置文件。
 
-14. 
+13. source和`.`的功能是一样的。都是将指定的文件读入到当前的shell中。不会重新开启一个新的子进程。
 
-15. 
-
-16. 
-
-17. 
-
-18. 
-
-19. 
-
-20. 
-
-21. 
-
-22. 
-
-23. 
-
-24. 
+14. 如果在一台电脑上安装了多个OpenFOAM版本，可以通过source不同的配置文件，来切换环境。
 
 
 ## 脚本文件
@@ -1960,15 +1942,29 @@
 
 ## 运算
 
-1. 以下都是使用test来进行判断的。test expr 和[ expr ]是相同的。test的基本作用是：判断整数，判断文件，判断字符串。
+1. 可以使用test来判断条件表达式，结果为真时，`echo $?`为0，否则为1，这和一般编程语言不同，这是因为一般程序返回0时表示正常结束。`test -z expr` 和`[ -z expr ]`是相同的。test的基本作用是：判断整数，判断文件，判断字符串。
 
    ```shell
    test 3 -gt 2 ;echo $?    #0
    [ 3 -gt 2 ];echo $?      #0
    ((3>2));echo $?          #0
+   test -e /home/zj && echo "exist" || echo "Not exist" #若/home/zj路径存在，则输出exist，否则输出Not exist。
    ```
 
-2. 整数比较大小，一共6种，不能直接使用<之类的符号，只可以使用-lt之类的选项：
+2. 因为中括号会用在正则表达式中，因此用它作为判断时，中括号和其中每一项的两侧都应加上空白：
+
+   ```shell
+   [ -z "${HOME}" ] #只有这一种情况，下面三种都是错误的。
+   [-z "${HOME}" ]
+   [ -z "${HOME}"]
+   [-z "${HOME}"]
+   #中括号内的变量最好都以双引号括起来。常量最好以单双引号括起来。推荐都用双引号括起来。
+   name="VBird Tsai"
+   [ ${name} == "VBird" ] #会报错，提示参数太多。因为此时会被替换为[ VBird Tsai == "VBird" ]，实际想要的应该是[ "VBird Tsai" == "VBird" ]。
+   [ "${name}" == "VBird" ] #正确
+   ```
+
+3. 整数比较大小，一共6种，不能直接使用<之类的符号，只可以使用-lt之类的选项：
 
    ```shell
    3 -eq 4   #返回false，因为3不等于4,-ne为不等于,-ge为>=,-gt为>,-le为<=,-lt为<。
@@ -1976,41 +1972,53 @@
    test 1 -ne 2;echo $?  #结果为0,即true
    ```
 
-3. 文件的比较和检查：
+4. 文件的比较和检查：
 
    ```shell
    -e #检查文件是否存在          exist
    -f #检查文件是否存在，且为文件 file
    -d #检查文件是否存在，且为目录 directory
+   -b #检查文件是否存在，且为块设备 block device
+   -c #检查文件是否存在，且为字符设备 character device
+   -S #检查文件是否存在，且为套接字文件 Socket
+   -p #检查文件是否存在，且为管道文件 FIFO
    -L #检查文件是否存在，且为链接文件 link
+   
    -r #检查文件是否存在，且可读   read    读写执行权限的检查对root无效。
    -w #检查文件是否存在，且可写   write
    -x #检查文件是否存在，且可执行 excute
-   -s #检查文件是否存在，且不为空 
+   -u #检查文件是否存在，且具有设置组ID SUID 的属性
+   -g #检查文件是否存在，且具有设置用户ID SGID 的属性
+   -k #检查文件是否存在，且具有粘滞位 Sticky bit 的属性
+   
+   -s #检查文件是否存在，且不为空
    -O #检查文件是否存在，且拥有者是否为当前用户  owner
    -G #检查文件是否存在，且当前用户是否在文件的所属组内 group
-   file -nt file2 #检查file1是否比file2新，这里比较的是最后修改时间  newer than
-   file -ot file2 #检查file1是否比file2旧                          older than
+   
+   file -nt file2 #检查file1是否比file2新，newer than。这里比较的是最后修改时间
+   file -ot file2 #检查file1是否比file2旧，older than。
    file -ef file2 #检查file1和file2的iNode号是否相同。硬链接的两个文件具有相同的iNode号。
    ```
 
-4. 字符串比较运算：
+5. 字符串比较运算：
 
    ```shell
    #字符串记得用引号包括起来
-   ==    #检查2个字符串是否相等
-   !=    #检查2个字符串是否不等
-   -n    #检查字符串是否不为空。
-   -z    #检查字符串是否为空。
+   "str1" == "str2"    #检查2个字符串是否相等
+   "str1" != "str2"    #检查2个字符串是否不等
+   -n    #检查字符串是否不为空
+   -z    #检查字符串是否为空
    ```
 
-5. 逻辑运算：
+6. 逻辑运算：
 
    ```shell
-   #  &&  ||  !   分别表示与或非，中间不能有空格。&&和||可以使用-a -o来替代
-   test 1 -lt 2 && test 4 -lt 2;echo $?  #结果为1
+   #  &&  ||  !   分别表示与或非，中间不能有空格。&&和||可以使用-a和-o来替代
+   test 1 -lt 2 && test 4 -lt 2;echo $?  #结果为1，两个test的结果做&&，真和假做与，结果为假，因此$?为1
    test 1 -lt 2 && test 4 -lt 5;echo $?  #结果为0
-   test ! 1 -lt 2;echo $?                #结果为1,对test 1 -lt 2的结果取反。
+   test ! 1 -lt 2;echo $?                #结果为1，对test 1 -lt 2的结果取反。
+   [ "${yn}" == "Y" -o "${yn}" == "y" ] #等价于下一行
+   [ "${yn}" == "Y" ] || [ "${yn}" == "y" ]
    #分支语句中使用逻辑运算应该套上[]
    if [ $1 -eq $2 ] && [ $3 -lt $4 ]
    then
@@ -2019,14 +2027,24 @@
    	echo "Not OK"
    fi
    #shell中的逻辑运算都是短路的，可以用它来设置出错报警。shell内部通过$?来判断前一个命令是否成功
-   ls /tmp/abc || mkdir /tmp/abc      #当第一个命令执行失败(该目录不存在)，才会执行第二个命令。
+   ls /tmp/abc || mkdir /tmp/abc      #当第一个命令执行失败(该目录不存在)，才会执行第二个命令。这样会确保这个文件存在
    ls /tmp/abc && touch /tmp/abc/def  #当第一个命令执行成功(该目录存在)，才会执行第二命令。不过这个最好使用[]来判断，更方便。
    ls /tmp/abc || mkdir /tmp/abc && touch /tmp/abc/def #不论/tmp/abc目录是否存在，都要在其下创建一个def的文件。这样有一个好处，重复执行这样命令，不会重复创建文件或目录。
    #上面的例子，相当于如下加括号的操作
    (ls /tmp/abc || mkdir /tmp/abc) && touch /tmp/abc/def
    ```
 
-6. `[[ ]]`是shell的内置命令。支持字符串的模式匹配。
+7. `[[ ]]`是shell的内置命令。支持字符串的模式匹配。
+
+8. 例子，在软件安装中常用的询问Y/N的功能。
+
+   ```shell
+   #!/bin/bash
+   read -p "Please input (Y/N): " yn
+   [ "${yn}" == "Y" -o "${yn}" == "y" ] && echo "OK, continue" && exit 0
+   [ "${yn}" == "N" -o "${yn}" == "n" ] && echo "Oh, interrupt!" && exit 0
+   echo "I don't know what your choice is" && exit 0
+   ```
 
 ## 流程控制
 
@@ -2035,9 +2053,9 @@
    ```shell
    #如果条件为真，则会执行then之后的代码块，否则执行else之后的代码块。也可以只有then代码块。
    if [ 1 -lt 3 ]    #[]前后必须有空格
-       then          #只要是单独在一行即可，不一定需要缩进
+       then          #只要是单独在一行即可，不一定需要缩进。也可以和if在同一行，此时then前要有;
            ls  #实际执行的代码块可以有多行。
-       else
+       else #也可以没有else分支
            ls -al  #这里不能使用alias定义的别名，因为不是变量，更不是环境变量。
    fi          #必须要有
    #也可以有递进判断：
@@ -2052,7 +2070,7 @@
    fi
    ```
 
-2. if的条件可以用((  ))来计算表达式，也可以用[[  ]]来进行字符串匹配
+2. if的条件可以用`((  ))`来计算表达式，也可以用`[[  ]]`来进行字符串匹配：
 
    ```shell
    if (($1>$2))   #这里需要使用>符号，而不能使用 -gt
@@ -2078,29 +2096,30 @@
            echo $i
    done
    #可以用seq来生成对应的等差数列
-   seq 1 9      #1 2 3 .. 9
+   seq 1 9      #1 2 3 .. 9。也可以用{1..9}代替
    seq 1 2 9    #1 3 5 7 9
    seq 9 -1 1   #9 8 7 ... 1
+   {b..f}       #b c d e f。但是不能用$(seq b f)来代替
    #类C语言的写法
-   for ((i=;i<5;i++))    #for ((;;))表示死循环
+   for ((i=1; i<5; i++))    #for ((;;))表示死循环，这里的i++可以用i=i+1替换，等号右侧的i可以世界使用，而不用$i。
    do
    	echo $i
    done
    ```
 
-4. while循环：
+4. while循环，当条件满足时就循环：
 
    ```shell
-   while read i
+   while [ condition ]
    do
        echo "$i"
-   done < $1     #将命令行参数通过输入重定向传递给read
+   done
    ```
 
-5. until循环，类似于do...while循环：
+5. until循环，类似于do...while循环，当条件满足时，就退出循环：
 
    ```shell
-   until [ ]
+   until [ condition ]
    do
    	echo "ok"
    done
@@ -2109,85 +2128,89 @@
 6. case多条件分支语句，服务的管理脚本就是判断$1来进行启动，重启等操作的：
 
    ```shell
-   read -p "输入一个数字" N
+   read -p "输入一个数字" NUM
    case $NUM in
-   1)       #当NUM的值为1时，执行下面的代码块，直到;;为止。
-   	echo "hha"
-   ;;
-   2|3|4)  #当NUM的值为2或3或4
-   	echo "hhe"
-   ;;
-   *)
-   	echo "huhu"
-   ;;
+       1)       #当NUM的值为1时，执行下面的代码块，直到;;为止。
+           echo "hha"
+       ;;
+       2|3|4)  #当NUM的值为2或3或4
+           echo "hhe"
+       ;;
+       *)      #相当于default
+           echo "huhu"
+       ;;
    esac
    ```
 
 7. sleep 3可以让程序睡眠3秒钟。continue可以跳过本次循环，执行下一次循环。break退出最近的循环。break N可以跳出N层循环。
 
-8. Shell的内置变量：
+8. Shell的内置变量，加不加大括号都可以：
 
    ```shell
-   $*      #代表所有命令行参数，参考IFS
-   $@      #代表所有命令行参数，不参考IFS
-   $N      #第N个命令行参数,N从0开始
-   $#      #命令行参数的个数
+   /path/to/scriptname opt1 opt2 opt3 opt4
+          $0            $1   $2   $3   $4
+   # 当以sh来执行脚本时，sh本身不会被当作参数
+   sh /path/to/scriptname opt1 opt2 opt3 opt4
+           $0            $1   $2   $3   $4
+   $*      #代表所有命令行参数，"$1 $2 $3 $4"。使用分隔符IFS(默认为空格)来拼接到一起。
+   $@      #代表所有命令行参数，"$1" "$2" "$3" "$4"。常用
+   #当输入的参数中带有双引号时，建议使用"$@"来代替$@，否则参数的双引号会被取消。尤其是带双引号的参数中有空白字符时。
+   $N      #第N个命令行参数，N从0开始
+   $#      #命令行参数的个数，这里为4
    $$      #代表脚本执行的进程号
    $_      #代表最后一个执行的命令
    $-      #当前SHELL的选项，可以有himBH
+   $BASH_SOURCE #当前bash脚本的路径名
+   ```
+   
+9. 可以使用shift来移动参数，后面可以接参数，表示移动的数量，默认是1：
+
+   ```shell
+   # test.sh one two three
+   echo "Total parameter number is ==> $#"    #结果为3
+   echo "Your whole parameter is   ==> '$@'"  #结果为"one two three"
+   shift   #将最左侧的参数移除
+   echo "Total parameter number is ==> $#"    #结果为2
+   echo "Your whole parameter is   ==> '$@'"  #结果为"two three"
    ```
 
 ## 函数
 
-1. 函数：
+1. 函数，必须要先定义才可以调用：
 
    ```shell
-   func1 () {  #()内不能写参数.      这一行也可以写为function func1 {
+   func1 () {    #定义时()内不能写参数。这一行也可以写为function func1 {
        return 0  #返回值可有可无
    }
-   func1 1 2 r    #调用函数,可以传入参数,在函数体内使用$0-3来引用
+   func1 1 2 r   #调用函数时，可以传入参数，不用括号包裹，类似于调用命令的参数一样，在函数体内使用$N来引用，其中$0为函数名。在函数内使用$N时会屏蔽掉shell脚本的命令行参数。
    ```
 
+## 调试
 
-## 正则表达式
-
-1. 常见的支持正则的命令有grep，sed，awk。在这些命令意外，特殊字符有自己的含义。
-
-2. 如果^$同时使用就是精确匹配，否则是模糊匹配
+1. 调试选项：
 
    ```shell
-   grep -E "^ab" file  #在file文件中搜索,匹配以ab开头，后面任意。也可以用egrep
-   egrep "bc$" file    #匹配以bc结尾的字符串
-   egrep "^a.c$" file  #a开头,c结尾,中间一个任意字符，除了回车。
-   egrep "^ab*c$" file #以a开头,c结尾，中间可以有>=0个b。 ?表示<=1次，+表示>=1次。{3}正好3次，{2,5}表示2到5次,闭区间。
-   ```
-
-3. 除了特殊字符外，还支持POSIX字符：
-
-   ```shell
-   [:alpha:]   #任意字母,也就是a-z A-Z
-   [:digit:]   #任意数字,也就是0-9
-   [:alnum:]   #任意字母+数字
-   [:graph:]   #非空格的控制字符
-   [:lower:]   #小写字母,也就是a-z
-   [:upper:]   #大写字母,也就是A-Z
-   [:cntl:]    #控制字符
-   [:print:]   #可打印的字符
-   [:punct:]   #标点符号
-   [:blank:]   #空格和tab
-   [:xdigit:]  #16进制数字,也就是0-9 a-f A-F
-   [:space:]   #所有空白字符，空格，tab，换行
-   #使用
-   grep -E "^a[[:alnum:]]c$" file   #相当于"^a[0-9a-zA-Z]c$"
-   ```
-
-4. ip地址匹配：
-
-   ```shell
-   ^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)    #表示三段,第一段为250-255,第二段为200-249,第三段为0-199
-   [01]?[0-9][0-9]? #第三段需要认真分析,当两个?都表示没有时，可以匹配0-9;当第一个?表示没有，第二个?表示有时，可以匹配00-99;当第一个?表示有，第二个?表示没有时，可以匹配00-09 10-19这些;当两个?都表示有时,可以匹配000-099 100-199。综上来看这段除了可以匹配0-199，还会多余一些内容。
-   ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3} #加上点,重复3遍。
-   ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$  #补上最后一段，最终版本。
+   sh [-nvx] scripts.sh
+   -n #不要执行脚本，仅检查语法问题，如果没有问题，则不会有任何提示。
+   -v #在执行脚本之间，先将内容输出到屏幕上。
+   -x #将用到的脚本的参数，显示到屏幕上，常用。
+   #例子，test.sh内容如下：
+   #!/bin/bash
+   for ((i = 1; i < 3; i = i + 1)); do #for ((;;))表示死循环，这里的i++可以用i=i+1替换，等号右侧的i可以世界使用，而不用$i。
+       echo $i
+   done
+   #输出的信息中，以+开头的行就是指令串
+   zj@zj-hit:~/test$ bash -x ./test.sh 
+   + (( i = 1 ))
+   + (( i < 3 ))
+   + echo 1
+   1
+   + (( i = i + 1 ))
+   + (( i < 3 ))
+   + echo 2
+   2
+   + (( i = i + 1 ))
+   + (( i < 3 ))
    ```
 
 ## sed
@@ -2536,6 +2559,48 @@
 4. 交互式和非交互式shell：
 
 5. 
+
+
+# 正则表达式
+
+1. 常见的支持正则的命令有grep，sed，awk。在这些命令意外，特殊字符有自己的含义。
+
+2. 如果^$同时使用就是精确匹配，否则是模糊匹配
+
+   ```shell
+   grep -E "^ab" file  #在file文件中搜索,匹配以ab开头，后面任意。也可以用egrep
+   egrep "bc$" file    #匹配以bc结尾的字符串
+   egrep "^a.c$" file  #a开头,c结尾,中间一个任意字符，除了回车。
+   egrep "^ab*c$" file #以a开头,c结尾，中间可以有>=0个b。 ?表示<=1次，+表示>=1次。{3}正好3次，{2,5}表示2到5次,闭区间。
+   ```
+
+3. 除了特殊字符外，还支持POSIX字符：
+
+   ```shell
+   [:alpha:]   #任意字母,也就是a-z A-Z
+   [:digit:]   #任意数字,也就是0-9
+   [:alnum:]   #任意字母+数字
+   [:graph:]   #非空格的控制字符
+   [:lower:]   #小写字母,也就是a-z
+   [:upper:]   #大写字母,也就是A-Z
+   [:cntl:]    #控制字符
+   [:print:]   #可打印的字符
+   [:punct:]   #标点符号
+   [:blank:]   #空格和tab
+   [:xdigit:]  #16进制数字,也就是0-9 a-f A-F
+   [:space:]   #所有空白字符，空格，tab，换行
+   #使用
+   grep -E "^a[[:alnum:]]c$" file   #相当于"^a[0-9a-zA-Z]c$"
+   ```
+
+4. ip地址匹配：
+
+   ```shell
+   ^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)    #表示三段,第一段为250-255,第二段为200-249,第三段为0-199
+   [01]?[0-9][0-9]? #第三段需要认真分析,当两个?都表示没有时，可以匹配0-9;当第一个?表示没有，第二个?表示有时，可以匹配00-99;当第一个?表示有，第二个?表示没有时，可以匹配00-09 10-19这些;当两个?都表示有时,可以匹配000-099 100-199。综上来看这段除了可以匹配0-199，还会多余一些内容。
+   ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3} #加上点,重复3遍。
+   ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$  #补上最后一段，最终版本。
+   ```
 
 
 # 重定向
@@ -3595,57 +3660,59 @@
 
 13. rpm包：bind-9.8.2-0.47.rc1.el6.x86_64.rpm：
 
-             1. 软件名bind
-             2. 9.8.2是主版本，次版本，修正版本号。47是发布版本号，表示这个rpm包是第47次编译生成的。rc1表示release candidate，也就是候选发布的版本，一般要经过几个rc版本之后，才会定型为正式的版本。
-             3. el6表示适用于发行版rhel6版本的。
-             4. x86_64或i686或noarch表示当前软件的适用的硬件平台，一定不能安装错了。
-             5. 有些包还有对应的开发版本，如bind-devel   开发版本一般会带.h头文件。
+       ```shell
+       1. 软件名bind
+       2. 9.8.2是主版本，次版本，修正版本号。47是发布版本号，表示这个rpm包是第47次编译生成的。rc1表示release candidate，也就是候选发布的版本，一般要经过几个rc版本之后，才会定型为正式的版本。
+       3. el6表示适用于发行版rhel6版本的。
+       4. x86_64或i686或noarch表示当前软件的适用的硬件平台，一定不能安装错了。
+       5. 有些包还有对应的开发版本，如bind-devel   开发版本一般会带.h头文件。
+       ```
 
 14. yum将常用到的一些包进行组合，形成了一些group，安装一个group就相当于安装了一堆rpm包。
 
-          ```shell
-          [zj@z] ~]$ yum grouplist
-          已加载插件: fastestmirror
-          没有安装组信息文件
-          Maybe run: yum groups mark convert (see man yum)
-          loading mirror speeds from cached hostfile
-           * base: mirror.zu.edu.cn
-           * extras: mirror.lzu.edu.cn
-           * updates: mirrors.bfsu.edu.cn
-          可用的环境分组:
-            最小安装
-            基础设施服务器
-            计算节点
-            文件及打印服务器
-            基本网页服务器
-            虚拟化主机
-            带 GUI 的服务器
-            GNOME桌面
-            KDE Plasma Workspaces
-            开发及生成工作站
-          可用组:
-            传统 UNIX 兼容性
-            兼容性程序库
-            图形管理工具
-            安全性工具
-            开发工具
-            控制台互联网工具
-            智能卡支持
-            科学记数法支持
-            系统管理
-            系统管理工具
-          完成
-          ```
+       ```shell
+       [zj@z] ~]$ yum grouplist
+       已加载插件: fastestmirror
+       没有安装组信息文件
+       Maybe run: yum groups mark convert (see man yum)
+       loading mirror speeds from cached hostfile
+       * base: mirror.zu.edu.cn
+       * extras: mirror.lzu.edu.cn
+       * updates: mirrors.bfsu.edu.cn
+       可用的环境分组:
+       最小安装
+       基础设施服务器
+       计算节点
+       文件及打印服务器
+       基本网页服务器
+       虚拟化主机
+       带 GUI 的服务器
+       GNOME桌面
+       KDE Plasma Workspaces
+       开发及生成工作站
+       可用组:
+       传统 UNIX 兼容性
+       兼容性程序库
+       图形管理工具
+       安全性工具
+       开发工具
+       控制台互联网工具
+       智能卡支持
+       科学记数法支持
+       系统管理
+       系统管理工具
+       完成
+       ```
 
 15. 可以使用yum的downloadonly 插件来只下载，不安装对应的rpm包，依赖的包也会下载。
 
 16. 使用yum或dnf下载rpm包，解压rpm包。
 
-             ```shell
-              sudo yum download --downloadonly  tmux    #默认下载到当前路径下
-              rpm -qpl *.rpm      #查看rpm包内的文件 
-              rpm2cpio *.rpm | cpio -div     #将rpm格式转化为cpio格式，然后输出到当前目录下。
-             ```
+    ```shell
+    sudo yum download --downloadonly  tmux    #默认下载到当前路径下
+    rpm -qpl *.rpm      #查看rpm包内的文件 
+    rpm2cpio *.rpm | cpio -div     #将rpm格式转化为cpio格式，然后输出到当前目录下。
+    ```
 
 17. https://pkgs.org/这个网站可以查询各个发行版的软件包。
 
@@ -4160,9 +4227,9 @@
    SOCKS5 127.0.0.1:10808  HTTP 127.0.0.1:10809  PAC http://127.0.0.1:10810/pac/?t=133741
    ```
 
-3. 可以通过curl google.com来检测是否配置成功代理。ping google.com是无效的，因为ping命令使用的是ICMP协议，而http代理只能代理http协议，在应用层；socks5代理只能代理tcp或udp协议。
+3. 可以通过curl google.com来检测是否配置成功代理。ping google.com是无效的，因为ping命令使用的是ICMP协议，而http代理只能代理http协议，在应用层；socks5代理可以代理tcp或udp协议。
 
-4. 以上设置的代理可能会对apt命令无效，可以单独为其设置代理：
+4. 以上设置的代理可能会对apt命令无效，可以单独为其设置代理，有时使用私有源下载国外的软件时可能需要：
 
    ```shell
    #新建一个文件/etc/apt/apt.conf.d/95proxy.conf 文件名不重要，之所以这么起是为了表明功能
@@ -4182,7 +4249,7 @@
    4. 类似的终端复用器来由GNU Screen。
 
    5. ```shell
-      sudo yum install tmux        安装tmux
+      sudo yum install tmux  #安装tmux
       ```
 
    6. 输入tmux，进行tmux环境，窗口底部会显示当前会话编号和名称，默认是从0开始。可以创建多个会话，分别执行不同的任务。
@@ -4190,7 +4257,7 @@
    7. Tmux 窗口有大量的快捷键。所有快捷键都要通过前缀键唤起。默认的前缀键是`Ctrl+b`，即先按下`Ctrl+b`，快捷键才会生效。
 
    8. ```shell
-      tmux new -s <session-name>       创建一个新的会话，指定名称。
+      tmux new -s <session-name>    #创建一个新的会话，指定名称。
       ```
 
    9. Ctrl+b d或者输入tmux detach，使得窗口和当前会话分离开。上面命令执行后，就会退出当前 Tmux 窗口，但是会话和里面的进程仍然在后台运行。
@@ -4199,20 +4266,20 @@
 
    11. ```shell
        # 将窗口和会话重新绑定
-       $ tmux attach -t 0        使用会话编号
-       $ tmux attach -t <session-name>           使用会话名称
+       $ tmux attach -t 0      #使用会话编号
+       $ tmux attach -t <session-name>        #使用会话名称
        ```
 
    12. ```shell
        # 杀死会话
-       $ tmux kill-session -t 0                    使用会话编号
-       $ tmux kill-session -t <session-name>       使用会话名称
+       $ tmux kill-session -t 0              #使用会话编号
+       $ tmux kill-session -t <session-name> #使用会话名称
        ```
 
    13. ```shell
        # 切换会话
-       $ tmux switch -t 0                         使用会话编号
-       $ tmux switch -t <session-name>            用会话名称
+       $ tmux switch -t 0                    #使用会话编号
+       $ tmux switch -t <session-name>       #用会话名称
        # 重命名会话
        tmux rename-session -t 0 <new-name>
        ```

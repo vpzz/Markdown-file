@@ -565,7 +565,9 @@
 
 2. 使用Fortran宏包括的Fortran函数，需要使用ctags才可以在vscode内跳转。安装Exuberant CTags扩展，使用Ctrl+Shift+P，输入regenerate，选择第一个运行即可生成，不过这个扩展存在一个bug，就是会卡死，此时可以推出vscode，然后重新进入，再执行该命令即可。或者在终端执行`ctags -R -f .vscode-ctags`，手动生成ctags文件。
 
-3. task.json，用于生成可执行文件：
+3. ctags在Ubuntu22.04有两个版本，exuberant ctags 和 universal ctags。universal ctags是exuberant ctags的继续开发。
+
+4. task.json，用于生成可执行文件：
 
    ```json
    {
@@ -598,7 +600,7 @@
    }
    ```
 
-4. launch.json，用于启动调试：
+5. launch.json，用于启动调试：
 
    ```json
    {
@@ -636,7 +638,7 @@
    }
    ```
 
-5. settings.json：
+6. settings.json：
 
    ```json
    {
@@ -650,7 +652,7 @@
    }
    ```
 
-6. c_cpp_properties.json，用于控制IntelliSense的高亮：
+7. c_cpp_properties.json，用于控制IntelliSense的高亮：
 
    ```json
    {
