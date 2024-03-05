@@ -558,16 +558,37 @@
    fndat=jobname(1:i)//'.dat' !如果再调试时，需要跳过过程
    ```
 
-
 # VSCode 工程配置
 
 1. 如果要进行debug，不建议打开O2，因为有些代码可能会被gcc优化的变形严重，跳转的位置不对。同时还有可能出现局部变量被优化，在调试器的变量面板中出现optimized out的情况。
 
-2. 使用Fortran宏包括的Fortran函数，需要使用ctags才可以在vscode内跳转。安装Exuberant CTags扩展，使用Ctrl+Shift+P，输入regenerate，选择第一个运行即可生成，不过这个扩展存在一个bug，就是会卡死，此时可以推出vscode，然后重新进入，再执行该命令即可。或者在终端执行`ctags -R -f .vscode-ctags`，手动生成ctags文件。
+2. 使用Fortran宏包括的Fortran函数，需要使用ctags才可以在vscode内跳转。
 
-3. ctags在Ubuntu22.04有两个版本，exuberant ctags 和 universal ctags。universal ctags是exuberant ctags的继续开发。
+3. 安装Ctags Companion扩展。然后执行终端→运行任务→显示所有任务→Ctags Companion: rebuild ctags即可生成tags文件。之后可以使用F12，CTRL+单击来进行跳转。
 
-4. task.json，用于生成可执行文件：
+4. ctags在Ubuntu22.04有两个版本，exuberant ctags 和 universal ctags。universal ctags是exuberant ctags的继续开发。
+
+   ```shell
+   sudo apt install universal-ctags #安装ctags
+   ```
+
+5. VSCode的配置默认只有用户，当程序同时打开了一个目录时，会增加一个工作区的设置。当使用remote时，还会增加一个远程的设置。配置存放的位置分别为：
+
+   1. 用户配置，并不存放在本地机的用户家目录下，而是在"C:\Users\zj\AppData\Roaming\Code\User\settings.json"。
+
+   2. 远程配置，存放在远程机用户家目录下的.vscode目录中的settings文件。
+
+   3. 工作区配置，存放在打开的目录的.vscode目录中的settings文件。
+
+6. 账号同步的内容是用户配置文件的内容。
+
+7. 三个位置的优先级从低到高依次为：用户→远程→工作区。
+
+8. VSCode的每个配置对每个选项都有一个默认值，如果仅在用户区修改了某些选项，则也会覆盖工作区的默认值。此时只有在工作区也修改该选项才会覆盖用户区的选项。
+
+9. 也可以将多个文件夹添加到同一个工作区, 此时, 工作区需要单独保存为一个 code-workspace 文件。
+
+10. task.json，用于生成可执行文件：
 
    ```json
    {
@@ -600,82 +621,98 @@
    }
    ```
 
-5. launch.json，用于启动调试：
+11. launch.json，用于启动调试：
 
-   ```json
-   {
-       "version": "0.2.0",
-       "configurations": [
-           {
-               "name": "(gdb) 启动",
-               "type": "cppdbg",
-               "request": "launch",
-               "program": "${workspaceFolder}/ccx_2.20", //设置可执行文件的完整路径
-               "args": [ //参数
-                   "-input",
-                   "../test/beamp"
-               ],
-               "preLaunchTask": "${defaultBuildTask}", //设置在debug之前，先执行的task，这样可以保证在每次修改完代码后，再调试时，行号能够对应的上。
-               "stopAtEntry": false,
-               "cwd": "${fileDirname}",
-               "environment": [],
-               "externalConsole": false,
-               "MIMode": "gdb",
-               "setupCommands": [
-                   {
-                       "description": "为 gdb 启用整齐打印",
-                       "text": "-enable-pretty-printing",
-                       "ignoreFailures": true
-                   },
-                   {
-                       "description": "将反汇编风格设置为 Intel",
-                       "text": "-gdb-set disassembly-flavor intel",
-                       "ignoreFailures": true
-                   }
-               ]
-           }
-       ]
-   }
+    ```json
+    {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "name": "(gdb) 启动",
+                "type": "cppdbg",
+                "request": "launch",
+                "program": "${workspaceFolder}/ccx_2.20", //设置可执行文件的完整路径
+                "args": [ //命令行参数
+                    "-input",
+                    "../test/beamp"
+                ],
+                "preLaunchTask": "${defaultBuildTask}", //在debug启动之前，先执行构建的task，这样可以保证在每次修改完代码后，再调试时，行号能够对应的上。
+                "stopAtEntry": false,
+                "cwd": "${fileDirname}",
+                "environment": [],
+                "externalConsole": false,
+                "MIMode": "gdb",
+                "setupCommands": [
+                    {
+                        "description": "为 gdb 启用整齐打印",
+                        "text": "-enable-pretty-printing",
+                        "ignoreFailures": true
+                    },
+                    {
+                        "description": "将反汇编风格设置为 Intel",
+                        "text": "-gdb-set disassembly-flavor intel",
+                        "ignoreFailures": true
+                    }
+                ]
+            }
+        ]
+    }
+    ```
+
+12. settings.json，这里保存工作区的设置：
+
+    ```json
+    {
+        "files.associations": {
+            "*.py": "python",
+            "*.oth": "xml",
+            "*.f": "FortranFixedForm",
+            "calculix.h": "c",
+            "string.h": "c"
+        }
+    }
+    ```
+
+13. c_cpp_properties.json，用于控制IntelliSense的高亮：
+
+    ```json
+    {
+        "configurations": [
+            {
+                "name": "Linux", // 系统名称
+                "includePath": [ // 头文件路径
+                    "../../../SPOOLES.2.2"
+                ],
+                "compilerPath": "/usr/bin/gcc",
+                "defines": [ // 添加全局宏定义
+                    "ARCH=Linux",
+                    "SPOOLES",
+                    "ARPACK",
+                    "MATRIXSTORAGE",
+                    "NETWORKOUT"
+                ],
+                "cStandard": "gnu99", // 采用的C标准
+                "intelliSenseMode": "linux-gcc-x64"
+            }
+        ],
+        "version": 4
+    }
+    ```
+
+# 仓库备份
+
+1. 在根目录执行make clean，恢复源码目录。
+
+2. 执行如下命令打包并压缩：
+
+   ```shell
+   tar -czvf CalculiX-`date +%F`.tar.gz CCX #会生成一个类似CalculiX-2024-03-05.tar.gz的文件。
    ```
 
-6. settings.json：
+3. 执行如下命令解包并解压缩：
 
-   ```json
-   {
-       "files.associations": {
-           "*.py": "python",
-           "*.oth": "xml",
-           "*.f": "FortranFixedForm",
-           "calculix.h": "c",
-           "string.h": "c"
-       }
-   }
-   ```
-
-7. c_cpp_properties.json，用于控制IntelliSense的高亮：
-
-   ```json
-   {
-       "configurations": [
-           {
-               "name": "Linux", // 系统名称
-               "includePath": [ // 头文件路径
-                   "../../../SPOOLES.2.2"
-               ],
-               "compilerPath": "/usr/bin/gcc",
-               "defines": [ // 添加全局宏定义
-                   "ARCH=Linux",
-                   "SPOOLES",
-                   "ARPACK",
-                   "MATRIXSTORAGE",
-                   "NETWORKOUT"
-               ],
-               "cStandard": "gnu99", // 采用的C标准
-               "intelliSenseMode": "linux-gcc-x64"
-           }
-       ],
-       "version": 4
-   }
+   ```shell
+   tar -xzvf CalculiX*.tar.gz #或者使用x命令。
    ```
 
 # 所有文件的作用

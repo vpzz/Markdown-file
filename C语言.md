@@ -2926,3 +2926,40 @@
    #endif /* __TEST_H__ */
    ```
 2. 在C++编译器中用extern "C" { }包含起来的名称，都不会使用C++的修饰，而是使用C的修饰，也就是什么也不修饰。这样才可以顺利链接C源文件编译的库。
+
+## 使用clang-format格式化代码
+
+1. 可以统一代码风格，方便git管理。该工具和IDE自带的格式化工具相比，支持在命令行使用，可以批量格式化整个工程。
+
+2. 步骤：
+
+   1. 在VSCode中安装Clang-Format扩展。
+
+   2. 在远程机上安装clang-format。实际上C/C++扩展中也包含一个clang-format的可执行文件，在`C:\Users\zj\.vscode\extensions\ms-vscode.cpptools-1.19.4-win32-x64\LLVM\bin/clang-format`和`/home/zj/.vscode/extensions/ms-vscode.cpptools-1.19.1-linux-x64/LLVM/bin/clang-format`。不过推荐单独安装。
+
+      ```shell
+      sudo apt install clang-format #不同版本的clang-format程序略有差异
+      ```
+
+   3. 设置vscode的选项：
+
+      ```shell
+      Editor: Default Formatter #设置为Clang-Format，这样可以设置默认的格式化器
+      Editor: Format On Save #一般推荐勾选上，这样就可以在保存文件时自动格式化
+      ```
+
+3. 在工程目录下生成一个默认的`.clang-format`文件：
+
+   ```shell
+   clang-format -style=google -dump-config > .clang-format #基于Google的风格
+   ```
+
+4. 如果源码文件中有一部分不希望被格式化，可以使用如下特定注释包含起来：
+
+   ```c#
+   some code
+   // clang-format off
+   不希望被格式化的代码
+   // clang-format on
+   some code
+   ```
