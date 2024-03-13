@@ -328,7 +328,9 @@
          if(env) {log_realloc=atoi(env);}
        }
        if(log_realloc==1) { //只有当log_realloc为1时，才记录
-   	printf("ALLOCATION of variable %s, file %s, line=%d, size=%ld, address= %ld\n",ptr_name,file,line,size,(long int)a);
+   	printf("\033[1;32;40m%3d-\033[0mALLOC   %s, file %s, line=%d, size=%ld, "
+              "addr= %p\n", count, ptr_name, file, line, size, a); //\033可以改变终端文字的颜色，这里是黑色背景，绿色文字。
+   	count++;
        }
        return(a); 
      }
@@ -558,6 +560,19 @@
    fndat=jobname(1:i)//'.dat' !如果再调试时，需要跳过过程
    ```
 
+# 修改工作目录
+
+1. 在读取到.inp文件的路径后，立刻修改工作目录，这样所有求解产生的文件都会和.inp在一个目录下：
+
+   ```c
+   // 修改工作目录为inp文件所在的目录。因为dirname会修改参数，所以需要一个临时的字符串
+   strcpy(tmpjobname, jobnamef);
+   if (chdir(dirname(tmpjobname)) < 0) {
+       printf("Error: Cannot change into the .inp directory.\n");
+       FORTRAN(stop, ());
+   }
+   ```
+
 # VSCode 工程配置
 
 1. 如果要进行debug，不建议打开O2，因为有些代码可能会被gcc优化的变形严重，跳转的位置不对。同时还有可能出现局部变量被优化，在调试器的变量面板中出现optimized out的情况。
@@ -588,40 +603,49 @@
 
 9. 也可以将多个文件夹添加到同一个工作区, 此时, 工作区需要单独保存为一个 code-workspace 文件。
 
-10. task.json，用于生成可执行文件：
+10. 如果在VSCode remote中使用ranger，右键打开文件时，报错：`xdg-open unexpected option: '--'`。此时可以进行如下操作：
 
-   ```json
-   {
-       "tasks": [
-           {
-               "type": "cppbuild",
-               "label": "构建ccx_2.20",
-               "command": "make", //调用make
-               "args": [
-                   "-j" //并行构建
-               ],
-               "options": {
-                   "cwd": "${fileDirname}"
-               },
-               "presentation": {
-                   "revealProblems": "onProblem", //只有在构建遇到问题时才会显示问题
-                   "close": true //自动关闭构建结果面板
-               },
-               "problemMatcher": [
-                   "$gcc"
-               ],
-               "group": {
-                   "kind": "build",
-                   "isDefault": true //设置为默认的task
-               },
-               "detail": "调试器生成的任务。"
-           }
-       ],
-       "version": "2.0.0"
-   }
-   ```
+    ```shell
+    ranger --copy-config=all #命令行执行如下命令，生成ranger的配置文件，在~/.config/ranger目录下。
+    #在~/.config/ranger/rifle.conf文件中找到下面的内容。将下面的 xdg-open -- "$@"改为${VISUAL:-$EDITOR} -- "$@"。这样就会使用select-editor选中的编辑器打开了。
+    label open, has xdg-open = ${VISUAL:-$EDITOR} -- "$@"
+    label open, has open     = open -- "$@"
+    ```
 
-11. launch.json，用于启动调试：
+11. task.json，用于生成可执行文件：
+
+    ```
+    {
+        "tasks": [
+            {
+                "type": "cppbuild",
+                "label": "构建ccx_2.20",
+                "command": "make", //调用make
+                "args": [
+                    "-j" //并行构建
+                ],
+                "options": {
+                    "cwd": "${fileDirname}"
+                },
+                "presentation": {
+                    "revealProblems": "onProblem", //只有在构建遇到问题时才会显示问题
+                    "close": true //自动关闭构建结果面板
+                },
+                "problemMatcher": [
+                    "$gcc"
+                ],
+                "group": {
+                    "kind": "build",
+                    "isDefault": true //设置为默认的task
+                },
+                "detail": "调试器生成的任务。"
+            }
+        ],
+        "version": "2.0.0"
+    }
+    ```
+
+12. launch.json，用于启动调试：
 
     ```json
     {
@@ -659,7 +683,7 @@
     }
     ```
 
-12. settings.json，这里保存工作区的设置：
+13. settings.json，这里保存工作区的设置：
 
     ```json
     {
@@ -673,7 +697,7 @@
     }
     ```
 
-13. c_cpp_properties.json，用于控制IntelliSense的高亮：
+14. c_cpp_properties.json，用于控制IntelliSense的高亮：
 
     ```json
     {
