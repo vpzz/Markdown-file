@@ -10,7 +10,7 @@
 
 5. 文件名(filename)指的是某个文件的名称，路径名(pathname)分为绝对路径和相对路径。从路径名不能分辨出，指向的是文件还是目录。
 
-6. 早期的Unix将8个部分都集中在《Unix程序员手册》，现在已经分开了，方便用户，程序员，系统管理员的使用。
+6. 早期的UNIX将8个部分都集中在《UNIX程序员手册》，现在已经分开了，方便用户，程序员，系统管理员的使用。
 
 7. 按照惯例，函数的返回值为0，表示正常结束。一般用-1表示出错。
 
@@ -42,12 +42,12 @@
 
 18. 进程在执行过程中会收到各种各样的信号，可以忽略（不推荐），或按照系统默认的方式（大多是结束该进程）处理，也可以捕捉信号，自己编写函数处理。键盘可以产生信号，例如Ctrl+C或Ctrl+\键。在一个进程中调用kill函数可以向另一个进程发送信号，此时需要是该进程的所有者或root。
 
-19. Unix中的两类时间：
+19. UNIX中的两类时间：
 
-    1. 日历时间：早期的Unix使用格林尼治时间，后来使用了更精确的世界协调时UTC。表示从1970年1月1日00:00以来经过的秒数。使用time_t类型保存。
+    1. 日历时间：早期的UNIX使用格林尼治时间，后来使用了更精确的世界协调时UTC。表示从1970年1月1日00:00以来经过的秒数。使用time_t类型保存。
     2. 进程时间：也被称作CPU时间，用来度量进程使用的CPU资源。以时钟滴答计算，每秒钟曾经取过50,60，100个时钟滴答。使用sysconf(_SC_CLK_TCK)查询。
 
-20. Unix为一个进程维护了3个时间值，使用time命令查看，其中real又称为墙上时钟时间。
+20. UNIX为一个进程维护了3个时间值，使用time命令查看，其中real又称为墙上时钟时间。
 
 21. linux3.2大约定义了320个系统调用。在man 2中说明，用C语言书写成。早期的系统使用汇编语言定义内核入口点。
 
@@ -67,15 +67,109 @@
 
 29. 如果申请两个资源，要求第一个成功再申请第二个，那么就应该考虑在第二个申请失败时，释放第一个资源。
 
-# Unix标准及实现
+30. Linux和UNIX相比专有的特性：
 
-1. 1989年，ANSI开发的C标准X3.159-1989被采纳为国际标准ISO/IEC9899-1990。ANSI（美国国家标准协会）是在ISO中代表美国的组织，IEC是国际电子技术委员会。
-2. ISO C的目标是提高C语言程序的移植性，使其能够使用于大量操作系统，不仅是Unix。该标准定义了语法和语义，还定义了标准库。大部分的操作系统都提供了C标准中的库函数。
-3. 1999年，ISO C更新为ISO/IEC9899-1999。自1999年以来，已经公布了3个技术勘误，分别在2001,2004,2007年。后续的标准有ISO/IEC9899-2011和2018。分别被称为
-4. 不同的编译器支持的C标准不同。
-5. C标准：
-   1. ==ANSI C==
-   2. ISO C
+    ```c
+    epoll   //获取文件I/O事件通知的一种机制
+    inotify //监控文件和目录变化的一种机制
+    capabilities //为进程赋予超级用户的部分权限一种机制
+    扩展属性
+    i-node标记
+    clone系统调用
+    /proc文件系统
+    ```
+
+31. Linux手册页中的第2，3，4，5，7部分都属于man-pages项目，API在这些手册页中描述。
+
+32. 虽然在没有内核的情况下，计算机也能运行程序，像单片机一样，但是有了内核，会极大简化程序员的工作。Linux内核的可执行文件为：`/boot/vmlinuz`，其中vm表示实现了虚拟内存机制，z表示这是压缩过的。
+
+33. Linux属于抢占式多任务操作系统，多任务指多个进程同时驻留内存，且每个进程都会获得CPU的使用权。抢占意味着存在一组规则，来分配CPU的使用权。这两个特性都由内核的进程调度程序实现。
+
+34. Linux使用了虚拟内存，有以下两个优势：
+
+    1. 用户进程和用户进程之间，用户进程和内核之间彼此隔离，用户进程不能随意读写其他用户进程和内核的内容。
+    2. 只需将进程的一部分保存在物理内存中，这使得可以同时在物理内存中驻留更多的进程，从而使得可以随时被CPU调度的进程数量增多，不用等到被赋予CPU使用权限后再载入内存。
+
+35. 现代CPU可以运行在内核态和用户态，可以通过指令切换。与之对应的是，虚拟内存对地址空间也划分为内核空间和用户空间。CPU处于用户态时，只能访问用户空间。操作系统的代码和数据保存在内核空间中，从而获得保护。
+
+36. 信号的传递和进程间通信事件的触发由内核统一协调。进程之间彼此不能直接通信，进程的运作类似于内核控制下的提线木偶。
+
+37. 某些操作系统将shell集成进内核中，而UNIX中，shell只是一个用户进程而已。
+
+38. POSIX.2-1992基于当时的Korn shell版本定义了一个shell的标准，如今的bash也是符合该标准的。
+
+39. 早期的UNIX中，一个用户只能属于一个组，BSD率先支持多个组，POSIX.1-1990将其标准化。
+
+40. 默认情况下，内核会递归解析符号链接获得实际文件，不过会限制递归的层数。如果符号链接指向的文件不存在，则称为悬空连接（dangling）。
+
+41. 大多数Linux文件系统上，文件名最长为255个字符，可以使用/和空字符之外的所有字符。但是SUSv3建议只是用`[-._a-zA-Z0-9]`这65个字符，并称之为可移植文件名字符集。因为这以外的字符可能会在shell，正则表达式中有特殊含义。还应避免将`-`作为文件名开头字符，因为会被当作命令的选项。
+
+42. 进程的当前工作目录继承自父进程，对于登录shell来说，初始当前工作目录保存在passwd文件中。
+
+43. 目录的执行权限意味着是否可以进入该目录，而是否可以访问目录中具体文件，还得根据文件来判定。
+
+44. 就本质而言，内核只提供一种文件类型：字节流序列。处理磁盘等块设备时，可以使用lseek来随机访问。
+
+45. UNIX没有文件结束符这一实体，读取文件时，如果没有数据返回，就会认定到达文件末尾。
+
+46. 由shell启动的进程会继承3个已经打开的文件描述符。在交互式终端上，这三个都指向终端。在stdio函数库中，这三个描述符分别和三个流对应。
+
+# man page
+
+1. 
+
+2. POSIX的一些不常用的函数不在标准man中，需要安装以下附属包：
+
+   ```shell
+   sudo apt install manpages-posix* #例如pthread_mutex_init函数
+   ```
+
+3. 对于像Ubuntu这样的系统来说，应用程序的手册页常常以后缀 `-doc` 的独立包方式存在特定软件的手册，需要单独安装：
+
+   ```shell
+   sudo apt install git-doc #git软件的文档
+   ```
+
+4. 还可以安装特定语言的版本：
+
+   ```shell
+   sudo apt install manpages-zh
+   ```
+
+5. 
+
+6. 
+
+7. 
+
+8. 
+
+# UNIX标准及实现
+
+1. 在C语言诞生到标准出现的时间里，1978年K&R的C语言书籍充当实时上的标准，但是该书中并未就C语言的所有细节说明。后来第二版的K&R中对C89标准有详细的描述。
+2. 1989年，ANSI开发的C标准X3.159-1989被采纳为国际标准ISO/IEC9899-1990。ANSI（美国国家标准协会）是在ISO中代表美国的组织，IEC是国际电子技术委员会。
+3. ISO C的目标是提高C语言程序的移植性，使其能够使用于大量操作系统，不仅是UNIX。该标准定义了语法和语义，还定义了标准库。大部分的操作系统都提供了C标准中的库函数。
+4. 1999年，ISO C更新为ISO/IEC9899-1999，增加了long long数据类型，C++风格注释(//)，受限指针和可变长数组等。自1999年以来，已经公布了3个技术勘误，分别在2001,2004,2007年。后续的标准有ISO/IEC9899-2011和2018。
+5. gcc认为ansi c就是c89，这可以通过其命令行参数来体现。
+6. 不同的编译器支持的C标准不同。
+7. POSIX.1-2001和SUSv3可以认为是一套标准的两种称呼，目前由同一份文档描述。后继者为POSIX.1-2008和SUSv4。
+8. 对UNIX的定义通常有2种：
+   1. 通过SUS的官方一致性测试，且由OPEN GROUP（UNIX商标的持有者）正式授权冠以UNIX的操作系统，目前没有一个开源实现，主要原因是时间和费用，厂商的每个发行版都需要接收规范度检查。
+   2. 运作方式类似于经典UNIX系统（例如最初的Bell实验室的UNIX系统，及其后来的主要分支System V和BSD）的操作系统。Linux和现代BSD是这一种。
+
+9. POSIX是IEEE开发的，目标是提升应用程序在源码级别的可移植性，其名称来自于Stallman。
+10. POSIX.1于1989 年成为IEEE标准，并在稍作修订后于1990年被正式采纳为ISO标准（ISO/IEC 9945-1:1990）。
+11. POSIX.1b定义了文件同步，异步I/O，进程调度，高精度时钟和定时器。还定义了采用信号量，共享内存以及消息队列的进程间通信。古老的System V中也有对应的进程间通信API。
+12. POSIX.1c定义了POSIX线程；POSIX.1g定义了套接字网络API。
+13. POSIX.2是第二个标准，对shell和C编译器命令行接口在内的UNIX工具进行了标准化。
+14. 
+15. 
+16. 
+17. 
+18. 
+19. 
+20. 
+21. 
 
 # I/O
 
@@ -253,7 +347,7 @@
    as
    ```
 
-5. 人工编辑的文件末尾有没有换行，取决于编辑器，vim会给末尾也添加一个换行符，这样每一行都是一样的。而vscode则不会自动给末尾添加换行符，因此尾行和其他行不一样。在Windows下，行尾的换行是以两个字符来代替的，CR和LF，分别表示回车（\r 光标回到本行开头），换行（\n光标下移一行）的意思。ASCII码分别为0xD 0xA，（如下图所示）。Unix/Linux仅使用LF(\n)作为行尾的换行。
+5. 人工编辑的文件末尾有没有换行，取决于编辑器，vim会给末尾也添加一个换行符，这样每一行都是一样的。而vscode则不会自动给末尾添加换行符，因此尾行和其他行不一样。在Windows下，行尾的换行是以两个字符来代替的，CR和LF，分别表示回车（\r 光标回到本行开头），换行（\n光标下移一行）的意思。ASCII码分别为0xD 0xA，（如下图所示）。UNIX/Linux仅使用LF(\n)作为行尾的换行。
 
 6. ![image-20230501003508267](Linux系统编程.assets/image-20230501003508267.png)
 
@@ -622,16 +716,8 @@
    +++ exited with 0 +++
    ```
 
-5. time命令可以计算后面的命令执行消耗的时间：
+5. 随着buffersize的值变大，性能存在一个拐点，大约是4k。读写太频繁，每次读写非常少的内容和读写太不频繁，每次读写非常大的内容，这两种方案都是效率低下的。当buffersize增大到一定程度后，会产生栈溢出错误，ulimit -a中可以查看到，一般为8M。
 
-   ```shell
-   [zj@ZJ test]$ time cp /etc/services aa
-   real    0m0.003s  #实际运行的时间=user+sys+调度消耗，也称为墙上时间
-   user    0m0.000s  #在用户态运行的时间
-   sys     0m0.003s  #在内核态运行的时间
-   ```
-
-6. 随着buffersize的值变大，性能存在一个拐点，大约是4k。读写太频繁，每次读写非常少的内容和读写太不频繁，每次读写非常大的内容，这两种方案都是效率低下的。当buffersize增大到一定程度后，会产生栈溢出错误，ulimit -a中可以查看到，一般为8M。
 
 ### 文件共享
 
@@ -664,7 +750,7 @@
    oldfd = open("a",O_WRONLY | O_CREAT | O_TRUNC, 0600); //打开文件a，获得文件描述符oldfd。
    close(1); //关闭标准输出
    int newfd = dup(oldfd); //此时新的描述符会是1,和oldfd关联同一个结构体。
-   puts("abcd"); //此时向标准输出中写入内容，例如printf，就相当于write(1,buf,count);会写入到1和oldfd共同对应的文件了，从而实现了将标准输出输出重定向到文件。
+   puts("abcd"); //此时向标准输出中写入内容时，例如printf，就相当于write(1,buf,count);会写入到1和oldfd共同对应的文件了，从而实现了将标准输出输出重定向到文件。
    ```
 
 5. 上述操作如果在第二步和第三步中间被中断，有可能出现bug。例如关闭了1号文件描述符，但是切换到另一个线程，如果该线程碰巧正要打开一个文件，则该文件就会占用1号文件描述符，这样等到第三步再执行时，就newfd就不是1了，就不能实现将标准输出重定向到文件了。出现这种情况的原因是close和dup这两个函数不是原子操作，因此推荐使用dup2函数。上述代码还存在一个问题，如果该进程默认关闭了1号文件描述符，那么第二步会关闭掉第一步打开的文件。
@@ -844,7 +930,7 @@
 
 ## 文件系统
 
-1. FAT和UFS系统。UFS是Unix早期的文件系统，和ext2较为接近。
+1. FAT和UFS系统。UFS是UNIX早期的文件系统，和ext2较为接近。
 
 2. 一个FAT（File Allocation table）文件的本质是一个静态存储的单链表。静态指的是使用数组存储。比较轻量级，现在多用在U盘等设备中。有两种思路：
 
@@ -983,7 +1069,7 @@
 
 ## utime
 
-1. ls看到的时间默认是mtime，即数据内容被修改的时间，Unix文件系统不记录文件的创建时间。
+1. ls看到的时间默认是mtime，即数据内容被修改的时间，UNIX文件系统不记录文件的创建时间。
 
 2. 修改文件的atime和mtime
 
@@ -1290,7 +1376,7 @@
 
 # 用户信息操作
 
-1. 用户信息文件和操作函数：/etc/passwd /etc/group /etc/shadow这三个文件，存储着UID，GID和用户名，组名，密码的关系。不建议直接查询文件来获得相关信息，因为不是所有的Unix系统都是使用这些文件。FreeBSD上使用一个数据库BDB来存放这些信息。HP-Unix利用文件系统来存储这些信息。
+1. 用户信息文件和操作函数：/etc/passwd /etc/group /etc/shadow这三个文件，存储着UID，GID和用户名，组名，密码的关系。不建议直接查询文件来获得相关信息，因为不是所有的UNIX系统都是使用这些文件。FreeBSD上使用一个数据库BDB来存放这些信息。HP-UNIX利用文件系统来存储这些信息。
 
    ```shell
    # /etc/passwd文件
@@ -1541,9 +1627,9 @@
 
 12. <img src="Linux系统编程.assets/image-20230505103736237.png" alt="image-20230505103736237" style="zoom: 80%;" />
 
-13. 从上图中可以看出exit函数会执行标准I/O清理，但是ISO C并不处理文件描述符，多进程以及作业控制，因此这一定义对Unix系统是不完整的。
+13. 从上图中可以看出exit函数会执行标准I/O清理，但是ISO C并不处理文件描述符，多进程以及作业控制，因此这一定义对UNIX系统是不完整的。
 
-14. ISO C定义了\_Exit函数，是为了给进程提供一种无需执行终止处理程序或信号处理程序而终止的方法。对于标准I/O流是否冲洗，取决于实现，在Unix系统中，\_Exit和\_exit是同义的，都不冲洗标准I/O流。\_exit由exit调用。
+14. ISO C定义了\_Exit函数，是为了给进程提供一种无需执行终止处理程序或信号处理程序而终止的方法。对于标准I/O流是否冲洗，取决于实现，在UNIX系统中，\_Exit和\_exit是同义的，都不冲洗标准I/O流。\_exit由exit调用。
 
 15. 通过fork创建子进程时，子进程会继承注册记录。但是通过exec函数后，会清除注册记录。
 
@@ -1668,13 +1754,13 @@
 
 ## 环境变量
 
-1. 较早时候，大多数的Unix系统支持main函数带三个参数的，第三个参数就是环境变量，但是ISO C规定main函数只有两个参数，因此POSIX.1也规定使用environ来代替第三个参数。
+1. 较早时候，大多数的UNIX系统支持main函数带三个参数的，第三个参数就是环境变量，但是ISO C规定main函数只有两个参数，因此POSIX.1也规定使用environ来代替第三个参数。
 
     ```c
     int main(int argc, char* argv[], char* envp[]);
     ```
 
-2. Unix内核并不关心环境变量。它的解释完全取决于各个应用程序。例如shell使用了大量的环境变量，例如USER和PATH等，程序也使用，例如LS_COLORS。通常在一个shell的启动文件中设置环境变量，以控制shell的行为。POSIX.1定义了一些环境变量，例如LC_ALL，PATH等，而ISO C并没有定义任何环境变量。
+2. UNIX内核并不关心环境变量。它的解释完全取决于各个应用程序。例如shell使用了大量的环境变量，例如USER和PATH等，程序也使用，例如LS_COLORS。通常在一个shell的启动文件中设置环境变量，以控制shell的行为。POSIX.1定义了一些环境变量，例如LC_ALL，PATH等，而ISO C并没有定义任何环境变量。
 
 3. 进程的环境变量是以键值对的方式存储，key="value"。等号两侧不能空格。
 
@@ -2100,22 +2186,25 @@
 
 # 进程
 
-1. 每个进程都有一个非负整数表示的唯一进程ID。它在整个系统中不重复。有些程序使用进程ID作为名字的一部分来创建一个唯一的文件。例如coredump文件。进程ID是可以被复用的。当进程终止后，它的ID会被回收，其他进程可以用。大多数Unix采用的是延迟分配的算法，并不会刚回收的进程ID分配出去。这样是为了防止被认错为同ID的旧进程。
+1. 每个进程都有一个非负整数表示的唯一进程ID，它在整个系统中不重复。因此程序可以使用进程ID作为名字的一部分来创建一个唯一的文件，例如coredump文件。进程ID是可以被复用的。当进程终止后，它的ID会被回收，其他进程可以用。大多数UNIX采用的是延迟分配的算法，并不会刚回收的进程ID分配出去。这样是为了防止被认错为同ID的旧进程。
 
-2. ID为0的进程通常是调度进程，也被称为交换进程(swapper)，它是内核的一部分，但是并不执行磁盘上的任何程序。
-
-3. ID为1的进程为init进程。在自举结束后，由内核调用，文件为/sbin/init。该进程会读取系统初始化文件，例如/etc/rc*，/etc/inittab以及/etc/init.d中的文件，并将系统引导到一个适合用户使用的状态。init进程不会终止，它不是内核的一部分，只是一个普通的用户进程，但是以超级用户特权运行。
-
-4. few代指fork，exec，wait三个函数。
-
-5. 进程标识符的类型为pid_t，一般为有符号的16位整型数，因此，最多同时运行32767个进程（从1开始计数）。ulimit中没有规定进程的最多个数。进程号的使用顺次循环使用，不会插空。
+2. 进程标识符的类型为pid_t，一般为有符号的16位整型数，因此，最多同时运行32767个进程（从1开始计数），一般来说是够用了，但是虚拟机出来后，可能会不够用，如果不够用，可以typedef，然后重新编译内核来修改。ulimit中没有规定进程的最多个数，因此以这个数据类型来限制。进程号的使用顺次循环使用，不会插空，这一点和文件描述符的规则不同（优先使用可能用的最小的那个）。
 
    ```c
    #include <sys/types.h>
    #include <unistd.h>
+   //以下两个函数总会成功
    pid_t getpid(void);    //获取当前进程的PID
    pid_t getppid(void);   //获取父进程的PID
    ```
+
+3. ID为0的进程通常是调度进程，也被称为交换进程(swapper)，它是内核的一部分，但是并不执行磁盘上的任何程序。
+
+4. ID为1的进程为init进程，是所有进程的祖先进程，PID=1，EUID=0。在自举结束后，由内核调用，文件为/sbin/init。该进程会读取系统初始化文件，例如/etc/rc*，/etc/inittab以及/etc/init.d中的文件，并将系统引导到一个适合用户使用的状态。init进程不会终止，它不是内核的一部分，只是一个普通的用户进程，但是以超级用户特权运行。不过很多新的发行版中，使用systemd来代替init的功能。
+
+5. 超级用户也无法杀死init进程，只有关闭系统才可以终止该进程。
+
+6. few代指fork，exec，wait三个函数。
 
 
 ## fork
@@ -2125,7 +2214,7 @@
    ```c
    #include <sys/types.h>
    #include <unistd.h>
-   pid_t fork(void);  //通过复制当前进程的方式来创建一个新的子进程，该函数和setjmp类似，都是执行一次，返回两次，区别是setjmp是从同一个进程的不同函数返回，fork是从不同进程的同名函数返回。如果执行成功，父进程中返回子进程的PID，子进程返回0。如果失败，父进程返回-1。
+   pid_t fork(void);  //通过复制当前进程的方式来创建一个新的进程，新进程为当前进程的子进程。该函数和setjmp类似，都是执行一次，返回两次，区别是setjmp是从同一个进程的不同函数返回，fork是从不同进程的同名函数返回。如果执行成功，父进程中返回子进程的PID，子进程返回0。如果失败，父进程返回-1，不创建子进程，且会设置errno。
    //失败的情况一般为该RUID的进程总数超过了资源限制。
    ```
 
@@ -2137,7 +2226,7 @@
 
    2. 执行新的程序，例如shell。
 
-4. 通过fork出来的进程和当前进程一模一样（相当于memcpy），都是执行到fork这一行。区别只有以下几点：
+4. 通过fork出来的进程和当前进程一模一样（相当于memcpy），都是执行到fork这一行。区别只有以下几点（不同的发行版的区别不一样）：
 
    1. 父子进程fork函数的返回值不同，由此可以进行父子进程的区分。
    2. 父子进程的PID和PPID都不同，子进程的PPID就是父进程的PID。
@@ -2146,7 +2235,7 @@
    5. 子进程不继承父进程设置的文件锁。
    6. 子进程不继承父进程的信号量调整。
    7. 子进程不继承父进程的计时器（闹钟）。
-   8. 子进程不继承父进程的的资源利用量。
+   8. 子进程不继承父进程的的资源利用量，归零。
    9. CPU计时器清零。tms_utime（进程的用户态执行时间），tms_stime（进程的内核态执行时间），tms_cutime（子进程的用户态执行时间），tms_cstime（子进程的内核态执行时间）的值设置为0，这四个字段为struct tms的成员，通过times函数获取。
 
 5. 父子进程共享的内容：
@@ -2181,64 +2270,64 @@
 
     15. 资源限制
 
-6. 早期的fork会完全复制一份内存，费时又占用内存，因此有了vfork来使得子进程和父进程共享内存。但是现在新版的fork使用了写时复制（copy-on-write）技术，即fork后的进程的内存并不会完全复制一份，而是和父进程共用，如果某个进程要修改对应的内存空间，才会自己复制出来一份（要修改的内容所在的页）用于修改。谁修改，谁来拷贝。这个功能需要虚拟内存的支持。
+6. 早期的fork会完全复制一份内存，费时又占用内存，因此有了vfork来使得子进程和父进程共享内存。但是现在新版的fork使用了写时复制（copy-on-write）技术，即fork后，子进程的内存并不会完全复制一份，而是和父进程共用，如果某个进程要修改对应的内存空间，才会自己复制出来一份（要修改的内容所在的页）用于修改。谁修改，谁来拷贝。这个功能需要虚拟内存功能的支持。
 
-7. 因为某些情况下，fork后会很快调用exec，这将导致fork中复制的内容被扔掉，造成时间的浪费，因此产生了vfork，它用于创建一个新的进程，而该进程的目的就是为了执行一个新程序。shell就是典型。vfork并不将父进程的地址空间完全复制到子进程中。不过在调用exec之前，子进程会在父进程的地址空间运行，即此时子进程对变量的修改会影响到父进程。vfork的另一个特点是，它保证子进程先运行，在它调用exec或exit之后，父进程才可能会被调度。
+7. 因为某些情况下，fork后会很快调用exec，这将导致fork中复制的内容被扔掉，造成时间的浪费，因此产生了vfork，它用于创建一个新的进程，而该进程的目的就是为了执行一个新程序。shell就是典型。vfork并不将父进程的地址空间完全复制到子进程中。因此在调用exec之前，子进程会在父进程的地址空间运行，即此时子进程对变量的修改会影响到父进程。vfork的另一个特点是，它保证子进程先运行，在它调用exec或exit之后，父进程才可能会被调度。
 
-8. Linux支持一种新的进程创建函数clone，它是fork的增强版，允许调用者控制父进程的哪部分和子进程共享。
+8. 用vfork创建的进程，只能保证成功调用exit或exec族函数，其他都属于未定义行为。综上不推荐使用vfork，而是推荐使用fork，好用有没有副作用。
 
-9. 某些系统为fork+exec提供了一个合并系统调用spawn，分开的好处是可以在fork后，exec前进行一些I/O重定向，用户ID，信号安排的工作。
+9. Linux支持一种新的进程创建函数clone，它是fork的增强版，允许调用者控制父进程的哪部分和子进程共享。
 
-10. init进程是所有进程的祖先进程，PID=1。
+10. 某些系统为fork+exec提供了一个合并系统调用spawn，分开的好处是可以在fork后，exec前进行一些I/O重定向，用户ID，信号安排的工作。
 
-11. 产生子进程后，由调度器决定哪个进程先运行，不一定哪个先运行。
+11. 产生子进程后，由调度器决定哪个进程先运行，不一定哪个先运行。如果需要父子进程按照一个特定的顺序运行，需要使用锁来保证，也可以让另一个进程睡眠一会，但是不推荐，可移植行不强。
 
 12. 例子：
 
-     ```c
-     #include <stdio.h>
-     #include <stdlib.h>
-     #include <unistd.h>
-     int main(){
-         pid_t pid1;
-         printf("[%d]:Begin\n",getpid());
-     //  fflush(NULL);    //刷新所有的流，清空缓冲区。
-         if((pid1 = fork()) < 0){
-             perror("fork()");
-             exit(1);
-         }
-         if(pid1 == 0 ){
-             printf("[%d]:Child Process\n",getpid());  //子进程中会执行该句
-         }else{
-             printf("[%d]:Parent Process\n",getpid()); //父进程中会执行该句
-         }
-         printf("[%d]:End\n",getpid());                //父子进程都会执行该句
-     }
-     ```
+      ```c
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <unistd.h>
+      int main(){
+          pid_t pid1;
+          printf("[%d]:Begin\n",getpid());
+      //  fflush(NULL);    //推荐刷新所有的流，清空缓冲区。
+          if((pid1 = fork()) < 0){
+              perror("fork()");
+              exit(1);
+          }
+          if(pid1 == 0 ){
+              printf("[%d]:Child Process\n",getpid());  //子进程中会执行该句
+          }else{
+              printf("[%d]:Parent Process\n",getpid()); //父进程中会执行该句
+          }
+          printf("[%d]:End\n",getpid());                //父子进程都会执行该句
+      }
+      ```
 
 13. 上述代码运行结果如下：
 
-     ```shell
-     [zj@ZJ test]$ ./test   #终端是行缓冲设备，上面的每行后面都有一个\n，所以会无延迟地输出。
-     [1841]:Begin
-     [1841]:Parent Process
-     [1841]:End
-     [1842]:Child Process
-     [1842]:End
-     #有时候会出现程序结束时，命令行的提示符看不到了，实际上是命令行的提示符提前输出了，即shell在父进程结束后就立即输出了提示符，而后续子进程又输出了一些内容，所以就把设立了的命令提示符挡住了。shell只会等待自己的子进程，但是不会等待子进程的子进程。
-     [zj@ZJ test]$ ./test >/tmp/out   #文件是全缓冲设备，遇到\n不刷新，必须手动fflush。否则会到进程结束时刷新。因此在fork的时候，父进程输出缓冲区内的begin字符串也被复制过来了。因此在fork之前要加上fflush(NULL)，刷新所有的流。
-     [zj@ZJ test]$ cat a
-     [1843]:Begin
-     [1843]:Parent Process
-     [1843]:End
-     [1843]:Begin  #还是父进程填入的自己的PID
-     [1844]:Child Process
-     [1844]:End
-     ```
+      ```shell
+      [zj@ZJ test]$ ./test   #终端是行缓冲设备，上面的每行后面都有一个\n，所以会无延迟地输出。
+      [1841]:Begin
+      [1841]:Parent Process
+      [1841]:End
+      [zj@ZJ test]$ [1842]:Child Process #这里命令行提示符先打印出来了
+      [1842]:End
+      #有时候会出现程序结束时，命令行的提示符看不到了，实际上是命令行的提示符提前输出了，即shell在上述的父进程结束后就立即输出了提示符，而后续子进程又输出了一些内容，所以就把设立了的命令提示符挡住了。shell被设定为只会等待自己的子进程，但是不会等待子进程的子进程。
+      [zj@ZJ test]$ ./test >/tmp/out   #文件是全缓冲设备，遇到\n不刷新，只是换行而已，必须手动fflush。否则会到进程结束时刷新。因此在fork的时候，父进程输出缓冲区内的begin字符串也被复制过来了。\n并不保证一定不缓冲，因此推荐在fork之前要加上fflush(NULL)，刷新所有的流。
+      [zj@ZJ test]$ cat a
+      [1843]:Begin
+      [1843]:Parent Process
+      [1843]:End
+      [1843]:Begin  #还是父进程填入的自己的PID
+      [1844]:Child Process
+      [1844]:End
+      ```
 
-14. 子进程会复制父进程的所有打开的文件描述符，好像执行了dup函数。子进程和父进程的每个相同的文件描述符共享同一个文件表项。因此共享同一个文件的偏移量，这样二者对同一个文件的读写同步。
+14. 子进程会复制父进程的所有打开的文件描述符，好像执行了dup函数。子进程和父进程的每个相同的文件描述符共享同一个文件表项。因此共享同一个文件的偏移量，这样二者对同一个文件的读写同步。因此也会将其标准输入，输出和错误关联到同一个终端上。父进程可以先打开一个文件，然后fork，这样子进程也可以通过读写这个文件来和父进程交互。
 
-15. <img src="Linux系统编程.assets/image-20230515221900109.png" alt="image-20230515221900109" style="zoom: 67%;" />
+15. <img src="Linux系统编程.assets/image-20230515221900109.png" alt="image-20230515221900109" style="zoom: 80%;" />
 
 16. 如果父进程在创建子进程后什么也不做，只是等待子进程完成。则fork前后无需对文件描述符做任何特殊操作。因为父子进程对文件的操作不会交叉。不会发生竞争的现象。
 
@@ -2248,40 +2337,40 @@
 
 19. ![image-20210507111305440](Linux系统编程.assets/image-20210507111305440.png)
 
-20. 循环创建子进程需要注意的问题：
+20. 对于一个可以并行的任务，例如寻找一定范围内的质数。如果OS可用核数只有1个的话，对于计算密集型任务，也不会有加速效果。如果有多个核，创建的子进程过多，也一定不会按照子进程数量来加速。对于I/O密集型任务，多进程可以起到加速的效果。
 
-     ```c
-     #include <stdio.h>
-     #include <stdlib.h>
-     #include <unistd.h>
-     int main(){
-         pid_t pid;
-         for (int i=0;i<3;i++){
-             fflush(NULL);
-             pid = fork();
-             if (pid<0){
-                 perror("fork()");
-                 exit(1);
-             }
-             if(pid ==0){  //子进程分支
-                 printf("child:[%d]\n",getpid());
-                 //sleep(1000);
-                 exit(0); //在循环内部fork时，子进程必须要有exit，否则子进程也会继续循环，进而fork孙子进程。1→1+2→ 1+3 2+4→ 1+5 3+6 2+7 4+8
-             }
-         }
-         //sleep(1000);
-         exit(0);
-     }
-     ```
+21. 循环创建子进程需要注意的问题：
 
-21. 上面程序中的两处sleep分别起作用时会出现如下状况：
+      ```c
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <unistd.h>
+      int main(){
+          pid_t pid;
+          for (int i=0;i<3;i++){
+              fflush(NULL);
+              pid = fork();
+              if (pid<0){
+                  perror("fork()");
+                  exit(1);
+              }
+              if(pid ==0){  //子进程分支
+                  printf("child:[%d]\n",getpid());
+                  //sleep(1000);
+                  exit(0); //在循环内部fork时，子进程必须要有exit，否则子进程也会继续循环，执行第6行，进而fork孙子进程。1 → 1+2 → 1+3 2+4 → 1+5 3+6 2+7 4+8
+              }
+          }
+          //sleep(1000);
+          exit(0);
+      }
+      ```
 
-     1. 仅15行起作用时，每个子进程都休眠1000s，因此父进程很快创建完所有的子进程后会先结束。此时子进程的状态都为S，可中断的睡眠态。且他们的父进程都会变成init。因为父进程消亡后，子进程并不会被爷爷进程接管，而是直接被init接管。init也要等到这些由它接管的进程sleep都结束了才可以为其收尸，因为无法为正在运行的程序收尸。
-     2. 仅19行起作用时，父进程休眠1000s，因此子进程会先结束。此时子进程的状态都为Z，僵尸态。等待父进程给他们收尸。而本程序中，父进程也没有为子进程收尸的语句，因此子进程会先变成孤儿，然后再被init收尸。
+22. 上面程序中的两处sleep分别起作用时会出现如下状况：
 
-22. 僵尸进程偶尔出现，一闪即过，可能是他的父进程正在忙，暂时没有时间收尸。一个僵尸进程只占用一个结构体，其中包含了它的退出状态，且最宝贵的资源是PID。
+      1. 仅15行起作用时，每个子进程都休眠1000s，此时父进程很快创建完所有的子进程后会先结束。此时子进程的状态都为S，即可中断的睡眠态，且他们的父进程都会变成init。因为父进程消亡后，子进程并不会被爷爷进程接管，而是直接被init接管。init也要等到这些由它接管的进程sleep都结束了才可以为其收尸，因为无法为正在运行的程序收尸。
+      2. 仅19行起作用时，父进程休眠1000s，因此子进程会先结束。此时子进程的状态都为Z，僵尸态，等待父进程给他们收尸，父进程为睡眠态。而本程序中，父进程也没有为子进程收尸的语句，因此在父进程结束后，子进程会先变成孤儿，然后再被init收尸。
 
-23. 通过fork产生的子进程共享父进程的终端信息，因此也会将其标准输入，输出和错误关联到同一个终端上。父进程可以先打开一个文件，然后fork，这样子进程也可以通过读写这个文件来和父进程交互。
+23. 僵尸进程偶尔出现，一闪即过，可能是他的父进程正在忙，暂时没有时间收尸。一个僵尸进程只占用一个结构体，其中包含了它的退出状态，且最宝贵的资源是PID。
 
 24. 任何一个进程终止时，内核会逐个检查所有活动进程，以判断它是否是正要终止进程的子进程，如果是则该进程的父进程会被修改为1，这样确保了每个进程都有父进程。
 
@@ -2296,9 +2385,11 @@
 
 ## wait
 
-1. 当一个进程正常或异常终止，内核就向其父进程发送SIGCHILD信号，像子进程终止这种异步事件使用信号非常方便。对于这个信号，父进程可以选择忽略（默认），也可以为其注册一个信号处理程序。
+1. wait的含义是等待进程状态发生变化。
 
-2. 当一个父进程调用wait时：
+2. 当一个进程正常或异常终止，内核就向其父进程发送SIGCHILD信号，像子进程终止这种异步事件使用信号非常方便。对于这个信号，父进程可以选择忽略（默认），也可以为其注册一个信号处理程序。
+
+3. 当一个父进程调用wait时：
 
     1. 如果其所有子进程都还在运行，则父进程阻塞。
 
@@ -2306,128 +2397,134 @@
 
     3. 如果它没有任何子进程，则立即出错返回。因为任何时刻，wait系列函数都只能为其子进程收尸。
 
-3. wait的调用可以是在任意时间点调用（此时可能会阻塞），也可以是在SIGCHILD的信号处理函数中调用（此时会立即返回）。
+4. wait的调用可以是在任意时间点调用（此时可能会阻塞），也可以是在SIGCHILD的信号处理函数中调用（此时会立即返回）。
 
-4. wait系列函数是等待子进程的状态发生改变（正常终止，被信号终止，被信号恢复），对于正常终止的进程，wait程序会释放和它相关的资源，否则进程会变为僵尸态。
+5. wait系列函数是等待子进程的状态发生改变（正常终止，被信号终止，被信号恢复），对于正常终止的进程，wait程序会释放和它相关的资源，否则进程会变为僵尸态。
 
-5. wait无法指定为哪个子进程收尸，哪个先结束就先为哪个收尸。对于wait来说，父进程会阻塞，等待一个信号通知它子进程的状态改变了。但是如果子进程出问题了，父进程可能永远无法被唤醒。waitpid除了可以指定为哪个子进程收尸之外，还支持一些选项，例如NOHANG(非阻塞)，如果没有子进程处于待收尸状态，父进程不会等待，而是立即返回0，如果有子进程处于待收尸状态，父进程会为其收尸，并立即返回。
+6. wait无法指定为哪个子进程收尸，哪个先结束就先为哪个收尸。调用wait后，父进程会阻塞，等待一个信号通知它子进程的状态改变了。但是如果子进程出问题了，父进程可能永远无法被唤醒。
 
-6. 在shell中运行程序，有时候shell提示符会先跳出来，后面还会打印别的内容，这种情况一般为，运行的程序比它的子进程先结束了，同时没有wait子进程。如果在父进程的结束前加上wait函数，父进程就会阻塞，直到所有的子进程都结束，父进程为子进程收尸。然后父进程结束，shell为父进程收尸，最后shell显示出命令提示符。
+7. 在shell中运行程序，有时候shell提示符会先跳出来，后面还会打印别的内容，这种情况一般为，运行的程序比它的子进程先结束了，同时没有wait子进程。如果在父进程的结束前加上wait函数，父进程就会阻塞，直到所有的子进程都结束，父进程为子进程收尸。然后父进程结束，shell为父进程收尸，最后shell显示出命令提示符。
 
-7. ```c
+8. ```c
    #include <sys/types.h>
    #include <sys/wait.h>
-   pid_t wait(int *wstatus);  //等待进程状态发生变化，将进程的终止状态(不是exit的退出码)保存在参数wstatus中（如果不关心，可以用NULL）。如果成功，返回终止的子进程的PID。失败返回-1。 该函数时一直等待，直到进程状态变化，阻塞式的。
-   pid_t waitpid(pid_t pid, int *wstatus, int options);//可以指定要为其收尸的pid，option如果为WNOHANG，则将该阻塞操作变为非阻塞的。
-   //wstatus是可以看做是一个位图，可以用以下宏来检测对应的位：
-   WIFEXITED(wstatus);    //该宏是用来检测进程的退出状态是否是正常退出(调用exit(), _exit()或从main函数return)。正常退出时可以执行WEXITSTATUS(wstatus);来获取退出码(exit的参数或return的值)。
-   WIFSIGNALED(wstatus);  //检查进程是否是由信号终止的。如果为真则可以通过WTERMSIG(wstatus);来获取信号值。如果为真有些实现还可以用WCOREDUMP(wstatus);来检查是否产生coredump文件。
+   pid_t wait(int *status);  //等待子进程状态发生变化，将进程的终止状态(不是exit的退出码)保存在参数status中（如果不关心，可以用NULL）。如果成功，返回终止的子进程的PID。失败返回-1。 该函数时一直等待，直到任意一个进程状态变化，阻塞式的。
+   pid_t waitpid(pid_t pid, int *status, int options);//可以指定要为其收尸的pid，option可以是多个选项的或，如果包含WNOHANG，则将该阻塞操作变为非阻塞的。如果当前没有子进程退出等待收尸，则立即返回0，如果有子进程处于待收尸状态，父进程会为其收尸，并立即返回。
+   
+   //status是可以看做是一个位图，可以用以下宏来检测对应的位：
+   WIFEXITED(status);   //该宏是用来检测进程的退出状态是否是正常退出(调用exit(), _exit()或从main函数return)。正常退出时可以执行WEXITSTATUS(status)宏来获取退出码(exit的参数或return的值)。
+   WIFSIGNALED(status); //检查进程是否是由信号终止的。如果为真则可以通过WTERMSIG(status)来获取信号编号。如果为真，有些实现还可以用WCOREDUMP(status)来检查是否产生了coredump文件。
+   WIFCONTINUED(status) //如果子进程是接收到了SIGCONT信号而重新运行则为真，从Linux2.6.10才有。
    //当一个进程被停止或由停止继续执行时，也会发生状态变化，此时也可以由wait获取到：
    
    ```
 
-8. waitpid中的第一个参数可以有以下几种情况：
+9. waitpid中的第一个参数pid可以有以下几种情况：
 
    1. = -1，等待任何一个子进程，此时和wait等价。
-   2. < -1，子进程.PGID == |参数|
-   3. ==  0，子进程.PGID == 调用进程.PGID。
+   2. < -1，子进程.PGID == |参数|。
+   3. ==  0，子进程.PGID == 调用进程.PGID，和父进程同组的任意一个进程。
    4. \>  0，PID等于该值的子进程才会被等待。
 
-9. wait函数在进程没有子进程或者被信号打断时，都会出错。waitpid中如果指定的PID或PGID都不存在，或pid指定的进程不是调用进程的子进程，也会出错。
+10. wait函数在进程没有子进程或者被信号打断时，都会出错。waitpid中如果指定的PID或PGID都不存在，或pid指定的进程不是调用进程的子进程（没有权限），也会出错。
 
-10. 进程也可以分组，便于统一管理，默认子进程是和创建它的父进程一组的。wait等价于waitpid(-1,&status,0)。
+11. 进程也可以分组，便于统一管理，默认子进程是和创建它的父进程一组的。
 
-11. ```c
-     #include <stdio.h>
-     #include <stdlib.h>
-     #include <unistd.h>
-     #include <sys/types.h>
-     #include <sys/wait.h>
-     int main() {
-         pid_t pid;
-         int status;
-         for (int i = 0;i < 3;i++) {
-             fflush(NULL);
-             pid = fork();
-             if (pid < 0) {  //只有父进程有可能到达这里
-                 perror("fork()");
-                 for (int j = 0; j < i; j++) { //这里没有直接exit,是考虑到前2个进程创建成功，但第3个不成功的情况，这个循环wait给前两个子进程收尸。如果不写循环，直接exit父进程的话，子进程会变成孤儿进程，然后被init接管，不推荐这样做。
-                     wait(NULL);
-                 }
-             }
-             if (pid == 0) { //子进程
-                 printf("child:[%d]\n", getpid());
-                 exit(i);
-             }
-         }
-         for (int i = 0;i < 3;i++) {
-             pid = wait(&status);
-             printf("child-terminated,pid:[%d],status:[%d],returncode:[%d]\n", \
-                 pid, status, WEXITSTATUS(status));
-         }
-         exit(0);
-     }
-    ```
-
-12. 上述程序执行的结果可能为：
-
-     ```shell
-     [zj@ZJ test]$ ./test
-     child:[1896]
-     child:[1898]     #子进程之间，子进程和父进程之间谁会先执行，完全取决于调度器。
-     child:[1897]
-     child-terminated,pid:[1897],status:[256],returncode:[1]
-     child-terminated,pid:[1898],status:[512],returncode:[2]
-     child-terminated,pid:[1896],status:[0],returncode:[0]
-     #另一种执行情况
-     child:[1945]
-     child-terminated,pid:[1945],status:[0],returncode:[0]
-     child:[1947]
-     child-terminated,pid:[1947],status:[512],returncode:[2]
-     child:[1946]
-     child-terminated,pid:[1946],status:[256],returncode:[1]
-     ```
-
-13. 如果有一个父进程不想wait其子进程，也不想让子进程变成僵尸一直等待父进程终止，然后被init接管并收尸。这个目的可以用两次fork实现：
+12. 批量fork，中途出错的处理：
 
      ```c
-     #include <stdio.h>
-     #include <stdlib.h>
-     #include <sys/wait.h>
-     #include <unistd.h>
-     int main() {
-         pid_t pid;
-         if ((pid = fork()) < 0) { //主进程首先fork了一次，然后就去21行wait自己的子进程了。
-             perror("first fork()");
-             exit(1);
-         } else if (pid == 0) { 
-             if ((pid = fork()) < 0) {//子进程又fork了一次
-                 perror("second fork()");
-                 exit(1);
-             } else if (pid > 0) { //主进程的子进程推出了，这样21行就能返回。
-                 exit(0);
-             }
-             sleep(2);//这里是主进程的孙子进程，它的父进程消亡了，因此它被init接管。
-             printf("second child, parent pid = %ld\n", (long)getppid());//上面之所以要让孙子进程睡眠2秒，是为了让printf执行时，其父进程结束，这样此时getppid的结果就一定是1。
-             exit(0);
-         }
-         if (waitpid(pid, NULL, 0) != pid) {
-             perror("waitpid");
-             exit(1);
-         }
-         exit(0);
-     }
-     //这里进程A fork一次，产生了进程A和B，然后进程B再fork一次，产生了B和C，此时进程B exit了，进程A也wait进程B，这样进程B就完美退出了，此时就只剩进程C了，他被init接管了。
-     //这个方法可以最终产生一个被init接管的进程，对进程A来说，不用阻塞很久，好像啥也没发生一样，进程C跟它始终没啥关系。
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <unistd.h>
+      #include <sys/types.h>
+      #include <sys/wait.h>
+      int main() {
+          pid_t pid;
+          int status;
+          for (int i = 0; i < 3; i++) {
+              fflush(NULL);
+              pid = fork();
+              if (pid < 0) {  //只有父进程有可能到达这里
+                  perror("fork()");
+                  for (int j = 0; j < i; j++) { //这里没有直接exit,是考虑到前2个进程创建成功，但第3个不成功的情况，这个循环wait给前两个子进程收尸。如果不写循环，直接exit父进程的话，子进程会变成孤儿进程，然后被init接管，不推荐这样做。另一种做法是父进程kill掉所有创建成功的子进程，然后再exit。
+                      wait(NULL);
+                  }
+                  exit(0); //从这里退出父进程，否则会运行24行，但是那是已经没有任何子进程了。
+              }
+              if (pid == 0) { //子进程
+                  printf("child:[%d]\n", getpid());
+                  exit(i);
+              }
+          }
+          for (int i = 0;i < 3;i++) {
+              pid = wait(&status);
+              printf("child-terminated,pid:[%d],status:[%d],returncode:[%d]\n", \
+                  pid, status, WEXITSTATUS(status));
+          }
+          exit(0);
+      }
      ```
 
-14. 如果有一系列类似任务要分配给多个进程，不推荐一个任务分配给一个进程，
+13. 上述程序执行的结果可能为：
 
-     1. 有些任务适合于均匀分配给多个进程；有分块和交叉分配两种算法，例如1-100分给三个进程：
-        1. 分块，1-33分给1，34-67分给2，67-100分给3。
-        2. 交叉分配，1，4，...分给1，2，5，...分给2，3，6，...分给3。一般情况下优先选择交叉分配，也有例外，例如查找质数的任务，交叉分配可能导致某个进程始终分配到的数都是某个很小的数的倍数，因而该进程很快就完成了任务。
-     2. 有些任务需要非均匀的分配，各个进程才能一样忙。例如查找质数的任务，由于质数的分布密度不均匀，在较小的数附近分布较密。
-     3. 池类算法：可以创建一个任务池，进程逐个从池中取任务，如果先结束，就先取任务，能者多劳。上游将任务投递到任务池内，下游从任务池内取任务。类似于生产者和消费者，会产生竞争和冲突。
+      ```shell
+      [zj@ZJ test]$ ./test
+      child:[1896]
+      child:[1898]     #子进程之间，子进程和父进程之间谁会先执行，完全取决于调度器。
+      child:[1897]
+      child-terminated,pid:[1897],status:[256],returncode:[1] #这里三个子进程都执行完了，父进程再为他们逐个收尸，顺序不定
+      child-terminated,pid:[1898],status:[512],returncode:[2]
+      child-terminated,pid:[1896],status:[0],returncode:[0]
+      #另一种执行情况
+      child:[1945]
+      child-terminated,pid:[1945],status:[0],returncode:[0] #这里一个子进程结束后，就调度到了父进程，直接为其收尸。
+      child:[1947]
+      child-terminated,pid:[1947],status:[512],returncode:[2]
+      child:[1946]
+      child-terminated,pid:[1946],status:[256],returncode:[1]
+      ```
+
+14. 如果有一个父进程不想wait其子进程，也不想让子进程变成僵尸一直等待父进程终止，然后被init接管并收尸。这个目的可以用两次fork实现：
+
+      ```c
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <sys/wait.h>
+      #include <unistd.h>
+      int main() {
+          pid_t pid;
+          if ((pid = fork()) < 0) { //主进程首先fork了一次，然后就去21行wait自己的子进程了。
+              perror("first fork()");
+              exit(1);
+          } else if (pid == 0) { 
+              if ((pid = fork()) < 0) {//子进程又fork了一次
+                  perror("second fork()");
+                  exit(1);
+              } else if (pid > 0) { //主进程的子进程退出了，这样21行就能返回。
+                  exit(0);
+              }
+              sleep(2);//这里是主进程的孙子进程，它的父进程消亡了，因此它被init接管。
+              printf("second child, parent pid = %ld\n", (long)getppid());//上面之所以要让孙子进程睡眠2秒，是为了让printf执行时，其父进程结束，这样此时getppid的结果就一定是1。
+              exit(0);
+          }
+          if (waitpid(pid, NULL, 0) != pid) {
+              perror("waitpid");
+              exit(1);
+          }
+          exit(0);
+      }
+      //这里进程A fork一次，产生了进程A和B，然后进程B再fork一次，产生了B和C，此时进程B exit了，进程A也wait进程B，这样进程B就完美退出了，此时就只剩进程C了，他被init接管了。
+      //这个方法可以最终产生一个被init接管的进程，对进程A来说，不用阻塞很久，好像啥也没发生一样，进程C跟它始终没啥关系。
+      ```
+
+15. 如果有一系列类似任务要分配给多个进程，不推荐一个任务分配给一个进程：
+
+      1. 有些任务适合于均匀分配给多个进程；有分块和交叉分配两种算法，例如1-100分给三个进程：
+         1. 分块，1-33分给1进程，34-67分给2进程，67-100分给3进程。
+         2. 交叉分配，1，4，...分给1进程；2，5，...分给2进程；3，6，...分给3进程。
+      2. 一般情况下优先选择交叉分配，也有例外，例如查找质数的任务，交叉分配可能导致某个进程始终分配到的数都是某个很小的数的倍数，因而该进程很快就完成了任务。
+      3. 有些任务需要非均匀的分配，各个进程才能一样忙才是最优的状态。例如查找质数的任务，由于质数的分布密度不均匀，在较小的数附近分布较密。
+      4. 池类算法：可以创建一个任务池，进程逐个从池中取任务，如果先结束，就先取任务，能者多劳。上游将任务逐个投递到任务池内，然后唤醒下游从任务池内取任务去计算，然后这个下游再唤醒上有投递任务，周而复始。类似于生产者和消费者，会产生竞争和冲突。可以用进程池或线程池完成。
 
 
 ## exec
@@ -2438,28 +2535,28 @@
 
    ```c
    #include <unistd.h>
-   extern char **environ;  //环境变量
-   int execl(const char *path, const char *arg, .../* (char  *) NULL */); //path为文件名，可以有多个命令行参数，最后以NULL结尾。
-   int execlp(const char *file, const char *arg, .../* (char  *) NULL */); //和上一个不同的是，file为文件名，如果文件名中含有/，就将其视为路径名;否则就按path环境变量，在各个目录中寻找可执行文件。
-   int execle(const char *path, const char *arg, .../*, (char *) NULL, char * const envp[] */);//和第一个比，允许使用自定义的环境变量envp。命令行参数和环境变量中间需要间隔一个NULL的参数。
+   extern char **environ;  //环境变量，和argv的存储一样
+   int execl(const char *path, const char *arg, .../* (char  *) NULL */); //path为路径名，可以有多个命令行参数，最后以NULL结尾。
+   int execlp(const char *file, const char *arg, .../* (char  *) NULL */); //和上一个不同的是，file为文件名，如果文件名中含有/，就将其视为路径名;否则就在环境变量PATH的各个目录中寻找该可执行文件。
+   int execle(const char *path, const char *arg, .../*, (char *) NULL, char * const envp[] */);//和第一个比，允许使用自定义的环境变量envp，替换environ。命令行参数和环境变量中间需要间隔一个NULL的参数。
    int execv(const char *path, char *const argv[]);  //命令行参数由一个字符指针数组当做一个参数传入。一般用于函数之间相互调用的情况，因为无法实现确定有多少个参数，因而无法使用execl函数。
    int execvp(const char *file, char *const argv[]); //类似于execlp
    int execvpe(const char *file, char *const argv[], char *const envp[]); //类似于execle
    ```
 
-3. PATH环境变量包含了一个目录列表（路径前缀），目录之间用冒号分割，例如：
+3. 环境变量PATH包含了一个目录列表（路径前缀），目录之间用冒号分割，例如：
 
     ```shell
-    PATH=/bin:/usr/bin:/usr/local/bin:.      #最后的.表示当前路径。一个零长度的前缀也表示当前目录，例如开头的单个: 中间的两个连续的:: 和末尾的:。
+    PATH=/bin:/usr/bin:/usr/local/bin:.  #最后的.表示当前路径。一个零长度的前缀也表示当前目录，例如开头的单个:，中间的两个连续的::，和末尾的:。
     #不过处于安全考虑，不推荐将.加入到PATH中。
     ```
 
-4. exec函数族中的命令行参数是从argv[0]开始传入的。argv[0]对可执行程序本身没用，但是在该程序内部可能会使用到，该名称也被称作进程名，ps命令中会从argv[0]开始显示整个argv。
+4. exec函数族中的命令行参数是从argv[0]开始传入的。argv[0]对可执行程序本身没用，但是在该程序内部可能会使用到，该名称也被称作进程名，ps命令中会从argv[0]开始显示整个argv来作为进程的详细信息。一般的命令只会从argv[1]开始处理命令行参数。
 
 5. 如果此类函数产生返回，说明exec失败，因为原来的进程执行环境已经被破坏了，正常情况下该函数是不会返回的。
 
    ```c
-   //exec前也应fflush刷新所有的流。和fork不同的是，fork会复制到子进程中一份。而如果不刷新，缓冲区内的内容会丢失。
+   //exec前也应fflush刷新所有的流。和fork不同的是，fork会复制缓冲到子进程中。而exec会直接覆盖掉缓冲，而导致输出丢失。
    execl("\bin\date","date","+%s",NULL);  //如果该函数执行成功，其后的代码就被替换，因而不会再被执行了。
    perror("execl()");  //此处不用再判断返回值，因为只要该函数返回，就表示执行失败。直接打印错误信息，然后退出进程即可。
    exit(1);
@@ -2509,7 +2606,7 @@
    static void parse(char* linebuffer, glob_t* globres);
    
    int main() {
-       char* linebuffer = NULL;
+       char* linebuffer = NULL; //用于接收getline内部创建的内存的地址
        size_t linebuf_size = 0;
        char* tok = NULL;
        glob_t globres;
@@ -2544,23 +2641,28 @@
        char* tok = NULL;
        int times = 0;
        while (1) {
-           tok = strsep(&linebuffer, DELIMS);
+           tok = strsep(&linebuffer, DELIMS); //使用分隔符字符串DELIMS中的任意一个来逐个分隔字符串linebuffer，strtok也可以完成该功能。
            if (tok == NULL)
                break;
-           if (tok[0] == '\0')
+           if (tok[0] == '\0') //当多个分隔符连续出现时，会解析出空串。
                continue;
-           glob(tok, GLOB_NOCHECK | GLOB_APPEND * times, NULL, globres);
+           glob(tok, GLOB_NOCHECK | GLOB_APPEND * times, NULL, globres); //将被分隔出来的字符串存储起来。NOCHECK表示如果没有匹配，则返回原始的字符串保存起来。GLOB_APPEND表示追加到之前的内容中，不过应该只有第一次不追加（因为globres中默认可能有数据），后面每次都追加。
            times = 1;
        }
+   }
+   //另一种思路是，考虑到parse函数可能会在解析时发现是内部命令，此时应该顺道输出一个标志。可以选择增加一个参数flag，或者定义一个结构体类型，此时在glob函数的最后一个参数就变成&(cmd->globres)了，第二种方式的扩展性更强。
+   struct cmd{
+       glob_t globres;
+       int flag;
    }
    ```
 
 
 ## u+s，g+s
 
-1. 普通用户对/etc/shadow文件是没有读写权限的，但是却可以通过passwd命令来修改密码，其实就是修改该文件。用shell执行任何命令，都会附带着一个用户ID的信息，这样才可以执行文件的权限检查和资源利用限制。
+1. 普通用户对/etc/shadow文件是没有读写权限的，但是却可以通过passwd命令来修改密码，而改密码就是修改该文件。用shell执行任何命令，都会附带着一个用户ID的信息，这样才可以执行文件的权限检查和资源利用限制。
 
-2. 进程的PCB中除了存储着运行该进程的用户的UID和GID(也称为real)，还存储着effective，save的UID和GID，一共6个。suid，sgid不一定有，而real和effective是必须有的。
+2. 进程的PCB中除了存储着运行该进程的用户的UID和GID(也称为real)，还存储着effective，save的UID和GID，一共6个。suid，sgid不一定有，而real和effective是必须有的。鉴定权限时看的是effective。
 
    ```c
    struct task_struct{
@@ -2573,18 +2675,28 @@
    }
    ```
 
-3. 有些可执行文件还具有特殊权限，即所有者或所属组的执行权限变为s，s是包含x的。u+s的操作是other在执行该程序时，会暂时将EUID转变为文件的所有者的ID。这样可以将root的权限下放，给与普通用户一些暂时提权的固定行为。 在没有u+s权限的时代，普通用户都不可以修改自己的密码。例如：
+3. 有些可执行文件还具有特殊权限，即所有者或所属组的执行权限变为s，s是包含x的。u+s的操作是other在执行该程序时，会暂时将EUID转变为文件的所有者的ID。这样可以将root的部分权限下放，给与普通用户一些暂时提权的固定行为。 在没有u+s权限的时代，普通用户都不可以修改自己的密码。例如：
 
    ```shell
-   [zj@ZJ ~]$ ll /bin/passwd 
+   [zj@ZJ ~]$ ll /bin/passwd /usr/bin/su /usr/bin/sudo
    -rwsr-xr-x. 1 root root 33K 4月   7 2020 /bin/passwd
-   [zj@ZJ ~]$ ll /usr/bin/su
    -rwsr-xr-x. 1 root root 50K 7月  22 2020 /usr/bin/su
-   [zj@ZJ ~]$ ll /usr/bin/sudo
    ---s--x--x. 1 root root 162K 1月  27 05:58 /usr/bin/sudo
    ```
 
-4. 获取和修改real和effective ID：
+4. u+s，g+s被称为setuid或setgid。
+
+   ```shell
+   chmod u+s a.out    #为可执行文件设置u+s权限。只有该文件的所有者和root可以执行此命令
+   ```
+
+5. exec函数会检查可执行文件是否具备u+s或g+s权限，如果具备，则会将当前子进程的EUID修改为可执行文件的所有者的UID或GID（这一步没必要使用setuid等函数修改的，因为exec是系统调用，它可以直接在内核态修改PCB中对应变量的值）。而RUID和RGID不变，内核总是通过有效UID和GID来判断权限的。RUID和RGID一般是用来做资源利用统计的。可以看到，u+s和root没有关系，可以用来切换到任意用户。
+
+6. exec切换EUID或EGID后，一般不需要再切换回去，因为可执行文件结束后，就被父进程或init收尸了。
+
+7. u+s或g+s的权限设置要慎重，因为这样可能会使得一个普通用户没有输入root的密码也以root的身份来运行一个程序。如果权限是rwsrwxrwx，那么可以直接修改具有u+s权限的二进制文件来更改其功能，这样比较危险，所以一般不会开放给other写可执行文件的权限。
+
+8. 获取和修改real和effective ID：
 
    ```c
    #include <unistd.h>
@@ -2594,7 +2706,7 @@
    gid_t getgid(void);   //返回当前进程的real GID。gid_t在64位Ubuntu上为unsigned int
    gid_t getegid(void);  //返回当前进程的effective GID。
    
-   int setuid(uid_t uid); //设置当前进程的effective UID。如果当前进程是有特权的(例如EUID为root或者是一个u+s的程序)，那么RUID和SUID也会被设置。
+   int setuid(uid_t uid); //设置当前进程的effective UID。如果当前进程是有特权的(EUID为0)，那么RUID和SUID也会被设置。
    int setgid(gid_t gid); //设置当前进程的effective GID。同上
    int seteuid(uid_t euid); //设置当前进程的effective UID。非特权进程只能将EUID设置为RUID,EUID或SUID。
    int setegid(gid_t egid); //设置当前进程的effective GID。同上
@@ -2603,7 +2715,9 @@
    int setregid(gid_t rgid, gid_t egid);  //同时设置当前进程的real和effective GID，原子化的操作。
    ```
 
-5. u+s权限和setuid的例子：
+9. 特权进程就是EUID为0的进程，有2种方法创建特权进程：由某一特权进程产生子进程；使用可执行文件的u+s权限。
+
+10. u+s权限和setuid的例子：
 
    ```c
    #include <stdio.h>
@@ -2645,10 +2759,9 @@
    After
    UID: 0  EUID: 0 GID: 0  EGID: 0  //而调用setuid函数后，会改变UID和EUID
    //如果EUID为0的进程通过setuid函数修改了自己的UID和EUID为1000后，此时它无法再通过setuid将EUID修改回0。
-   
    ```
 
-6. 例子，root用户修改自己的EUID，然后又修改回来：
+11. 例子，root用户修改自己的EUID，然后又修改回来：
 
    ```c
    #include <stdio.h>
@@ -2697,24 +2810,12 @@
    UID: 0  EUID: 0 GID: 0  EGID: 0 //最后将EUID和RUID还原为一开始的0
    ```
 
-7. u+s，g+s被称为setuid或setgid。
-
-   ```shell
-   chmod u+s a.out    #为可执行文件设置u+s权限。只有该文件的所有者和root可以执行此命令
-   ```
-
-8. exec函数会检查可执行文件是否具备u+s或g+s权限，如果具备，则会将当前子进程的EUID修改为可执行文件的所有者的UID或GID。而RUID和RGID不变，内核总是通过有效UID和GID来判断权限的。RUID和RGID一般是用来做资源利用统计的。
-
-9. exec切换EUID或EGID后，一般不需要再切换回去，因为可执行文件结束后，就被父进程或init收尸了。
-
-10. u+s或g+s的权限设置要慎重，因为这样会使得一个普通用户没有输入root的密码也以root的身份来运行一个程序。
-
 
 ## sudo
 
 1. 用户执行sudo命令时，因为sudo命令设置了是u+s权限的，因此exec函数会将子进程的EUID更改为root。sudo命令内部会再根据第一个参数再exec一次（此时EUID已经是root了，一般并不会修改EUID），传入后续对应的参数。这样sudo后面的命令就可以用root用户的身份执行了。
 
-2. sudo命令中并没有设置有效UID的操作，因为它被设置了u+s权限，fork出的shell子进程在exec时就会修改EUID。
+2. sudo命令中并没有设置EUID的操作，因为它被设置了u+s权限，fork出的shell子进程在exec时就会修改EUID。
 
 3. sudo并不要求其后的命令具有u+s或g+s权限。而sudo程序本身具有u+s权限。
 
@@ -2736,14 +2837,15 @@
    sudo:x:27:zj  #zj用户是在sudo组内的，因此它具备执行任何命令
    ```
 
-6. 例子，写一个自定义的扩展功能的sudo，可以以指定de 任意用户来执行某个命令：
+6. 例子，写一个自定义的扩展功能的sudo，可以以指定的任意用户来执行某个命令：
 
    ```c
    #include <stdio.h>
    #include <stdlib.h>
    #include <unistd.h>
-   int main(int argc, char* argv[]){
-       pit_t pid;
+   #include <sys/wait.h>
+   int main(int argc, char* argv[]){ //因为当前程序是u+s，所以此时EUID就是0了，但是RUID还是执行它的shell的。
+       pid_t pid;
        if(argc < 3){
            fprintf(stderr, "Usage:...\n");
            exit(1);
@@ -2754,7 +2856,7 @@
            exit(1);
        }
        if (pid == 0){
-           if (setuid(aoti(argv[1])) < 0){
+           if (setuid(atoi(argv[1])) < 0){ //因为EUID是0，所以可以设置为将EUID任意，同时也会修改RUID。
                perror("setuid");
                exit(1);
            }
@@ -2765,27 +2867,27 @@
        wait(NULL);
        exit(0);
    }
-   //执行命令   ./mysu 0 cat /etc/shadow      希望该程序会使用root用户的权限来执行cat /etc/shadow文件。但是setuid函数会报错，Operation not permitted。因为普通用户无法修改自己的EUID为root。
+   //执行命令 ./mysu 0 cat /etc/shadow  希望该程序会使用root用户的权限来执行cat /etc/shadow文件。但是setuid函数会报错，Operation not permitted。因为普通用户无法修改自己的EUID为root。
    //还需要root用户执行以下两步才可以达到目标：
-   sudo chown root mysu
-   sudo chmod u+s mysu
+   chown root mysu
+   chmod u+s mysu
    ```
 
-7. 可以用id命令来获取某个用户的RUID，RGID，EUID，EGID，还可以列出属于的所有组：
+7. 可以用id命令来获取某个用户的RUID，RGID，EUID，EGID，还可以列出所在的组：
 
    ```shell
-   zj@hit:~/linux_c/process$ id -un   #-u表示列出当前用户的有效用户ID。配合-r使用可以获得真实用户ID。whoami等价于id -un
+   zj@hit:~$ id -un   #-u表示列出当前用户的有效用户ID,-n表示列出名称,而不是ID。配合-r使用可以获得真实用户ID。whoami等价于id -un
    zj
-   zj@hit:~/linux_c/process$ id -Gn   #-G表示列出当前用户所在的组,-n表示列出名称,而不是ID。
+   zj@hit:~$ id -Gn   #-G表示列出当前用户所在的组。
    zj adm cdrom sudo dip plugdev lxd
-   zj@hit:~/linux_c/process$ id -gn   #-g表示列出当前用户有效组ID。配合-r使用可以获得真实组ID
+   zj@hit:~$ id -gn   #-g表示列出当前用户有效组ID，只有一个。配合-r使用可以获得真实组ID。
    zj
-   
+   # id并不是shell的内置命令，可以配合管道符，附加在其他进程的后面，来输出该进程的信息。
    ./mysu 0 id -un  #结果为root
-   ./mysu 0 id -run  #结果为root，可见setuid把RUID也改了。实际上u+s的程序在exec时并不会修改RUID，但是此时
+   ./mysu 0 id -run #结果为root，可见setuid把RUID也改了。实际上u+s的程序在exec时并不会修改RUID，这里是因为setuid函数修改的。
    ./mysu 0 id -gn  #结果为zj
-   ./mysu 0 id -rgn  #结果为zj
-   ./mysu 0 id -Gn  #结果为zj adm cdrom sudo dip plugdev lxd
+   ./mysu 0 id -rgn #结果为zj
+   ./mysu 0 id -Gn  #结果为zj adm cdrom sudo dip plugdev lxd。虽然UID和EUID都变为0了，仍然能输出zj的组信息，即使将GID和EGID都修改为0，结果也不便。这可能是因为id命令并没有根据这些值来确定组信息。
    ```
 
    
@@ -2797,9 +2899,9 @@
    1. init进程（此时还是root用户）产生（fork + exec）一个getty进程，提示输入用户名，保存用户名。
    2. 然后getty进程再exec(login)，变身为login进程，提示输入密码，保存密码。
    3. 将输入的密码和shadow文件中对应的行的盐值组合，计算摘要是否等于之前设置的。到此，都是root用户的身份。
-   4. 如果相等，则认证成功。fork+exec一个用户对应的shell程序。开始变成对应的用户身份。root用户可以设置当前进程的所有用户和组ID。但是设置完成后，就无法再修改回来了。
+   4. 如果相等，则认证成功。然后fork+exec一个用户对应的shell程序。再切换用户的身份。root用户可以设置当前进程的所有用户和组ID。但是设置完成后，就无法再修改回来了。
    5. 如果不相等，则exec一个getty进程。
-2. 和一般的用法不同的是，可以不fork，直接exec。
+2. 和一般的用法不同的是，getty进程不fork，直接exec。
 
 ## 解释器
 
@@ -2812,7 +2914,7 @@
    ps
    ```
 
-2. exec函数会先判断文件的前两个字符是否是#!，如果是则为脚本文件，则不会直接将当前进程镜像替换为脚本文件，需要特殊处理：exec载入对应的解释器（路径存储在第一行的#!后面），其中包含一个命令行参数为脚本文件名。这样解释器就回解释执行整个当前文件（相当于执行命令bash a.sh或python a.py），包括第一行。由于exec根据开头的两个字符是否是#!来判断是不是脚本文件。所以一般解释器(bash，python)也顺便将#作为脚本文件的注释行，这样解释器就会跳过第一行。
+2. exec函数会先判断文件的前两个字符是否是#!，如果是则为脚本文件，则不会直接将当前进程镜像替换为脚本文件，需要特殊处理：exec载入对应的解释器（路径存储在第一行的#!后面），其中包含一个命令行参数为脚本文件名。这样解释器就会解释执行整个当前文件（相当于执行命令bash a.sh或python a.py），包括第一行。由于exec根据开头的两个字符是否是#!来判断是不是脚本文件。所以一般解释器(bash，python)也顺便将#作为脚本文件的注释行，这样解释器就会跳过第一行。
 
 3. 实际上#!后面可以不是解释器文件，任意的可执行文件都行，例如脚本文件abc为：
 
@@ -2831,13 +2933,22 @@
    hoho
    ```
 
-5. 有时候需要限制某些用户的操作，可以为其定制shell，需要修改/etc/passwd文件中的该用户的登录shell。
+5. 有时候需要限制某些用户的操作（安全性较高的场景），可以为其定制shell，需要修改/etc/passwd文件中的该用户的登录shell。
 
 6. system函数执行shell命令：
 
    ```c
    #include <stdlib.h>
-   int system(const char *command);//相当于调用/bin/sh -c command 可以看做是fork+exec+wait的简单封装。
+   int system(const char *command);//相当于调用/bin/sh -c command，可以看做是fork+exec+wait的简单封装。
+   ```
+
+## 进程会计
+
+1. acct函数打开或关闭进程会计：
+
+   ```c
+   #include <unistd.h>
+   int acct(const char *filename); //当有进程消亡时，会将相关信息写入到filename文件中。不过这个函数只是BSD的方言，不再POSIX中。
    ```
 
 ## 竞争条件
@@ -2848,7 +2959,7 @@
 
 ## 计时
 
-1. clock_t在linux 64位下就是long类型，在C标准头文件time.h中定义。该头文件中还定义了CLOCKS_PER_SEC宏，表示一秒内的时钟滴答数，一般是100万。
+1. clock_t在64位linux下就是long类型，在C标准头文件time.h中定义。该头文件中还定义了CLOCKS_PER_SEC宏，表示一秒内的时钟滴答数，一般是100万。
 
 2. C标准的时间函数clock：
 
@@ -2861,7 +2972,7 @@
    printf ("It took me %d clicks (%f seconds).\n",t,((float)t)/CLOCKS_PER_SEC);
    ```
 
-3. 进程时间，time命令的基础：
+3. 进程时间，time命令的基础times函数：
 
    ```c
    #include <sys/times.h>
@@ -2879,10 +2990,20 @@
 4. 常见的计时方式有：
 
    1. 通过时钟中断进行间隔计时，每隔一定时间（一般为10ms），时钟中断就会传入CPU中，CPU会执行中断服务程序，减少当前进程的时间片，将当前进程PCB中的时间属性加1，如果中断时在用户态就增加用户时间，反之增加系统时间。这种方法不太精确，只有当程序运行时间在秒级别才有意义。
-   
+
 5. 使用time命令为进程计时，其中父进程会等待子进程，因此进程的时间会包含父进程自己的时间和子进程的运行时间，还有父进程等待子进程的时间，当然这三个时间有可能重叠。
 
-6. sysconf函数可以在运行时获取系统的信息，通过一系列枚举量来指定，可以通过man sysconf查询：
+6. time命令可以计算后面的命令执行消耗的时间：
+
+   ```shell
+   [zj@ZJ test]$ time cp /etc/services aa
+   real    0m0.003s  #实际运行的时间=user+sys+调度消耗，也称为墙上时间
+   user    0m0.000s  #在用户态运行的时间
+   sys     0m0.003s  #在内核态运行的时间
+   [zj@ZJ test]$ time ./test > /dev/null #重定向不会作用在time的输出上，只会重定向./test程序的输出。
+   ```
+
+7. sysconf函数可以在运行时获取系统的信息，通过一系列枚举量来指定，可以通过man sysconf查询：
 
    ```c
    #include <unistd.h>
@@ -2896,15 +3017,15 @@
 
 1. 真正的终端是在早期，多人共同使用一台计算机的情况，只有基本的输入输出，类似于网吧的无盘系统。现在使用的都是终端模拟器。
 
-2. 一个终端的登录就产生一个会话session，当然也可以主动产生会话(创建守护进程时需要)。一个session可以容纳多个进程组，一个进程组内可以有多个进程。进程组分为前后台，任何时刻有且只有一个前台进程组，其余的都是后台进程组。之所以要区分前后台，主要是为了确定终端的输入分配给哪个进程组。
+2. 一个终端的登录就产生一个会话session，当然也可以主动产生会话(创建守护进程时需要)。一个session可以容纳多个进程组，一个进程组内可以有多个进程。进程组分为前后台，任何时刻最多只有一个前台进程组，其余的都是后台进程组。之所以要区分前后台，主要是为了确定终端的输入和输出关联到哪个进程组。
 
-3. 进程组也有ID，称为PGID，进程组的leader，满足PID=PGID。父进程是它和他的子进程所在组的leader。
+3. 进程组也有ID，称为PGID。实际上并不存在一个进程组这样的实体，他只是一个将进程分类的属性，PGID属性相同的进程属于同一个进程组，PID=PGID的进程是该进程组的leader。一般情况下父进程是它和他的子进程所在组的leader。
 
 4. 会话也有ID，称为SID，会话的leader，满足PID=SID。
 
 5. 刚登录时，只有一个进程组，该进程组内只有一个进程，就是该用户的登录shell。如果此时执行top命令则会创建一个新的进程组，组内只有一个进程top，该进程组为前台进程组，占据着终端。如果从top退出，则shell进程组又回到了前台。
 
-6. 设计session和进程组的目的是为了支持shell的job管理。一个进程组通常称为一个job。使用管道符链接起来的多个进程属于同一个进程组，例如ls | wc。同一个进程组的所有进程隶属于一个session，同一个session共享一个控制终端。
+6. 设计session和进程组的目的是为了支持shell的job管理。一个进程组通常称为一个job。使用管道符连接起来的多个进程属于同一个进程组，例如`ls|wc`。同一个进程组的所有进程隶属于一个session，同一个session共享一个控制终端。可以都是后台进程
 
 7. 使用ps命令可以查看，PPID为父进程的ID，PGID为所属进程组的ID，SID为会话ID，TTY为关联的终端，？表示没有关联控制终端：
 
@@ -2933,7 +3054,7 @@
    int setpgid(pid_t pid, pid_t pgid);  //修改pid进程的PGID为pgid。一个进程只能修改自己和它的同一个session中的子进程的组ID，否则会报错。如果pid=0,则表示修改当前进程的组ID。
    
    pid_t getsid(pid_t pid);  //获取进程pid所在的session ID。如果pid为0，表示获取当前进程所在的session ID。
-   pid_t setsid(void); //如果当前进程不是一个进程组的leader，则会创建一个session，并且在新会话中创建一个新的进程组，然后把该进程放到新的进程组中。当前进程会变为新session和新group的leader，且新的session默认没有控制终端。新的PGID和SID都和该进程的PID相同。如果调用成功，返回新的session ID，否则返回-1。如果当前进程是组leader，则什么也不做。
+   pid_t setsid(void); //如果当前进程不是一个进程组的leader，则会创建一个session，并且在新会话中创建一个新的进程组，然后把该进程放到新的进程组中。当前进程会变为新session和新group的leader，PGID=SID=PID，且新的session默认没有控制终端。如果调用成功，返回新的session ID，否则返回-1。如果当前进程是组leader，则什么也不做。
    ```
 
 11. 一般来说父进程fork出子进程，父进程是进程组的leader，而子进程不是，子进程可以通过调用这个函数，来变成一个新的进程组和session的leader，并且脱离控制终端，这也会将该子进程变为守护进程。
@@ -2996,41 +3117,44 @@
 
    3. PPID=1，因为在创建守护进程时，他的父进程一般会直接退出，而不是等待为其收尸，因为守护进程可能要运行很久都不会退出。这样守护进程的父进程就变为init进程。
 3. 一般会对守护进程的标准输入，标准输出和标准错误进行重定向，否则会报错。其父进程在fork前就先修改自己的标准输入，标准输出和标准错误，fork完再修改回来。
-4. 创建守护进程的步骤：
+4. 创建守护进程的步骤，例子见下一节：
 
    1. 父进程fork()创建子进程，然后父进程执行exit()，使得子进程被init接管。
-   2. 子进程setsid()创建新会话，chdir("/")修改工作目录，这样可以防止占用某个挂载的设备，使得该设备无法卸载。
-   3. umask(0)重新设置umask
-   4. close() 关闭所有打开的文件描述符，因为子进程会继承父进程的所有打开的文件描述符。
+   2. 子进程将自己的0，1，2三个文件描述符不关联设备，重映射到`/dev/null`空设备。
+   3. 子进程setsid()创建新会话，`chdir("/")`修改工作目录，这样可以防止占用某个挂载的设备，使得该设备无法卸载。
+   4. 如果确定程序不会再创建文件，则可以调用umask(0)重新设置umask。
+   5. close() 关闭所有打开的文件描述符，因为子进程会继承父进程的所有打开的文件描述符。
 
       ```c
       for(i=0;i<getdtablesize();i++)  //getdtablesize返回当前进程文件描述符表的项数
           close(i);
       ```
-   5. 执行守护进程的任务，顺便打开一个日志文件，记录日志。
+   6. 执行守护进程的任务，顺便打开一个日志文件，记录日志。
 
 5. 守护进程一般要求是单实例的，即重复启动会失败。一般通过在/var/run目录下的*.pid锁文件来实现。每次启动时，都会去检验该目录下是否存在同名的.pid文件，如果有则表示已经存在一个实例了，启动失败。锁文件内保存着该守护进程的PID。
 
-6. 
+6. 因为没有控制终端，因此无法使用Ctrl+C来杀死它，可以使用kill函数或命令给守护进程发送信号来杀死它。
+
 
 ## 日志
 
 1. 守护进程脱离了控制终端，因此需要通过写日志来反应自己的运行状况。实际上所有的程序都应该写日志来记录自己的运行状况。可以写入到系统日志中，也可以写入到程序自己的日志中。系统日志需要通过系统的服务来写入。
 
-2. 系统日志，在/var/log目录下。其下的messages文件为主日志文件。不能允许所有的程序任意修改日志，因此出现了syslogd服务，进程将要写的日志交给该服务，由该服务写日志，属于权限分离。日志文件的所有者和用户组一般都是root。
+2. 系统日志，在/var/log目录下。其下的messages文件为主日志文件。不能允许所有的程序任意修改日志文件，因此出现了rsyslogd服务（配置文件为/etc/rsyslog.conf），进程将要写的日志交给该服务，由该服务写日志，属于权限分离。日志文件的所有者和用户组一般都是root。
 
 3. ```c
    #include <syslog.h>
-   void openlog(const char *ident, int option, int facility); //关联日志服务。
-   //indent为标识，例如进程名，会添加到每条日志的开头，如果为NULL，则使用程序名
-   //option控制日志打开和后续写入的行为，常用的为LOG_PID，即在每条日志中包含进程的PID
-   //facility用来指明写日志的程序的类型，常用的又LOG_FTP,LOG_MAIL,LOG_LPR,LOG_CRON等
-   void syslog(int priority, const char *format, ...);  //priority是由openlog中的facility参数和level参数按位或得到的。其中level确定了日志的等级，常用的为LOG_ERR, LOG_WARNING, LOG_INFO, LOG_DEBUG。format及后面的参数可以当作和printf一样使用，syslog会自动为每一条日志换行。
-   void closelog(void);  //关闭日志
+   void openlog(const char *ident, int option, int facility); //打开一个到系统日志器的连接。如果没调用openlog也可以直接使用syslog写日志，后者会自动调用openlog，不过此时ident为NULL。
+   //ident为标识，例如进程名，会添加到每条日志的开头，如果为NULL，则使用程序名。如果在写日志的过程中ident的内容发生了变化，会反映在日志内容中，因此建议提供一个字符串常量。
+   //option控制日志打开和后续写入的行为，常用的为LOG_PID，即在每条日志中包含进程的PID；LOG_NODELAY表示立即打开连接，默认会在第一条日志写入时才打开连接，即LOG_ODELAY。
+   //facility用来指明写日志的程序的类型，常用的有LOG_FTP,LOG_MAIL,LOG_LPR,LOG_CRON等，默认为LOG_USER。
+   void syslog(int priority, const char *format, ...);  //产生一条日志，分发给syslogd服务。priority是由自定义的facility（取值依据上面的参数）和level按位或得到的，如果没有按位或facility，则会使用openlog指定的facility，如果之前没有调用过openlog，则facility为LOG_USER。其中level确定了日志的等级，常用的为LOG_ERR, LOG_WARNING, LOG_INFO, LOG_DEBUG。format及后面的参数可以当作和printf一样使用，不同的是%m会被strerror(errno)替换，syslog会自动为每一条日志换行，因此没必要手动添加。
+   void closelog(void);  //关闭日志，可选。
+   int setlogmask(int mask); //设置日志优先级的mask，默认所有level的日志都可以写入，mask=0xFF，这个可以在服务的配置文件中设置。函数返回之前的mask。mask = LOG_MASK(LOG_DEBUG) | LOG_MASK(LOG_INFO) 表示仅打开这两个级别的日志输出。LOG_DEBUG为7，LOG_MASK(p)为(1 << (p))。
    #include <stdarg.h>
-   void vsyslog(int priority, const char *format, va_list ap);
+   void vsyslog(int priority, const char *format, va_list ap); //和syslog类似，就是接收可变参数。
    ```
-   
+
 4. 守护进程和系统日志综合例子：
 
    ```c
@@ -3059,7 +3183,7 @@
            exit(0);
        }
        //子进程代码
-       fd = open("/dev/null", O_RDWR); //打开一个设备
+       fd = open("/dev/null", O_RDWR); //打开一个孔设备
        if (fd < 0) {
            syslog(LOG_ERR, "open(\"/dev/null\") failed %s", strerror(errno));
            exit(1);
@@ -3068,7 +3192,7 @@
        dup2(fd, 1);
        dup2(fd, 2);
        if (fd > 2) {
-           close(fd);
+           close(fd); //只保留012三个文件描述符。
        }
        chdir("/");
        umask(0);
@@ -3097,30 +3221,37 @@
    //实测Ubuntu22.04会将日志写入到/var/log/syslog文件中。
    ```
 
-# 信号
+# 并发
 
 1. 信号和多线程是实现并发的两大类方法。
-
-
-## 同步和异步
-
-1. 事件可以分为同步和异步。异步的意思是事件何时到来不确定。钓鱼中的鱼上钩，俄罗斯方块中按键的到来，网络编程中监听外部连接的到来就可以看做是一个异步事件。
-
-2. 异步事件的处理方法：
+2. 多进程的并发是先有具体实现，然后标准化的，多线程与之相反，因此后者跟规范些，处理的分歧情况更少。一般来说一个库发布时默认应该支持多线程并发，如果不支持，会在名字上体现出来。
+3. 事件可以分为同步和异步。异步的意思是事件何时到来不确定。钓鱼中的鱼上钩，俄罗斯方块中按键的到来，网络编程中监听外部连接的到来就可以看做是一个异步事件。
+4. 异步事件的处理方法：
    1. 查询法：适用于事件发生频率较高的情况。主动。
    2. 通知法：适用于事件发生频率较低的情况。被动。本质上也是查询，可以看做间接查询。让别人主动查询，然后通知自己。
 
-3. 信号属于初步异步，线程属于强烈异步。混合使用的比较少。
+5. 信号属于初步异步，线程属于强烈异步。二者混合使用的比较少，一般以一个为主。多线程并发比信号并发要简单些。
 
+6. 因为信号是进程层面，而非线程层面的。
 
-## 信号
+7. 线程安全：如果一个函数可以被多个线程同时调用，而结果不会变化，此时认为它是线程安全的。POSIX.1要求标准内的所有函数都是线程安全的，除了部分函数外。这些非线程安全的函数，大多有线程安全的版本，例如rand和rand_r。
+
+8. 异步取消安全：如果一个函数在开启异步取消的环境中，可以安全地被取消，此时认为它是异步取消安全的。POSIX标准中只有pthread_cancel，pthread_setcancelstate，pthread_setcanceltype是线程安全的。
+
+9. 
+
+10. 
+
+11. 
+
+# 信号
 
 1. 信号是软件层面的中断，和系统调用中的int 0x80还不一样。信号的响应依赖于中断机制。信号是进程层面的。
 
 2. 信号是经典的异步实例，进程不能通过测试某个变量来判断是否发生了信号，只能告诉内核，当某个信号发生时，应该如何响应。
 
 3. ```shell
-   [zj@manjaro ~]$ kill -l
+   [zj@manjaro ~]$ kill -l #列出所有信号,信号的名字都是以SIG开头的。
     1) SIGHUP       2) SIGINT       3) SIGQUIT      4) SIGILL       5) SIGTRAP
     6) SIGABRT      7) SIGBUS       8) SIGFPE       9) SIGKILL     10) SIGUSR1
    11) SIGSEGV     12) SIGUSR2     13) SIGPIPE     14) SIGALRM     15) SIGTERM
@@ -3136,15 +3267,23 @@
    63) SIGRTMAX-1  64) SIGRTMAX
    ```
 
-4. 信号1-31称为标准信号，34-64称为实时信号，RT为RealTime。信号的名字都是以SIG开头的。
+4. 信号1-31称为标准信号，34-64称为实时信号，RT为RealTime。标准信号可能会丢失，而实时信号不会。
 
-5. 标准信号会丢失，而实时信号不会。
+5. 信号的不可靠指的是信号的行为不可靠，而不是标准信号会丢失。因为程序中没有显式书写调用信号处理程序的语句，信号处理程序的执行现场是内核布置的。在处理一个信号的同时，如果又来了一个相同的信号，第二次的执行现场就可能把第一次的覆盖掉。早期的UNIX为了规避这种问题，就规定信号处理程序在被响应一次后，信号的行为变成默认的，这样不太好。
 
-6. 信号的不可靠指的是信号的行为不可靠，而不是标准信号会丢失。因为程序中没有显式书写调用信号处理程序的语句，信号处理程序的执行现场是内核布置的。在处理一个信号的同时，如果又来了一个相同的信号，第二次的执行现场就可能把第一次的覆盖掉。早期的Unix为了规避这种问题，就规定信号处理程序在被响应一次后，信号的行为变成默认的。
+6. 发生下列情况时，内核会向进程发送信号：
+
+   1. 用户键入中断字符，通常是Ctrl+C。
+
+   2. 进程的某个子进程已经终止。
+
+   3. 由进程设定的定时器已经到期。
+
+   4. 进程尝试访问无效的内存地址。
 
 7. 产生信号的方法：
 
-   1. 用户在终端上的按键，例如Ctrl+C会产生一个SIGINT信号，发送给前台进程组。Ctrl+\会产生一个SIGQUIT信号。
+   1. 用户在终端上的按键，例如Ctrl+C会产生一个SIGINT信号，Ctrl+\会产生一个SIGQUIT信号，这些信号都会发送给终端的前台进程组。
    2. 硬件异常产生信号，例如除数为0，无效的内存引用，这些异常由硬件产生，通知内核，内核为进程产生一个信号。例如访问0地址会受到SIGSEGV。
    3. kill函数或命令可以发送任意信号给一个进程或进程组。有权限要求，普通用户的进程只能发送给自己的其他进程，root用户的进程可以发送给任意用户的进程。
    4. 当检测到某些条件满足，会发送信号，这里的条件是软件层面的，例如定时器到时，会发送SIGALRM信号。
@@ -3164,9 +3303,9 @@
     ```c
      #include <signal.h>
     typedef void (*sighandle_t)(int);  //定义了一个函数指针类型。多个信号可以共用一个信号处理函数，因此信号处理函数的参数int为此次触发该函数的信号编号。
-    sighandle_t signal(int signum, sighandle_t handler); //返回值为信号之前的处理函数指针
+    sighandle_t signal(int signum, sighandle_t handler); //signum为要注册的信号，返回值为信号之前的处理函数指针
     //展开如下：
-    void (*signal(int sig, void (*func)(int)))(int);  //建议使用这种，因为可以少定义一个类型，避免命名冲突。
+    void (*signal(int sig, void (*func)(int)))(int);  //建议使用这种，因为可以少定义一个类型，避免命名冲突。标准C中并没有定义sighandle_t这个类型。
     ```
 
 12. signal函数的第二个参数可以是SIG_IGN(忽略信号)，SIG_DFL(系统默认行为，这样做相当于恢复默认)或用户自定义的函数。
@@ -3181,7 +3320,7 @@
         write(stdout, "!", 1);
     }
     int main(){
-        void (*oldsiginthandler)(int);
+        void (*oldsiginthandler)(int); //定义一个函数指针变量
         oldsiginthandler = signal(SIGINT, siginthandler);
         for (int i = 0; i < 10; i++){
             write(stdout, "*", 1);
@@ -3193,7 +3332,7 @@
     *****^C!*****      //其中^C是功能键的回显，可以关闭。
     ```
 
-14. 阻塞的系统调用会被信号打断而提前返回，例如sleep（规定的时间走完之前），write（在写入任何数据之前），read（在读到任何数据之前）等，此时会设置errno为EINTR。因此如果上面的程序按住Ctrl+C不松的话，程序会很快执行完。
+14. 阻塞的系统调用会被信号打断而提前返回，例如sleep（规定的时间走完之前会阻塞），write（在写入任何数据之前会阻塞），read（在读到任何数据之前会阻塞）等，此时会在返回值报错，且设置errno为EINTR。因此如果上面的程序按住Ctrl+C不松的话，程序会很快执行完。
 
 15. 用信号改写之前的程序，例如文件的打开：
 
@@ -3207,54 +3346,69 @@
     }while(fd < 0)
     ```
 
-16. 可重入函数是为了解决信号的不可靠而产生的。信号处理函数应该为可重入的。其特点是，上一次调用还没结束，下一次调用就发生了，但是二者不会相互影响。所有的系统调用都是可重入的，一部分库函数也是可重入的，例如memcpy。不可重入的库函数一般都会有\_r版本，例如rand和rand\_r。rand产生的随机值是伪随机序列。每次产生的随机值是在上一次的基础上产生的。不可重入函数大多是包含局部静态变量，用来记录多次调用的上下文。通过将局部静态变量变成函数的参数，也就是将其放在栈上，这样就变成可重入的函数了。
+16. 可重入（reentry）函数是为了解决信号的不可靠而产生的。信号处理函数应该为可重入的。其特点是，上一次调用还没结束，下一次调用就发生了，但是二者不会相互影响。不可重入函数大多是包含全局或局部静态变量，用来记录多次调用的上下文。通过将全局或局部静态变量变成函数的参数，也就是将其放在栈上，这样就变成可重入的函数了。
+
+17. 所有的系统调用都是可重入的，一部分库函数也是可重入的，例如memcpy。不可重入的库函数一般都会有\_r版本，例如rand和rand\_r。rand产生的随机值是伪随机序列，每次产生的随机值是在上一次的基础上产生的。
 
     ```c
     #include <stdlib.h>
     int rand(void);
     int rand_r(unsigned int *seedp); //多了一个参数，seedp用来标识不同的调用状态。
+    
+    char *ctime(const time_t *timep);
+    char *ctime_r(const time_t *restrict timep, char buf[restrict 26]); //多了一个参数，原来返回的字符串，现在由调用者来给出，这样重入时，就不会混淆了。
     ```
 
-17. 是否可重入在man手册中有个表格会标识出来：
+18. 是否可重入在man手册中有个表格会标识出来：
 
-18. ![image-20230509211103651](Linux系统编程.assets/image-20230509211103651.png)
+19. ![image-20230509211103651](Linux系统编程.assets/image-20230509211103651.png)
 
-19. 标准信号的响应过程：
+20. 标准信号的响应过程：
 
-    1. 内核为每个进程维护了至少2个位图，mask和pending，二者都是32位的，分别对应于32个Unix标准信号。mask是信号屏蔽字。用来标识当前进程的状态，默认为全1。pending用来记录当前进程收到了哪些信号，初始为全0，进程收到信号时，内核会将其pending位图的对应位置为1。
+    1. 内核为每个进程维护了至少2个位图，mask和pending，二者都是32位的，分别对应于32个UNIX标准信号。mask是信号屏蔽字，用来标识当前进程的状态，默认为全1，表示不屏蔽任何信号。pending用来记录当前进程收到了哪些信号，初始为全0，进程收到信号时，内核会将其pending位图的对应位置为1。
 
-    2. 进程在重新获得CPU使用权，从Kernel态转化到User态时，会先计算下mask & pending 按位与操作来获得自己要处理的信号（可能有多个）。然后将其中一个（先响应哪个是没有严格的顺序）信号的mask和pending位都置为0，再去调用对应信号的处理函数。pending置为0表示处理了这个信号，mask置为0是防止重入现象，即另一个线程也对此信号进行处理。
+    2. 进程在重新获得CPU使用权，从Kernel态转化到User态时，内核会计算`mask & pending`，如果结果为0，表示该进程没有收到任何信号。如果有多个位不为0，内核会将其中一个（先响应哪个是没有严格的顺序）信号的mask和pending的位都置为0，再去调用（将函数的返回值从原来主函数中的某个位置修改为信号处理函数的头）对应信号的处理函数。pending置为0表示处理了这个信号，mask置为0是防止重入现象。
 
-    3. 从该信号处理函数返回后，再进入内核，将上一次的信号的mask位置为1，pending位不处理，此时已经完成了一个信号的处理。然后从内核态回到用户态，重复第2步的操作，继续做mask & pending 的按位与。
+    3. 该信号处理函数执行完后，再进入内核，将上一次的信号的mask位置为1，pending位不处理，此时才算完成了一个信号的处理。然后从内核态回到用户态前，重复第2步的操作，继续做`mask & pending`的按位与。
 
-20. 通过将signal的第二个参数即信号处理函数设置为SIG_IGN来忽略一个信号。这个函数实际是将指定信号的mask设置为0，这样在按位与时，即使pending位为1，结果也为0。
+21. 通过将signal的第二个参数即信号处理函数设置为SIG_IGN来忽略一个信号。这个函数实际是将mask位图的指定信号的位设置为0，这样在按位与时，即使pending位为1，结果也为0。
 
-21. 信号从受到到响应有不可避免地延迟，因为进程只有在（通过中断）陷入内核，然后重新获得CPU使用权时才会处理信号。如果进程当前正在使用CPU或正在排队等待，是无法对信号立刻响应的，收到的信号只能由内核存储在对应进程的pending位图中。用信号来计时的话可能会带来10ms左右的误差。
+22. 信号从收到到响应有不可避免的延迟，因为进程只有在（通过中断）陷入内核，然后重新获得CPU使用权时才会处理信号。如果进程当前正在使用CPU或正在排队等待，是无法对信号立刻响应的，收到的信号只能由内核存储在对应进程的pending位图中。用信号来计时的话可能会带来10ms左右的误差。
 
-22. 之所以要在执行信号处理函数期间将对应的mask置为0，是因为这样会避免该函数被同一个信号重入。
+23. 信号的响应是可以嵌套的，一个信号处理函数没执行完被调度出让CPU，再次获取CPU前，会处理新的信号（其它类型的信号，因为此时之前信号的mask位还为0），可以执行新的信号处理函数。
 
-23. 如果在短时间内收到了相同的多个信号，只会当作一次，因为位图只有0和1两种情况。
+24. 如果在短时间内收到了相同的多个信号，只会当作一次，因为位图只有0和1两种情况。
 
     1. 一种是进程在运行或排队等待CPU时收到了多个相同信号，内核会重复地将对应的pending位设置为1。
     2. 另一种是进程在执行信号处理函数时，收到了多个相同的信号，内核也会重复地将对应的pending位设置为1。
-
-24. 实时信号不会丢失，会记录下相同信号的数量，依次响应。
 
 25. 常用函数：
 
     ```c
     #include <sys/types.h>
     #include <signal.h>
-    int kill(pid_t pid, int sig); //给进程或进程组发送信号sig，kill并非是用来杀死进程，主要是由于大部分的信号的功能是用来杀死进程的。如果pid>0，则是对应的进程。如果pid=0，则发给和当前进程同组的每个进程，一般称为组内广播。如果pid=-1，给当前进程有权发送信号的每个进程发送，除了1号进程init以外，例如即将解除设备挂载时，init进程可以对所有进程发送信号，要求他们解除对该设备的使用。如果pid<-1，将信号发送给进程组ID为-pid内的每个进程。如果sig=0，则不发送信号，但是会执行判断进程是否存在和是否有权对该进程发送信号的检查，这个功能一般用来检查某个进程或进程组是否存在。成功发送至少一个信号则返回0，否则返回-1，并设置errno。
+    int kill(pid_t pid, int sig); //给进程或进程组发送信号sig，kill并非是用来杀死进程，主要是由于大部分的信号的功能是用来杀死进程的。如果pid>0，则是对应的进程。如果pid=0，则发给和当前进程同组的每个进程，一般称为组内广播。如果pid=-1，给当前进程有权发送信号的每个进程发送，除了1号进程init以外，称为全局广播，例如即将解除设备挂载时，init进程可以对所有进程发送信号，要求他们解除对该设备的使用。如果pid<-1，将信号发送给进程组ID为-pid内的每个进程。如果sig=0，则不发送信号，但是会执行判断进程是否存在和是否有权对该进程发送信号的检查，这个功能一般用来检查某个进程或进程组是否存在。成功发送至少一个信号则返回0，否则返回-1，并设置errno。(-1,EPERM)表示权限不够，(-1,ESRCH)表示进程或进程组不存在。
     #include <signal.h>
-    int raise(int sig); //给调用进程或线程发送一个信号。在单线程进程中，等价于kill(getpid(), sig)，在多线程进程中，等价于pthread_kill(pthread_self(), sig)。若成功则返回0。
+    int raise(int sig); //给调用进程或线程发送一个信号。在单线程进程中，等价于kill(getpid(), sig)，在多线程进程中，等价于pthread_kill(pthread_self(), sig)。如果这个信号导致一个信号处理函数被调用，则该处理函数返回后，raise才会返回。若成功返回0，失败返回非0。
     #include <unistd.h>
-    unsigned int alarm(unsigned int seconds); //在倒计时seconds秒后，给当前进程发送一个SIGALRM信号。如果seconds=0，则不会产生新的倒计时。新的alarm设置会覆盖掉旧的。例如alarm(10);alarm(5)，大约会在5s后收到信号。
+    unsigned int alarm(unsigned int seconds); //在倒计时seconds秒后，给当前进程发送一个SIGALRM信号，该信号的默认行为会杀死当前进程并在终端输出“闹钟”二字。如果seconds=0，则不会产生新的倒计时，同时会取消已有的倒计时。新的alarm设置会覆盖掉旧的。例如alarm(10);alarm(5)，大约会在5s后收到信号。
     #include <unistd.h>
-    int pause(void);  //使得调用进程或线程睡眠，以等待一个信号的到达。当信号到达，且其信号处理函数执行完毕后，pause才会返回。
+    int pause(void);  //使得调用进程或线程睡眠，以等待任意一个信号（该信号要么注册了处理函数，要么会杀死进程）的到达。当信号到达，且其信号处理函数执行完毕后，pause才会返回。
     ```
 
-26. 某些实现中，sleep是用alarm和pause来封装的。这时不推荐使用sleep，因为其内部的alarm和外部其他的alarm会冲突。考虑到移植的问题，因此不推荐使用sleep。
+26. 某些实现中，sleep是用alarm和pause来封装的，这时不推荐使用sleep，因为其内部的alarm和外部其他的alarm会冲突。考虑到移植的问题，因此不推荐使用sleep。一般系统中sleep是用nanosleep封装的，所以不会有事。
+
+    ```c
+    #include <unistd.h>
+    int usleep(useconds_t usec); //usec不能超过1000000,否则会报错EINVAL，微秒单位，实际时间可能由于系统繁忙，处理调用或系统定时器的粒度而被轻微地拉长。成功时返回0。
+    //和sleep，usleep相比，nanosleep可以在被信号打断后，继续休眠。
+    #include <time.h> //也可能会被信号打断，此时会将剩余的为sleep的时间写入到rem参数中，这样可以继续调用该函数来sleep。
+    int nanosleep(const struct timespec *duration, struct timespec *_Nullable rem);
+    struct timespec { //
+        time_t     tv_sec;   /* 秒 非负整数 */
+        /* ... */  tv_nsec;  /* 纳秒 [0, 999999999] */
+        }; //tv_nsec的类型不定，但是一定能存放上述范围。32位glibc下，通常是long或long long。
+    ```
 
 27. 例子，让程序对一个变量持续累加5s，然后打印结果：
 
@@ -3272,7 +3426,7 @@
         printf("%lld\n", count);
         exit(0);
     }
-    //用time命令来对进程进行计时，三次结果如下，可以发现时间相差较大，这取决于进程开始执行的时间是处在一秒钟的开头部分还是结尾部分，因为在一秒内的任意时刻获取time都是相同的，假设开始时间为2.1s，结束时间为8.0s，则一共经历5.9s；若开始时间为2.9s，结束时间相同，则一共经历5.1s：
+    //用time命令来对进程进行计时，三次结果如下，可以发现时间相差较大，这取决于进程开始执行的时间是处在一秒钟的开头部分还是结尾部分，因为在一秒内的任意时刻获取time都是相同的，假设开始时间为2.1s，结束时间为8.0s，则一共经历5.9s；若开始时间为2.9s，结束时间相同，则一共经历5.1s，二者都被认为是5s。time获取的时间是真实的时刻，并非开启了一个新的计时器。这个问题中，结束时刻都是统一的，但是起始时刻不同。
     zj@hit:~/linux_c/parallel$ time ./5sec 
     2614308708
     real    0m5.392s
@@ -3491,7 +3645,7 @@
 
 33. 为了方便后续的使用，可以将令牌桶封装成库，供其他程序调用。考虑到程序中可能需要多个令牌桶，该库中也应该维护一个令牌桶的数组或链表。
 
-34. 结构体指针数组中，可以让结构体来自述下标。也就是说如果接收到了一个结构体指针，要释放它，此时不用去数组内循环查找它的位置来将其设置为NULL。可以在结构体的设计中包含一个pos变量，生成该结构体的时候，就存储上它在数组中的位置。这样在释放它时，可以直接通过pos变量来获取它的位置。直接对数组的对应元素赋值NULL。
+34. 结构体指针数组中，可以让结构体来自述下标。也就是说如果接收到了一个结构体指针，要释放它，此时不用去数组内循环查找它的位置来将其设置为NULL。可以在结构体的设计中包含一个pos变量，生成该结构体的时候，就存储上它在数组中的位置。这样在释放它时，可以直接通过pos变量来获取它的位置，直接对数组的对应元素赋值NULL。
 
 35. 用单一计时器alarm来实现多任务计时器，效果如下：
 
@@ -3555,16 +3709,16 @@
     #endif
     ```
 
-37. setitimer和getitimer，中间的i表示interval，即时间间隔。不同于时刻定时器，后者在某一时刻到达时才会触发。系统为每个进程提供了三种时钟，一个进程每种计时器最多只能有一个。setitimer的好处是，长期运行误差不累计。
+37. setitimer和getitimer，中间的i表示interval，即时间间隔。不同于时刻定时器，后者在某一时刻到达时才会触发。系统为每个进程提供了三种时钟，一个进程每种计时器最多只能有一个。setitimer的好处是，长期运行误差不累计，适合服务器环境。
 
     ```c
-    //当时间间隔定时器(interval timer)到时后，内核会发送一个信号给调用进程。然后计时器会重置为特定的值，如果时间间隔非零的话。
+    //当时间间隔定时器(it_value)到时后，内核会发送一个信号给调用进程。然后计时器会重置为it_interval，如果时间间隔非零的话。
     #include <sys/time.h>
-    int getitimer(int which, struct itimerval *curr_value);//which为要设置的时钟，时钟存储在curr_value中。
+    int getitimer(int which, struct itimerval *curr_value);//which为时钟类型，取值可以为ITIMER_REAL，ITIMER_VIRTUAL，ITIMER_PROF，时钟信息存储在curr_value中。
     int setitimer(int which, const struct itimerval *new_value,struct itimerval *old_value);//用新的new_value设置，如果要保存旧的，可以提供old_value，否则可以用NULL代替。
     struct itimerval {
-        struct timeval it_interval; //周期间隔，每个it_interval时间都会发送一个信号。
-        struct timeval it_value;    //初始时间间隔，每次都会递减这个值
+        struct timeval it_interval; //后续时间间隔，每次it_value到期后，都会原子化地将it_interval赋值给it_value。
+        struct timeval it_value;    //初始时间间隔，每次都会将这个值递减。
     };
     struct timeval {
         time_t      tv_sec;  //秒
@@ -3572,35 +3726,912 @@
     };
     //若成功，返回0，否则返回-1，并设置errno。
     //如果it_value的2个字段都为0，则表示关闭这个定时器。如果it_interval的2个字段都为0，则表示这个定时器仅生效一次，否则为循环定时器。
+    //当it_interval为3.5s，it_value为1.5s，则定时后1.5s会收到一个信号，然后每3.5s收到一个信号，一直持续下去。
     ```
 
 38. 三种时钟到时后，发出的信号不同。
 
     1. ITIMER_REAL 用墙上时间计时，每次到时后发出SIGALRM信号。和alarm函数类似。
-    2. ITIMER_VIRTUAL 用进程在用户态消耗的CPU时间来计时，计算该进程下所有线程的和。每次到时后发送SIGVTALRM信号。
+    2. ITIMER_VIRTUAL 用进程在用户态消耗的CPU时间来计时，计算该进程下所有线程的和。每次到时后发送SIGVTALRM信号。只有在进程执行时，该计时器才递减。
     3. ITIMER_PROF 用进程消耗的总CPU时间(用户态和内核态之和)来计时，计算该进程下所有线程的和。每次到时后发出SIGPROF信号。联合ITIMER_VIRTUAL可以用来度量进程的用户和内核态的CPU用时。
 
 39. 通过fork产生的子进程不继承父进程的时间间隔定时器。时间间隔定时器在execve时保留。
 
-40. 用sigprocmask函数block的信号，在被屏蔽期间，终端的按键会回显也会发出信号，设置pending中的位图，但是却无法打断阻塞的系统调用，例如sleep。
+40. 在使用system函数来执行命令期间，内核会自动屏蔽SIGCHILD，忽略SIGINT和SIGQUIT信号。
 
-44. sigpending的作用不大，它会去内核中获取pending集，即到来的信号的状态。但是该函数从内核中返回时，就会响应一个信号，返回后的pending集就跟原来不同了。
+41. 信号集操作函数：
 
-45. 不能从信号处理函数随意跳转到其他位置，例如使用longjmp。因为信号处理函数结束后，还要把之前的设置过的mask位恢复，若longjmp，就没有机会做这件事，会导致该进程永远无法收到该信号了。不同unix的行为不一样，BSD上在setjmp时，就可以设置保存mask。然后再longjmp时，会自动回复。POSIX提供了两个函数用来完成这样的工作：sigsetjmp和siglongjmp，配套使用，这样就可以从信号处理函数往外跳了。
+    ```c
+    #include <signal.h>
+    //sigset_t是信号集类型，由一个整型实现的位图，一定能够包含标准信号的个数。
+    int sigemptyset(sigset_t *set);//使信号集排除所有信号，位图置为全0。
+    int sigfillset(sigset_t *set); //使信号集包含所有的信号，位图置为全1。
+    //信号集必须先使用empty或fill初始化，然后才可以调用下面的函数。
+    int sigaddset(sigset_t *set, int signum); //向信号集中添加某个信号。
+    int sigdelset(sigset_t *set, int signum); //从信号集中删除某个信号。
+    
+    int sigismember(const sigset_t *set, int signum); //判断信号是否存在于信号集中，在返回1，不在返回0，出错返回-1。
+    ```
+
+42. 用sigprocmask函数block的信号，在被屏蔽期间，终端的按键会回显也会发出信号，设置pending中的位图，但是却无法打断阻塞的系统调用，例如sleep。
+
+    ```c
+    #include <signal.h> //读写调用线程的信号屏蔽字
+    int sigprocmask(int how, const sigset_t *_Nullable restrict set, sigset_t *_Nullable restrict oldset); 
+    //how取值可以为SIG_BLOCK(向当前屏蔽集中添加set参数),SIG_UNBLOCK(从当前屏蔽集中删除set参数，允许尝试解锁未被屏蔽的信号),SIG_SETMASK(将当前屏蔽集设定为set参数)
+    //如果oldset非NULL，则之前的屏蔽集会赋值给它。
+    //如果set为NULL，则屏蔽集没有变化，但是还是会将当前屏蔽集赋值给oldset。保存现场，用于后面的恢复。
+    //该函数在多线程进程中的行为未定义，可以使用pthread_sigmask代替。
+    ```
+
+43. sigpending的作用不大，它会去内核中获取pending集，即到来的信号的状态。但是该函数从内核中返回时，就会响应一个信号，返回后的pending集就跟原来不同了。
+
+    ```c
+    #include <signal.h>
+    int sigpending(sigset_t *set);
+    ```
+
+44. 不能从信号处理函数随意跳转到其他位置，例如使用longjmp。因为信号处理函数结束后，还要把之前的设置过的mask位恢复，若longjmp，就没有机会做这件事，会导致该进程永远无法收到该信号了。不同UNIX的行为不一样，BSD上在setjmp时，就可以设置保存mask。然后再longjmp时，会自动恢复。POSIX提供了两个函数用来完成这样的工作：sigsetjmp和siglongjmp，配套使用，这样就可以从信号处理函数往外跳了。
 
     ```c
     #include <setjmp.h>
-    void sigsetjmp(sigjmp_buf env, int savesigs);//savesigs表示是否要保存mask，如果为true，则siglongjmp时，就会自动恢复mask。
+    void sigsetjmp(sigjmp_buf env, int savesigs);//savesigs表示是否要保存mask，如果为true，则siglongjmp时，就会自动恢复mask，和BSD的行为相同。
     void siglongjmp(sigjmp_buf env, int val);
     ```
 
-46. sigsuspend可以用来实现一个信号驱动程序。
+45. 信号驱动程序：也就是执行一段程序（期间不会响应驱动信号），然后暂停，等待驱动信号，然后继续循环执行。这个功能可以用sigprocmask和pause完成，但是如果要求将屏蔽期间收到的信号也作为一个驱动信号来驱动，则无法完成（类似于令牌桶，可以积攒权限），可以使用sigsuspend来实现。
 
-47. 用signal为多个信号注册同一个处理函数时可能会出现信号处理函数被重入的风险。例如信号A，B都注册了处理函数C，当进程在执行处理函数C来响应信号A期间，可能会进入内核，在从内核返回时，又回去响应刚刚到来的信号B，因此又会去调用C。这样C函数将会被调用两次。另外一种情况就是从内核返回时，也可能。如果使用signal函数，要避免这种情况，就只能在信号处理函数一开始就先屏蔽掉其他注册了此处理函数的其他信号，然后在信号处理函数结束时，再恢复。
+    ```c
+    sigprocmask(SIG_BLOCK, &set,&oldset); //set中包含想要屏蔽的信号，即驱动信号，oldset为空。
+    /* 执行程序 */
+    sigprocmask(SIG_SETMASK, &oldset, NULL);//在这两句中间发送的驱动信号都不会被响应，而是暂存起来。而在这个函数从内核回来时，就会处理掉驱动信号，因为此时已经解除屏蔽了。因此会暂停在下面的pause上。发生这种情况的主要原因是，这两句不是原子操作，无法在接触屏蔽的同时暂停。
+    pause();
+    
+    #include <signal.h>
+    int sigsuspend(const sigset_t *mask); //临时用mask替换调用线程的信号屏蔽字，然后马上进入阻塞状态，等待一个信号信号（该信号要么注册了处理函数，要么会杀死进程），信号响应完毕后，恢复信号屏蔽字。该函数中间不会响应任何信号。如果该信号的行为杀死了进程，则sigsuspend函数不会返回；如果调用了信号处理函数，则sigsuspend函数会再信号处理函数返回后再返回，然后恢复信号屏蔽字。mask中不能包含SIGKILL或SIGSTOP，会没有效果。
+    //总是返回-1，并设置errno为EINTR，即被信号打断。
+    ```
 
-49. sigaction可以完整地替换signal函数。并解决上面的问题。
+46. 用signal为多个信号注册同一个处理函数时可能会出现信号处理函数被重入的风险。例如信号A，B都注册了处理函数C，当进程在执行处理函数C来响应信号A期间，可能会进入内核，在从内核返回时，又回去响应刚刚到来的信号B，因此又会去调用C。这样C函数将会被调用两次。另外一种情况就是从内核返回时，也可能。如果使用signal函数，要避免这种情况，就只能在信号处理函数一开始就先屏蔽掉其他注册了此处理函数的其他信号，然后在信号处理函数结束时，再恢复。
 
-50. signal并不区分信号的来源。
+47. 例如，使用多个信号（SIGINT，SIGQUIT，SIGTERM）来进行程序收尾，将他们注册了同一个处理函数。收尾程序中的某些命令只能被执行一次，例如使用信号来申请释放内存，或者打开关闭文件，一旦被重入则有可能出错。
+
+48. sigaction可以完整地替换signal函数，并解决上面的问题。
+
+    ```c
+    #include <signal.h>
+    int sigaction(int signum, const struct sigaction *_Nullable restrict act, struct sigaction *_Nullable restrict oldact); //signum为除了SIGKILL和SIGSTOP的任何信号，act为新的处理函数，oldact会保存旧的。
+    
+    struct sigaction {
+        void     (*sa_handler)(int); //某些架构中，sa_handler和sa_sigaction是一个union，不能同时赋值。
+        void     (*sa_sigaction)(int, siginfo_t *, void *); //响应信号时，会将信号相关的信息填入第二个参数中。
+        sigset_t   sa_mask; //响应当前信号时，还想要block的信号，可以放在sa_mask中。
+        int        sa_flags; //如果值包含SA_SIGINFO，则会使用sa_sigaction函数，而非sa_handler。
+        void     (*sa_restorer)(void);
+    };
+    //如果要给三个信号设置sigacton，不需要分别设置sa_mask来屏蔽另外2个，可以使用同一个屏蔽这三个信号的mask。因为无论如何都会屏蔽自己。
+    ```
+
+49. signal并不区分信号的来源，而是将所有信号都认为一样。可以使用sigaction来设置只响应从内核传来的信号，而对于用户使用kill发送的信号不予响应。或者只响应从某个进程发来的信号。
+
+    ```c
+    siginfo_t {
+        int      si_signo;     /* Signal number */
+        int      si_errno;     /* An errno value */
+        int      si_code;      /* Signal code 记录了信号从何而来，例如USER或KERNEL*/
+        int      si_trapno;    /* Trap number that caused hardware-generated signal (unused on most architectures) */
+        pid_t    si_pid;       /* Sending process ID */
+        uid_t    si_uid;       /* Real user ID of sending process */
+        int      si_status;    /* Exit value or signal */
+        clock_t  si_utime;     /* User time consumed */
+        clock_t  si_stime;     /* System time consumed */
+        union sigval si_value; /* Signal value */
+        int      si_int;       /* POSIX.1b signal */
+        void    *si_ptr;       /* POSIX.1b signal */
+        int      si_overrun;   /* Timer overrun count; POSIX.1b timers */
+        int      si_timerid;   /* Timer ID; POSIX.1b timers */
+        void    *si_addr;      /* Memory location which caused fault */
+        long     si_band;      /* Band event (was int in glibc 2.3.2 and earlier) */
+        int      si_fd;        /* File descriptor */
+        short    si_addr_lsb;  /* Least significant bit of address (since Linux 2.6.32) */
+        void    *si_lower;     /* Lower bound when address violation occurred (since Linux 3.19) */
+        void    *si_upper;     /* Upper bound when address violation occurred (since Linux 3.19) */
+        int      si_pkey;      /* Protection key on PTE that caused fault (since Linux 4.6) */
+        void    *si_call_addr; /* Address of system call instruction (since Linux 3.5) */
+        int      si_syscall;   /* Number of attempted system call (since Linux 3.5) */
+        unsigned int si_arch;  /* Architecture of attempted system call (since Linux 3.5) */
+    }
+    ```
+
+50. 海量的假信号可能会淹没掉真信号。
+
+51. 在进程的多个线程之间进行用户级的上下文切换：
+
+    ```c
+    #include <ucontext.h> //上下文就是可还原的执行现场，使用这两个函数就可以在用户态搭建一个多线程框架。
+    int getcontext(ucontext_t *ucp); //将获取到的上下文保存在ucp中，上下文包括信号屏蔽字，执行栈，机器寄存器。
+    int setcontext(const ucontext_t *ucp); //ucp参数要么是用getcontext获得的，要么是通过sigaction的三参信号处理函数的最后一个参数传递的。
+    ```
+
+52. 实时信号不会丢失，会记录下相同信号的数量，依次响应。不同的信号也会按照收到的顺序来依次响应。如果同时受到标准信号和实时信号，则会先响应标准信号。
+
+53. 实时信号都没有默认动作，标准信号除了SIGUSR1和SIGUSR2都由默认动作。
+
+54. 使用ulimit设置实时信号可以排队的上限：pending signals，一般为7k多个。
+
+
+# 线程
+
+1. 线程就是一个正在运行的函数。线程之间没有主次之分，main函数也不应称之为主线程。
+
+2. 线程之间共享代码段，全局数据段，堆。但是每个线程都有自己的栈，信号屏蔽字，errno变量，实时调度策略和优先级。
+
+3. 线程之间通信比进程之间简单，可以使用全局变量，因为共享同一块地址空间。
+
+4. 线程有多个标准，最常用的是POSIX标准，还有openmp标准。POSIX线程只是标准，没有实现，各家系统的实现可以不一样。例如线程标识是pthread_t类型，但是可能是整数或结构体或指针。Linux环境下使用整数实现。
+
+5. 使用POSIX线程，需要在gcc编译和链接时加入-pthread选项。makefile中使用`CFLAGS+=-pthread`和`LDFLAGS+=-pthread`。
+
+6. `ps ax -L`可以查看进程中包含的线程。-L表示以Linux的模式查看。
+
+   ```shell
+   zj@zj-hit:~$ ps ax -L  #LWP是轻量级进程，是Linux下的线程。
+       PID     LWP TTY      STAT   TIME COMMAND
+       869     869 ?        Ssl    0:00 /usr/sbin/rsyslogd -n -iNONE
+       869     879 ?        Ssl    0:00 /usr/sbin/rsyslogd -n -iNONE
+       869     880 ?        Ssl    0:00 /usr/sbin/rsyslogd -n -iNONE
+       869     881 ?        Ssl    0:00 /usr/sbin/rsyslogd -n -iNONE
+   ```
+
+7. Linux下进程的第一个线程（一般是main线程）的线程号和进程号相同，线程号会挤占进程号的空间。
+
+8. Linux下存在2个Pthread的实现：
+
+   1. LinuxThreads，最原始的pthread实现，在glibc2.4后，就不再维护。
+   2. NPTL（Native POSIX Thread Library），现代实现，更符合标准，对于创建大量线程更优化。在glibc2.3.2，Linux2.6内核之后可用。没有管理线程，所有的线程在同一个线程组内。使用了前两个实时信号，因此这些信号不能在程序中使用。
+
+9. 这两者都是1:1实现，每个线程都对应于一个内核调度实体。都使用了clone的系统调用。在NPTL中，进程同步原语（互斥量，线程join）通过futex系统调用实现。从glibc2.3.2开始，可以使用`getconf GNU_LIBPTHREAD_VERSION`来确定pthread是哪个实现。
+
+10. Pthreads定义了一套C语言的类型、函数与常量，它以pthread.h头文件和一个线程库实现。
+
+11. Pthreads API中大致共有100个函数调用，全都以"pthread_"开头，并可以分为四类：
+
+    1. 线程管理，例如创建线程，等待(join)线程，查询线程状态等。
+
+    2. 互斥锁（Mutex）：创建、摧毁、锁定、解锁、设置属性等操作。
+
+    3. 条件变量（Condition Variable）：创建、摧毁、等待、通知、设置与查询属性等操作。
+
+    4. 使用了互斥锁的线程间的同步管理。
+
+12. POSIX的Semaphore API可以和Pthreads协同工作，但这并不是Pthreads的标准。因而这部分API是以`sem_`打头，而非`pthread_`。一般来说信号量是应在进程间通信的。
+
+13. pthread的函数成功时，返回0，失败则返回error number，并不会设置errno，这个和系统调用的规定不一样，后者都是返回-1，并设置errno，这样可能会导致多个出错覆盖的问题。此时不能用perror报错，只能用strerror报错。
+
+14. 线程标识符（号）：
+
+    ```c
+    #include <pthread.h>
+    int pthread_equal(pthread_t t1, pthread_t t2); //比较两个线程的标识符，因为pthread_t的类型不定，因此不能使用==比较。相同时，返回非0，否则为0。
+    pthread_t pthread_self(void); //返回调用线程的线程标识符。类似于进程的getpid
+    ```
+
+15. 线程的创建：
+
+    ```c
+    int pthread_create(pthread_t *restrict thread, const pthread_attr_t *restrict attr, void *(*start_routine)(void *), void *restrict arg); //在调用进程中产生一个新的线程。新线程的入口地址是start_routine，也成为启动例程。arg是传递给它的单个参数。attr指向一个确定线程属性的pthread_attr_t类型结构体。该结构体使用pthread_attr_init来初始化。如果为attr为NULL，则使用默认属性创建线程。
+    //如果调用成功，则返回前会将新线程的标识符存放在thread参数内。出错时thread参数的内容不定。
+    //新线程继承调用线程的信号屏蔽字，不继承信号栈上下文。新线程的pending集为空。
+    //新线程继承调用线程的浮点环境。
+    //在Linux下，还有如下特性，新线程会继承调用线程的能力集(capability sets)和CPU亲和屏蔽字(affinity mask)。
+    //大部分情况下不需要设置线程的属性，使用默认的即可。
+    ```
+
+16. 线程终止的情况：
+
+    1. 主动调用了`void pthread_exit(void *retval)`，retval为退出状态，可以通过兄弟线程调用`int pthread_join(pthread_t thread, void **retval)`来接收。
+
+       ```c
+       #include <pthread.h>
+       [[noreturn]] void pthread_exit(void *retval); //推荐使用pthread_exit，而非return，它会执行线程栈的清理。类似于进程的exit会调用钩子函数一样。这个函数不会返回到调用者。
+       ```
+
+    2. 从入口函数处正常返回，等价于调用pthread_exit，其中retcval就是return的值。
+
+    3. 被`int pthread_cancel(pthread_t thread)`取消了。
+
+    4. 任何一个兄弟线程调用了exit，或者main线程从main()函数return了。这都会终止进程的所有线程。
+
+17. 线程终止时，进程级别的共享资源必会释放，例如互斥量，条件变量，信号量，文件描述符等。使用atexit注册的钩子函数也不会调用。只有进程的最后一个线程终止时，才会执行上述动作。
+
+18. 等待一个线程终止：
+
+    ```c
+    #include <pthread.h>
+    int pthread_join(pthread_t thread, void **retval); //thread参数指定要等待的线程，如果线程已经终止，则立即返回，否则阻塞。该thread必须是可等待的(joinable)。
+    //如果retval非空，则会将目标线程的退出状态(就是pthread_exit的参数)赋值给retval指向的空间，也就是需要传入一个一级指针的地址。如果目标线程是通过pthread_cancel终止的，则会将PTHREAD_CANCELED赋值。
+    //如果多个线程同时终止，尝试去join同一个线程，那么行为未定义。如果调用pthread_join的线程被取消了，那么目标线程仍然是可等待的。
+    //成功返回0，否则返回错误代码。
+    ```
+
+19. 例子：
+
+    ```c
+    #include <stdio.h>
+    #include <unistd.h>
+    #include <pthread.h>
+    #include <string.h>
+    #include <stdlib.h>
+    static void* func (void* p){
+        puts("Thread is working!\n");
+        return NULL;
+    }
+    int main(){
+        pthread_t tid;
+        int err;
+        puts("Begin!\n");
+        err = pthread_create(&tid, NULL, func, NULL);
+        if(err){
+            fprintf(stderr, "pthread_create():%s\n", strerror(err));
+            exit(1);
+        }
+    //  pthread_join(tid,NULL);
+        puts("End!\n");
+        exit(0);
+    }
+    //理想的执行顺序是main线程打印Begin!，然后另一个线程打印Thread is working!，然后main线程打印End!。不过线程的执行顺序取决于调度器，不能事先假定其顺序。
+    //新创建的线程有可能在main线程执行到exit时，都没有调度到，此时进程结束，它永远也不会被执行了。
+    ```
+
+20. 线程的取消：
+
+    ```c
+    //例如将一个查找的任务交给多个线程，当其中一个线程找到后，应该取消其他所有的线程。
+    #include <pthread.h>
+    int pthread_cancel(pthread_t thread); //给thread线程发送取消请求，目标线程的是否和何时响应，取决于它的取消状态和类型。
+    //线程的取消状态可以通过pthread_setcancelstate设置为enable或disable。
+    int pthread_setcancelstate(int state, int *oldstate); //设定线程的取消状态。如果线程关闭了取消状态(PTHREAD_CANCEL_DISABLE)，则该取消请求会排队等待线程打开取消状态(PTHREAD_CANCEL_ENABLE)。默认所有线程都打开取消状态。
+    int pthread_setcanceltype(int type, int *oldtype); //设定线程的取消类型。分为推迟取消和异步取消。默认状态下，取消请求会被推迟到取消点前再响应(PTHREAD_CANCEL_DEFERRED)；或者线程可以在任何时间被取消(PTHREAD_CANCEL_ASYNCHRONOUS)，通常会在收到请求时立刻响应，但是系统并不保证这一点。
+    void pthread_testcancel(void); //调用这个函数就会创建一个取消点。适用于纯科学计算的线程，因为他可能会运行很长时间而不阻塞，因此需要认为制造一个取消点。
+    //POSIX.1中定义一些函数必须是cancel点（都是可能引发阻塞的系统调用），一些可以是cancel点。这可以在man pthreads中找到。
+    
+    //例子
+    fd1=open();
+    pthread_cleanup_push(); //为了防止打开fd1后立刻被取消，导致没法释放文件，可以将close函数添加到清理栈中。有一种极端情况，也就是在fd1打开后，清理函数入栈前，收到了cancel请求，不过此时也不用害怕被直接取消，因为默认情况下，cancel请求会被推迟响应。程序继续执行，将要阻塞在open时才会响应取消请求，从而调用清理函数。
+    fd2=open();
+    pthread_cleanup_push();
+    pthread_cleanup_pop();
+    pthread_cleanup_pop();
+    ```
+
+21. 栈的清理，操作调用线程的取消清理栈，其中存放的都是线程取消时会被调用的钩子函数。可以用于解锁互斥量，使之可以被其他线程使用：
+
+    ```c
+    #include <pthread.h> //类似于atexit记录钩子函数，不过POSIX.1允许下面的函数用宏实现，展开后各自缺一个大括号，所以要成对使用，且出现在同一个语法区域内。
+    void pthread_cleanup_push(void (*routine)(void *), void *arg); //将一个函数压入栈中，函数为routine，参数为arg。
+    void pthread_cleanup_pop(int execute); //从栈上弹出一个函数，若execute非0，则会调用该函数，否则不会。
+    //有如下三种情况会将函数弹出栈：1.线程被取消时，所有函数依次弹出栈并执行。2.线程调用pthread_exit终止时，所有函数依次弹出栈并执行，return时不会调用。3.线程调用pthread_cleanup_pop时，最顶部的函数弹出栈，是否执行看参数execute。
+    //例子
+    static void* func(void*p){
+        pthread_cleanup_push(cleanfunc,"1"); //逐个将三个钩子函数入栈
+        pthread_cleanup_push(cleanfunc,"2");
+        pthread_cleanup_push(cleanfunc,"3");
+        pthread_cleanup_pop(1); //逐个将他们逆序弹出
+        pthread_cleanup_pop(0); //第二个函数不会被执行
+        pthread_cleanup_pop(1);
+        pthread_exit(NULL);
+    //pthread_cleanup_pop一定要配套出现，否则会报语法错误。即使在exit之后也可以，此时会将参数execute都当作是1。
+    //  pthread_cleanup_pop(1);
+    //  pthread_cleanup_pop(0);
+    //  pthread_cleanup_pop(1);
+    }
+    ```
+
+22. 线程分离，表示不关心这个线程的生死存亡：
+
+    ```c
+    #include <pthread.h>
+    int pthread_detach(pthread_t thread); //将thread线程标记为分离的。当一个分离的线程终止时，它的资源会自动释放给系统，而不需要其他线程来join它。尝试去join一个分离的线程会产生未定义的行为。
+    ```
+
+23. 线程出现竞争的明显现象是，程序的结果有时和设想的不同，而且每次都可能不一样。可以增加sleep语句来复现竞争的结果，类似于没有红绿灯的十字路口，如果车辆较长（sleep），则可能会碰撞，反之碰撞几率则较小。
+
+24. 例如将查找20个数中的质数的任务分配给20个线程，在main线程中使用for循环创建20个线程，i不断递增的同时也将他传递给每个线程的入口函数。因此对于变量i来说，有20个线程要读它，而main线程还在同时改变他。因此调度顺序的不同，会使得每个线程读到的i可能不同。改进方法是：将这20个数放在一个数组中，每次创建线程时，分别传入不同位置的数即可。
+
+25. 一个进程中可以包含的线程数量，取决于进程的可用地址空间和每个线程的栈大小（ulimit可以查看，默认为10MB）。对于64位系统，最先消耗完的可能是PID号。
+
+26. 例子，20个线程，每个线程都从文件读取一个数，然后加1，写回文件，不竞争的情况下，文件中的数会增加20：
+
+    ```c
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <string.h>
+    #include <pthread.h>
+    #include <unistd.h>
+    
+    static void* thr_add (void* p){
+        char linebuf[1024];
+        FILE *fp;
+        fp=fopen("/tmp/out","r+");
+        if(fp == NULL){
+            perror("fopen()");
+            exit(1);
+        }
+        fgets(linebuf,1024,fp);
+        fseek(fp,0,SEEK_SET);
+     // sleep(1); //这段程序如果在单核机器上运行，由于每个线程都比较短，因此有可能不会出现竞争，此时可以让程序sleep一下，这样就更容易产生竞争了，有时会仅使数据增加1。
+        fprintf(fp,"%d\n",atoi(linebuf)+1);
+        fclose(fp);
+        pthread_exit(NULL);
+    }
+    int main(){
+        int i, err;
+        pthread_t tid[20];
+        for(i=0; i<20; i++){
+            err = pthread_create(tid+i, NULL, thr_add, NULL);
+            if(err){
+                fprintf(stderr, "pthread_create():%s\n", strerror(err));
+                exit(1);
+            }
+        }
+        for(i=0; i<20; i++){
+            pthread_join(tid[i], NULL);
+        }
+        exit(0);
+    }
+    ```
+
+27. 互斥量是线程同步的一种机制。为资源加锁，保证同时只能由一个人占有该资源。
+
+28. 创建和销毁互斥量。
+
+    ```c
+    #include <pthread.h>
+    int pthread_mutex_init(pthread_mutex_t *restrict mutex,const pthread_mutexattr_t *restrict attr); //动态初始化互斥量mutex，可以在attr参数中设置其属性。刚初始化的互斥量是未加锁的。重复初始化一个互斥量，会造成未定义的行为。
+    pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; //静态初始化，使用默认参数，编译时常量表达式。
+    int pthread_mutex_destroy(pthread_mutex_t *mutex); //销毁互斥量。
+    //被销毁后的互斥量还可以重新初始化，对被销毁的互斥量加锁的行为是未定义的。
+    //销毁未解锁的互斥量，或者正在被其他线程尝试加锁的互斥量，或者被其他线程调用pthread_cond_timedwait或pthread_cond_wait等待的互斥量，此时行为未定义。
+    ```
+
+29. 给互斥量上锁，解锁：
+
+    ```c
+    #include <pthread.h>
+    int pthread_mutex_lock(pthread_mutex_t *mutex);
+    int pthread_mutex_trylock(pthread_mutex_t *mutex); //非阻塞的lock，
+    int pthread_mutex_unlock(pthread_mutex_t *mutex);
+    ```
+
+30. 多个人同时对一个资源只读是没有竞争的。一旦有一个人要写，那么就需要考虑竞争，因为写之前和写之后读到的结果是不同的。
+
+31. 代码临界区：同一时刻只能有一个线程在其中执行代码。任何一个线程在进入之前，都需要获取锁，退出时释放锁。
+
+32. 互斥量其实是限制某段代码能否运行，而非某个变量或资源能否使用。
+
+33. 互斥锁链，可以让多个线程有序执行：
+
+    ```c
+    #include <pthread.h>
+    #include <signal.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <string.h>
+    #include <unistd.h>
+    
+    static pthread_mutex_t mut[4]; // 4个互斥量构成了一个循环链
+    static pthread_t tid[4];
+    
+    static void *thr_func(void *p) { // p分别为0，1，2，3
+      int c = 'a' + (int)p;
+      while (1) {
+        pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+        //为了避免没有解锁而直接退出线程，先不对cancel响应。
+        pthread_mutex_lock(mut + (int)p);
+        //每个线程对自己的互斥量加锁，因为在创建线程时都加锁了，所以这里都会阻塞，但是由于在第28行解锁了第0个互斥量，所以只有它不阻塞在此。
+        write(1, &c, 1);
+        pthread_mutex_unlock(mut + ((int)p + 1) % 4); //解锁下一个互斥量。
+        pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+        //解锁后，才可以响应cancel。
+        pthread_testcancel(); //如果没有这个调用，就不会响应cancel，为pthread_setcancelstate不是一个取消点。这样会造成始终不响应cancel请求，从而一直运行不停止。
+      }
+      pthread_exit(NULL);
+    }
+    
+    static void mutex_destroy(int sig) {
+      int i;
+      for (i = 0; i < 4; i++) {
+        pthread_cancel(tid[i]);
+      }
+    }
+    
+    int main() {
+      int i, err;
+      void *return_msg;
+      signal(SIGALRM, mutex_destroy); //注册信号，响应闹钟的到来
+      for (i = 0; i < 4; i++) {
+        pthread_mutex_init(mut + i, NULL);
+        //初始化并对各自的互斥量加锁，此时可以顺利加锁。
+        pthread_mutex_lock(mut + i);
+        err = pthread_create(tid + i, NULL, thr_func, (void *)i);
+        if (err) {
+          fprintf(stderr, "pthread_create():%s\n", strerror(err));
+          exit(1);
+        }
+      }
+      pthread_mutex_unlock(mut+0); //解锁第一个互斥量，可以将0修改为1，2，3来从b，c，d开始输出
+      alarm(1); //因为4个线程都是死循环，所以设定1秒后停止
+      for (i = 0; i < 4; i++) {
+        pthread_join(tid[i], &return_msg);
+        //结果为PTHREAD_CANCELED宏，即((void *) -1)
+        printf("%d\n", (int)return_msg);
+      }
+      for (i = 0; i < 4; i++) {
+        pthread_mutex_destroy(mut + i);
+      }
+      exit(0);
+    }
+    ```
+
+34. 使用任务池来计算质数：
+
+    ```c
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <unistd.h>
+    #include <pthread.h>
+    #include <string.h>
+    #define LEFT 30000000
+    #define RIGHT 30000200
+    #define THRNUM 4
+    static int num = 0; //用来存储待计算的数，全局变量可以方便各个线程读写。
+    static pthread_mutex_t mut_num = PTHREAD_MUTEX_INITIALIZER;
+    void* thr_prime(void* p){
+        int i,j,mark;
+        while(1){
+            pthread_mutex_lock(&mut_num);
+            while(num == 0){
+                pthread_mutex_unlock(&mut_num);
+                sched_yield();
+                pthread_mutex_lock(&mut_num);
+            }
+            if(num == -1){
+                pthread_mutex_unlock(&mut_num);
+                break;
+            }
+            i = num; //这里使用一个局部变量将num保存起来，可以尽可能缩短临界区的代码范围
+            num = 0;
+            pthread_mutex_unlock(&mut_num);
+            mark = 1;
+            for(j=2; j<i/2; j++){
+                if(i%j == 0){
+                    mark = 0;
+                    break;
+                }
+            }
+            if(mark){
+                printf("[%d]:%d is a primer\n", (int)p, i);
+            }
+        }
+        pthread_exit(NULL);
+    }
+    int main(){
+        int i, err;
+        pthread_t tid[THRNUM];
+        for(i=0; i<THRNUM; i++){
+            err = pthread_create(tid+i, NULL, thr_prime, (void*)i);
+            if(err){
+                fprintf(stderr, "pthread_create():%s\n", strerror(err));
+                exit(1);
+            }
+        }
+        for(i=LEFT; i<RIGHT; i++){//下发任务
+            pthread_mutex_lock(&mut_num);
+            while(num != 0){ //如果num不为0，表示已经下发了任务还没有线程接收该任务。
+                pthread_mutex_unlock(&mut_num);
+                sched_yield(); //调用线程主动让出CPU。可以认为是任意短的sleep。如果使用sleep会造成进程调度颠簸。
+                pthread_mutex_lock(&mut_num);
+            }
+            num = i;
+            pthread_mutex_unlock(&mut_num);
+        }
+        pthread_mutex_lock(&mut_num);
+        while(num != 0){ //如果num不为0，表示最后一个任务还没有被取走。
+            pthread_mutex_unlock(&mut_num);
+            sched_yield();
+            pthread_mutex_lock(&mut_num);
+        }
+        num = -1; //这样任务线程再取到-1后，会自动退出，然后被main线程join。
+        pthread_mutex_unlock(&mut_num);
+        for(i=0; i<THRNUM; i++){
+            pthread_join(tid[i], NULL);
+        }
+        pthread_mutex_destroy(&mut_num); //销毁互斥量
+        exit(0);
+    }
+    ```
+
+35. 如果在临界区内要进行跳转（例如break或continue等），如果目的地还在临界区内，则可以不用解锁，否则需要先解锁，再跳转。否则会产生死锁状态。
+
+36. 上面的方法有一个问题，任务线程在让出CPU后，可能会调度另一个任务线程抢到锁，这样它还得继续让出CPU。主要原因是main线程和任务线程的地位并不相同，而且任务线程数量多，更容易抢到锁。可以采用通知法，main线程等待取走任务的哪个任务线程唤醒它，任务线程等待main线程唤醒它们中的一个。
+
+37. 主动让出CPU：
+
+    ```c
+    #include <sched.h>
+    int sched_yield(void); //使调用线程让出CPU，移动到它的静态优先级的调度队列的末尾。如果当前线程是最高优先级队列中的唯一一个线程，那么它会继续运行。
+    ```
+
+38. 从Linux2.6.23开始，默认的调度器就是CFS(Completely Fair Scheduler)，替代了早先的O(1)调度器。调度器是内核的一部分，每个线程都有关联的调度策略和一个静态的调度优先级。调度器会根据所有线程的这2个属性来决定现在调度哪个程序。
+
+39. 条件变量和互斥量不同的是，一个线程释放了互斥量后，不会去唤醒另一个阻塞在该互斥量上的线程，而条件变量会：
+
+    ```c
+    #include <pthread.h> //初始化和销毁一个条件变量，类似于互斥量的用法
+    int pthread_cond_init(pthread_cond_t *restrict cond, const pthread_condattr_t *restrict attr); //动态初始化
+    pthread_cond_t cond = PTHREAD_COND_INITIALIZER; //静态初始化
+    int pthread_cond_destroy(pthread_cond_t *cond);
+    ```
+
+40. 广播或发送信号：
+
+    ```c
+    #include <pthread.h>
+    int pthread_cond_broadcast(pthread_cond_t *cond); //唤醒所有阻塞在条件变量cond上的线程。
+    int pthread_cond_signal(pthread_cond_t *cond); //至少唤醒一个线程。
+    //如果有多个线程阻塞在同一个条件变量上，调度策略会决定唤醒的顺序。
+    //如果没有线程阻塞在条件变量上，那么这两个函数没有任何效果。
+    ```
+
+41. 等待一个条件，会用到条件变量和互斥量：
+
+    ```c
+    #include <pthread.h> //解锁互斥量，然后阻塞在条件变量上，此时在临界区外，线程会让出CPU。应确保调用时，当前线程已经锁住了互斥量，否则会报错或产生未定义行为。成功返回时表示，当前线程已经锁住了互斥量，
+    int pthread_cond_timedwait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex, const struct timespec *restrict abstime); //等待abstime时间
+    int pthread_cond_wait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex); //死等
+    //应确保在调用线程锁定互斥量的情况下调用这些函数。
+    ```
+
+42. 仅使用互斥量的程序本是上是查询法，效率不如通知法高。例子：
+
+    ```c
+    pthread_mutex_lock(&mut);
+    while(num == 0){ //本质上是查询法
+        pthread_mutex_unlock(&mut);
+        sched_yield();
+        pthread_mutex_lock(&mut);
+    }
+    ... //临界区操作
+    pthread_mutex_unlock(&mut);
+    //更改为如下：
+    pthread_mutex_lock(&mut);
+    while(num == 0){
+        pthread_cond_wait(&cond,&mut); //cond为条件变量，此时或解锁mut，然后在cond上等待。当其他线程对该条件变量调用signal或broadcast时，会唤醒此线程。当此线程被唤醒后，会尝试锁定互斥量mut。如果成功则继续向下执行，否则会阻塞在抢锁阶段。
+    }
+    i = num; //读取非零的num
+    num = 0;
+    pthread_cond_broadcast(&cond); //唤醒main线程来继续填入新的数据
+    pthread_mutex_unlock(&mut);
+    
+    //下发任务的
+    pthread_mutex_lock(&mut);
+    while(num != 0){
+        pthread_cond_wait(&cond,&mut);
+    }
+    num = i;
+    pthread_cond_broadcast(&cond);
+    pthread_mutex_unlock(&mut); //唤醒等待的线程和解锁这两句的顺序并没有严格的顺序。不过推荐先唤醒，再解锁，这样可以让被唤醒的线程随后立即抢锁。
+    ```
+
+43. 使用条件变量的通知法来改写筛选质数：
+
+    ```c
+    #include <pthread.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <string.h>
+    #include <unistd.h>
+    #define LEFT 30000000
+    #define RIGHT 30000200
+    #define THRNUM 4
+    static int num = 0; //用来存储待计算的数，全局变量可以方便各个线程读写。
+    static pthread_mutex_t mut_num = PTHREAD_MUTEX_INITIALIZER;
+    static pthread_cond_t cond_num = PTHREAD_COND_INITIALIZER;
+    void *thr_prime(void *p) {
+      int i, j, mark;
+      while (1) {
+        pthread_mutex_lock(&mut_num);
+        while (num == 0) {
+          pthread_cond_wait(&cond_num, &mut_num);
+          // cond为条件变量，此时或解锁mut，然后在cond上等待。当其他线程对该条件变量调用signal或broadcast时，会唤醒此线程。当此线程被唤醒后，会尝试锁定互斥量mut。如果成功则继续向下执行，否则会阻塞在抢锁阶段。
+        }
+        if (num == -1) {
+          pthread_mutex_unlock(&mut_num);
+          break;
+        }
+        i = num;
+        num = 0;
+        pthread_cond_broadcast(&cond_num);
+        //不能使用signal，因为可能会唤醒另一个任务线程
+        pthread_mutex_unlock(&mut_num);
+        mark = 1;
+        for (j = 2; j < i / 2; j++) {
+          if (i % j == 0) {
+            mark = 0;
+            break;
+          }
+        }
+        if (mark) {
+          printf("[%d]:%d is a primer\n", (int)p, i);
+        }
+      }
+      pthread_exit(NULL);
+    }
+    int main() {
+      int i, err;
+      pthread_t tid[THRNUM];
+      for (i = 0; i < THRNUM; i++) {
+        err = pthread_create(tid + i, NULL, thr_prime, (void *)i);
+        if (err) {
+          fprintf(stderr, "pthread_create():%s\n", strerror(err));
+          exit(1);
+        }
+      }
+      for (i = LEFT; i < RIGHT; i++) { //下发任务
+        pthread_mutex_lock(&mut_num);
+        while (num != 0) {
+          pthread_cond_wait(&cond_num, &mut_num);
+        }
+        num = i;
+        pthread_cond_signal(&cond_num); //这里只要唤醒一个工作线程即可
+        pthread_mutex_unlock(&mut_num);
+        //唤醒等待的线程和解锁这两句的顺序并没有严格的顺序。不过推荐先唤醒，再解锁，这样可以让被唤醒的线程随后立即抢锁。
+      }
+      pthread_mutex_lock(&mut_num);
+      while (num != 0) {
+        pthread_cond_wait(&cond_num, &mut_num);
+      }
+      num = -1;
+      pthread_cond_broadcast(&cond_num); //需要唤醒所有的工作线程。
+      pthread_mutex_unlock(&mut_num);
+      for (i = 0; i < THRNUM; i++) {
+        pthread_join(tid[i], NULL);
+      }
+      pthread_mutex_destroy(&mut_num); //销毁互斥量
+      pthread_cond_destroy(&cond_num); //销毁条件变量
+      exit(0);
+    }
+    ```
+
+44. 使用time命令来对通知法和查询法进行度量，可以看到通知法的时间更短：
+
+    ```shell
+    zj@zj-hit:~/test/C$ time ./main #查询法
+    real    0m0.281s
+    user    0m0.733s
+    sys     0m0.049s
+    zj@zj-hit:~/test/C$ time ./main #通知法
+    real    0m0.247s
+    user    0m0.643s
+    sys     0m0.037s
+    ```
+
+45. 如果不确定是唤醒任意一个，还是唤醒所有，则可以都唤醒。
+
+46. 使用条件变量来改进逐个打印abcd的问题。
+
+    ```c
+    #include <pthread.h>
+    #include <signal.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <string.h>
+    #include <sys/time.h>
+    #include <unistd.h>
+    
+    static pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
+    static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+    static pthread_t tid[4];
+    static int num = 0; //令牌，用来记录当前允许哪个线程打印。只有num和自己的线程编号(int)p相同时，线程才会打印，否则wait在一个条件变量上，每次取得权力后，将令牌移动一位，叫醒所有等待令牌的线程。
+    
+    static void *thr_func(void *p) {
+      int c = 'a' + (int)p;
+      while (1) {
+        pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+        pthread_mutex_lock(&mut);
+        while (num != (int)p) {
+          pthread_cond_wait(&cond, &mut);
+        }
+        write(1, &c, 1);
+        num = (num + 1) % 4; //令牌移动一位
+        pthread_cond_broadcast(&cond); //此时无法定向唤醒，只能唤醒所有
+        pthread_mutex_unlock(&mut);
+        pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+        pthread_testcancel();
+      }
+      pthread_exit(NULL);
+    }
+    
+    static void mutex_destroy(int sig) {
+      int i;
+      for (i = 0; i < 4; i++) {
+        pthread_cancel(tid[i]);
+      }
+    }
+    
+    int main() {
+      int i, err;
+      void *return_msg;
+      struct itimerval it;
+      signal(SIGALRM, mutex_destroy);
+      for (i = 0; i < 4; i++) {
+        pthread_mutex_init(&mut, NULL);
+        pthread_mutex_lock(&mut);
+        err = pthread_create(tid + i, NULL, thr_func, (void *)i);
+        if (err) {
+          fprintf(stderr, "pthread_create():%s\n", strerror(err));
+          exit(1);
+        }
+      }
+      pthread_mutex_unlock(&mut); //解锁互斥量，
+      it.it_interval.tv_sec = 0;
+      it.it_interval.tv_usec = 0;
+      it.it_value.tv_sec = 0;
+      it.it_value.tv_usec = 20000;
+      setitimer(ITIMER_REAL, &it, NULL);
+      // alarm(1); //因为4个线程都是死循环，所以设定1秒后停止
+      for (i = 0; i < 4; i++) {
+        pthread_join(tid[i], &return_msg);
+        //结果为PTHREAD_CANCELED宏，即((void *) -1)
+        printf("%d\n", (int)return_msg);
+      }
+      for (i = 0; i < 4; i++) {
+        pthread_mutex_destroy(&mut);
+      }
+      exit(0);
+    }
+    ```
+
+47. 信号量就是一个非负整数，可以认为是非独占的互斥量。互斥量可以认为是布尔类型，信号量是非负整型。其上可以进行2个主要操作，+1和-1。如果信号量当前值为0，则-1操作会阻塞。
+
+48. 当有多个资源可以供同时使用时，可以使用信号量。例如桌子上有6根筷子，每个人吃饭需要拿2根，如果使用互斥量的话，同一时刻只能有1个人吃饭，但是桌子上的筷子是能满足3个人同时吃饭的，这就造成了资源的浪费。
+
+49. 哲学家就餐问题，圆桌就坐，目标就是不要有人饿死。有两种版本：
+
+    1. 每两个人之间放着一个叉子，一个人只要拿到一个叉子就可以吃饭。
+
+    2. 每两个人之间放着一根筷子，每个人需要同时拿到自己两侧的筷子才可以吃饭。
+
+50. 信号量可以使用互斥量+条件变量的方式模拟出来。
+
+    ```c
+    
+    
+    
+    
+    
+    
+    
+    ```
+
+51. 信号量操作函数：
+
+    ```c
+    #include <semaphore.h>
+    int sem_init(sem_t *sem, int pshared, unsigned int value); //初始化一个匿名信号量value为其初始值。pshared表示该信号量是在同进程的线程之间共享（取0，应该为全局变量或者堆中分配的内存）还是在不同进程之间共享（取非0，应该在共享内存区域，使用shm_open，mmap，shmget。或者通过fork产生的父子进程之间）。任何可以访问共享内存区域的进程，都可以操作其中的信号量。重复初始化一个信号量会产生未定义行为。
+    sem_t *sem_open(const char *name, int oflag);//创建一个新的或打开一个已有的信号量，其名称为name。oflag是打开标记，定义在fcntl.h中。如果为O_CREAT，则当信号量不存在时会创建，其用户和组ID为调用进程的EUID，EGID。如果为O_CREAT|O_EXCL，当信号量已经存在时会报错。如果成功，则返回信号量的地址，这个地址可以用于其他信号量相关的操作函数。
+    sem_t *sem_open(const char *name, int oflag, mode_t mode, unsigned int value);//如果oflag为O_CREAT，则需要提供mode和value两个参数。mode为新信号量的权限，权限会和进程的umask相互作用，类似于open函数，权限的符号形式的定义在<sys/stat.h>中。value为其初始值。如果oflag为O_CREAT，且信号量已经存在，则mode和value参数会被忽略。
+    int sem_post(sem_t *sem);//给信号量sem+1，如果导致信号量大于0，则另一个阻塞在信号量上的线程会被唤醒，从而来给信号量-1。
+    int sem_wait(sem_t *sem); //给信号量-1，如果信号量之前大于0，则当前线程会继续，如果之前等于0，则当前线程会阻塞在该信号量上。
+    int sem_trywait(sem_t *sem); //非阻塞版本，失败返回EAGAIN。
+    int sem_timedwait(sem_t *sem, const struct timespec *abs_timeout); //有截止时间的阻塞版本，abs_timeout表示从EPOCH(1970年初)以来的时间。失败返回ETIMEDOUT。如果可以立即给信号量-1，那么无论abs_timeout的值是多少，此函数都不会失败，此时甚至都不会检查abs_timeout的有效性。
+    int sem_getvalue(sem_t *sem, int *sval); //获得信号量sem的值，存放在sval中。当有多个线程使用sem_wait尝试锁住该信号量而阻塞时，POSIX.1支持sem_getvalue的两种返回值，要么是0，要么是一个负数，它的绝对值表示当前阻塞在该信号量上的线程数目。Linux使用前一种方式。
+    int sem_close(sem_t *sem); //关闭sem信号量，使得所有与之关联的资源被释放。
+    int sem_destroy(sem_t *sem); //销毁匿名信号量sem，只有被初始化后的信号量才可以被销毁。如果其他线程正阻塞在该信号量上，此时销毁会造成未定义行为。使用已销毁的信号量的行为时未定义的，可以重新初始化已经销毁的信号量。匿名信号量应该在和他关联的内存被释放前销毁。
+    int sem_unlink(const char *name); //删除命名信号量，一旦打开信号量的所有其他进程关闭信号量，它就会被销毁。
+    ```
+
+52. POSIX信号量有两种形式：
+
+    1. 命名，名称类似于`/somename`，以/开头，有且只有一个/，空字符结尾的字符串，最多包含`NAME_MAX-4`个字符，一般为251。不同进程之间可以通过指定同一个名称给`sem_open()`来操作同一个命名信号量。当一个进程不再使用该信号量时，可以使用`sem_close()`来关闭，当所有进程都不再使用该信号量时，可以使用`sem_unlink()`来从系统中删除。
+
+    2. 匿名，也成为基于内存的信号量。只能通过变量名或内存地址来引用。进程之间共享的信号量需要通过共享内存来实现。System V共享内存段使用shmget创建，POSIX共享内存对象使用shm_open创建。必须使用`sem_init()`来初始化。当不用时，应该在对应内存区域释放前，使用`sem_destroy()`销毁。使用共享内存，应该链接上rt库，`-lrt`。
+
+53. 以上两种信号量都可以在线程之间或进程之间共享。对命名信号量来说，这两种方式没有区别；对匿名信号量来说，信号量存放的位置不一样。
+
+54. 在Linux2.6之前，只支持匿名的，线程共享的信号量。命名信号量具有内核持续性，如果不适用`sem_unlink()`销毁，则会一直持续到关机。
+
+55. 在Linux中，命名信号量会在虚拟文件系统中创建一个对应的文件，通常为`/dev/shm/sem.somename`，这也是为什么要求somename要小于`NAME_MAX-4`，因为sem.占据了4个字符。从Linux2.6.19以后，可以为该目录下的文件添加ACL，控制对象的用户和组权限。
+
+56. POSIX信号机制比System V信号机制（semop，semget）更简单易用，因此不推荐使用后者。
+
+57. 读写锁，分为读锁和写锁。允许多个同时读，但是只有一个能同时写，分别相当于信号量和互斥量。读锁可以施加在读锁上，但不能施加在写锁上，因为不知道会读到写之前还是之后的内容。写锁不能加在任何锁上。这可能会发生写者饿死的情况，例如源源不断地有读者来加锁，导致写着无法加锁。可以通过如下方式来解决：当新的读者看到有写者阻塞时，就不会加读锁，而是排队在写锁后面。
+
+58. 使用方法：
+
+    ```c
+    int pthread_rwlock_destroy(pthread_rwlock_t *rwlock);
+    int pthread_rwlock_init(pthread_rwlock_t *restrict rwlock,const pthread_rwlockattr_t *restrict attr);
+    pthread_rwlock_t rwlock = PTHREAD_RWLOCK_INITIALIZER;
+    ```
+
+59. 自旋锁：
+
+    ```c
+    int pthread_spin_init(pthread_spinlock_t *lock, int pshared);
+    int pthread_spin_destroy(pthread_spinlock_t *lock);
+    ```
+
+60. 屏障：
+
+    ```c
+    int pthread_barrier_wait(pthread_barrier_t *barrier);
+    ```
+
+61. 线程私有数据：
+
+    ```c
+    int pthread_key_create(pthread_key_t *key, void (*destructor)(void*));
+    ```
+
+62. 
+
+63. 
+
+64. 
+
+65. 
+
+66. 
+
+67. 
+
+68. 
+
+69. 
+
+70. 
+
+71. 
+
+72. 
+
+73. 
+
+74. 
+
+75. 
+
+76. 
+
+77. 
+
+78. 
+
+79. 
+
+80. 
+
+81. 
+
+
+# 进程间通信
+
+1. 最原始的进程间通信（IPC）可以是读写同一个文件。但是效率低，缺乏灵活性。以下方式可以作为IPC的方法：
+   1. 信号，用来表示事件的发生。
+   2. 管道（即|符号），和FIFO，用于在进程间传递数据。
+   3. 套接字，供同一台主机或不同主机上的进程之间传递数据。
+   4. 文件锁定，为了防止其他进程读取或更新文件内容，允许某进程对文件的部分区域加以锁定。
+   5. 消息队列，用于在进程间交换数据包。
+   6. 信号量，用于同步进程的动作。
+   7. 共享内存，允许多个进程共享同一块物理内存，当某个进程改变了该区域的值，其他进程可以立即感知。
+2. 之所以有这么多的IPC机制，是因为它们来源一不同的UNIX实现，遵循的标准也不同，例如FIFO来源自System V，套接字来源于BSD。
+3. 
+4. 
+5. 
+6. 
+7. 
+8. 
 
 
 

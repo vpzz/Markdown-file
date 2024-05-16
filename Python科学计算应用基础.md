@@ -913,7 +913,7 @@
    np.linalg.inv(A) #求逆矩阵
    np.linalg.pinv(A) #求伪逆，非方阵可以使用
    ```
-   
+
 6. 矩阵可以和向量的乘法，Numpy中可以和矩阵做乘法的向量有3种：
 
    ```python
@@ -1008,6 +1008,144 @@
     np.isclose([1e10,1e-7], [1.00001e10,1e-8]) #第一个元素，公式左侧为1e5，右侧为1.00001e5+1e-8，满足等式；第二个元素，公式左侧为9e-8，右侧为1e-8+1e-13，不满足等式。因此结果为array([ True, False])。
     numpy.allclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=False) #如果isclose比较的结果为全True，则allclose返回True，否则为False。
     ```
+
+# pytorch
+
+1. pytorch是从torch来的，torch最早是用lua写的。pytorch的tensor使用方法和numpy一样，但是二者底层不同，MXNET的API和numpy是一样的。
+
+2. pytorch的默认数据类型是张量，它和numpy的ndarray可以自由转换。
+
+   ```python
+   A = X.numpy() # A的类型为numpy.ndarray
+   B = torch.tensor(A) #B的类型为torch.Tensor
+   
+   #将大小为1的张量转化为python的标量
+   a = torch.tensor([3.5])
+   a.item() #结果为内置浮点数3.5
+   float(a) #结果同上
+   ```
+
+3. 运行一些操作可能导致为新的结果分配新内存。
+
+   ```python
+   before = id(Y) 
+   Y = Y + X
+   id(Y) == before #可能不等
+   #执行原地操作
+   Z = torch.zeros_like(Y) #创建一个和Yshape相同的张量，数值都填充为0
+   Z[:] = X + Y #这一步仅仅会更新Z中的值，而不会分配新的内存。
+   #或者使用原地操作符
+   X += Y #这个和X = X + Y不同
+   ```
+
+4. 一般使用pandas来读取存储在csv格式中的数据集。
+
+   ```python
+   pandas.read_csv(data_file) #即可获得一个二维的数组。
+   ```
+
+5. pandas中也包含一些数据预处理的函数，例如对于缺省值NaN的处理，可以将其替换为非NaN数据的平均值，如果是非数值数据，则可以使用独热编码，例如：有2个离散状态（Pave和NaN），则可以将它们表示为2个向量：(10)和(01）。
+
+   ```python
+   inputs.fillna(inputs.mean()) #每个数值列都用该列的平均值填充
+   pd.get_dummies(inputs, dummy_na=True) #将NaN也作为一个离散状态，独立编码
+   torch.tensor(inputs.values) #此时inputs的内容都是数值了，可以转化为张量了。
+   ```
+
+6. 深度学习一般使用32位浮点数，计算速度较快。
+
+7. 张量创建
+
+   ```python
+   torch.tensor(3.0) #0阶，shape为torch.Size([])
+   torch.tensor([3.0]) #1阶，shape为torch.Size([1])
+   torch.tensor([3.0, 2.0]) #1阶，shape为torch.Size([2])
+   a = torch.arange(12).reshape(3,4) #2阶，shape为torch.Size([3, 4])
+   a.numel() #元素个数，不考虑shape，当作1维数组看。
+   ```
+
+8. 视图与克隆：
+
+   ```python
+   A = torch.tensor([3.0, 2.0])
+   B = A #此处没有进行内存分配，而是创建了A的一个视图，二者共享数据，修改B的同时也会修改A
+   C = A.clone() #显式声明要内存分配，此时不是视图
+   ```
+
+9. 两个矩阵按元素位置相乘，称为哈达玛积，使用$A\odot B$表示。在torch中使用$A*B$表示。
+
+10. 默认情况下，调用求和函数会沿所有的轴降低张量的维度，使它变为一个标量。 我们还可以指定张量沿哪一个轴来通过求和降低维度，被指定的轴会在结果的shape中消失。
+
+    ```python
+    a = torch.arange(12).reshape(3,4) #shape为torch.Size([3, 4])
+    a.sum() #结果为标量tensor(66)，类型为torch.Size([])
+    a.sum(axis=0) #结果为tensor([12, 15, 18, 21])，shape为torch.Size([4])，被指定的第0轴没了
+    a.sum(axis=1) #结果为tensor([ 6, 22, 38])，shape为torch.Size([3])
+    #也可以同时按照多个轴求和，默认就是按照所有轴求和。
+    a.sum(axis=[0,1]) #结果为tensor(66)，shape为torch.Size([])，
+    #也可以令keepdims=True来保留被求和的轴，该轴的size则为1。keepdims默认为False
+    a.sum(axis=1, keepdims=True) #结果为tensor([[6], [22], [38]])，shape为torch.Size([3, 1])。这样a.sum和a就是同维度的张量，可以应用广播机制来进一步处理。
+    a/a.sum(axis=1) #会报错，因为[3]无法通过扩展和[3,4]匹配。
+    a/a.sum(axis=0) #不会报错，因为[4]可以扩展为[1,4]，等价于a/a.sum(axis=0, keepdims=True)
+    #可以做累加求和
+    a.cumsum(axis=0) #每一列都是之前所有列的和。
+    tensor([[ 0,  1,  2,  3],
+            [ 4,  6,  8, 10],
+            [12, 15, 18, 21]])
+    ```
+
+11. 矩阵和向量的乘法：
+
+    ```python
+    torch.mv(A, x) #其中A为[3,4]，x为[4]，则结果为[3]。mv表示matrix和vector的成绩
+    torch.mm(A, B) #矩阵乘法
+    ```
+
+12. 范数，如果tensor的元素类型不是浮点数或复数时，求范数会报错：
+
+    ```python
+    a = torch.tensor([3.0,4.0])
+    torch.norm(a) #向量的2范数，结果为tensor(5.)，
+    torch.abs(a).sum() #向量的1范数，先对每个元素求绝对值，再求和。
+    A = torch.arange(12.0).reshape(3,4) #浮点数元素
+    torch.norm(A) #矩阵的F范数，结果为tensor(22.4944)
+    ```
+
+13. 
+
+14. 
+
+15. 
+
+16. 
+
+17. 
+
+18. 
+
+19. 
+
+20. 
+
+21. 
+
+22. 
+
+23. 
+
+24. 
+
+25. 
+
+26. 
+
+27. 
+
+28. 
+
+29. 
+
+30. 
 
 # SciPy
 

@@ -1,29 +1,54 @@
 # Linux系统简介
 
-## Unix和Linux的历史
+## UNIX和Linux的历史
 
-1. Unix和Linux之间的关系像父子。
+1. UNIX和Linux之间的关系像父子。
 
-2. 最早是MIT,GE,AT&T的贝尔实验室合作开发的Multics系统，但是由于追求的目标过于庞大复杂，项目进度落后，计划流产。后来贝尔实验室的肯·汤普森在pdp7上写出了Unix操作系统。最早命名为Unics，和Multics对立，因为二者读音相似，所以就叫做Unix。后来美国国防部的ARPAnet项目中ncp网络协议不够好，被重写的TCP/IP协议替代。由于AT&T的主营业务是电信，所以Unix就不受重视，后来TCP/IP协议捆绑到Unix系统上，面向大学发行非商业的许可。
+2. 最早是MIT,GE,AT&T的贝尔实验室合作开发的Multics系统，但是由于追求的目标过于庞大复杂，项目进度落后，计划流产。后来贝尔实验室的肯·汤普森在pdp-7上写出了UNIX操作系统。最早命名为Unics，和Multics对立，因为二者读音相似，所以就叫做UNIX。后来美国国防部的ARPAnet项目中ncp网络协议不够好，被重写的TCP/IP协议替代。由于AT&T的主营业务是电信，所以UNIX就不受重视，后来TCP/IP协议捆绑到UNIX系统上，面向大学发行非商业的许可。
 
-3. 后来肯·汤普森的同事丹尼斯·里奇根据B语言开发了C语言，二人又合伙重写了Unix（最初的Unix是用汇编语言写的）。提高了Unix的可移植性。二人因此获得图灵奖。
+3. 后来肯·汤普森的同事丹尼斯·里奇根据B语言开发了C语言，二人又合伙重写了UNIX（最初的UNIX是用汇编语言写的），UNIX也成为了最早用高级语言编写的操作系统，这也使得它可以被移植到其他硬件架构上，提高了UNIX的可移植性，二人因此获得图灵奖。
 
-4. 1970年，UNIX诞生→1979年UNIX商业化→1984Richard Stallman发起了GNU计划→1987年，GCC发布→1991年，Linus发布linux内核。
+4. 早期的编程语言设计初衷并非用于编写操作系统，例如Fortran就是为了数值计算，Cobol是为了处理商业数据。同时Fortran和Cobol都是由大型组织开发的，而C语言则是由几个程序员开发的，目的就是为了更好地编写操作系统。
 
-5. Unix的主要发行版本如下，Solaris可以在Intel微机平台安装，其他的Unix系统则不然。
+5. 1970年，UNIX诞生→1979年UNIX商业化→1984Richard Stallman发起了GNU计划→1987年，GCC发布→1991年，Linus发布linux内核。
 
-   ```shell
-   系统名称       公司      硬件平台
-   AIX            IBM      PowerPC      (该CPU被早年MAC电脑使用)
-   HP-UX          HP       PA-RISC
-   Solaris        Sun      SPARC        (Sun公司后来被Oracle收购)
-   ```
+6. 当时AT&T和美国政府达成协议，AT&T垄断美国的电信市场，但它不能涉足软件销售领域，因此AT&T无法售卖UNIX。从1974年发布的第5版开始，AT&T允许高校在象征性支付发布费用后使用UNIX系统，其中包含了1万多行的内核源码。和商业操作系统相比，UNIX属于物美价廉。
 
-6. Mac OS，BSD也是一个Unix的主流分支。Linux可以看做是类Unix系统。
+7. 1979年UNIX第7版发布，从此开始，UNIX分裂为了2大分支，BSD和System V。伯克利的Bill Joy是Thompson的学生，他后来创建了Sun公司。当时伯克利为UNIX开发了许多工具，例如cshell，vi编辑器等，因此伯克利将其和UNIX系统打包发布，产生了BSD。1983年，发布了4.2BSD，它第一次包含了TCP/IP的完整实现。Sun公司在此基础上构建自己的sun操作系统，后来演变成了Solaris。BSD的最终版本为1996年的4.4BSD。BSD在学术界非常流形。
 
-7. Linux诞生于1991年，芬兰大学生林纳斯在学习操作系统课程时，接触到了Minix系统，该系统是教授参考了Unix来开发的，不过声明编写的时候没有看源代码。当时的Unix系统是收费的。但是教授拒绝接受他人对系统漏洞的修复。Minix就没有流行开来，Linus参考率Minix，自己开发了linux。意思是Linus的Unix。
+8. 后来美国反垄断法将AT&T拆分，随着其在电信市场垄断地位的丧失，它也获准销售UNIX。1989年，AT&T发布了System V Release 4（SVR4），此时也纳入了一些BSD的特性。后来AT&T又将System V授权给其他厂商。
 
-8. Linux的吉祥物是企鹅。www.kernel.org 是内核的网站。2.x时代的时候次版本号如果是偶数，则表示该版本是稳定版，否则是开发版。到了3.x以后，此规定不适合。2.6版本的时间跨度最大，从03年到11年，从2.6.0到2.6.39。其中2.6.12是使用Git工具管理的第一个版本。
+9. 早期的硬件厂商都会自己做操作系统，销售捆绑，利益更大，但是对消费者来说转移平台代价昂贵。
+
+10. 1984年，GNU计划发起时，BSD还不是free的，使用它需要获得AT&T的许可，用户还不得随意修改并重新发布。
+
+11. GNU项目的重要成果是GPL，这也是free在法律上的体现。第一版发布于1989年，当前是第三版，2007年。Linux是以第二版（1991年）协议发布的。
+
+12. UNIX的主要发行版本如下，Solaris可以在Intel微机平台安装，其他的UNIX系统则不然。
+
+    ```shell
+    系统名称       公司      硬件平台
+    AIX            IBM      PowerPC      (该CPU被早年MAC电脑使用)
+    HP-UX          HP       PA-RISC
+    Solaris        Sun      SPARC        (Sun公司后来被Oracle收购)
+    ```
+
+13. Mac OS，BSD也是一个UNIX的主流分支。Linux可以看做是类UNIX系统。
+
+14. Linux诞生于1991年，芬兰大学生林纳斯在学习操作系统课程时，接触到了Minix系统，该系统是教授参考了UNIX来开发的，不过声明编写的时候没有看源代码。当时的UNIX系统是收费的。但是教授拒绝接受他人对系统漏洞的修复。Minix就没有流行开来，Linus参考了Minix，自己开发了linux。意思是Linus的UNIX。
+
+15. 由于Minix是为了教学而开发的，因此没有充分利用386处理器的能力，且教授不听取他人的建议来丰富功能。Linux开发之初，主要目标是针对Intel 80386的高效系统实现，而非向其他处理器架构迁移的可移植性。
+
+16. 最初，Linux 的使用许可协议要严格得多，但Torvalds很快就将其归于GNU GPL 阵营。
+
+17. Linux的吉祥物是企鹅。www.kernel.org 是内核的网站。2.x时代的时候次版本号如果是偶数，则表示该版本是稳定版，否则是开发版。到了3.x以后，此规定不适合。2.6版本的时间跨度最大，从03年到11年，从2.6.0到2.6.39。其中2.6.12是使用Git工具管理的第一个版本。
+
+18. Linux最早的发行版出现于1992年，Debian，SUSE和RedHat出现于1993年左右，Ubuntu诞生于2004年。
+
+19. 和UNIX不同的是，Linux的发行版掌握在很多家公司手里，同时也没有一家公司可以左右Linux内核的开发，因此还没有诞生标准的Linux。Linux发行商会给发行版添加自家的特性，这种特性后续可能被吸收进Linux内核中。
+
+20. 为了保证不同Linux发布版之间的兼容性，LSB开发并推广了一套Linux 系统标准，其主要目的是用来确保让二进制应用程序（即编译过的程序）能够在任何符合LSB 规范的系统上运行。这比POSIX的源码兼容性要严格得多。对于在Linux上开发应用程序的独立软件开发商来说，二进制可移植性是其生存的基本前提。
+
 
 ## 发行版
 
@@ -77,7 +102,7 @@
 
 13. linux为系统上的每个设备都创建一个称为节点的特殊文件，与设备的所有通信都通过设备节点来完成。每个节点有内核提供的唯一的标识，一个主设备号，一个次设备号。类似的设备被划分到同一个主设备号下，次设备号用于标识主设备组中的特定设备。
 
-14. GNU工具链中供Linux使用的核心工具称为coreutils软件包，主要提供三种功能：处理文件，操作文本，管理进程。bash(Bourne again shell)由GNU项目组负责开发，被当做Unix标准shell-Bourne shell的替代品。
+14. GNU工具链中供Linux使用的核心工具称为coreutils软件包，主要提供三种功能：处理文件，操作文本，管理进程。bash(Bourne again shell)由GNU项目组负责开发，被当做UNIX标准shell-Bourne shell的替代品。
 
 15. 不同的shell有不同的特性，有的利用创建脚本，有的利用管理进程：
 
@@ -745,7 +770,7 @@
     Feb 24 09:29:56 zj-hit sshd[819]: Server listening on :: port 22.
     Feb 24 09:29:56 zj-hit systemd[1]: Started OpenBSD Secure Shell server.
     Feb 24 09:55:25 zj-hit sshd[1048]: Accepted password for zj from 192.168.80.1 p>
-    Feb 24 09:55:25 zj-hit sshd[1048]: pam_unix(sshd:session): session opened for u>
+    Feb 24 09:55:25 zj-hit sshd[1048]: pam_UNIX(sshd:session): session opened for u>
     ```
 
 
@@ -1780,7 +1805,7 @@
     SSH_CLIENT=192.168.80.1 6703 22
     XDG_DATA_DIRS=/usr/local/share:/usr/share:/var/lib/snapd/desktop
     PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/zj/.local/bin  #PATH
-    DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+    DBUS_SESSION_BUS_ADDRESS=UNIX:path=/run/user/1000/bus
     SSH_TTY=/dev/pts/0   #SSH的终端设备文件
     _=/usr/bin/env
     #-------------------------------------
@@ -2707,7 +2732,7 @@
 
 # 磁盘分区
 
-1. 各个组件在linux下都是文件，这个是延续自Unix的。硬件的驱动程序一般由厂商提供，linux下一般提供C语言的源文件，用户自行编译；Windows下，一般提供二进制安装文件。驱动一般编译为内核模块 .ko文件。这样的好处是不用重新编译内核。
+1. 各个组件在linux下都是文件，这个是延续自UNIX的。硬件的驱动程序一般由厂商提供，linux下一般提供C语言的源文件，用户自行编译；Windows下，一般提供二进制安装文件。驱动一般编译为内核模块 .ko文件。这样的好处是不用重新编译内核。
 
 2. 各个硬件在linux中的文件名，几乎所有的硬件文件都在/dev目录下。
 
@@ -3289,9 +3314,9 @@
     proc     #访问系统信息
     ReiserFS #高级Linux文件系统，能提供更好的性能和硬盘恢复功能
     smb      #支持网络访问的Samba SMB文件系统
-    sysv     #较早期的Unix文件系统
+    sysv     #较早期的UNIX文件系统
     ufs      #BSD文件系统
-    umsdos   #建立在msdos上的类Unix文件系统
+    umsdos   #建立在msdos上的类UNIX文件系统
     vfat     #Windows 95文件系统（FAT32）
     XFS      #高性能64位日志文件系统
     ```
@@ -4501,7 +4526,7 @@
 
 # Samba 服务
 
-1. SMB协议是Windows平台的局域网文件共享协议。Samba是Unix平台上为了兼容SMB协议而逆像开发的软件。
+1. SMB协议是Windows平台的局域网文件共享协议。Samba是UNIX平台上为了兼容SMB协议而逆像开发的软件。
 
 2. 安装步骤：
 
