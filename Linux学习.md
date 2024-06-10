@@ -1885,7 +1885,7 @@
    echo ${path/dmtsai/zj} #将第一个dmtsai替换为zj，结果为/usr/local/bin:/usr/bin:/home/zj/.local/bin:/home/dmtsai/bin
    echo ${path//dmtsai/zj} #将所有的dmtsai替换为zj，结果为/usr/local/bin:/usr/bin:/home/zj/.local/bin:/home/zj/bin 
    ```
-   
+
 2. 测试与内容替换，这种工作也可以通过if then来完成：
 
    ```shell
@@ -1916,6 +1916,12 @@
    echo ${var:+3}  #3
    echo ${var1:+3} #空
    echo ${var2:+3} #空
+   ```
+
+3. 如果要对变量进行可选择的设置，需要在对应的行开头加上冒号，否则shell在设置完成后，会将结果当作命令执行：
+
+   ```sh
+   : ${VAR:=DEFAULT} #如果变量VAR没有声明或者为空时，将VAR设置为默认值DEFAULT，否则什么也不做，表达式的结果为${VAR}。如果不在前面加上:，那么就会把${VAR}本身当做一个命令来执行，此时就会报错。
    ```
 
 ## 数组
@@ -2191,7 +2197,7 @@
    $-      #当前SHELL的选项，可以有himBH
    $BASH_SOURCE #当前bash脚本的路径名
    ```
-   
+
 9. 可以使用shift来移动参数，后面可以接参数，表示移动的数量，默认是1：
 
    ```shell
@@ -2201,6 +2207,16 @@
    shift   #将最左侧的参数移除
    echo "Total parameter number is ==> $#"    #结果为2
    echo "Your whole parameter is   ==> '$@'"  #结果为"two three"
+   ```
+
+10. 可以使用:来充当占位符
+
+   ```shell
+   if [ "today" == "2011-08-29" ]; then  
+       : #啥也不做，只起到占位符的作用。比如在编写脚本的过程中，某些语法结构需要多个部分组成，但开始阶段并没有想好或完成相应的代码，这时就可以用:来做占位符，否则执行时就会报错。
+   else  
+       :
+   fi
    ```
 
 ## 函数

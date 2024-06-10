@@ -1,8 +1,8 @@
 # 编译安装
 
-1. Openfoam需要使用专用的ParaView，因为这里边有专门为Openfoam编写的读取模块。
+1. OpenFOAM需要使用专用的paraview，因为这里边有专门为OpenFOAM编写的读取模块。
 
-2. 如果使用源码编译Openfoam时，也可以不手动编译paraview，而使用官方仓库提供内编译好的paraview。然后需要添加paraview的bin目录到PATH中。
+2. 如果使用源码编译OpenFOAM时，也可以不手动编译paraview，而使用官方仓库提供的编译好的paraview，然后需要添加paraview的bin目录到PATH中。
 
    ```shell
    sudo apt install paraviewopenfoam510 #这个只会单独安装paraview
@@ -10,13 +10,13 @@
    PATH=$PATH:/opt/paraviewopenfoam510/bin
    ```
 
-3. 新版本的paraview已经原生支持openfoam结果文件了，可以直接`sudo apt install paraview`安装即可。使用的时候，需要在对应的结果目录下创建一个任意的后缀名为.foam的文件即可。使用paraFoam时，会自动创建一个临时的.foam文件。也可以使用`paraFoam -touch`来创建一个永久的文件。
+3. 新版本的paraview已经原生支持OpenFOAM结果文件了，可以直接`sudo apt install paraview`安装即可。使用的时候，需要在对应的结果目录下创建一个任意的后缀名为.foam的文件即可。OpenFOAM官方推荐使用paraFoam来打开项目目录，此时会自动创建一个临时的.foam文件。也可以使用`paraFoam -touch`来创建一个永久的文件。
 
 4. ThirdParty-11仓库中主要包含的是Scotch软件的源码，因为早期版本的Debian自带的Scotch版本比较落后，因此需要使用源码编译安装，不过在Ubuntu22.04中，可以使用`sudo apt install scotch`安装即可。
 
-5. 源码目录中可能有冗余的文件，只有包含在Make/files中的文件才会被编译。这点可以从.dep文件的对应发现。
+5. 源码目录中可能有冗余的文件，只有包含在Make/files中的文件才会被编译。这点可以从.dep文件的对应发现，例如：`platforms/linux64GccDPInt32Opt/src/conversion/meshTables`中的`boundaryRegion.C.dep`文件。
 
-6. 源代码目录下的lnInclude目录中包含同级目录及其子目录的所有源文件，包括.C和.h。
+6. 源代码目录下的lnInclude目录中包含同级目录及其子目录的所有源文件，包括.C和.h。.C后缀名表示C++源文件
 
    ```shell
    zj@zj-hit:~/OpenFOAM/OpenFOAM-11/src/fileFormats$ tree
@@ -65,17 +65,13 @@
 
 8. 
 
-9. 
+9. debug 调试，可以对软件进行单步执行、堆栈跟踪、调试等操作来发现bug。
 
-10. 
+10. release 发行版，如果最终调试后程序没有明显bug，可以作为可用的软件分享给他人使用就可以使用这个选项编译。
 
-11. debug 调试，可以对软件进行单步执行、堆栈跟踪、调试等操作来发现bug。
+11. profiling 性能分析。可以对软件执行过程中的cpu利用率，内存占有进行分析。也可以用来发现、分析异常、bug。
 
-12. release 发行版，如果最终调试后程序没有明显bug，可以作为可用的软件分享给他人使用就可以使用这个选项编译。
-
-13. profiling 性能分析。可以对软件执行过程中的cpu利用率，内存占有进行分析。也可以用来发现、分析异常、bug。
-
-14. 常见的和路径相关的宏：
+12. 常见的和路径相关的宏：
 
     ```shell
     #如果源码存放路径为/home/zj/OpenFOAM/OpenFOAM-11。
@@ -84,17 +80,15 @@
     export WM_DIR=$WM_PROJECT_DIR/wmake #结果为/home/zj/OpenFOAM/OpenFOAM-11/wmake
     export WM_THIRD_PARTY_DIR=$WM_PROJECT_INST_DIR/ThirdParty-$WM_PROJECT_VERSION #结果为/home/zj/OpenFOAM/ThirdParty-11
     export WM_PROJECT_USER_DIR=$HOME/$WM_PROJECT/$USER-$WM_PROJECT_VERSION #结果为/home/zj/OpenFOAM/zj-11，默认在用户的家目录下创建一个用户名-版本的目录，作为用户目录
-    export WM_COLLECT_DIR=$WM_PROJECT_DIR/platforms/${WM_OPTIONS}/${PWD////_} #默认为空
+    export WM_COLLECT_DIR=$WM_PROJECT_DIR/platforms/${WM_OPTIONS}/${PWD////_} #会被脚本检测，如果这个目录不存在则变量为空，默认时该目录不存在。最后一段表示将PWD变量中的/替换为_。
     
-    export FOAM_INST_DIR=$(cd $(dirname ${BASH_SOURCE:-$0})/../.. && pwd -P) #结果为/home/zj/OpenFOAM。这行代码是在etc/bashrc中执行的，因此BASH_SOURCE就是该bashrc的路径。获取bashrc的目录部分，然后向上寻找2级父目录，且获取的是物理目录而非符号链接。
-    export FOAM_JOB_DIR=$WM_PROJECT_INST_DIR/jobControl #结果为/home/zj/OpenFOAM/jobControl，默认不存在
+    export FOAM_INST_DIR=$(cd $(dirname ${BASH_SOURCE:-$0})/../.. && pwd -P) #结果为/home/zj/OpenFOAM。由于这行代码是在/home/zj/OpenFOAM/OpenFOAM-11/etc/bashrc中执行的，因此BASH_SOURCE就是该脚本文件的路径。获取bashrc的目录部分，然后向上寻找2级父目录，且获取的是物理目录而非符号链接。
+    export FOAM_JOB_DIR=$WM_PROJECT_INST_DIR/jobControl #结果为/home/zj/OpenFOAM/jobControl，该目录默认不存在
     
     export ParaView_DIR=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/ParaView-$ParaView_VERSION #结果为/home/zj/OpenFOAM/ThirdParty-11/platforms/linux64Gcc/ParaView-5.10.1
-    export ParaView_INCLUDE_DIR=$ParaView_DIR/include/paraview-$ParaView_MAJOR #默认为空，只有在paraviewSrcDir目录存在是才会定义这个变量。
-    export ParaView_LIB_DIR=$ParaView_DIR/lib$paraviewArch$paraviewLibSubDir #默认为空，只有在paraviewSrcDir目录存在是才会定义这个变量。
+    export ParaView_INCLUDE_DIR=$ParaView_DIR/include/paraview-$ParaView_MAJOR #默认为空，只有在paraviewSrcDir目录存在时才会定义这个变量。
+    export ParaView_LIB_DIR=$ParaView_DIR/lib$paraviewArch$paraviewLibSubDir #默认为空，只有在paraviewSrcDir目录存在时才会定义这个变量。
     ```
-
-15. 
 
 
 # bashrc配置文件
@@ -106,16 +100,17 @@
    ```shell
    export WM_PROJECT=OpenFOAM
    export WM_PROJECT_VERSION=11
-   ################################################################################
+   ############################################################################
    # 这一部分是用户可以自定义的，不过之后的更新可能会覆盖这个文件。
    # FOAM_INST_DIR是OpenFOAM将要安装到的目录，如果使用bash来执行此文件，则以此文件来推断得到对应的目录，这样和源码目录在一块。也可以手动指定为固定的目录。
+   #下面的3行实际是一个表达式，用&&和||连接起来。[ -o ] 表示两侧的变量的或。第二部分是通过当前脚本文件推断源文件路径，第三部分是直接指定为用户的家目录。默认情况下这两个结果是一样的，都是/home/zj/OpenFOAM。
    [ "$BASH" -o "$ZSH_NAME" ] && \
    export FOAM_INST_DIR=$(cd $(dirname ${BASH_SOURCE:-$0})/../.. && pwd -P) || \
    export FOAM_INST_DIR=$HOME/$WM_PROJECT
-   # export FOAM_INST_DIR=~$WM_PROJECT #OpenFOAM用户的家目录
+   # export FOAM_INST_DIR=~$WM_PROJECT #用户名为OpenFOAM的家目录
    # export FOAM_INST_DIR=/opt/$WM_PROJECT #公共的区域，建议使用root安装
    # export FOAM_INST_DIR=/usr/local/$WM_PROJECT
-   ################################################################################
+   ############################################################################
    # 下面是一些配置选项，可以由~/.OpenFOAM等目录下的prefs.sh文件覆盖设置
    #- Compiler location: 编译器的位置
    #    WM_COMPILER_TYPE= system | ThirdParty (OpenFOAM)
@@ -164,16 +159,16 @@
        $HOME/$WM_PROJECT/$USER $FOAM_USER_APPBIN $FOAM_USER_LIBBIN \
        $WM_PROJECT_SITE $FOAM_SITE_APPBIN $FOAM_SITE_LIBBIN"
    
-   # Location of installation 定位安装目录
+   # Location of installation 设置安装目录，和FOAM_INST_DIR变量相同
    export WM_PROJECT_INST_DIR=$FOAM_INST_DIR
    export WM_PROJECT_DIR=$WM_PROJECT_INST_DIR/$WM_PROJECT-$WM_PROJECT_VERSION
    
-   if [ -d "$WM_PROJECT_DIR" ] #该目录默认存在，这段的功能是获取该目录的物理目录，避免使用符号链接。
+   if [ -d "$WM_PROJECT_DIR" ] #该目录默认存在，这段的功能是获取该目录的物理目录，避免使用符号链接。-d表示检查是否存在且为目录，-e表示检查是否存在。
    then
        WM_PROJECT_DIR_REAL=$(cd $WM_PROJECT_DIR && pwd -P) # -P表示显示物理目录
        if [ -d "$WM_PROJECT_DIR_REAL" -a -e "$WM_PROJECT_DIR_REAL/etc/bashrc" ]
        then
-           export WM_PROJECT_DIR=$WM_PROJECT_DIR_REAL
+           export WM_PROJECT_DIR=$WM_PROJECT_DIR_REAL #用临时变量替换掉
        fi
        unset WM_PROJECT_DIR_REAL
    fi
@@ -193,7 +188,7 @@
    
    # 确定本地的etc目录，一般是没有的
    # unset is equivalent to $WM_PROJECT_INST_DIR/site
-   if [ -d "$WM_PROJECT_SITE" ]
+   if [ -d "$WM_PROJECT_SITE" ] #这个变量默认为空，因此判断为假
    then
        export WM_PROJECT_SITE
    else
@@ -203,32 +198,26 @@
    # 定位用户文件
    export WM_PROJECT_USER_DIR=$HOME/$WM_PROJECT/$USER-$WM_PROJECT_VERSION
    
-   # 导入一些初始化函数
-   . $WM_PROJECT_DIR/etc/config.sh/functions
+   # 导入函数_foamAddPath, _foamAddLib, _foamAddMan, _foamSource, _foamParams。
+   . $WM_PROJECT_DIR/etc/config.sh/functions #执行脚本
    
-   # Source当前用户或者本地的配置文件
-   _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile prefs.sh` #默认不存在这个pref.sh文件
+   # Source当前用户或者本地的配置文件，_foamSource就是上一行导入的函数
+   _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile prefs.sh` # ` `中的命令是在配置文件目录中寻找名称为prefs.sh的文件。默认不存在这个pref.sh文件，所以_foamSource的参数为空，该函数会直接退出。
    
-   # 处理bashrc脚本的命令行参数，export或unset对应的变量
+   # 处理当前脚本的命令行参数，写在系统的bashrc中，一般为空。可以用=键值对的方式来export或unset对应的变量。
    export FOAM_SETTINGS="$@"
    _foamParams $@
    
    # 清理标准环境变量 (PATH, LD_LIBRARY_PATH, MANPATH)
    foamClean=$WM_PROJECT_DIR/bin/foamCleanPath
-   
-   #此时PATH为:
-   /home/zj/.vscode-server/bin/31c37ee8f63491495ac49e43b8544550fbae4533/bin/remote-cli:/home/zj/.local/bin:/home/zj/OpenFOAM/ThirdParty-11/platforms/linux64Gcc/gperftools-svn/bin:/home/zj/OpenFOAM/ThirdParty-11/platforms/linux64Gcc/cmake-*/bin:/home/zj/OpenFOAM/OpenFOAM-11/bin:/home/zj/OpenFOAM/OpenFOAM-11/wmake:/home/zj/OpenFOAM/zj-11/platforms/linux64GccDPInt32Opt/bin:/home/zj/OpenFOAM/site/11/platforms/linux64GccDPInt32Opt/bin:/home/zj/OpenFOAM/OpenFOAM-11/platforms/linux64GccDPInt32Opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/zj/.local/bin:/home/zj/.local/bin
-   # 从PATH中清理foamOldDirs的目录
+   #注意，如果使用VSCODE Remote登录到Linux上时，即使在本脚本的开头echo $PATH，结果也会包含OpenFOAM的目录。因为Remote登录时已经将当前脚本完整执行一遍了。想要获得准确的结果可以用putty或者退出remote重新登陆
+   #此时PATH为，清理前后不变
+   /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/zj/.local/bin
+   # 从PATH中清理foamOldDirs的目录，并重新赋值给PATH。
    cleaned=`$foamClean "$PATH" "$foamOldDirs"` && PATH="$cleaned"
-   #此时PATH为:
-   /home/zj/.vscode-server/bin/31c37ee8f63491495ac49e43b8544550fbae4533/bin/remote-cli:/home/zj/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
-   # 清理 LD_LIBRARY_PATH
-   # 此时LD_LIBRARY_PATH为：
-   /home/zj/OpenFOAM/ThirdParty-11/platforms/linux64Gcc/gperftools-svn/lib:/home/zj/OpenFOAM/OpenFOAM-11/platforms/linux64GccDPInt32Opt/lib/openmpi-system:/home/zj/OpenFOAM/ThirdParty-11/platforms/linux64GccDPInt32/lib/openmpi-system:/usr/lib/x86_64-linux-gnu/openmpi/lib:/home/zj/OpenFOAM/zj-11/platforms/linux64GccDPInt32Opt/lib:/home/zj/OpenFOAM/site/11/platforms/linux64GccDPInt32Opt/lib:/home/zj/OpenFOAM/OpenFOAM-11/platforms/linux64GccDPInt32Opt/lib:/home/zj/OpenFOAM/ThirdParty-11/platforms/linux64GccDPInt32/lib:/home/zj/OpenFOAM/OpenFOAM-11/platforms/linux64GccDPInt32Opt/lib/dummy
+   # 清理 LD_LIBRARY_PATH 前后都为空
    cleaned=`$foamClean "$LD_LIBRARY_PATH" "$foamOldDirs"` \
        && LD_LIBRARY_PATH="$cleaned"
-   #此时LD_LIBRARY_PATH为：
-   /usr/lib/x86_64-linux-gnu/openmpi/lib
    # 清理 MANPATH 前后都为空
    cleaned=`$foamClean "$MANPATH" "$foamOldDirs"` && MANPATH="$cleaned"
    
@@ -244,8 +233,8 @@
    _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/ensight`
    _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.sh/gperftools`
    
-   # 再次清理环境变量，本次只是去重
-   #- Clean PATH
+   # 再次清理环境变量，本次只是去重，因为foamClean只有一个参数
+   #- 清理 PATH
    cleaned=`$foamClean "$PATH"` && PATH="$cleaned"
    
    #- 清理 LD_LIBRARY_PATH
@@ -257,13 +246,13 @@
    export PATH LD_LIBRARY_PATH MANPATH
    
    #- 清理 LD_PRELOAD
-   if [ -n "$LD_PRELOAD" ]
+   if [ -n "$LD_PRELOAD" ] #检查字符串是否为非空，这里默认为空
    then
        cleaned=`$foamClean "$LD_PRELOAD"` && LD_PRELOAD="$cleaned"
        export LD_PRELOAD
    fi
    
-   # 清理此脚本中用到的一些变量
+   # 清理此脚本中用到的一些变量，避免污染shell执行环境
    unset cleaned foamClean foamOldDirs
    
    # 再次执行脚本，以卸载初始化函数
@@ -279,11 +268,11 @@
 1. `etc/config.sh/functions`：
 
    ```shell
-   if [ -z "$WM_BASH_FUNCTIONS" ]
+   if [ -z "$WM_BASH_FUNCTIONS" ] #判断字符串是否为空
    then
        WM_BASH_FUNCTIONS=loaded #一个标记变量，第一次执行时，会进入到这个分支，第二次执行时就会执行else分支，把上一次执行时定义的_foam系列函数都unset掉。
        
-   # _foamSource会依次Source所有的参数，如果定义了FOAM_VERBOSE，则输出一句Sourcing: 文件名。结果如下：
+   # _foamSource会依次Source所有的参数，如果定义了FOAM_VERBOSE，则每Source一个文件就会输出一句Sourcing: 文件名。例如：
        #Sourcing: /home/zj/OpenFOAM/OpenFOAM-11/etc/config.sh/settings
        #Sourcing: /home/zj/OpenFOAM/OpenFOAM-11/etc/config.sh/compiler
        #Sourcing: /home/zj/OpenFOAM/OpenFOAM-11/etc/config.sh/aliases
@@ -293,27 +282,27 @@
        #Sourcing: /home/zj/OpenFOAM/OpenFOAM-11/etc/config.sh/gperftools
        _foamSource()
        {
-           while [ $# -ge 1 ]
-           do #PS1是shell的提示符
+           while [ $# -ge 1 ] #参数数量>=1
+           do #PS1是shell的提示符，只有交互式shell才非空，此时才可以输出到终端。
                [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "Sourcing: $1" 1>&2
                . $1 #一次source一个参数，然后移除
              shift
            done
        }
-   #逐个处理命令行参数，支持两种类型，name=和name=value
+   #逐个处理命令行参数，只支持两种类型，name=和name=value
        _foamParams()
        {
-           while [ $# -gt 0 ]
+           while [ $# -gt 0 ] #参数数量>0
            do
                case "$1" in
-               -*) #以-开头的选项是非法的
+               -*) #以-开头的选项
                    # Stray option (not meant for us here) -> get out
                    break
                    ;;
                *=)
                    # name=，会执行unset name。也会受到FOAM_VERBOSE的影响
                    [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "unset ${1%=}" 1>&2
-                   eval "unset ${1%=}"
+                   eval "unset ${1%=}" # %=表示删除末尾的=
                    ;;
                *=*)
                    # name=value，会执行export name=value
@@ -329,11 +318,11 @@
        {
            while [ $# -ge 1 ]
            do
-               export PATH=$1:$PATH
+               export PATH=$1:$PATH #用:拼接
                shift
            done
        }
-       # 将参数逐个添加到LD_LIBRARY_PATH的开头，默认为控
+       # 将参数逐个添加到LD_LIBRARY_PATH的开头，该变量默认为空
        _foamAddLib()
        {
            while [ $# -ge 1 ]
@@ -365,7 +354,7 @@
 1. foamEtcFile：
 
    ```shell
-   zj@zj-hit:~$ foamEtcFile -list #输出所有查找的目录
+   zj@zj-hit:~$ foamEtcFile -list #输出所有查找的目录，仅查找，不执行
    /home/zj/.OpenFOAM/11
    /home/zj/.OpenFOAM
    /home/zj/OpenFOAM/site/11/etc
@@ -383,23 +372,23 @@
    # other level: \$WM_PROJECT_DIR/etc
    error() {
        [ "${optQuiet:-$optSilent}" = true ] && exit 1 #如果指定了-quiet或-silent参数，则不输出错误提示，直接退出。
-       exec 1>&2 #没有指定任何命令，因此会将当前shell的流1重定向到流2中。
+       exec 1>&2 #没有指定任何命令，因此会将当前shell的流1重定向到流2中，表示所有的输出都是错误信息。
        while [ "$#" -ge 1 ]; do echo "$1"; shift; done #逐一输出所有的参数。
        usage #执行usage函数。
        exit 1
    }
-   # $0是/home/zj/OpenFOAM/OpenFOAM-11/bin/foamEtcFile
+   # $0在这里是/home/zj/OpenFOAM/OpenFOAM-11/bin/foamEtcFile
    # bin目录，也就是当前脚本所在的目录: /home/zj/OpenFOAM/OpenFOAM-11/bin
    binDir="$(cd -- "$(dirname "$0")" >/dev/null 2>&1 || exit ; pwd -P)"
    
    # 项目目录: /home/zj/OpenFOAM/OpenFOAM-11
-   projectDir="${binDir%/bin}"
+   projectDir="${binDir%/bin}" #从字符串的结尾删除/bin
    
    # 目录前缀(和$FOAM_INST_DIR一样): /home/zj/OpenFOAM
-   prefixDir="${projectDir%/*}"
+   prefixDir="${projectDir%/*}" #从字符串的结尾删除/*
    
    # 项目目录的名称: OpenFOAM-11
-   projectDirName="${projectDir##*/}"
+   projectDirName="${projectDir##*/}" #从字符串的开头删除*/
    
    # 为后续使用，先取消定义
    unset versionNum
@@ -409,7 +398,7 @@
        OpenFOAM-*)     # 标准命名约定 OpenFOAM-<VERSION>
            version="${projectDirName##OpenFOAM-}"
            ;;
-       openfoam[0-9]*) # debian naming convention
+       openfoam[0-9]*) # debian 命名约定，例如openfoam5
            versionNum="${projectDirName##openfoam}"
            case "$versionNum" in
            [4-9]) # v4-9
@@ -419,19 +408,19 @@
                version="$versionNum"
                ;;
            3[0-9]) # e.g. v3.0
-               version=$(echo "$versionNum" | sed -e 's@\(.\)\(.\)@\1.\2@')
+               version=$(echo "$versionNum" | sed -e 's@\(.\)\(.\)@\1.\2@') #将32变为3.2
                ;;
            [1-2][0-9][0-9]) # e.g. v1.7.0
-               version=$(echo "$versionNum" | sed -e 's@\(.\)\(.\)\(.\)@\1.\2.\3@')
+               version=$(echo "$versionNum" | sed -e 's@\(.\)\(.\)\(.\)@\1.\2.\3@') #将170变为1.7.0
                ;;
            *)
                version="$WM_PROJECT_VERSION"
                ;;
            esac
            ;;
-       openfoam-dev) # debian naming convention
-           versionNum="${projectDirName##openfoam}"
-           version="${versionNum##-}"
+       openfoam-dev) # debian 命名约定
+           versionNum="${projectDirName##openfoam}" #为 -dev
+           version="${versionNum##-}" #为 dev
            ;;
        *)
            echo "Error : unknown/unsupported naming convention"
@@ -458,10 +447,10 @@
            ;;
        -m | -mode)
            [ "$#" -ge 2 ] || error "'$1' option requires an argument"
-           mode="$2"
+           mode="$2" #该选项需要一个参数
            # sanity check:
            case "$mode" in
-           *u* | *g* | *o* )
+           *u* | *g* | *o* ) #只支持u g o三个参数
               ;;
            *)
               error "'$1' option with invalid mode '$mode'"
@@ -483,7 +472,7 @@
        -v | -version)
            [ "$#" -ge 2 ] || error "'$1' option requires an argument"
            version="$2"
-           # convert x.y.z -> xyz version (if installation looked like debian)
+           # 将 x.y.z 转化为 xyz，Debian命名约定使用
            if [ -n "$versionNum" ]
            then
                versionNum=$(echo "$version" | sed -e 's@\.@@g')
@@ -504,7 +493,7 @@
        shift
    done
    
-   # 调试代码，可以取消注释以输出中间结果:
+   # 调试代码，可以取消注释以输出中间变量的值:
    # echo "Installed locations:"
    # for i in projectDir prefixDir projectDirName version versionNum
    # do
@@ -513,7 +502,7 @@
    
    # Save the essential bits of information
    # 去除掉开头的 ~OpenFOAM/ (used in Foam::findEtcFile)
-   nArgs=$#
+   nArgs=$# #脚本参数个数
    fileName="${1#~OpenFOAM/}"
    
    # 定义要被搜索的各种路径:
@@ -586,7 +575,7 @@
            fi
        done
    fi
-   exit $exitCode
+   exit $exitCode #根据退出码退出
    ```
 
 ## bin/foamCleanPath
@@ -596,7 +585,7 @@
    ```shell
    #     Usage: foamCleanPath [-strip] path [wildcard] .. [wildcard]
    #         - 去除重复的目录
-   #         - 区域和wildcard匹配的目录
+   #         - 去除和wildcard匹配的目录，可选参数
    #         - 去除不可访问的目录 (如果使用了 -strip选项)
    unset strip
    # 解析选项
@@ -625,7 +614,7 @@
    shift
    
    [ -n "$dirList" ] || exit 2    # 如果dirlist为空，则直接退出
-   # 可以取消下行的#DEBUG，以输出调试信息
+   # 可以取消下一行的#DEBUG，以输出调试信息
    #DEBUG echo "input>$dirList<" 1>&2
    
    # 保存当前的IFS，设置新的IFS，使用:和空格分隔
@@ -698,7 +687,7 @@
    Linux)
        WM_ARCH=linux
        # 编译器设置
-       case `uname -m` in
+       case `uname -m` in #硬件架构
            i686) #Intel 32位CPU
                export WM_ARCH_OPTION=32
                export WM_CC='gcc'
@@ -707,7 +696,7 @@
                export WM_CXXFLAGS='-fPIC -std=c++0x'
                export WM_LDFLAGS=
            ;;
-       x86_64) #Intel 64位
+       x86_64) #Intel 64位CPU
            case "$WM_ARCH_OPTION" in #目标软件架构，对于64位CPU，可以是32或64，这个是在etc/bashrc中设置的
            32)
                export WM_COMPILER_ARCH=64
@@ -718,7 +707,7 @@
                export WM_LDFLAGS='-m32'
                ;;
            64) #实际执行的是这个分支
-               WM_ARCH=linux64
+               WM_ARCH=linux64 #对于32位的情况，WM_ARCH为linux
                export WM_COMPILER_LIB_ARCH=64
                export WM_CC='gcc'
                export WM_CXX='g++'
@@ -727,11 +716,11 @@
                export WM_LDFLAGS='-m64'
                ;;
            *)
-               echo "Unknown WM_ARCH_OPTION '$WM_ARCH_OPTION', should be 32 or 64"\
-                    1>&2
-               ;;
+               echo "Unknown WM_ARCH_OPTION '$WM_ARCH_OPTION', should be 32 or 64" 1>&2
+           ;;
            esac
            ;;
+   
        aarch64) #arm64架构
            WM_ARCH=linuxArm64
            export WM_COMPILER_LIB_ARCH=64
@@ -795,7 +784,7 @@
        ;;
    esac
    
-   # 作业控制的目录
+   # 作业控制的目录，默认不存在
    export FOAM_JOB_DIR=$WM_PROJECT_INST_DIR/jobControl
    
    # wmake 配置
@@ -837,17 +826,18 @@
    export FOAM_MODULES=$FOAM_APP/modules
    export FOAM_RUN=$WM_PROJECT_USER_DIR/run
    
-   # 将application bins目录添加到PATH中，可以观察到有三个地方，USER，SITE，源代码目录中。
+   # 将application，bins目录添加到PATH中，可以观察到有三个地方，USER，SITE，源代码目录中。
    #此时PATH为：
-   /home/zj/.vscode-server/bin/31c37ee8f63491495ac49e43b8544550fbae4533/bin/remote-cli:/home/zj/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
-   _foamAddPath $FOAM_USER_APPBIN:$FOAM_SITE_APPBIN:$FOAM_APPBIN
+   /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/zj/.local/bin
+   
+   _foamAddPath $FOAM_USER_APPBIN:$FOAM_SITE_APPBIN:$FOAM_APPBIN #参数只有一个，而非3个
    #此时PATH为：
-   /home/zj/OpenFOAM/zj-11/platforms/linux64GccDPInt32Opt/bin:/home/zj/OpenFOAM/site/11/platforms/linux64GccDPInt32Opt/bin:/home/zj/OpenFOAM/OpenFOAM-11/platforms/linux64GccDPInt32Opt/bin:/home/zj/.vscode-server/bin/31c37ee8f63491495ac49e43b8544550fbae4533/bin/remote-cli:/home/zj/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+   /home/zj/OpenFOAM/zj-11/platforms/linux64GccDPInt32Opt/bin:/home/zj/OpenFOAM/site/11/platforms/linux64GccDPInt32Opt/bin:/home/zj/OpenFOAM/OpenFOAM-11/platforms/linux64GccDPInt32Opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/zj/.local/bin
    # 将wmake脚本的目录添加到PATH中，仅运行时环境不需要
-   [ -d "$WM_DIR" ] && PATH=$WM_DIR:$PATH
+   [ -d "$WM_DIR" ] && PATH=$WM_DIR:$PATH #增加了个/home/zj/OpenFOAM/OpenFOAM-11/wmake
    
    # 将OpenFOAM脚本目录添加到PATH中
-   export PATH=$WM_PROJECT_DIR/bin:$PATH
+   export PATH=$WM_PROJECT_DIR/bin:$PATH #增加了个/home/zj/OpenFOAM/OpenFOAM-11/bin
    
    # 将本地特定目录添加到PATH中
    if [ -d "$siteDir/bin" ] # 目录为/home/zj/OpenFOAM/site/bin，但是一般不存在
@@ -868,7 +858,7 @@
    unset MPFR_ARCH_PATH GMP_ARCH_PATH
    
    # 编译器的位置
-   if [ -z "$WM_COMPILER_TYPE" ] #默认为system，不为0
+   if [ -z "$WM_COMPILER_TYPE" ] #默认为system，在bashrc的开头设置，不为空
    then
        WM_COMPILER_TYPE=system
        echo "Warning in $WM_PROJECT_DIR/etc/config.sh/settings:" 1>&2
@@ -1008,7 +998,7 @@
    ```shell
    # 编译选项设置
    alias wmSet='. $WM_PROJECT_DIR/etc/bashrc' #执行bashrc配置文件
-   alias wm64='wmSet WM_ARCH_OPTION=64' #使用键值对指定参数
+   alias wm64='wmSet WM_ARCH_OPTION=64' #使用键值对指定bashrc脚本的参数
    alias wm32='wmSet WM_ARCH_OPTION=32'
    alias wmSP='wmSet WM_PRECISION_OPTION=SP'
    alias wmDP='wmSet WM_PRECISION_OPTION=DP'
@@ -1037,13 +1027,14 @@
    alias run='cd $FOAM_RUN'
    # 刷新环境变量
    # 为了向后兼容，在定义前，会先unalias wmRefresh，如果它是一个alias的话。实际上整个工程中只在这里定义了wmRefresh。
-   if command -V wmRefresh 2> /dev/null | head -1 | grep -q "function" #wmRefresh是函数，再中文环境下，command -V 输出的第一行为 "wmRefresh 是函数"。
+   if command -V wmRefresh 2> /dev/null | head -1 | grep -q "function" #wmRefresh是函数，在中文环境下，command -V 输出的第一行为 "wmRefresh 是函数"。功能类似于type。
+   #第一次执行时，没有这个变量，因此判断为假，会unalias一个不存在的东西，无关紧要。第二次执行时，wmRefresh已经作为函数存在了，此时应该unset，而中文环境下，判断为假，还是回去执行unalias。不过也无关紧要。
    then
        unset wmRefresh
    else
        unalias wmRefresh 2> /dev/null
    fi
-   wmRefresh() #定义wmRefresh
+   wmRefresh() #定义wmRefresh函数
    {
        wmProjectDir=$WM_PROJECT_DIR
        foamSettings=$FOAM_SETTINGS
@@ -1052,13 +1043,13 @@
    }
    # 改变OpenFOAM版本
    unset foamVersion
-   foamVersion() # 输出OpenFOAM的版本，默认为OpenFOAM-11
+   foamVersion() # 输出OpenFOAM的版本，默认为OpenFOAM-11。或者根据参数切换版本，例如foamVersion10会切换到OpenFOAM-10。
    {
-       if [ "$1" ]; then #可以手动指定一个版本号，如果制定了本地不存在的版本号，则会导致环境错乱，需要重新运行bash。
+       if [ "$1" ]; then #可以手动指定一个版本号，如果指定了本地不存在的版本号，则会导致环境错乱，需要重新运行bash。
            foamInstDir=$FOAM_INST_DIR
-           wmUnset #为下一步执行bashrc，先取消所有的变量设置
-           . $foamInstDir/OpenFOAM-$1/etc/bashrc
-           foam
+           wmUnset #为下一步执行bashrc，先取消所有的变量设置。
+           . $foamInstDir/OpenFOAM-$1/etc/bashrc #执行对应版本的配置文件
+           foam #切换到对应的目录
            echo "Changed to OpenFOAM-$1" 1>&2
        else
            echo "OpenFOAM-$WM_PROJECT_VERSION" 1>&2
@@ -1068,7 +1059,7 @@
    unset foamPV
    foamPV()
    {
-       . $WM_PROJECT_DIR/etc/config.sh/paraview ParaView_VERSION=$1
+       . $WM_PROJECT_DIR/etc/config.sh/paraview ParaView_VERSION=$1 #带一个参数
        echo "paraview-$ParaView_VERSION  (major: $ParaView_MAJOR)" 1>&2
    }
    ```
@@ -1079,23 +1070,18 @@
 1. config.sh/unset：
 
    ```shell
-   # Description
-   #     Clear as many OpenFOAM environment settings as possible
-   #
-   #------------------------------------------------------------------------------
-   
+   #   尽可能多地删除OpenFOAM的环境设置
+   #-----------------------------------------------------------------------------
    # Clean standard environment variables (PATH, LD_LIBRARY_PATH, MANPATH)
    foamClean=$WM_PROJECT_DIR/bin/foamCleanPath
-   [ -f "$foamClean" -a -x "$foamClean" ] || unset foamClean
+   [ -f "$foamClean" -a -x "$foamClean" ] || unset foamClean #检查路径名是否是文件，且可执行。默认第一部分为真，因此不用执行第二部分。
    
-   # The old dirs to be cleaned from the environment variables
+   # 需要用从环境变量中清理的旧目录
    foamOldDirs="$WM_PROJECT_DIR $WM_THIRD_PARTY_DIR \
        $HOME/$WM_PROJECT/$USER $FOAM_USER_APPBIN $FOAM_USER_LIBBIN \
        $WM_PROJECT_SITE $FOAM_SITE_APPBIN $FOAM_SITE_LIBBIN $ParaView_DIR"
    
-   #------------------------------------------------------------------------------
    # Unset WM_* environment variables
-   
    unset WM_ARCH
    unset WM_ARCH_OPTION
    unset WM_CC
@@ -1126,9 +1112,7 @@
    unset WM_SCHEDULER
    unset WM_THIRD_PARTY_DIR
    
-   #------------------------------------------------------------------------------
    # Unset FOAM_* environment variables
-   
    unset FOAM_APPBIN
    unset FOAM_APP
    unset FOAM_CODE_TEMPLATES
@@ -1152,9 +1136,7 @@
    unset FOAM_USER_LIBBIN
    unset FOAM_UTILITIES
    
-   #------------------------------------------------------------------------------
    # Unset MPI-related environment variables
-   
    unset MPI_ARCH_PATH
    unset MPI_BUFFER_SIZE
    
@@ -1164,9 +1146,7 @@
        unset OPAL_PREFIX
    fi
    
-   #------------------------------------------------------------------------------
    # Unset Ensight/ParaView-related environment variables
-   
    unset ENSIGHT9_READER
    unset CMAKE_HOME
    unset ParaView_DIR
@@ -1177,10 +1157,7 @@
    unset ParaView_GL
    unset PV_PLUGIN_PATH
    
-   #------------------------------------------------------------------------------
-   # Cleanup environment
-   # PATH, LD_LIBRARY_PATH, MANPATH
-   
+   # 分别从PATH, LD_LIBRARY_PATH, MANPATH中清理$foamOldDirs
    if [ -n "$foamClean" ]
    then
        cleaned=`$foamClean "$PATH" "$foamOldDirs"` && PATH="$cleaned"
@@ -1188,16 +1165,13 @@
        cleaned=`$foamClean "$MANPATH" "$foamOldDirs"` && MANPATH="$cleaned"
    fi
    
-   
+   #如果对应的环境变量为空时，就unset它。因为这表示在执行OpenFOAM配置前，它也为空，也就是没有定义。
    [ -n "$LD_LIBRARY_PATH" ] || unset LD_LIBRARY_PATH
    [ -n "$MANPATH" ] || unset MANPATH
    [ -n "$LD_PRELOAD" ] || unset LD_PRELOAD
    
-   
    unset cleaned foamClean foamOldDirs
-   #------------------------------------------------------------------------------
    # Cleanup aliases
-   
    unalias wmSet
    unalias wm64
    unalias wm32
@@ -1235,11 +1209,8 @@
    unset MPI_ARCH_PATH MPI_HOME FOAM_MPI_LIBBIN
    
    case "$WM_MPLIB" in
-   SYSTEMOPENMPI) #默认是这个
-       # Use the system installed openmpi, get library directory via mpicc
-       # 使用系统自带的openmpi，通过mpicc程序来获得库的目录
+   SYSTEMOPENMPI) #默认是这个，使用系统自带的openmpi，通过mpicc程序来获得库的目录
        export FOAM_MPI=openmpi-system
-   
        # Undefine OPAL_PREFIX if set to one of the paths on foamOldDirs
        if [ -z "$($foamClean "$OPAL_PREFIX" "$foamOldDirs")" ]
        then
@@ -1248,8 +1219,6 @@
        # mpicc --showme:link会输出链接选项，-L/usr/lib/x86_64-linux-gnu/openmpi/lib -lmpi。
        libDir=`mpicc --showme:link | sed -e 's/.*-L\([^ ]*\).*/\1/'` #结果为/usr/lib/x86_64-linux-gnu/openmpi/lib
    
-       # Bit of a hack: strip off 'lib' and hope this is the path to openmpi
-       # include files and libraries.
        # 去掉末尾的lib，结果为/usr/lib/x86_64-linux-gnu/openmpi
        export MPI_ARCH_PATH="${libDir%/*}"
    
@@ -1472,7 +1441,7 @@
    
    # 设置最小的MPI缓冲大小 (各平台通用，除了SGI MPI)
    : ${minBufferSize:=20000000}
-   #如果MPI_BUFFER_SIZE比20000000小，则修正为20000000。
+   #如果MPI_BUFFER_SIZE比20000000小，则修正为20000000。也就是19M左右
    if [ "${MPI_BUFFER_SIZE:=$minBufferSize}" -lt $minBufferSize ]
    then
        MPI_BUFFER_SIZE=$minBufferSize
@@ -1499,7 +1468,7 @@
            ) \
            && PATH="$cleaned"
    
-   # 确定要使用的cmake Take the most recent.
+   # 确定要使用的cmake
    unset CMAKE_HOME CMAKE_ROOT
    for cmake in $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/cmake-* #并不存在该目录
    do
@@ -1560,7 +1529,7 @@
    export ParaView_VERSION ParaView_MAJOR
    
    # Set the binary and source directories
-   # 设置二进制和源码目录，如果要自己编译的话。
+   # 设置二进制和源码目录，如果要自己编译ParaView的话。
    export ParaView_DIR=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/ParaView-$ParaView_VERSION
    paraviewSrcDir=$WM_THIRD_PARTY_DIR/ParaView-$ParaView_VERSION
    
@@ -1674,11 +1643,11 @@
 
 ## Allwmake
 
-1. 执行Allwmake，来构建整个项目：
+1. 执行根目录下的Allwmake，来构建整个项目：
 
    ```shell
    #!/bin/sh
-   cd ${0%/*} || exit 1    # 将工作目录切换到当前脚本所在的目录
+   cd ${0%/*} || exit 1    # 将工作目录切换到当前脚本所在的目录，%/*表示从右侧删除/*的部分，即获取目录部分。
    
    # 解析库编译的参数
    . wmake/scripts/AllwmakeParseArguments
@@ -1721,7 +1690,7 @@
 1. wmake/scripts/AllwmakeParseArguments：
 
    ```shell
-   # 使用source来执行本脚本，这样所有的参数都会保留
+   # 使用source来执行本脚本，这样原脚本的所有参数在这里仍然可用
    
    Script=${0##*/} #获取执行该脚本的脚本的文件名
    
@@ -1775,7 +1744,7 @@
                # 永久去除参数
                continue
                ;;
-           # 目标类型
+           # 构建目标的类型
            lib | libo | libso | dep | objects)
                targetType=$arg
                ;;
@@ -1784,9 +1753,7 @@
        # 重新插入参数
        set -- "$@" "$arg"
    done
-   
    # 执行 wmake -all 如果不是从wmake调用的话。
-   
    if [ -z "$fromWmake" ]
    then
        exec wmake -all $qOpt $*
@@ -1796,7 +1763,7 @@
        echo "$Script $targetType$targetSpace$(echo $PWD | sed s%$WM_PROJECT_DIR/%% )"
    fi
    
-   # 如果 WM_CONTINUE_ON_ERROR 没有设置，则 激活shell选项 "stop on error"
+   # 如果 WM_CONTINUE_ON_ERROR 没有设置，则激活shell选项 "stop on error"
    
    if [ -z "${WM_CONTINUE_ON_ERROR}" ]
    then
@@ -1804,7 +1771,6 @@
    fi
    
    # 清除本地变量和函数
-   
    unset Script usage fromWmake
    ```
 
@@ -1815,9 +1781,8 @@
 
    ```shell
    #!/bin/sh
-   cd ${0%/*} || exit 1    # Run from this directory
+   cd ${0%/*} || exit 1
    
-   # Parse arguments for library compilation
    # 解析库编译时的参数
    . ../wmake/scripts/AllwmakeParseArguments
    
@@ -1835,13 +1800,13 @@
        exit 1
    }
    
-   # Update OpenFOAM version strings if required
+   # 如果需要的话，更新OpenFOAM version字符串
    wmakePrintBuild -check || wrmo OpenFOAM/global/global.o 2>/dev/null
    
    Pstream/Allwmake $targetType $*
    
    OSspecific/${WM_OSTYPE:-POSIX}/Allwmake $targetType $*
-   wmake $targetType OpenFOAM
+   wmake $targetType OpenFOAM #OpenFOAM是目录名称
    
    wmake $targetType fileFormats
    wmake $targetType surfMesh
@@ -1904,12 +1869,9 @@
    wmake $targetType waves
    ```
 
-2. 
+## wmake/wmake
 
-
-## wmake
-
-1. wmake：
+1. wmake/wmake：
 
    ```shell
    #!/bin/bash
@@ -1965,12 +1927,11 @@
    # See also
    #     wmakeLnInclude, wmakeLnIncludeAll, wmakeCollect, wdep, wrmdep, wrmo,
    #     wclean, wcleanPlatform, wcleanLnIncludeAll
-   #
-   #------------------------------------------------------------------------------
    Script=${0##*/}
    
-   # Source the wmake functions
-   # shellcheck source=scripts/wmakeFunctions
+   # 执行wmakeFunctions脚本，其中定义了几个函数
+   # shellcheck是一个静态的脚本分析工具，可以在执行前分析一下，提前发现错误。
+   # shellcheck source=scripts/wmakeFunctions 
    . "${0%/*}/scripts/wmakeFunctions"
    
    error() {
@@ -2008,28 +1969,23 @@
    or a special target:
      all               wmake all sub-directories, running Allwmake if present
      queue             wmakeCollect all sub-directories, running Allwmake if present
-     exe               Compile statically linked executable
-     lib               Compile statically linked archive lib (.a)
-     libo              Compile statically linked lib (.o)
-     libso             Compile dynamically linked lib (.so)
+     exe               Compile statically linked executable #静态链接的可执行文件
+     lib               Compile statically linked archive lib (.a) #静态库
+     libo              Compile statically linked lib (.o) #目标文件
+     libso             Compile dynamically linked lib (.so) #动态库
      dep               Compile lnInclude and dependencies only
-     objects           Compile but not link
+     objects           Compile but not link #编译但不链接
    
    USAGE
    }
    
-   
-   # Default make is the "make" in the path
+   # 默认的make是PATH中找到的make
    make="make"
    
-   
-   #------------------------------------------------------------------------------
-   # Set WM_NCOMPPROCS to number of cores on local machine
-   #------------------------------------------------------------------------------
-   
+   # 设置 WM_NCOMPPROCS 为本地计算机的核心数
    useAllCores()
    {
-       if [ -r /proc/cpuinfo ]
+       if [ -r /proc/cpuinfo ] #查询/proc/cpuinfo文件
        then
            WM_NCOMPPROCS=$(grep -Ec "^processor" /proc/cpuinfo)
        else
@@ -2039,12 +1995,8 @@
        export WM_NCOMPPROCS
    }
    
-   
-   #------------------------------------------------------------------------------
-   # Parse arguments and options
-   #------------------------------------------------------------------------------
-   
-   # Default to compiling the local target only
+   # 解析选项和参数
+   # 默认只编译本地目标
    all=
    update=
    
@@ -2064,27 +2016,27 @@
            -q | -queue | queue)
                all="queue"
                ;;
-           # Parallel compilation on all cores of local machine
+           # 在本地机器上使用所有核心并行编译
            -j)
                useAllCores
                [ $# -ge 2 ] && [ "$2" -gt 0 ] > /dev/null 2>&1 \
                    && shift && export WM_NCOMPPROCS=$1
                echo "Compiling enabled on $WM_NCOMPPROCS cores"
                ;;
-           # Parallel compilation on specified number of cores
+           # 在特定数量的核心上并行编译
            -j*)
-               export WM_NCOMPPROCS=${1#-j}
+               export WM_NCOMPPROCS=${1#-j} #获取-j后面的数字
                echo "Compiling enabled on $WM_NCOMPPROCS cores"
                ;;
-           # Non-stop compilation, ignoring errors
+           # 遇到错误不停止编译
            -k | -non-stop)
                export WM_CONTINUE_ON_ERROR=1
                ;;
-           # Disable scheduled parallel compilation
+           # 关闭并行编译调度功能
            -no-scheduler)
                unset WM_SCHEDULER
                ;;
-           # Meant to be used following a pull, this will:
+           # Meant to be used following a pull, this will: 一般在从源代码仓库pull之后使用，
            # - remove dep files that depend on deleted files;
            # - remove stale dep files;
            # - update lnInclude directories;
@@ -2108,15 +2060,11 @@
        shift
    done
    
-   
-   #------------------------------------------------------------------------------
    # Check environment variables
-   #------------------------------------------------------------------------------
    
    checkEnv
    
-   # When compiling anything but a standalone exe WM_PROJECT and WM_PROJECT_DIR
-   # must be set
+   # 除了静态构建一个单独的exe文件之外，都要设置WM_PROJECT 和 WM_PROJECT_DIR
    [ "$1" = exe ] || { [ "$WM_PROJECT" ] && [ "$WM_PROJECT_DIR" ]; } || {
        echo "$Script error:" 1>&2
        echo "    environment variable \$WM_PROJECT or " \
@@ -2125,11 +2073,7 @@
        exit 1
    }
    
-   
-   #------------------------------------------------------------------------------
-   # Setup parallel compilation
-   #------------------------------------------------------------------------------
-   
+   # 设置并行编译
    # Set WM_NCOMPPROCS automatically when both WM_HOSTS and WM_SCHEDULER are set
    if [ -z "$WM_NCOMPPROCS" ] && [ -n "$WM_HOSTS" ] && [ -n "$WM_SCHEDULER" ]
    then
@@ -2155,11 +2099,7 @@
        fi
    fi
    
-   
-   #------------------------------------------------------------------------------
-   # Check arguments and change to the directory in which to run wmake
-   #------------------------------------------------------------------------------
-   
+   # 检查参数，切换目录，来运行wmake
    unset dir targetType
    MakeDir=Make
    
@@ -2172,7 +2112,7 @@
            targetType=$1
        fi
    
-       # Specified directory name:
+       # 指定目录名称:
        [ $# -ge 2 ] && dir=$2
    
        # Specified alternative name for the Make sub-directory:
@@ -2186,15 +2126,12 @@
            }
        fi
    
-       # Print command
+       # 显示命令
        [ -z "$targetType" ] || targetSpace=" "
        echo "$Script $targetType$targetSpace${dir:-.}"
    fi
    
-   
-   #------------------------------------------------------------------------------
    # Recurse the source tree to compile "all" targets
-   #------------------------------------------------------------------------------
    
    if [ -n "$update" ]
    then
@@ -2209,9 +2146,7 @@
    fi
    
    
-   #------------------------------------------------------------------------------
    # Recurse the source tree to compile "all" targets
-   #------------------------------------------------------------------------------
    
    if [ "$all" = "all" ]
    then
@@ -2250,10 +2185,7 @@
        fi
    fi
    
-   
-   #------------------------------------------------------------------------------
    # Recurse the source tree to compile "all" targets using wmakeCollect
-   #------------------------------------------------------------------------------
    
    if [ "$all" = "queue" ]
    then
@@ -2270,18 +2202,12 @@
        exit $?
    fi
    
-   
-   #------------------------------------------------------------------------------
    # Search up the directory tree for the Make sub-directory,
    # check the existence of the 'files' file and build there if present
-   #------------------------------------------------------------------------------
    
    cdSource
    
-   
-   #------------------------------------------------------------------------------
    # Transform options
-   #------------------------------------------------------------------------------
    
    # Transform no option to "libso" if that looks appropriate or remove it
    # so that the call to make builds the application
@@ -2302,10 +2228,7 @@
        esac
    fi
    
-   
-   #------------------------------------------------------------------------------
    # Created the objectsDir directory
-   #------------------------------------------------------------------------------
    
    objectsDir=$MakeDir/$WM_OPTIONS
    expandPath "$PWD"
@@ -2317,13 +2240,9 @@
    
    mkdir -p "$objectsDir"
    
-   
-   #------------------------------------------------------------------------------
    # Create $objectsDir/files from $MakeDir/files if necessary
-   #
    # Spawn a sub-shell and unset MAKEFLAGS in that sub-shell to avoid
    # $objectsDir/files being built in parallel
-   #------------------------------------------------------------------------------
    
    if ! grep -q "SOURCE" "$MakeDir/files"; then
        (
@@ -2342,9 +2261,7 @@
    fi
    
    
-   #------------------------------------------------------------------------------
    # Make the dependency files
-   #------------------------------------------------------------------------------
    
    # For libraries create lnInclude ...
    case "$targetType" in
@@ -2359,9 +2276,7 @@
    esac
    
    
-   #------------------------------------------------------------------------------
    # When WM_UPDATE_DEPENDENCIES is set, use forced dependency files update
-   #------------------------------------------------------------------------------
    
    if [ -n "$WM_UPDATE_DEPENDENCIES" ]
    then
@@ -2378,10 +2293,7 @@
        unset makeExitCode
    fi
    
-   
-   #------------------------------------------------------------------------------
    # Make the dependency files or object files and link
-   #------------------------------------------------------------------------------
    
    # shellcheck disable=SC2093,SC2086
    exec $make -f "$WM_DIR/makefiles/general" MAKE_DIR="$MakeDir" \
@@ -2391,11 +2303,143 @@
    
    unset Script usage error useAllCores update expandPath findTarget
    ```
+   
 
-2. 
+# 编译结果
 
-3. 
+1. 编译前后目录结构的变化：
 
-4. 
+   ```shell
+   #编译前，在src路径下,fileFormats模块
+   zj@zj-hit:~/OpenFOAM/OpenFOAM-11/src/fileFormats$ tree
+   .
+   ├── lnInclude #将当前模块中所有的文件都通过符号链接包含到这里
+   │   ├── NASCore.C -> ../nas/NASCore.C
+   │   ├── NASCore.H -> ../nas/NASCore.H
+   │   ├── OBJstream.C -> ../obj/OBJstream.C
+   │   ├── OBJstream.H -> ../obj/OBJstream.H
+   │   ├── STARCDCore.C -> ../starcd/STARCDCore.C
+   │   ├── STARCDCore.H -> ../starcd/STARCDCore.H
+   │   ├── vtkUnstructuredReader.C -> ../vtk/vtkUnstructuredReader.C
+   │   ├── vtkUnstructuredReader.H -> ../vtk/vtkUnstructuredReader.H
+   │   ├── vtkUnstructuredReaderTemplates.C -> ../vtk/vtkUnstructuredReaderTemplates.C
+   │   ├── vtkWriteOps.C -> ../vtk/vtkWriteOps.C
+   │   ├── vtkWriteOps.H -> ../vtk/vtkWriteOps.H
+   │   ├── vtkWriteOpsTemplates.C -> ../vtk/vtkWriteOpsTemplates.C
+   │   ├── vtkWritePolyData.H -> ../vtk/vtkWritePolyData.H
+   │   └── vtkWritePolyDataTemplates.C -> ../vtk/vtkWritePolyDataTemplates.C
+   ├── Make
+   │   ├── files #
+   │   └── options
+   ├── nas
+   │   ├── NASCore.C
+   │   └── NASCore.H
+   ├── obj
+   │   ├── OBJstream.C
+   │   └── OBJstream.H
+   ├── starcd
+   │   ├── STARCDCore.C
+   │   └── STARCDCore.H
+   └── vtk
+       ├── vtkUnstructuredReader.C
+       ├── vtkUnstructuredReader.H
+       ├── vtkUnstructuredReaderTemplates.C
+       ├── vtkWriteOps.C
+       ├── vtkWriteOps.H
+       ├── vtkWriteOpsTemplates.C
+       ├── vtkWritePolyData.H
+       └── vtkWritePolyDataTemplates.C
+   
+   6 directories, 30 files
+   #编译后，在platforms路径下
+   zj@zj-hit:~/OpenFOAM/OpenFOAM-11/platforms/linux64GccDPInt32Opt/src/fileFormats$ tree
+   .
+   ├── files
+   ├── nas
+   │   ├── NASCore.C.dep #抛弃.H文件，将.C编译成.O文件，同时生成一个.C.dep的供make使用的依赖文件。
+   │   └── NASCore.o
+   ├── obj
+   │   ├── OBJstream.C.dep
+   │   └── OBJstream.o
+   ├── starcd
+   │   ├── STARCDCore.C.dep
+   │   └── STARCDCore.o
+   └── vtk
+       ├── vtkUnstructuredReader.C.dep
+       ├── vtkUnstructuredReader.o
+       ├── vtkWriteOps.C.dep
+       └── vtkWriteOps.o
+   
+   4 directories, 11 files
+   ```
 
-5. 
+2. Make文件夹中的内容：
+
+   1. file文件，第一部分负责记录本模块中需要编译的源文件，也是源文件依赖。LIB变量记录要生成的共享库的路径，这里是。省略了.so
+
+      ```sh
+      #可以看到虽然vtk文件夹下有5个.C文件，由于这里只包含了2个文件，因此编译后platforms中的vtk目录下，也只有2个文件名的.C.dep和.o文件。
+      vtk/vtkWriteOps.C
+      vtk/vtkUnstructuredReader.C
+      nas/NASCore.C
+      starcd/STARCDCore.C
+      obj/OBJstream.C
+      
+      LIB = $(FOAM_LIBBIN)/libfileFormats
+      #~/OpenFOAM/OpenFOAM-11/platforms/linux64GccDPInt32Opt/lib/libfileFormats.so
+      ```
+
+   2. option文件
+
+      ```shell
+      #头文件寻找路径，因为src目录下的.C文件中，包含头文件时都是使用" "，也就是去本地目录下寻找，而这个目录就在gcc -I参数指定的路径中。
+      EXE_INC = \
+          -I$(LIB_SRC)/fileFormats/lnInclude \
+          -I$(LIB_SRC)/finiteVolume/lnInclude \
+          -I$(LIB_SRC)/dynamicMesh/lnInclude \
+          -I$(LIB_SRC)/meshTools/lnInclude
+      #链接时需要的库的名称
+      LIB_LIBS = \
+          -lfileFormats \
+          -lfiniteVolume \
+          -ldynamicMesh \
+          -lmeshTools
+      ```
+
+3. src目录中的文件编译后，只会在platforms目录下的lib目录中生成.so库文件。而用户具体执行的求解器和工具程序则是由bin目录下的
+
+4. 用户执行bin目录下的以Foam结尾的脚本时，会提示这个文件已经被替换了，需要使用foamRun -solver来替代。而foamRun程序是通过编译applications中的源码来连接起来各种共享库得到的。例如
+
+   ```shell
+   #~/OpenFOAM/OpenFOAM-11/applications/solvers/foamRun/Make/files目录的内容
+   setDeltaT.C
+   foamRun.C
+   
+   EXE = $(FOAM_APPBIN)/foamRun #这表示要生成一个可执行文件
+   ```
+
+5. 有一些程序是以脚本的形式存在的，存放在源码目录`/home/zj/OpenFOAM/OpenFOAM-11/bin`中，不用编译就可以使用。
+
+6. `/home/zj/OpenFOAM/OpenFOAM-11/applications/modules`中的源文件编译后连接后，也会产生共享库
+
+7. platforms目录下的applications目录中存放的内容都是.C.H和.O文件，类似于src目录。
+
+8. applications目录下的这几个目录的作用：
+
+   ```shell
+   legacy    #生成可执行文件，存放在platforms下的bin目录     $(FOAM_APPBIN)
+   modules   #生成库文件，存放在platforms下的lib目录         $(FOAM_LIBBIN)
+   solvers   #生成可执行文件，存放在用户自己的platforms下的bin目录  $(FOAM_APPBIN)
+   test      #生成可执行文件，存放在platforms下的bin目录     $(FOAM_USER_APPBIN)
+   utilities #生成可执行文件，存放在platforms下的bin目录     $(FOAM_APPBIN)
+   ```
+
+9. src目录下的所有目录或子目录最终都会生成一个对应的共享库。
+
+10. 共享库一共有143个，可执行文件一共有157个。
+
+11. 
+
+12. 
+
+13. 

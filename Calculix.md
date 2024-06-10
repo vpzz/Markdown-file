@@ -579,7 +579,7 @@
 
 2. 使用Fortran宏包括的Fortran函数，需要使用ctags才可以在vscode内跳转。
 
-3. 安装Ctags Companion扩展。然后执行终端→运行任务→显示所有任务→Ctags Companion: rebuild ctags即可生成tags文件。之后可以使用F12，CTRL+单击来进行跳转。
+3. 安装Ctags Companion扩展。然后执行终端→运行任务→显示所有任务→Ctags Companion: rebuild ctags即可生成`tags`文件。之后可以使用F12，CTRL+单击来进行跳转。
 
 4. ctags在Ubuntu22.04有两个版本，exuberant ctags 和 universal ctags。universal ctags是exuberant ctags的继续开发。
 
