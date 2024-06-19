@@ -4595,9 +4595,11 @@
 
 2. ![image-20220707105841023](Linux学习.assets/image-20220707105841023-16571968881573.png)
 
-3. 还有Reverse Connection 也就是反向链接，将本机当作服务端，由远程的服务器主动连接客户端。这用在某些服务器不能正常开启pvserver的情况。此时-p就不表示服务器端监听的端口，而是客户端监听的端口。
+3. 连接成功后，可以在File→Open中找到远程目录。可以使用`paraFoam -touch`来创建.OpenFOAM文件，这样方便paraview识别。
 
-4. 这个pvserver设计有个不太好的点，就是在客户端断开连接后，服务端会自动终止。如果要避免这种情况，就需要书写一个shell脚本`start-pvserver.sh`来控制：
+4. 还有Reverse Connection 也就是反向链接，将本机当作服务端，由远程的服务器主动连接客户端。这用在某些服务器不能正常开启pvserver的情况。此时-p就不表示服务器端监听的端口，而是客户端监听的端口。
+
+5. 这个pvserver设计有个不太好的点，就是在客户端断开连接后，服务端会自动终止。如果要避免这种情况，就需要书写一个shell脚本`start-pvserver.sh`来控制：
 
    ```shell
    #!/usr/bin/bash

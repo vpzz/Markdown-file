@@ -4073,3 +4073,244 @@
    python a.py  #这种情况下不要求a.py文件具备执行权限。
    ./a.py       #这种情况要求a.py文件具备执行权限，同时还要求在该文件的第一行注明解释器的绝对路径，例如  #!/usr/bin/python3     或者用环境变量 #!/usr/bin/env python3
    ```
+
+# 自动化 pyautogui
+
+1. pyautogui可以执行鼠标和键盘的动作，并进行一些图像识别工作来自动化。
+
+2. 可以设置`pyautogui.PAUSE = 0.2`来在每个pyautogui调用之间插入一个休眠时间0.2秒。
+
+3. 可以设置`pyautogui.FAILSAFE = True`来开启安全模式，此时在程序运行中若将鼠标移动到左上角，则程序会异常终止，这样可以防止程序跑飞了。
+
+4. 鼠标功能：
+
+   ```python
+   import pyautogui
+   width, height = pyautogui.size()  # 返回屏幕分辨率
+   x, y = pyautogui.position()   # 返回当前鼠标位置
+   pyautogui.onScreen(1919, 500) # 判断给定位置是否在屏幕上
+   
+   pyautogui.moveTo(900, 900, 1)  # 移动鼠标到绝对位置，第三个参数是整个动作的时长duration
+   pyautogui.move(0, 60, 1)  # 按照相对位置移动鼠标
+   
+   pyautogui.dragTo(800, 800, 1, button="left")  # 左键拖动，绝对位置
+   pyautogui.drag(0, 200, 1, button="right")  # 右键拖动，相对位置
+   
+   pyautogui.click(100, 100, duration=1, clicks=2, interval=0.8, button="right") # 鼠标会先移动到指定位置，时间为1秒，然后右键点击2次，间隔为0.8秒。如果没有给定任何参数，则会当前位置左键单击一次
+   
+   pyautogui.doubleClick()  # 左键双击，比自己设定click的interval更好
+   pyautogui.tripleClick()  # 左键三击
+   
+   pyautogui.mouseDown()  # 保持按下鼠标的状态，拖动的底层就是按住，移动鼠标，再松开
+   pyautogui.mouseUp()  # 保持松开鼠标
+   pyautogui.scroll(1000)  # 滚动鼠标滚轮，并非是按照鼠标滚轮上的一段一段开滚动的。正数表示向上滚动滚轮，屏幕一般会向下移动，但是也可以设置向上移动。
+   ```
+
+5. 默认情况下，duration都是0，表示立即完成该动作。如果比`pyautogui.MINIMUM_DURATION`小，则会立即完成，该值默认是0.1秒。
+
+6. 通常情况下，鼠标会沿直线匀速运动。pyautogui还支持定制移动功能，这可以在move的第4个参数tween中设置，该参数接受一个函数，该函数接受一个0到1的参数，返回一个0到1的参数，输入表示时间比例，输出表示位置比例，默认为linear，也就是输入=输出。官方自带了一下几种模式：
+
+   ```python
+   pyautogui.easeInQuad     # start slow, end fast
+   pyautogui.easeOutQuad    # start fast, end slow
+   pyautogui.easeInOutQuad  # start and end fast, slow in middle
+   pyautogui.easeInBounce   # bounce at the end
+   pyautogui.easeInElastic  # rubber band at the end
+   ```
+
+7. 只有在duration参数不为0时才会生效。
+
+8. tween 为补间动画的意思，easing为缓动的意思。更复杂的功能可以使用pytweening库实现。
+
+9. drag和dragRel，move和moveRel，write和typewrite都是一样的，前者是pyautogui 1.0后推荐使用的。
+
+10. 按键button参数可以取值为`"left","right","middle"`。中键和右键单击都有对应的函数`pyautogui.rightClick, pyautogui.middleClick`。
+
+11. 在Linux和OS X上，可以调用hscroll来进行水平滚动。
+
+12. 键盘功能：
+
+    ```python
+    pyautogui.write("hello world", interval=0.2)  # 依次键入字符串中的每个按键，间隔为0.2秒。无法使用功能键。
+    pyautogui.press("enter")  # 按下然后抬起一个按键，一般用于按下功能键而非输入文字，大写字母也有效。
+    pyautogui.press(["A", "B"])  # 可以传入一个可迭代对象，这样会依次按下对应的键
+    pyautogui.press('left', presses=3, interval=0.2) #连续按3下该键
+    pyautogui.keyDown("F1")  # 按下按键并保持
+    pyautogui.keyUp("F1")  # 释放按键
+    pyautogui.hotkey("ctrl", "v", interval=0.2)  # 依次按下这些键，然后按照相反的顺序依次释放。相当于2个keyDown和2个keyUp
+    ```
+
+13. 可以使用hold上下文管理器来进行组合按键：
+
+    ```python
+    with pyautogui.hold('shift'):
+            pyautogui.press(['left', 'left', 'left']) #等价于按住shift，然后连按3下left，再松开shift。
+    ```
+
+14. 所有支持的按键名称可以通过`pyautogui.KEYBOARD_KEYS`获得：
+
+    ```python
+    ['\t', '\n', '\r', ' ', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '.', '/', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '_', '`', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 
+    'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '{', '|', '}', 
+    '~', 'accept', 'add', 'alt', 'altleft', 'altright', 'apps', 'backspace', 'browserback', 'browserfavorites', 'browserforward', 'browserhome', 'browserrefresh', 'browsersearch', 'browserstop', 'capslock', 'clear', 'convert', 'ctrl', 'ctrlleft', 'ctrlright', 'decimal', 'del', 'delete', 'divide', 'down', 'end', 'enter', 'esc', 'escape', 'execute', 'f1', 'f10', 'f11', 'f12', 'f13', 'f14', 'f15', 'f16', 'f17', 'f18', 'f19', 'f2', 'f20', 'f21', 'f22', 'f23', 'f24', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'final', 'fn', 'hanguel', 'hangul', 'hanja', 'help', 'home', 'insert', 'junja', 'kana', 'kanji', 'launchapp1', 'launchapp2', 
+    'launchmail', 'launchmediaselect', 'left', 'modechange', 'multiply', 'nexttrack', 'nonconvert', 'num0', 'num1', 'num2', 'num3', 'num4', 'num5', 'num6', 'num7', 'num8', 'num9', 'numlock', 'pagedown', 'pageup', 'pause', 'pgdn', 'pgup', 'playpause', 'prevtrack', 'print', 'printscreen', 'prntscrn', 'prtsc', 'prtscr', 'return', 'right', 'scrolllock', 'select', 'separator', 'shift', 'shiftleft', 'shiftright', 'sleep', 'space', 'stop', 'subtract', 'tab', 'up', 'volumedown', 'volumemute', 'volumeup', 'win', 'winleft', 'winright', 'yen', 'command', 'option', 'optionleft', 'optionright']
+    ```
+
+15. 显示提示框和用户交互：
+
+    ```python
+    pyautogui.alert(text='This is text', title='This is title', button='OK') #显示一个提示框，只有一个确定按钮，总是返回button的字符串。
+    pyautogui.confirm(text='This is text', title='This is title', buttons=['OK', 'Cancel']) #包含确定和取消2个按钮，关闭对话框相当于按取消，会返回buttons中的一个字符串。
+    pyautogui.prompt(text='This is text', title='This is title' , default='默认内容') #包含确定，取消2个按钮和1个输入框，用户输入后按确定，可以返回输入的字符串。按取消时返回None。
+    pyautogui.password(text='', title='', default='', mask='*') #功能和prompt类似，不同的是，输入的字符会被mask替换，用于输入密码。
+    ```
+
+16. pyautogui使用PyScreeze（基于pillow库）来处理图像相关的工作。
+
+    ```python
+    # 截图，区域的左上角为100,100，尺寸为500x500。当未指定区域时，截取整个屏幕。
+    image1 = pyautogui.screenshot("b.png", region=(100, 100, 500, 500))  # 返回值为一个pillow图像对象，也可以不指定文件地址，来直接使用图像对象。
+    
+    image1.getpixel((100, 100)) # 获取图像中位置为100,100的像素的颜色，会根据颜色格式来返回不同的结果，RGB时返回一个三元组，灰度时返回一个数值。
+    pyautogui.pixel(100, 100)  # 返回屏幕上位置100,100的像素的RGB三元组。
+    pyautogui.pixelMatchesColor(100, 100, (255, 255, 255), tolerance=10) # 对100,100位置的像素进行颜色对比，目标颜色为(255,255,255)，容差为10。
+    
+    imagebox = pyautogui.locateOnScreen("b.png") # 在屏幕上查找和图片内容相同的区域的第一个，找到时返回(left, top, width, height)。找不到时返回None。可以使用region参数来设定搜索区域的范围，或设定grayscale=True开启灰度匹配，这样可以提高比对速度，大约30%，也能一定程度模糊颜色区别或者产生假阳性结果（即将不匹配的认定为匹配）。
+    pyautogui.locateAllOnScreen #会在屏幕上找到所有相同的区域，返回一个生成器，能够生成位置大小的4元组。
+    centerpoint = pyautogui.center(imagebox)  # 根据box返回其中心点对象，可以使用x，y属性来获取值。也可以使用pyautogui.locateCenterOnScreen来直接返回中心点的坐标。
+    pyautogui.locateCenterOnScreen("b.png") #等价于locateOnScreen和center。
+    
+    pyautogui.locate(needleImage, haystackImage, grayscale=False) #在一系列图像对象中寻找，返回第一个。
+    locateAll(needleImage, haystackImage, grayscale=False) #在一系列图像对象中找到所有。
+    
+    pyautogui.click("a.png")  # 在当前屏幕上搜索图片的像素，然后单击其中心。
+    ```
+
+17. 在一个1920x1080的屏幕上，截图大概消耗100ms时间，查找大概消耗1到2秒。所有的查找都是从左上角依次到右下角。
+
+18. 从0.9.41开始，当查找失败时，会报`ImageNotFoundException`异常，而非返回None。
+
+19. 可以为locate系列函数定义`confidence=0.9`来设置置信度。不过这需要安装OpenCV才可以。
+
+20. 对于生成器，可以使用for in循环依次读取，也可以使用list构造列表。
+
+21. 可以使用keyboard库来hook全局事件，注册热键和模拟按键，它是纯python实现的，没有任何依赖库。该库利用了Windows钩子函数。功能如下：
+
+    ```python
+    import keyboard #注意不是pykeyboard
+    keyboard.press_and_release('shift+s, space') #
+    
+    keyboard.write('abc') #依次按下abc三个键
+    keyboard.add_hotkey('ctrl+shift+a', print, args=('triggered', 'hotkey')) #为热键绑定一个钩子函数，当按下ctrl+alt+a时，会调用print函数，并传递参数args，要求args是一个元素，即使只有一个元素。默认是在按键按下时触发，可以设置trigger_on_release=True来改变为抬起时触发。
+    
+    # Press PAGE UP then PAGE DOWN to type "foobar".
+    keyboard.add_hotkey('page up, page down', lambda: keyboard.write('foobar')) #按一次PAGE UP，然后再按依次PAGE DOWN会调用函数，这里使用lambda表达式来代替函数。
+    
+    
+    keyboard.add_abbreviation('@@', 'my.long.email@example.com') #输入@@然后按空格，就会将其替换为后面的字符串。
+    
+    keyboard.wait() #阻塞当前线程，类似于while True，但是while True会使CPU空转，这个不会。
+    keyboard.wait('esc') #阻塞，直到按下esc键时继续往下执行，也就是退出while循环。这个适用于只响应1次的情况。
+    
+    keyboard.remove_hotkey(event_data, element_data) #移除一个热键。
+    
+    keyboard.get_hotkey_status(event_data) #返回一个布尔值，表示热键事件的状态。
+    keyboard.get_hotkey_count() #返回一个整数，表示当前活动的热键数量。
+    keyboard.get_all_hotkey_status() #返回一个字典，其中键是键盘按键事件的类型，值是对应的状态。
+    
+    keyboard.get_current_time() #返回当前时间戳（以秒为单位）。
+    keyboard.get_last_time() #返回上次调用 keyboard.wait() 或 keyboard.wait(timeout) 时的时间戳（以秒为单位）。
+    
+    keyboard.get_pressed() #返回一个字典，其中键是键盘按键事件的类型，值是对应的按键值。
+    keyboard.get_key_modifiers() #返回一个字典，其中键是键盘按键事件的类型，值是对应的按键修饰符（如 Shift、Ctrl、Alt 等）。
+    keyboard.get_key_status(event_data) #返回一个布尔值，指示键盘按键事件的状态。
+    keyboard.get_key_description(event_data) #返回一个字符串，其中键是键盘按键事件的类型，值是对应的按键描述（如 "Key A"、"Key B" 等）。
+    ```
+
+22. 事件在单独的线程中自动捕获，不阻塞主程序。
+
+23. 注册一个多次使用的热键：
+
+    ```python
+    keyboard.add_hotkey('space', lambda: print('space was pressed!')) #为该热键注册一个函数
+    keyboard.wait() #阻塞当前线程，类似于while True，但是while True会使CPU空转，这个不会。
+    ```
+
+24. 注册一个只使用1次的热键：
+
+    ```python
+    keyboard.wait('space') #阻塞当前线程，直到按下空格键，才会继续执行下面的代码，也就是退出while循环。
+    print('space was pressed, continuing...')
+    ```
+
+25. 录制按键动作，保存，执行：
+
+    ```python
+    recorded = keyboard.record(until='esc') #录制按键序列，直到按下esc键时停止。
+    keyboard.play(recorded, speed_factor=3) #以原来3倍的速度执行之前录制的按键
+    ```
+
+26. 热键可以是扫描码（数字57代表空格），单个按键（"space"），多个按键（"enter"），多步按键（"alt+F4, enter"）等。
+
+27. 发送一个操作系统事件，来执行热键：
+
+    ```python
+    keyboard.send(hotkey, do_press=True, do_release=True) #
+    # do_press和do_release表示是否发送对应的按下或抬起事件
+    #该功能的底层是由按下和抬起两个事件组成的
+    keyboard.press(hotkey)
+    keyboard.release(hotkey)
+    keyboard.is_pressed(hotkey) #判断是否处于按下状态
+    ```
+
+28. 修饰键就是功能按键，分为sided_modifiers和all_modifiers：
+
+    ```py
+    sided_modifiers = {'ctrl', 'alt', 'shift', 'windows'} #在键盘的左右各有一个
+    all_modifiers = {'alt', 'alt gr', 'ctrl', 'left alt', 'left ctrl', 'left shift', 'left windows', 'right alt', 'right ctrl', 'right shift', 'right windows', 'shift', 'windows'} #alt gr是一个特殊的按键，在某些语言的键盘上才有。
+    keyboard.is_modifier(key) #判断key是否是修饰键，区分大小写。
+    keyboard.key_to_scan_codes("s") #将按键s转成扫描码列表，结果为(31,)
+    #对all_modifiers中的结果逐个输出如下：
+    right shift (54,)
+    left shift (42,)
+    right alt (56, 57400)
+    windows (57435, 91, 57436, 92)
+    right windows (57436, 92)
+    ctrl (29, 57629, 57373)
+    left alt (56,)
+    shift (42, 54) #可以看到shift等于right shift和left shift的组合。如果为shift注册热键，则按下左或右shift都可以的。
+    left ctrl (29,)
+    alt gr (541,)
+    right ctrl (57629, 29, 57373)
+    alt (56, 57400)
+    left windows (57435, 91)
+    ```
+
+29. 延迟调用：
+
+    ```python
+    keyboard.call_later(fn, args=(), delay=0.001) #延迟1ms后再在一个新的线程中调用函数fn。这可以让系统有足够的事件来处理之前的事件，同时也不阻塞当前的线程。
+    ```
+
+30. 按键钩子函数：
+
+    ```python
+    keyboard.hook(callback, suppress=False, on_remove=<lambda>) #注册一个按键监听器，按下或抬起任何键都会调用callback，参数为keyboard.KeyboardEvent类型的一个对象。返回创建的event handler，后续可以使用这个对象来卸载监听器。该对象具有如下属性：
+    #  name:字符的Unicode表示或描述，例如%，space。
+    #  scan_code:该按键的扫描码
+    #  time:事件发生时的时间戳
+    #以下两个函数只有在按键按下或抬起时才会调用回调函数
+    keyboard.on_press(callback, suppress=False)
+    keyboard.on_release(callback, suppress=False)
+    
+    keyboard.hook_key(key, callback, suppress=False) #将特定按键key的按下然后抬起当作一个事件来处理。返回创建的event handler。此函数与热键共享状态，因此clearall_hotkeys也会影响它。
+    #以下两个函数只hook指定的按键key，当对应的键被按下或释放时，会调用回调函数。
+    keyboard.on_press_key(key, callback, suppress=False) 
+    keyboard.on_release_key(key, callback, suppress=False)
+    
+    keyboard.unhook(remove) #卸载一个钩子，remove可以是回调函数名，或者hook函数返回的event handler。
+    keyboard.unhook_all() #卸载之前注册的所有键盘钩子，例如热键，缩写，单词监听器，记录record和等待wait。
+    
+    keyboard.block_key(key) #压制按键key的所有事件，不论是否有修饰键。
+    keyboard.remap_key(src, dst) #将src键的事件替换为dst键的事件，不论是否有修饰键。
+    ```
