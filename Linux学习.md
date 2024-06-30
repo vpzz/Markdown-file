@@ -776,7 +776,7 @@
 
 ## 开机启动的例子
 
-1. 设置开机启动pvserver程序，用于paraview远程处理。
+1. 设置开机启动pvserver程序，用于paraview远程处理。在`/usr/lib/systemd/system`目录下创建`pvserver.service`文件，然后执行`sudo systemctl enable pvserver.service`设置开机启动。
 
    ```shell
    [Unit]
@@ -797,6 +797,16 @@
    
    [Install]
    WantedBy=multi-user.target
+   ```
+   
+2. 还需要确保存在`/usr/bin/start-pvserver.sh`文件，内容为进程启动：
+
+   ```shell
+   #!/usr/bin/bash
+   # start pvserver
+   while true; do #repeatedly execute after disconnect
+       pvserver
+   done
    ```
 
 # SHELL
@@ -4272,9 +4282,27 @@
    SOCKS5 127.0.0.1:10808  HTTP 127.0.0.1:10809  PAC http://127.0.0.1:10810/pac/?t=133741
    ```
 
-3. 可以通过curl google.com来检测是否配置成功代理。ping google.com是无效的，因为ping命令使用的是ICMP协议，而http代理只能代理http协议，在应用层；socks5代理可以代理tcp或udp协议。
+3. 端口可能被占用，此时会报错如下：
 
-4. 以上设置的代理可能会对apt命令无效，可以单独为其设置代理，有时使用私有源下载国外的软件时可能需要：
+   ```
+   Failed to start: app/proxyman/inbound: failed to listen TCP on 10808 > transport/internet: failed to listen on address: 127.0.0.1:10808 > transport/internet/tcp: failed to listen TCP on 127.0.0.1:10808 > listen tcp 127.0.0.1:10808: bind: An attempt was made to access a socket in a way forbidden by its access permissions.
+   ```
+
+4. 此时可以用如下命令查看占用端口的进程号，找到该进程后，杀掉该进程即可。也可以修改v2ray的端口，在设置→参数设置→本地监听端口，修改为10818即可。
+
+   ```cmd
+   netstat -ano | findstr ":10808"
+   ```
+
+5. 同时查看该端口是否被禁用：
+
+   ```cmd
+   netsh interface ipv4 show excludedportrange protocol=tcp
+   ```
+
+6. 可以通过curl google.com来检测是否配置成功代理。ping google.com是无效的，因为ping命令使用的是ICMP协议，而http代理只能代理http协议，在应用层；socks5代理可以代理tcp或udp协议。
+
+7. 以上设置的代理可能会对apt命令无效，可以单独为其设置代理，有时使用私有源下载国外的软件时可能需要：
 
    ```shell
    #新建一个文件/etc/apt/apt.conf.d/95proxy.conf 文件名不重要，之所以这么起是为了表明功能
@@ -4599,7 +4627,7 @@
 
 4. 还有Reverse Connection 也就是反向链接，将本机当作服务端，由远程的服务器主动连接客户端。这用在某些服务器不能正常开启pvserver的情况。此时-p就不表示服务器端监听的端口，而是客户端监听的端口。
 
-5. 这个pvserver设计有个不太好的点，就是在客户端断开连接后，服务端会自动终止。如果要避免这种情况，就需要书写一个shell脚本`start-pvserver.sh`来控制：
+5. 这个pvserver设计有个不太好的点，就是在客户端断开连接后，服务端会自动终止。如果要避免这种情况，就需要书写一个shell脚本`start-pvserver.sh`来控制，将其加入到systemd开机启动管理：
 
    ```shell
    #!/usr/bin/bash
@@ -4608,6 +4636,10 @@
        pvserver
    done
    ```
+
+6. 可以打开View→Memory Inspector来查看客户端和服务器端的内存占用。
+
+7. Paraview的Edit→Settings，可以设置显示器的ppi，对于27寸的1K显示器，应该设置为82。
 
 
 # VMware和主机剪贴板互通

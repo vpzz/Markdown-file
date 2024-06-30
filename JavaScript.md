@@ -1971,3 +1971,41 @@
    2. 解析该文件，构建DOM树。
    3. 构建DOM树时，如果遇到CSS，图片和JS文件，会同时发送请求。
    4. CSS和图片不会阻塞DOM树的构建，而JS可能会改变DOM树，因此会等待JS下载，执行完成JS后再继续解析HTML，构建DOM树。因此JS代码的位置十分重要。
+
+# 油猴脚本
+
+1. 打印pdf的例子：
+
+   ```js
+   // ==UserScript==
+   // @name         CFD Print
+   // @namespace    http://tampermonkey.net/
+   // @version      2024-06-19
+   // @description  try to take over the world!
+   // @author       You
+   // @match        https://doc.cfd.direct/notes/cfd-general-principles/*
+   // @icon         https://www.google.com/s2/favicons?sz=64&domain=cfd.direct
+   // @grant        none
+   // ==/UserScript==
+   
+   (function() {
+       'use strict';
+       let note = document.querySelector("#content > article > div > div.note")
+       note.firstElementChild.remove()
+       document.body.appendChild(note)
+       document.querySelector("#page").remove()
+       note.style.marginBottom = 0
+       document.body.style.paddingTop = "20px"
+       document.body.style.paddingBottom = "20px"
+       document.body.style.paddingLeft = "40px"
+       document.body.style.paddingRight = "40px"
+       document.title = document.title.slice(35).replace(".","-")
+       window.print()
+   })();
+   ```
+
+2. 
+
+3. 
+
+4. 

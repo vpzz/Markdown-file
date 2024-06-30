@@ -12,11 +12,18 @@
 
 3. 新版本的paraview已经原生支持OpenFOAM结果文件了，可以直接`sudo apt install paraview`安装即可。使用的时候，需要在对应的结果目录下创建一个任意的后缀名为.foam的文件即可。OpenFOAM官方推荐使用paraFoam来打开项目目录，此时会自动创建一个临时的.foam文件。也可以使用`paraFoam -touch`来创建一个永久的文件。
 
-4. ThirdParty-11仓库中主要包含的是Scotch软件的源码，因为早期版本的Debian自带的Scotch版本比较落后，因此需要使用源码编译安装，不过在Ubuntu22.04中，可以使用`sudo apt install scotch`安装即可。
+4. Ubuntu 22.04中只有paraview的5.10版本。可以从官网下载更新的版本来使用。可以为服务器端安装headless的版本（5.6版本开始提供），其中只有pvpython，pvserver等，不包含paraview GUI客户端，可以在没有X窗口的机器上渲染，分为egl和osmesa2个版本，前者是用显卡的opengl，后者是软件实现，适合于没有显卡的。
 
-5. 源码目录中可能有冗余的文件，只有包含在Make/files中的文件才会被编译。这点可以从.dep文件的对应发现，例如：`platforms/linux64GccDPInt32Opt/src/conversion/meshTables`中的`boundaryRegion.C.dep`文件。
+   ```shell
+   #推荐将tar.gz文件解压缩到/opt目录。
+   sudo ln -s /opt/ParaView-5.12.1-osmesa-MPI-Linux-Python3.10-x86_64/bin/pvserver /usr/bin/pvserver #创建pvserver的符号链接到/usr/bin目录下。
+   ```
 
-6. 源代码目录下的lnInclude目录中包含同级目录及其子目录的所有源文件，包括.C和.h。.C后缀名表示C++源文件
+5. ThirdParty-11仓库中主要包含的是Scotch软件的源码，因为早期版本的Debian自带的Scotch版本比较落后，因此需要使用源码编译安装，不过在Ubuntu22.04中，可以使用`sudo apt install scotch`安装即可。
+
+6. 源码目录中可能有冗余的文件，只有包含在Make/files中的文件才会被编译。这点可以从.dep文件的对应发现，例如：`platforms/linux64GccDPInt32Opt/src/conversion/meshTables`中的`boundaryRegion.C.dep`文件。
+
+7. 源代码目录下的lnInclude目录中包含同级目录及其子目录的所有源文件，包括.C和.h。.C后缀名表示C++源文件
 
    ```shell
    zj@zj-hit:~/OpenFOAM/OpenFOAM-11/src/fileFormats$ tree
@@ -61,17 +68,17 @@
    6 directories, 30 files
    ```
 
-7. 总的配置文件为`/home/zj/OpenFOAM/OpenFOAM-11/etc/bashrc`。
+8. 总的配置文件为`/home/zj/OpenFOAM/OpenFOAM-11/etc/bashrc`。
 
-8. 
+9. 
 
-9. debug 调试，可以对软件进行单步执行、堆栈跟踪、调试等操作来发现bug。
+10. debug 调试，可以对软件进行单步执行、堆栈跟踪、调试等操作来发现bug。
 
-10. release 发行版，如果最终调试后程序没有明显bug，可以作为可用的软件分享给他人使用就可以使用这个选项编译。
+11. release 发行版，如果最终调试后程序没有明显bug，可以作为可用的软件分享给他人使用就可以使用这个选项编译。
 
-11. profiling 性能分析。可以对软件执行过程中的cpu利用率，内存占有进行分析。也可以用来发现、分析异常、bug。
+12. profiling 性能分析。可以对软件执行过程中的cpu利用率，内存占有进行分析。也可以用来发现、分析异常、bug。
 
-12. 常见的和路径相关的宏：
+13. 常见的和路径相关的宏：
 
     ```shell
     #如果源码存放路径为/home/zj/OpenFOAM/OpenFOAM-11。
@@ -1666,7 +1673,9 @@
        exit 1
    }
    
-   # 编译wmake所需的程序
+   # 编译wmake所需的程序，共2个
+   # dirToString，从标准输入读入，将a/b/c/dd变为abcdd输出。
+   # wmkdep，扫描文件，寻找-Idir，生成依赖文件列表，类似于cpp -M的行为，但是由于使用了hashtable，速度更快，且输出不重复。
    (cd wmake/src && make)
    
    # 编译第三方库
@@ -1677,7 +1686,7 @@
        echo "Allwmake: no ThirdParty directory found - skipping"
    fi
    
-   # 执行src目录下的Allwmake
+   # 执行src目录下的Allwmake，默认情况下targetType为空。$*为-fromWmake
    src/Allwmake $targetType $*
    
    # 执行applications目录下的Allwmake
@@ -1692,7 +1701,7 @@
    ```shell
    # 使用source来执行本脚本，这样原脚本的所有参数在这里仍然可用
    
-   Script=${0##*/} #获取执行该脚本的脚本的文件名
+   Script=${0##*/} #获取执行该脚本的脚本的文件名，就是Allwmake
    
    if [ -z "$WM_PROJECT_DIR" ]
    then
@@ -1724,7 +1733,7 @@
    # 解析参数和选项
    fromWmake=
    qOpt=
-   
+   #默认情况下$@为-fromWmake
    for arg in "$@"
    do
        # Remove arg
@@ -1760,11 +1769,10 @@
    else
        # Print command
        [ -z "$targetType" ] || targetSpace=" "
-       echo "$Script $targetType$targetSpace$(echo $PWD | sed s%$WM_PROJECT_DIR/%% )"
+       echo "$Script $targetType$targetSpace$(echo $PWD | sed s%$WM_PROJECT_DIR/%% )"  #会输出Allwmake src或Allwmake src/Pstream等。sed会将路径的开头部分删除掉。
    fi
    
    # 如果 WM_CONTINUE_ON_ERROR 没有设置，则激活shell选项 "stop on error"
-   
    if [ -z "${WM_CONTINUE_ON_ERROR}" ]
    then
        set -e
@@ -1801,6 +1809,8 @@
    }
    
    # 如果需要的话，更新OpenFOAM version字符串
+   # 如果没有git信息，则第一部分输出no git description found，返回0，在shell中返回0表示成功，所以不会执行第二部分。
+   # wrmo 是用来删除指定的.o文件。
    wmakePrintBuild -check || wrmo OpenFOAM/global/global.o 2>/dev/null
    
    Pstream/Allwmake $targetType $*
@@ -1919,11 +1929,9 @@
    #
    #     The disadvantage of the out-of-tree compilation is that the dependency
    #     files are harder to find but are sometimes useful to study which header
-   #     files are included.  For those who need access to the dependency files the
-   #     new wdep script is provided to locate them.  See the wdep script header or
-   #     run:
+   #     files are included.  For those who need access to the dependency files the new wdep script is provided to locate them.  See the wdep script header or   run:
    #         wdep -h
-   #
+   # 
    # See also
    #     wmakeLnInclude, wmakeLnIncludeAll, wmakeCollect, wdep, wrmdep, wrmo,
    #     wclean, wcleanPlatform, wcleanLnIncludeAll
@@ -1963,10 +1971,10 @@
    A general, easy-to-use make system for multi-platform development
    with support for local and network parallel compilation.
    
-   The 'target' is a Makefile target:
+   The 'target' is a Makefile target: #可以是一个具体的.o文件
      e.g., platforms/linux64GccDPOpt/.../fvMesh.o
    
-   or a special target:
+   or a special target: #也可以是一个通用的target
      all               wmake all sub-directories, running Allwmake if present
      queue             wmakeCollect all sub-directories, running Allwmake if present
      exe               Compile statically linked executable #静态链接的可执行文件
@@ -2303,7 +2311,19 @@
    
    unset Script usage error useAllCores update expandPath findTarget
    ```
-   
+
+2. wdep工具：
+
+   ```shell
+   zj@zj-hit:~$ wdep argList.C #会输出该文件对应的.dep文件的路径。不要求参数在当前目录下，它会自动搜索。
+   /home/zj/OpenFOAM/OpenFOAM-11/platforms/linux64GccDPInt32Opt/src/OpenFOAM/global/argList/argList.C.dep
+   ```
+
+3. 新版的wmake会在s'rc同级的目录中创建一个paltform目录，将所有的输出文件都放在这里。
+
+4. wmakeFilesAndOptions程序会读取当前目录下的所有文件夹和文件，然后在同级的Make文件夹中生成files和options文件。不过如果已经存在这两个文件，则不会修改已有的文件。
+
+5. OpenFOAM发布的源码中，是包含Make/files和Make/options的文件，但是不包含lnInclude目录。
 
 # 编译结果
 
@@ -2406,9 +2426,9 @@
           -lmeshTools
       ```
 
-3. src目录中的文件编译后，只会在platforms目录下的lib目录中生成.so库文件。而用户具体执行的求解器和工具程序则是由bin目录下的
+3. src目录中的文件编译后，只会在platforms目录下的lib目录中生成.so库文件。而用户具体执行的求解器和工具程序则是由bin目录下的。
 
-4. 用户执行bin目录下的以Foam结尾的脚本时，会提示这个文件已经被替换了，需要使用foamRun -solver来替代。而foamRun程序是通过编译applications中的源码来连接起来各种共享库得到的。例如
+4. 用户执行bin目录下的以Foam结尾的脚本时，会提示这个文件已经被替换了，需要使用foamRun -solver来替代。而foamRun程序是通过编译applications中的源码来连接起来各种共享库得到的。例如：
 
    ```shell
    #~/OpenFOAM/OpenFOAM-11/applications/solvers/foamRun/Make/files目录的内容
@@ -2420,7 +2440,7 @@
 
 5. 有一些程序是以脚本的形式存在的，存放在源码目录`/home/zj/OpenFOAM/OpenFOAM-11/bin`中，不用编译就可以使用。
 
-6. `/home/zj/OpenFOAM/OpenFOAM-11/applications/modules`中的源文件编译后连接后，也会产生共享库
+6. `/home/zj/OpenFOAM/OpenFOAM-11/applications/modules`中的源文件编译后连接后，也会产生共享库。
 
 7. platforms目录下的applications目录中存放的内容都是.C.H和.O文件，类似于src目录。
 
@@ -2438,8 +2458,188 @@
 
 10. 共享库一共有143个，可执行文件一共有157个。
 
-11. 
 
-12. 
+# 教程
 
-13. 
+1. 每一个教程目录下都有一个Allrun脚本：
+
+   ```shell
+   #!/bin/sh
+   cd ${0%/*} || exit 1    #首先将当前目录切换到此脚本所在的目录
+   
+   # 执行教程所需的函数
+   . $WM_PROJECT_DIR/bin/tools/RunFunctions
+   
+   application="$(getApplication)"
+   
+   runApplication blockMesh -dict $FOAM_TUTORIALS/resources/blockMesh/pitzDaily
+   runApplication $application
+   ```
+
+2. RunFunctions：
+
+   ```shell
+   isTest(){
+       for i in "$@"; do
+           if [ "$i" = "-test" ]
+           then
+               return 0
+           fi
+       done
+       return 1
+   }
+   
+   getNumberOfProcessors(){
+       foamDictionary -entry numberOfSubdomains -value system/decomposeParDict
+   }
+   
+   getApplication(){ #去system/controldict这个字典中查找键名为application的项的值。
+       foamDictionary -entry application -value system/controlDict #结果为foamRun
+   }
+   
+   getSolver(){
+       foamDictionary -entry solver -value system/controlDict #结果为incompressibleFluid
+   }
+   
+   runApplication(){
+       APP_RUN=
+       LOG_IGNORE=false
+       LOG_APPEND=false
+       LOG_SUFFIX=
+   
+       # 解析选项和可执行文件
+       while [ $# -gt 0 ] && [ -z "$APP_RUN" ]; do
+           key="$1"
+           case "$key" in
+               -append|-a)
+                   LOG_IGNORE=true
+                   LOG_APPEND=true
+                   ;;
+               -overwrite|-o)
+                   LOG_IGNORE=true
+                   ;;
+               -suffix|-s)
+                   LOG_SUFFIX=".$2"
+                   shift
+                   ;;
+               *)
+                   APP_RUN="$key"
+                   APP_NAME="${key##*/}"
+                   LOG_SUFFIX="${APP_NAME}${LOG_SUFFIX}"
+                   ;;
+           esac
+           shift
+       done
+   
+       if [ -f log.$LOG_SUFFIX ] && [ "$LOG_IGNORE" = "false" ]
+       then
+           echo "$APP_NAME already run on $PWD:" \
+                "remove log file 'log.$LOG_SUFFIX' to re-run"
+       else
+           echo "Running $APP_RUN on $PWD"
+           if [ "$LOG_APPEND" = "true" ]; then
+               $APP_RUN "$@" >> log.$LOG_SUFFIX 2>&1 #具体执行的指令
+           else
+               $APP_RUN "$@" > log.$LOG_SUFFIX 2>&1  #具体执行的指令
+           fi
+       fi
+   }
+   
+   runParallel(){
+       APP_RUN=
+       LOG_IGNORE=false
+       LOG_APPEND=false
+       LOG_SUFFIX=
+       nProcs=$(getNumberOfProcessors) #获取处理器数量
+   
+       # Parse options and executable
+       while [ $# -gt 0 ] && [ -z "$APP_RUN" ]; do
+           key="$1"
+           case "$key" in
+               -append|-a)
+                   LOG_IGNORE=true
+                   LOG_APPEND=true
+                   ;;
+               -overwrite|-o)
+                   LOG_IGNORE=true
+                   ;;
+               -suffix|-s)
+                   LOG_SUFFIX=".$2"
+                   shift
+                   ;;
+               -np|-n)
+                   nProcs="$2"
+                   shift
+                   ;;
+               *)
+                   APP_RUN="$key"
+                   APP_NAME="${key##*/}"
+                   LOG_SUFFIX="${APP_NAME}${LOG_SUFFIX}"
+                   ;;
+           esac
+           shift
+       done
+   
+       if [ -f log.$LOG_SUFFIX ] && [ "$LOG_IGNORE" = "false" ]
+       then
+           echo "$APP_NAME already run on $PWD:" \
+                "remove log file 'log.$LOG_SUFFIX' to re-run"
+       else
+           echo "Running $APP_RUN in parallel on $PWD using $nProcs processes"
+           if [ "$LOG_APPEND" = "true" ]; then
+               ( mpirun -np $nProcs $APP_RUN -parallel "$@" < /dev/null >> log.$LOG_SUFFIX 2>&1 )
+           else
+               ( mpirun -np $nProcs $APP_RUN -parallel "$@" < /dev/null > log.$LOG_SUFFIX 2>&1 )
+           fi
+       fi
+   }
+   
+   compileApplication(){
+       echo "Compiling $1 application"
+       wmake $1
+   }
+   
+   cloneCase(){ #克隆case目录
+       from=$1
+       to=$2
+   
+       if [ ! -d $from ]
+       then
+           echo "Case $from does not exist"
+           return 1
+       elif [ -d $to ]
+       then
+           echo "Case already cloned: remove case directory $to to clone"
+           return 1
+       else
+           echo "Cloning $to case from $from"
+           mkdir -p $to
+           for f in 0 system constant
+           do
+               cp -R $from/$f $to
+           done
+           return 0
+       fi
+   }
+   
+   cloneMesh(){ #克隆网格
+       from=$1/constant/polyMesh
+       to=$2/constant/polyMesh
+   
+       if [ ! -d $from ]
+       then
+           echo "Mesh $from does not exist"
+           return 1
+       elif [ -d $to ]
+       then
+           echo "Mesh already cloned: remove mesh directory $to to clone"
+           return 1
+       else
+           echo "Cloning $to mesh from $from"
+           cp -pr $from $to
+           return 0
+       fi
+   }
+   ```
+
+3. 

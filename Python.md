@@ -6,13 +6,17 @@
 
 3. Python Package Index（PyPI）是Python的官方软件仓库。现在已经有6万多个库了。
 
-4. 计算机只能解决一个问题的可计算部分。
+4. 标准库包含了多个内置模块 (以C编写)，Python必须依靠它们来实现系统级功能，例如文件I/O，此外还有大量以Python编写的模块，提供了日常编程中许多问题的标准解决方案，它们将特定平台功能都抽象化为平台中立的API来增强Python程序的可移植性。
 
-5. 有两种编程方式，交互式（例如IPython和Jupyter）和文件式，和matlab类似。交互式控制台提供REPL（read-eval-print-loop），即读取，求值，输出的循环。
+5. Windows版本的Python安装包通常包含整个标准库，往往还包含许多额外组件。对于类Unix操作系统，Python通常会被分成一系列的软件包，因此可能需要使用包管理工具来获取部分或全部可选组件。
 
-6. 缩进是Python语法的一部分，缩进不正确可能导致运行错误，是表达代码包含和层次关系的唯一手段。一般为四个空格或一个tab。
+6. 计算机只能解决一个问题的可计算部分。
 
-7. #后面是单行注释   '''开头和结尾是多行注释，三个单引号或双引号。
+7. 有两种编程方式，交互式（例如IPython和Jupyter）和文件式，和matlab类似。交互式控制台提供REPL（read-eval-print-loop），即读取，求值，输出的循环。
+
+8. 缩进是Python语法的一部分，缩进不正确可能导致运行错误，是表达代码包含和层次关系的唯一手段。一般为四个空格或一个tab。
+
+9. #后面是单行注释   '''开头和结尾是多行注释，三个单引号或双引号。
 
    ```python
    #单行注释
@@ -23,27 +27,27 @@
    '''
    ```
 
-8. 命名是将标识符和对象关联的过程，标识符区分大小写，可以有汉字。
+10. 命名是将标识符和对象关联的过程，标识符区分大小写，可以有汉字。
 
-9. 一共有33个保留字，也称为关键字，区分大小写。
+11. 一共有33个保留字，也称为关键字，区分大小写。
 
-   ```python
-   and      elif    import raise  global
-   as       else    in     return nonlocal
-   assert   execpt  is     try    True
-   break    finally lambda while  False
-   class    for     not    with   None
-   continue from    or     yield
-   def      if      pass   del
-   ```
+    ```python
+    and      elif    import raise  global
+    as       else    in     return nonlocal
+    assert   execpt  is     try    True
+    break    finally lambda while  False
+    class    for     not    with   None
+    continue from    or     yield
+    def      if      pass   del
+    ```
 
-10. 语句结尾不用加分号。如果要将几行代码写到一行，可以用分号分隔。
+12. 语句结尾不用加分号。如果要将几行代码写到一行，可以用分号分隔。
 
-11. type(x) 可以返回对象x的类型，type不是关键字。
+13. type(x) 可以返回对象x的类型，type不是关键字。
 
-12. 如果某行代码太长，可以使用\来续行。要求\之后立刻就是换行，不能有别的空格。相当于\把enter转义了。
+14. 如果某行代码太长，可以使用\来续行。要求\之后立刻就是换行，不能有别的空格。相当于\把enter转义了。
 
-13. python会忽略`(),[],{}`内的换行符，因此他们内部的换行符可以不用\来续行。
+15. python会忽略`(),[],{}`内的换行符，因此他们内部的换行符可以不用\来续行。
 
     ```python
     a = [1, 2, 3,
@@ -53,7 +57,7 @@
          4, 5]
     ```
 
-14. PEP是Python Enhancement Proposals的缩写，一般包含以下几种：
+16. PEP是Python Enhancement Proposals的缩写，一般包含以下几种：
 
     1. 跟踪Python中的新特性
 
@@ -61,7 +65,7 @@
 
     3. 关于Python的提案，但不针对Python语言本身
 
-15. python2中True是一个变量，可以对它赋予其他的值，但是不建议这么做，会造成混乱，因此while True就不会被python2优化掉，因为用户可能会修改True的值。在python3中，True作为一个关键字存在，不允许赋值，因此while True会被优化。
+17. python2中True是一个变量，可以对它赋予其他的值，但是不建议这么做，会造成混乱，因此while True就不会被python2优化掉，因为用户可能会修改True的值。在python3中，True作为一个关键字存在，不允许赋值，因此while True会被优化。
 
 
 # 字符串
@@ -4154,6 +4158,7 @@
     'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '{', '|', '}', 
     '~', 'accept', 'add', 'alt', 'altleft', 'altright', 'apps', 'backspace', 'browserback', 'browserfavorites', 'browserforward', 'browserhome', 'browserrefresh', 'browsersearch', 'browserstop', 'capslock', 'clear', 'convert', 'ctrl', 'ctrlleft', 'ctrlright', 'decimal', 'del', 'delete', 'divide', 'down', 'end', 'enter', 'esc', 'escape', 'execute', 'f1', 'f10', 'f11', 'f12', 'f13', 'f14', 'f15', 'f16', 'f17', 'f18', 'f19', 'f2', 'f20', 'f21', 'f22', 'f23', 'f24', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'final', 'fn', 'hanguel', 'hangul', 'hanja', 'help', 'home', 'insert', 'junja', 'kana', 'kanji', 'launchapp1', 'launchapp2', 
     'launchmail', 'launchmediaselect', 'left', 'modechange', 'multiply', 'nexttrack', 'nonconvert', 'num0', 'num1', 'num2', 'num3', 'num4', 'num5', 'num6', 'num7', 'num8', 'num9', 'numlock', 'pagedown', 'pageup', 'pause', 'pgdn', 'pgup', 'playpause', 'prevtrack', 'print', 'printscreen', 'prntscrn', 'prtsc', 'prtscr', 'return', 'right', 'scrolllock', 'select', 'separator', 'shift', 'shiftleft', 'shiftright', 'sleep', 'space', 'stop', 'subtract', 'tab', 'up', 'volumedown', 'volumemute', 'volumeup', 'win', 'winleft', 'winright', 'yen', 'command', 'option', 'optionleft', 'optionright']
+    # apps就是右侧的win键右侧的那个键，相当于鼠标右键
     ```
 
 15. 显示提示框和用户交互：
@@ -4194,105 +4199,135 @@
 
 20. 对于生成器，可以使用for in循环依次读取，也可以使用list构造列表。
 
-21. 可以使用keyboard库来hook全局事件，注册热键和模拟按键，它是纯python实现的，没有任何依赖库。该库利用了Windows钩子函数。功能如下：
+21. 打印pdf的例子：
 
     ```python
-    import keyboard #注意不是pykeyboard
-    keyboard.press_and_release('shift+s, space') #
+    import keyboard
+    import pyautogui
+    import time
+    pyautogui.PAUSE = 0.5
+    pyautogui.FAILSAFE = True
     
-    keyboard.write('abc') #依次按下abc三个键
-    keyboard.add_hotkey('ctrl+shift+a', print, args=('triggered', 'hotkey')) #为热键绑定一个钩子函数，当按下ctrl+alt+a时，会调用print函数，并传递参数args，要求args是一个元素，即使只有一个元素。默认是在按键按下时触发，可以设置trigger_on_release=True来改变为抬起时触发。
+    def printNotes():
+        while True:
+            pyautogui.press("tab")
+            pyautogui.press("apps")
+            pyautogui.press("down")
+            pyautogui.press("enter")
+            pyautogui.hotkey("ctrl", "tab")
+            time.sleep(3)
+            pyautogui.press("enter")
+            pyautogui.press("enter")
+            time.sleep(1)
+            pyautogui.hotkey("ctrl", "w")
+            time.sleep(1)
     
-    # Press PAGE UP then PAGE DOWN to type "foobar".
-    keyboard.add_hotkey('page up, page down', lambda: keyboard.write('foobar')) #按一次PAGE UP，然后再按依次PAGE DOWN会调用函数，这里使用lambda表达式来代替函数。
-    
-    
-    keyboard.add_abbreviation('@@', 'my.long.email@example.com') #输入@@然后按空格，就会将其替换为后面的字符串。
-    
-    keyboard.wait() #阻塞当前线程，类似于while True，但是while True会使CPU空转，这个不会。
-    keyboard.wait('esc') #阻塞，直到按下esc键时继续往下执行，也就是退出while循环。这个适用于只响应1次的情况。
-    
-    keyboard.remove_hotkey(event_data, element_data) #移除一个热键。
-    
-    keyboard.get_hotkey_status(event_data) #返回一个布尔值，表示热键事件的状态。
-    keyboard.get_hotkey_count() #返回一个整数，表示当前活动的热键数量。
-    keyboard.get_all_hotkey_status() #返回一个字典，其中键是键盘按键事件的类型，值是对应的状态。
-    
-    keyboard.get_current_time() #返回当前时间戳（以秒为单位）。
-    keyboard.get_last_time() #返回上次调用 keyboard.wait() 或 keyboard.wait(timeout) 时的时间戳（以秒为单位）。
-    
-    keyboard.get_pressed() #返回一个字典，其中键是键盘按键事件的类型，值是对应的按键值。
-    keyboard.get_key_modifiers() #返回一个字典，其中键是键盘按键事件的类型，值是对应的按键修饰符（如 Shift、Ctrl、Alt 等）。
-    keyboard.get_key_status(event_data) #返回一个布尔值，指示键盘按键事件的状态。
-    keyboard.get_key_description(event_data) #返回一个字符串，其中键是键盘按键事件的类型，值是对应的按键描述（如 "Key A"、"Key B" 等）。
+    keyboard.add_hotkey('F2', printNotes)
+    keyboard.wait("F2")
     ```
 
-22. 事件在单独的线程中自动捕获，不阻塞主程序。
 
-23. 注册一个多次使用的热键：
+# keyboard
 
-    ```python
-    keyboard.add_hotkey('space', lambda: print('space was pressed!')) #为该热键注册一个函数
-    keyboard.wait() #阻塞当前线程，类似于while True，但是while True会使CPU空转，这个不会。
-    ```
+1. 可以使用keyboard库来hook全局事件，注册热键和模拟按键，它是纯python实现的，没有任何依赖库。该库利用了Windows钩子函数。功能如下：
 
-24. 注册一个只使用1次的热键：
+   ```python
+   import keyboard #注意不是pykeyboard
+   keyboard.press_and_release('shift+s, space') #
+   
+   keyboard.write('abc') #依次按下abc三个键
+   keyboard.add_hotkey('ctrl+shift+a', print, args=('triggered', 'hotkey')) #为热键绑定一个钩子函数，当按下ctrl+alt+a时，会调用print函数，并传递参数args，要求args是一个元素，即使只有一个元素。默认是在按键按下时触发，可以设置trigger_on_release=True来改变为抬起时触发。
+   
+   # Press PAGE UP then PAGE DOWN to type "foobar".
+   keyboard.add_hotkey('page up, page down', lambda: keyboard.write('foobar')) #按一次PAGE UP，然后再按依次PAGE DOWN会调用函数，这里使用lambda表达式来代替函数。
+   
+   
+   keyboard.add_abbreviation('@@', 'my.long.email@example.com') #输入@@然后按空格，就会将其替换为后面的字符串。
+   
+   keyboard.wait() #阻塞当前线程，类似于while True，但是while True会使CPU空转，这个不会。
+   keyboard.wait('esc') #阻塞，直到按下esc键时继续往下执行，也就是退出while循环。这个适用于只响应1次的情况。
+   
+   keyboard.remove_hotkey(event_data, element_data) #移除一个热键。
+   
+   keyboard.get_hotkey_status(event_data) #返回一个布尔值，表示热键事件的状态。
+   keyboard.get_hotkey_count() #返回一个整数，表示当前活动的热键数量。
+   keyboard.get_all_hotkey_status() #返回一个字典，其中键是键盘按键事件的类型，值是对应的状态。
+   
+   keyboard.get_current_time() #返回当前时间戳（以秒为单位）。
+   keyboard.get_last_time() #返回上次调用 keyboard.wait() 或 keyboard.wait(timeout) 时的时间戳（以秒为单位）。
+   
+   keyboard.get_pressed() #返回一个字典，其中键是键盘按键事件的类型，值是对应的按键值。
+   keyboard.get_key_modifiers() #返回一个字典，其中键是键盘按键事件的类型，值是对应的按键修饰符（如 Shift、Ctrl、Alt 等）。
+   keyboard.get_key_status(event_data) #返回一个布尔值，指示键盘按键事件的状态。
+   keyboard.get_key_description(event_data) #返回一个字符串，其中键是键盘按键事件的类型，值是对应的按键描述（如 "Key A"、"Key B" 等）。
+   ```
 
-    ```python
-    keyboard.wait('space') #阻塞当前线程，直到按下空格键，才会继续执行下面的代码，也就是退出while循环。
-    print('space was pressed, continuing...')
-    ```
+2. 事件在单独的线程中自动捕获，不阻塞主程序。
 
-25. 录制按键动作，保存，执行：
+3. 注册一个多次使用的热键：
 
-    ```python
-    recorded = keyboard.record(until='esc') #录制按键序列，直到按下esc键时停止。
-    keyboard.play(recorded, speed_factor=3) #以原来3倍的速度执行之前录制的按键
-    ```
+   ```python
+   keyboard.add_hotkey('space', lambda: print('space was pressed!')) #为该热键注册一个函数
+   keyboard.wait() #阻塞当前线程，类似于while True，但是while True会使CPU空转，这个不会。
+   ```
 
-26. 热键可以是扫描码（数字57代表空格），单个按键（"space"），多个按键（"enter"），多步按键（"alt+F4, enter"）等。
+4. 注册一个只使用1次的热键：
 
-27. 发送一个操作系统事件，来执行热键：
+   ```python
+   keyboard.wait('space') #阻塞当前线程，直到按下空格键，才会继续执行下面的代码，也就是退出while循环。
+   print('space was pressed, continuing...')
+   ```
 
-    ```python
-    keyboard.send(hotkey, do_press=True, do_release=True) #
-    # do_press和do_release表示是否发送对应的按下或抬起事件
-    #该功能的底层是由按下和抬起两个事件组成的
-    keyboard.press(hotkey)
-    keyboard.release(hotkey)
-    keyboard.is_pressed(hotkey) #判断是否处于按下状态
-    ```
+5. 录制按键动作，保存，执行：
 
-28. 修饰键就是功能按键，分为sided_modifiers和all_modifiers：
+   ```python
+   recorded = keyboard.record(until='esc') #录制按键序列，直到按下esc键时停止。
+   keyboard.play(recorded, speed_factor=3) #以原来3倍的速度执行之前录制的按键
+   ```
 
-    ```py
-    sided_modifiers = {'ctrl', 'alt', 'shift', 'windows'} #在键盘的左右各有一个
-    all_modifiers = {'alt', 'alt gr', 'ctrl', 'left alt', 'left ctrl', 'left shift', 'left windows', 'right alt', 'right ctrl', 'right shift', 'right windows', 'shift', 'windows'} #alt gr是一个特殊的按键，在某些语言的键盘上才有。
-    keyboard.is_modifier(key) #判断key是否是修饰键，区分大小写。
-    keyboard.key_to_scan_codes("s") #将按键s转成扫描码列表，结果为(31,)
-    #对all_modifiers中的结果逐个输出如下：
-    right shift (54,)
-    left shift (42,)
-    right alt (56, 57400)
-    windows (57435, 91, 57436, 92)
-    right windows (57436, 92)
-    ctrl (29, 57629, 57373)
-    left alt (56,)
-    shift (42, 54) #可以看到shift等于right shift和left shift的组合。如果为shift注册热键，则按下左或右shift都可以的。
-    left ctrl (29,)
-    alt gr (541,)
-    right ctrl (57629, 29, 57373)
-    alt (56, 57400)
-    left windows (57435, 91)
-    ```
+6. 热键可以是扫描码（数字57代表空格），单个按键（"space"），多个按键（"enter"），多步按键（"alt+F4, enter"）等。
 
-29. 延迟调用：
+7. 发送一个操作系统事件，来执行热键：
 
-    ```python
-    keyboard.call_later(fn, args=(), delay=0.001) #延迟1ms后再在一个新的线程中调用函数fn。这可以让系统有足够的事件来处理之前的事件，同时也不阻塞当前的线程。
-    ```
+   ```python
+   keyboard.send(hotkey, do_press=True, do_release=True) #
+   # do_press和do_release表示是否发送对应的按下或抬起事件
+   #该功能的底层是由按下和抬起两个事件组成的
+   keyboard.press(hotkey)
+   keyboard.release(hotkey)
+   keyboard.is_pressed(hotkey) #判断是否处于按下状态
+   ```
 
-30. 按键钩子函数：
+8. 修饰键就是功能按键，分为sided_modifiers和all_modifiers：
+
+   ```py
+   sided_modifiers = {'ctrl', 'alt', 'shift', 'windows'} #在键盘的左右各有一个
+   all_modifiers = {'alt', 'alt gr', 'ctrl', 'left alt', 'left ctrl', 'left shift', 'left windows', 'right alt', 'right ctrl', 'right shift', 'right windows', 'shift', 'windows'} #alt gr是一个特殊的按键，在某些语言的键盘上才有。
+   keyboard.is_modifier(key) #判断key是否是修饰键，区分大小写。
+   keyboard.key_to_scan_codes("s") #将按键s转成扫描码列表，结果为(31,)
+   #对all_modifiers中的结果逐个输出如下：
+   right shift (54,)
+   left shift (42,)
+   right alt (56, 57400)
+   windows (57435, 91, 57436, 92)
+   right windows (57436, 92)
+   ctrl (29, 57629, 57373)
+   left alt (56,)
+   shift (42, 54) #可以看到shift等于right shift和left shift的组合。如果为shift注册热键，则按下左或右shift都可以的。
+   left ctrl (29,)
+   alt gr (541,)
+   right ctrl (57629, 29, 57373)
+   alt (56, 57400)
+   left windows (57435, 91)
+   ```
+
+9. 延迟调用：
+
+   ```python
+   keyboard.call_later(fn, args=(), delay=0.001) #延迟1ms后再在一个新的线程中调用函数fn。这可以让系统有足够的事件来处理之前的事件，同时也不阻塞当前的线程。
+   ```
+
+10. 按键钩子函数：
 
     ```python
     keyboard.hook(callback, suppress=False, on_remove=<lambda>) #注册一个按键监听器，按下或抬起任何键都会调用callback，参数为keyboard.KeyboardEvent类型的一个对象。返回创建的event handler，后续可以使用这个对象来卸载监听器。该对象具有如下属性：
