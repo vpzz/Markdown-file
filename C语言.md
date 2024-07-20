@@ -2929,13 +2929,13 @@
 
 ## 使用clang-format格式化代码
 
-1. 可以统一代码风格，方便git管理。该工具和IDE自带的格式化工具相比，支持在命令行使用，可以批量格式化整个工程。
+1. 可以统一代码风格，方便git管理。该工具和IDE自带的格式化工具相比，支持在命令行使用，可以在提交代码前，对整个工程应用。
 
 2. 步骤：
 
-   1. 在VSCode中安装Clang-Format扩展。
+   1. 可以在VSCode中安装Clang-Format扩展，可以更好地控制其行为，但是没必要安装。
 
-   2. 在远程机上安装clang-format。实际上C/C++扩展中也包含一个clang-format的可执行文件，在`C:\Users\zj\.vscode\extensions\ms-vscode.cpptools-1.19.4-win32-x64\LLVM\bin/clang-format`和`/home/zj/.vscode/extensions/ms-vscode.cpptools-1.19.1-linux-x64/LLVM/bin/clang-format`。不过推荐单独安装。
+   2. 在远程机上安装clang-format。实际上C/C++扩展中也包含一个clang-format的可执行文件，在`C:\Users\zj\.vscode\extensions\ms-vscode.cpptools-1.19.4-win32-x64\LLVM\bin/clang-format`和`/home/zj/.vscode/extensions/ms-vscode.cpptools-1.19.1-linux-x64/LLVM/bin/clang-format`。不过推荐单独安装，会优先使用path中找到的。
 
       ```shell
       sudo apt install clang-format #不同版本的clang-format程序略有差异

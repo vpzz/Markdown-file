@@ -229,7 +229,7 @@
 
 # Calculix.h文件
 
-1. 在ccx_2.20.c中包含了，主要是定义了有些简短的宏，用来简化函数调用，：
+1. 在ccx_2.20.c中包含了，主要是定义了有些简短的宏，用来简化函数调用：
 
    ```c
    //所有的Fortran函数都用Fortran(A,B)宏包装，编译参数中定义了-DARCH="Linux"，因此
@@ -515,8 +515,6 @@
    // "-inp",3 s1为['-','i','n'] 也不会添加'\0'
    ```
 
-4. 
-
 
 # 改装
 
@@ -601,9 +599,11 @@
 
 8. VSCode的每个配置对每个选项都有一个默认值，如果仅在用户区修改了某些选项，则也会覆盖工作区的默认值。此时只有在工作区也修改该选项才会覆盖用户区的选项。
 
-9. 也可以将多个文件夹添加到同一个工作区, 此时, 工作区需要单独保存为一个 code-workspace 文件。
+9. 有时候更改完设置后，没有效果，可以重启vscode试试。
 
-10. 如果在VSCode remote中使用ranger，右键打开文件时，报错：`xdg-open unexpected option: '--'`。此时可以进行如下操作：
+10. 也可以将多个文件夹添加到同一个工作区, 此时, 工作区需要单独保存为一个 code-workspace 文件。
+
+11. 如果在VSCode remote中使用ranger，右键打开文件时，报错：`xdg-open unexpected option: '--'`。此时可以进行如下操作：
 
     ```shell
     ranger --copy-config=all #命令行执行如下命令，生成ranger的配置文件，在~/.config/ranger目录下。
@@ -612,9 +612,9 @@
     label open, has open     = open -- "$@"
     ```
 
-11. task.json，用于生成可执行文件：
+12. task.json，用于生成可执行文件，点击菜单栏的终端→运行生成任务，可以执行默认任务，需要打开该项目的一个文件，否则会提示无法解析fileDirname变量：
 
-    ```
+    ```json
     {
         "tasks": [
             {
@@ -645,7 +645,7 @@
     }
     ```
 
-12. launch.json，用于启动调试：
+13. launch.json，用于启动调试：
 
     ```json
     {
@@ -655,9 +655,9 @@
                 "name": "(gdb) 启动",
                 "type": "cppdbg",
                 "request": "launch",
-                "program": "${workspaceFolder}/ccx_2.20", //设置可执行文件的完整路径
+                "program": "${workspaceFolder}/ccx_2.20", //设置可执行文件的完整路径，${workspaceFolder}为当前工作空间的位置，是/home/zj/CCX/CalculiX/ccx_2.20/src。
                 "args": [ //命令行参数
-                    "-input",
+                    "-i",
                     "../test/beamp"
                 ],
                 "preLaunchTask": "${defaultBuildTask}", //在debug启动之前，先执行构建的task，这样可以保证在每次修改完代码后，再调试时，行号能够对应的上。
@@ -683,7 +683,7 @@
     }
     ```
 
-13. settings.json，这里保存工作区的设置：
+14. settings.json，这里保存工作区的设置：
 
     ```json
     {
@@ -697,7 +697,7 @@
     }
     ```
 
-14. c_cpp_properties.json，用于控制IntelliSense的高亮：
+15. c_cpp_properties.json，用于控制IntelliSense的高亮：
 
     ```json
     {
@@ -738,6 +738,34 @@
    ```shell
    tar -xzvf CalculiX*.tar.gz #或者使用x命令。
    ```
+
+# readinput.c
+
+1. MATERIAL类别包括：
+
+   ```
+   *CONDUCTIVITY
+   *CREEP
+   *CYCLICHARDENING
+   *DAMPING
+   *ELASTIC
+   *DEFORMATIONPLASTICITY
+   *DENSITY
+   *DEPVAR
+   *ELECTRICALCONDUCTIVITY
+   *EXPANSION
+   *FLUIDCONSTANTS
+   *HYPERELASTIC
+   *HYPERFOAM
+   *MAGNETICPERMEABILITY
+   *MATERIAL
+   *PLASTIC
+   *SPECIFICGASCONSTANT
+   *SPECIFICHEAT
+   *USERMATERIAL
+   ```
+
+2. 
 
 # 所有文件的作用
 
@@ -1168,9 +1196,9 @@
    inputerror.f90 #
    inputinfo.f90 #
    inputwarning.f90 #
-   insertsortd.f90 #
-   insertsorti.f90 #
-   interpol_alfa2.f90 #
+   insertsortd.f90 # 对于非常小的n的插入排序算法，该算法在大量数据时效率不如快速排序，归并排序等算法。d表示浮点数，real
+   insertsorti.f90 #功能同上，i表示整数，integer
+   interpol_alfa2.f90 # 将第三个参数alfa2设置为1.d0
    interpolateinface.f90 #
    interpolatestate.f90 #
    interpolextnodes.f90 #
@@ -1684,7 +1712,7 @@
    zienzhu.f90#
    
    
-   add_rect.c #计算两个系数矩阵的和
+   add_rect.c #计算两个稀疏矩阵A,B的和A+B。
    arpack.c # arpack相关
    arpackbu.c #
    arpackcs.c #
@@ -1750,9 +1778,9 @@
    inimortar.c #初始化mortar接触
    iniparll.c #resultsini.c的并行部分
    insert_cmatrix.c #下三角矩阵，插入矩阵相关
-   insertas.c # 在稀疏矩阵中插入新的非零矩阵位置
+   insertas.c # 在稀疏矩阵中插入新的非零矩阵位置，不要求矩阵是对称的
    insertas_ws.c # 在有序稀疏矩阵中插入新的非零矩阵位置
-   insert.c #在数据结构中插入新的非零矩阵位置
+   insert.c #在数据结构中插入新的非零矩阵位置，针对下三角矩阵，不包括对角矩阵。
    insertcbs.c #
    insertfreq.c #用于边界刚度系数
    insertrad.c #

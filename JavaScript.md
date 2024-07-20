@@ -2004,7 +2004,22 @@
    })();
    ```
 
-2. 
+2. 另一种，可以运行在console中的代码：
+
+   ```js
+   divObject = document.querySelector("#content > article > div > div.note"); //要打印的标签，使用F12→Copy→js path来选择
+   function printdiv(divObject){
+       var headstr ="<html><head><title>打印 div 标签</title></head><body>";
+       var footstr ="</body>";
+       var newstr = divObject.innerHTML;
+       var oldstr = document.body.innerHTML;
+       document.body.innerHTML = headstr + newstr + footstr; //设置新场景
+       window.print();
+       document.body.innerHTML = oldstr; //恢复场景
+       return false;
+   }
+   printdiv(divobject);
+   ```
 
 3. 
 
