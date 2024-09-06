@@ -1347,12 +1347,14 @@
    };
    ```
 
-5. 上面等号右边为匿名函数，可以在创建的时候调用，直接在后面加()。定义匿名函数的时候需要在整个函数的定义外边加上括号，否则不会识别，如果时赋值给变量，则不用加括号。
+5. 上面等号右边为匿名函数，可以在创建的时候调用，直接在后面加()。定义匿名函数的时候需要在整个函数的定义外边加上括号，否则不会识别，如果是赋值给变量，则不用加括号。
 
    ```js
    (function(a,b){ //函数有2个形参
        console.log("a=" + a + " b=" + b);
    })(1,3) //创建的同时调用，传递了2个实参。结果输出为a=1 b=3
+   //还有一种方法，在function前面加上!或者+等符号，都可以省略原来的括号。
+   !function(a,b){}()
    ```
 
 6. 函数的形参就相当于在函数内声明了一个变量，但是并不赋值，当函数被调用的时候，可以用实参给形参赋值。
@@ -1485,9 +1487,12 @@
    clearInterval(编号); //关闭指定的定时器。
    ```
 
-2. 
+2. 还有一种是要延迟一定时间后再调用一次的情况，类似于闹钟：
 
-3. 
+   ```javascript
+   setTimeout(回调函数，等待的ms数); //返回值是定时器编号
+   clearTimeout(编号); //关闭指定的定时器，一般不用。
+   ```
 
 # DOM和BOM
 
@@ -1521,19 +1526,50 @@
    document.all;             //页面中所有的元素，一般为html,head,meta,title,script ,body等元素，不分层级。等价于document.getElementsByTagName("*");
    ```
 
-9. 浏览器提供了现成的对象供程序员操作DOM树，名称为document。它是一个全局变量，是window对象的属性，代表整个HTML文档。
+9. 浏览器提供了现成的对象供程序员操作DOM树，名称为document。它是一个全局变量，是window对象的属性，代表整个HTML文档，也就是说BOM包含了DOM
+
+10. window对象还包含了navigator，location，history，screen对象。
+
+11. location对象，拆分并保存了URL地址的各个组成部分。常用的属性和方法：
+
+    1. href属性，获取完整的URL地址，对其赋值可以进行跳转。
+
+    2. search属性，获取地址中携带的参数，也就是?及后面的部分，例如链接为`https://www.baidu.com?wd=abc&user=1112`，其中有2个参数，分别为wd和user，这里search属性的值为`"?wd=abc&user=1112"`。
+
+    3. hash属性，获取地址中的哈希值，也就是#及以后的部分。在单页面应用中存在，类似于QT编程中的MDI多文档界面，允许不刷新网页，显示不同的页面。例如网易云的主页，`"https://music.163.com/#/friend"`。这里hash属性的值为`"#/friend"`。
+
+    4. reload方法，用来刷新当前的页面，相当于F5，如果传入true参数，则强制刷新，也就是Ctrl+F5，不从本地缓存中取数据。
+
+12. navigator对象，记录了浏览器自身的相关信息。
+
+    1. userAgent属性，保存浏览器的版本和平台。`"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"`。可以用来判断是否是移动端，从而跳转到移动站点。
+
+13. history对象，管理历史记录，功能和浏览器左上角的前进，后退按钮相同。
+
+    1. back方法，后退
+    2. forward方法，前进
+    3. go(n)，如果n是1，则前进1个页面，如果n是-1，后退1个页面。
+
 
 ## 获取元素
 
-1. 元素的id，type，value等属性都可以使用.来获取，但是class属性不可以，因为class时js的关键字，需要使用className来读取。
+1. 元素的id，type，value等属性都可以使用.来获取，但是class属性不可以，因为class时js的关键字，需要使用className来读取。优先使用ID，其次是className，最后才是标签类型。
 
 2. 推荐使用CSS选择器来选择元素：
 
    ```js
-   // 参数为字符串，包含一个或多个有效的css选择器，
-   document.querySelector(".box1 div");    //在document对象下查找，类名为box1的元素中的div标签，递进要求。该方法只能返回第一个匹配的元素。
-   document.querySelectorAll(".box1 div"); //在所有的box1类中查找所有的div元素，返回一个NodeList的数组。实际上是一个伪数组，有长度，有索引号，但是不能push和pop。
+   // 参数为字符串，包含一个或多个有效的css选择器，选择器之间是且的关系，而非递进。
+   document.querySelector(".box1 div");    //在document对象下查找，类名为box1的div标签。该方法只能返回第一个匹配的元素。
+   document.querySelectorAll(".box1 div"); //同上，但是返回一个NodeList的数组。实际上是一个伪数组，有长度，有索引号，但是不能push和pop。
    //  #id   根据id属性选择
+   //根据相对关系查找
+   "A > B" //表示A的子元素中查找满足条件B的元素，不递归。
+   "A B" //表示A的所有后代元素中查找满足条件B的元素，递归。
+   "A + B" //在A的兄弟元素中寻找B。
+   "A.B" //不表示相对关系，而是A标签，且className为B的元素。
+   //根据特定或自定义属性来选择
+   "[role]" //选择具有role属性的元素
+   "[role=main]" //选择具有role属性，且值为main的元素
    ```
 
 3. 通过document对象，获取它的子元素节点。
@@ -1627,7 +1663,7 @@
    </script>
    ```
 
-2. 通过style属性的子属性修改某个元素的样式：
+2. 通过style属性的子属性修改某个元素的样式，这样修改的是内联样式，也就是通过标签的style属性设置的：
 
    ```js
    对象.style.width = "200px"; //设置宽度为200像素，单位不能省略
@@ -1945,15 +1981,91 @@
 
 18. 有时需要阻止事件的默认行为，例如阻止链接的跳转和表单的提交,，当用户点击表单提交时，需要先判断输入是否合法，如果不合法，需要阻止提交。可以使用事件对象`e.preventDefault`。
 
-19. 
 
-20. 
+# JS执行机制
 
-21. 
+1. JS最大的特点是单线程，它的诞生是为了解决页面中的交互，以及操作DOM。由于DOM树的操作必须要严格按照顺序执行，因此单线程是适合的。如果JS代码执行时间太长，会造成页面渲染不连贯，产生阻塞的感觉。
 
-22. 
+2. 但是又有定时之类的需求，为了解决这类问题，H5允许JavaScript创建多个线程，出现了同步和异步的概念。
 
-23. 
+3. 同步任务都是在主线程中执行，形成一个执行栈，而异步任务是通过回调函数实现的，会放到任务队列中。
+
+4. 一般而言，异步任务有如下三种：
+
+   1. 普通事件，click，resize等
+   2. 资源加载，load，error等
+   3. 定时器，setTimeout，setInterval等。
+
+5. JS执行机制：
+
+   1. JS引擎读取整个脚本，把所有同步语句都放入执行栈中，依次执行。
+   2. 所有的异步语句，都会被交给浏览器处理，因为浏览器可以是多线程的，所以这里没问题。然后继续执行其后的语句。
+   3. 在JS执行同步任务的时候，浏览器负责处理异步任务，例如在定时到了以后，将回调函数放到任务队列中，等待JS来取。
+   4. 一旦执行栈中的所有同步任务执行完毕，系统会按顺序读取任务队列中的异步任务，并执行，这一步会反复进行，也成为事件循环。
+
+6. 例子：
+
+   ```javascript
+   console.log(1);
+   console.log(2);
+   setTimeout(function(){
+       console.log(3)
+   },0); //虽然延迟为0，最后输出也是1243。
+   console.log(4);
+   ```
+
+# 本地存储
+
+1. 随着互联网的发展，基于网页的应用越来越普遍，经常会遇到需要在本地存储数据的情况，H5提出了相关的方法。数据存储在用户浏览器中，设置，读取方便，刷新页面不会丢失。容量较大。分为2类，sessionStorage和localStorage，约5M左右。
+
+2. localStorage可以将数据永久地存储在用户的电脑中，除非手动删除，及时重新打开浏览器也存在。可以多窗口（页面）共享，不同域名的网页默认不共享，需要跨域，不同浏览器之间的不共享。以键值对的方式存储。可以在F12→Application→Storage→Local storage中找到。
+
+3. 例子：
+
+   ```javascript
+   //键必须是字符串，值任意，都会被转化成字符串，因为只能存储字符串。
+   localStorage.setItem(key, value); //新增或者修改已有的键值对。
+   localStorage.getItem(key); //根据键获取值。
+   localStorage.removeItem(key); //删除键值对
+   localStorage.clear(); //清除所有的键值对
+   ```
+
+4. sessionStorage会在关闭浏览器窗口后释放，用法和localStorage相同。
+
+5. 存储对象的方法：
+
+   ```javascript
+   const obj1 = {
+       uname:"pink",
+       age:18,
+       gender:"女"
+   }
+   localStorage.setItem("obj1", obj1); //这里会执行obj1.toString()，将返回值存储键中，之后再读取，就无法还原对象了。
+   //此时需要将对象序列化，然后在存储。这里将其转化为JSON字符串。
+   localStorage.setItem("obj1", JSON.stringify(obj1));
+   //JSON字符串如下，可以看到为键和值都加上的双引号，最外侧为一对单引号。
+   '{"uname":"pink","age":18,"gender":"女"}'
+   const obj2 = JSON.parse(localStorage.getItem("obj1"));
+   obj1 == obj2; //结果为false，但是二者的属性和方法都是一样的。
+   ```
+
+# Cookie，session
+
+1. HTTP本身是无状态的，但是有时需要区分不同用户的访问，此时可以在本地存储一些数据，让用户请求时，附加上这些数据来鉴别身份。无状态可以使得浏览器和服务器之间不用保持链接，这样服务器可以同时服务多个浏览器。
+2. 浏览器第一次发起HTTP请求后，服务器除了返回网页文件外，还会进行Cookie（就是键值对）设置，也就是Set-Cookie。浏览器接收到Cookie之后，会保存起来，这样浏览器对这个网站后续的每个请求都会附上这个Cookie。由于Cookie是以明文存储的，因此存在安全风险。
+3. 之所以称之为Cookie，是因为认为请求的文件是正餐，而附带的这个数据是小点心。
+4. Session机制是把原来需要通过Cookie保存的各种数据都保存在服务器端，然后给这些数据一个SessionID，把这个ID发给浏览器，用作通信的身份。这样就无法从浏览器来窃取数据了。
+5. session是用来进行保密通信的，因为如果直接将网站的用户名和密码存储在浏览器，容易被黑客获取，因此当浏览器第一次发送给服务器账号密码时，服务器验证成功后，就生成一个随机数的SessionID和Max-age（过期时间），将其作为Cookie发送给浏览器。浏览器收到后，将它们作为Cookie存储，同时将Cookie的结束时间设置为会话的结束时间。这样黑客及时拿到了SessionID也无法从中推断出用户名和密码。实际上这个会话结束时间还可以被服务器延长，例如只要相邻两次登录间隔不太长，Cookie就不会过期。SessionID在被盗后，确实是可以伪装用户的登陆状态。
+6. session也有一些问题，例如第一次请求是由A服务器响应，第二次的请求发送到了B服务器，B服务器在收到这个SessionID后，还需要去找A服务器获取对应的信息，会带来性能的开销。
+7. CSRF（Cross Site Request Forgery 跨域请求伪造）攻击：A网站设置了一个Cookie，B网站是恶意网站，它在其JS中执行了一个对A网站的请求，此时可能会携带A网站之前设置的Cookie。
+8. 每个Cookie都有一个samesite属性：
+   1. Strict，只有请求的发起者是同一个网站时才会携带Cookie数据。
+   2. Lax，其他网站通过超链接，预加载，表单提交时，允许携带此Cookie数据，其他方式不允许。这是默认级别。
+   3. None，没有限制。
+9. token是另一种形式的Cookie，不属于浏览器的规范，需要前后端程序来维护。token是服务器端负责加密的，浏览器端一般不大会需要解密。是否携带也是由JS代码来控制的，浏览器不会自动携带，因此可以避免上述CSRF攻击。
+10. token还取代了session，其中自然包含了用户的基本信息，临时状态。token使用数字签名来防伪，一般包含用户ID，IP地址，登录时间等信息。服务器使用其私钥对这些数据加密，然后将签名附加在末尾。这样伪造或修改其中任意一段，都会导致解密后对不上。
+11. <img src="JavaScript.assets/image-20240729215047211.png" alt="image-20240729215047211" style="zoom: 50%;" />
+12. token已经取代了Cookie，称为前端验证的主流方式。
 
 # 浏览器内核
 
@@ -1971,16 +2083,40 @@
    2. 解析该文件，构建DOM树。
    3. 构建DOM树时，如果遇到CSS，图片和JS文件，会同时发送请求。
    4. CSS和图片不会阻塞DOM树的构建，而JS可能会改变DOM树，因此会等待JS下载，执行完成JS后再继续解析HTML，构建DOM树。因此JS代码的位置十分重要。
+8. 
+9. 
+10. 
+11. 
+12. 
+13. 
 
 # 油猴脚本
 
-1. 打印pdf的例子：
+1. 元信息，作为注释存在，可以被油猴插件或脚本仓库网站来使用：
+
+   ```javascript
+   // ==UserScript==
+   // @name         CFD Print  脚本名称，显示在油猴控制界面中
+   // @namespace    http://tampermonkey.net/ 用来避免重名，一般用域名
+   // @version      1.0  版本
+   // @description  try to take over the world! 会显示在GreasyFork中
+   // @author       You
+   // @match        https://doc.cfd.direct/notes/cfd-general-principles/* 在那些网页上启用该脚本
+   // @icon         https://www.google.com/s2/favicons?sz=64&domain=cfd.direct 图标，显示在油猴的控制界面中
+   // @grant        none 特殊权限，调用GM_开头的函数时，需要先申请权限。
+   // @include     https://doc.cfd.direct/notes/cfd-general-principles/*  和@match差不多，但是@match只支持通配符，这个支持正则表达式，更推荐使用这个。
+   // @connect example.com   如果脚本要访问跨域资源，则需要提前声明。
+   // @license AGPL-3.0     授权许可信息
+   // ==/UserScript==
+   ```
+
+2. 打印pdf的例子：
 
    ```js
    // ==UserScript==
    // @name         CFD Print
    // @namespace    http://tampermonkey.net/
-   // @version      2024-06-19
+   // @version      1.0 
    // @description  try to take over the world!
    // @author       You
    // @match        https://doc.cfd.direct/notes/cfd-general-principles/*
@@ -1988,7 +2124,7 @@
    // @grant        none
    // ==/UserScript==
    
-   (function() {
+   (function() { //之所以使用匿名函数，是为了避免从外部访问函数内的东西。
        'use strict';
        let note = document.querySelector("#content > article > div > div.note")
        note.firstElementChild.remove()
@@ -2004,7 +2140,7 @@
    })();
    ```
 
-2. 另一种，可以运行在console中的代码：
+3. 另一种，可以运行在console中的代码：
 
    ```js
    divObject = document.querySelector("#content > article > div > div.note"); //要打印的标签，使用F12→Copy→js path来选择
@@ -2021,6 +2157,6 @@
    printdiv(divobject);
    ```
 
-3. 
-
 4. 
+
+5. 

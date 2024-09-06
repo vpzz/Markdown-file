@@ -1590,6 +1590,332 @@
     plt.show()
     ```
 
+# 稀疏矩阵
+
+1. 工程计算中经常用到稀疏矩阵（大多数元素是0的矩阵）。稀疏因子：非零元素数/总元素的个数 当稀疏因子＜0.05时，就认为是稀疏矩阵。
+
+2. 以常规的二维数组来表示稀疏矩阵有以下问题：
+   1. 零值元素占用了大量的空间。
+   2. 计算中要进行很多和0相关的无意义运算。
+
+3. 尽可能少存或不存零值元素；尽可能减少和0相关的运算。
+
+4. 同时还要运算方便，能够尽快根据下标找到对应的元素。能尽快地找到同一行/列的非零元素。
+
+5. 稀疏矩阵中存在一类特殊的，例如三角矩阵和对角矩阵，非零元素的分布都比较规律。线性化存储较为容易。
+
+6. 稀疏矩阵的代价是：访问单个成员变得更加复杂，需要额外的结构才能明确地恢复原始矩阵。
+
+7. 根据非零元的数量和分布，可以使用不同的数据结构，大致分为如下两类：
+   1. 支持高效修改的，可以很方便地对往原始矩阵中假如新的元素, 或者从原始矩阵中删去元素 (增加元素指的是将原来为0的元素变为非0, 同样删除同理)。如DOK（Dictionary of keys，密钥字典）、LIL（List of lists，列表的列表）或COO（Coordinate list，坐标列表）。这些格式通常用于构建矩阵。
+   2. 支持快速访问到特定位置的元素的数据结构以及支持基于矩阵形式的操作, 即两个稀疏矩阵相加或者相减等，如CSR（Compressed Sparse Row，压缩稀疏行）或CSC（Compressed Sparse Column，压缩稀疏列）。
+
+8. 上面的第一种格式如果要进行矩阵乘法或求逆，应该先转化成第二种中的一种格式，lil格式内部的数据是按行存储的，因此转化为CSR更快。
+
+9. CSR，CSC，COO格式之间的互转都是快速的，线性时间复杂度。
+
+10. CSR格式尤其适合进行矩阵和向量的乘积，使用`A.dot(v)`进行。
+
+11. CSR和CSC格式，在内部存储时，不一定按照行或列进行排序，如果需要内部是有序时，可以使用`.sort_indices()`函数。
+
+12. Python的scipy.sparse模块提供了对稀疏矩阵的支持。
+
+13. 对于一个`sparse.spmatrix`（抽象基类），可以用`.tocoo, tocsr`等方法来进行存储方式的转换。
+
+14. `sparse.save_npz`函数将稀疏矩阵序列化，`sparse.load_npz`反序列化。
+
+15. `sparse.hstack`和`sparse.vstack`函数用于稀疏矩阵的拼接。
+
+16. 稀疏矩阵与向量相乘用`.dot`方法。
+
+17. `scipy.sparse.linalg`包有稀疏矩阵的一些线性代数方法。
+
+18. 稀疏矩阵可以存储显式的零：
+
+    ```python
+    row = [0,0,1,1,2,2]
+    col = [0,3,1,2,2,3]
+    data = [1,2,4,1,5,0]
+    csr = sp.sparse.csr_array((data, (row, col)))
+    csr
+    <Compressed Sparse Row sparse array of dtype 'int64'
+         with 6 stored elements and shape (3, 4)>
+    csr.eliminate_zeros() #移除显式的零，就地操作。
+    csr
+    <Compressed Sparse Row sparse array of dtype 'int64'
+         with 5 stored elements and shape (3, 4)>
+    ```
+
+19. COO格式中可以包含重复的键值对，在转化为CSR或CSC格式时，位置重合的键值对的值会自动求和，这对于构建有限元的刚度和质量矩阵很有帮助。
+
+    ```python
+    row = [0,0,1,1,1,2]
+    col = [0,3,1,1,2,2]
+    data = [1,2,1,3,1,5]
+    dupes = sp.sparse.coo_array((data, (row, col))) #可以看到，在(1,1)的位置上有2个元素，取值为1和3。
+    dupes
+    <COOrdinate sparse array of dtype 'int64'
+         with 6 stored elements and shape (3, 4)> #认为有6个元素，虽然只有5个位置
+    dupes.todense()
+    array([[1, 0, 0, 2],
+          [0, 4, 1, 0],
+          [0, 0, 5, 0]])
+    dupes.sum_duplicates() #对重复下标的元素求和，就地进行。
+    ```
+
+20. 一些稀疏矩阵格式在标准形式下会有较高的效率，例如没有重复的下标项，下标按顺序排列。coo_array，csr_array，csc_array格式的矩阵都是标准形式，也可以使用`.has_canonical_format`函数来检查矩阵是否是标准形式。
+
+21. 大部分对于稠密矩阵来说可用的算法，对于稀疏矩阵来说也是可用的。
+
+22. 稀疏矩阵的`.nnz`属性，可以返回其中非零元素的数量。
+
+23. 对稀疏矩阵应用归约函数时，例如mean，sum，max等，结果以非稀疏矩阵形式返回。
+
+24. 有时稀疏矩阵之间的操作的结果的格式不一定和原来一样，这是因为SCIPY会选择计算效率最高的格式。例如2个COO格式的矩阵的乘法，结果为CSR格式。
+
+25. 给定非零元素的下标及其值来构建矩阵：
+
+    ```python
+    row = np.array([0, 0, 1, 2, 2, 2]) #row和col数组不要求有序
+    col = np.array([0, 2, 1, 0, 1, 2])
+    data = np.array([1, 2, 3, 4, 5, 6])
+    mtx = sparse.coo_matrix((data, (row, col)), shape=(3, 3)) #将行和列的列表以元组形式包装, 然后再将该元组与data组成一个新的元祖作为第一个参数传入。
+    print(mtx) #输出所有的非零元及其下标
+      (0, 0)        1
+      (0, 2)        2
+      (1, 1)        3
+      (2, 0)        4
+      (2, 1)        5
+      (2, 2)        6
+    mtx.toarray() #输出成二维数组，numpy.ndarray类型
+    array([[1, 0, 2],
+           [0, 3, 0],
+           [4, 5, 6]])
+    mtx.todense() #输出成矩阵，numpy.matrix类型。将稀疏矩阵变成稠密矩阵，注意转换后的内存消耗。
+    matrix([[1, 0, 2],
+            [0, 3, 0],
+            [4, 5, 6]])
+    ```
+
+26. 所有的稀疏矩阵格式支持使用`numpy.ndarray`二维数组来构建：
+
+    ```python
+    mtx = sparse.lil_matrix([[0, 1, 2, 0], [3, 0, 1, 0], [1, 0, 0, 1]])
+    print(mtx.todense())
+    [[0 1 2 0]
+     [3 0 1 0]
+     [1 0 0 1]]
+    ```
+
+27. 所有的矩阵都可以使用如下方式来构建一个所有的元素都为0的矩阵
+
+    ```python
+    mtx = sparse.coo_matrix((3, 4), dtype=np.int8)
+    print(mtx) #注意这里输出的是空值, 因为只构造了一个(5,5)的零矩阵, 其中没有非0元素自然没有非零元素键值对。
+    ```
+
+## COO
+
+1. COO的思想是按照（行，列，值）的方式存储每一个非0元素，所以存储的数据结构就应该是一个以三元组为元素的列表`List[Tuple[int, int, int]]`。为了方便检索矩阵某个位置的元素，这些三元组最好应该按顺序（比如先行后列）排列，这样在访问时可以使用二分查找加速。
+
+2. 优点： 转化快速，还能转化成CSR/CSC格式的稀疏矩阵。
+
+3. 缺点： 不支持切片和下标索引，矩阵计算。
+
+4. 例子：
+
+   ```python
+   from scipy import sparse
+   import numpy as np
+   row = np.array([0, 3, 1, 0])
+   col = np.array([0, 3, 1, 2])
+   data = np.array([4, 5, 7, 9])
+   mtx = sparse.coo_matrix((data, (row, col)), shape=(4, 4))
+   print(mtx)
+   (0, 0)    4
+   (3, 3)    5
+   (1, 1)    7
+   (0, 2)    9
+   
+   print(mtx.todense())
+   [[4 0 9 0]
+    [0 7 0 0]
+    [0 0 0 0]
+    [0 0 0 5]]
+   
+   row = np.array([0, 0, 1, 3, 1, 0, 0])
+   col = np.array([0, 2, 1, 3, 1, 0, 0])
+   data = np.array([1, 1, 1, 1, 1, 1, 1])
+   mtx = sparse.coo_matrix((data, (row, col)), shape=(4, 4))
+   print(mtx.todense())
+   [[3 0 1 0]
+    [0 2 0 0]
+    [0 0 0 0]
+    [0 0 0 1]]
+   
+   mtx[2, 3] #不支持索引，会报错。
+   ```
+
+## DOK
+
+1. DOK的内部是一个哈希表`unordered_set<pair<int, int>>`，以`(row_index, column_index)`为key。访问某个位置只需要 O(1) 的时间。所以这种存储方式能比较好的支持矩阵的索引。这种格式支持矩阵运算。是一种高效的增量构建稀疏矩阵的方式。
+
+2. 这种格式的储存方式非常适合增删改查，只需要直接向字典中加入或删除一个键值对就行，但如果要查某一个位置的元素是否是非0元素，也不用遍历整个字典的keys，因为内部是哈希表。
+
+3. 例子：
+
+   ```python
+   from scipy import sparse
+   import numpy as np
+   mtx = sparse.dok_matrix((5, 5), dtype=np.float64) #创建一个全为0.0的矩阵
+   for ir in range(5):
+       for ic in range(5):
+           mtx[ir, ic] = 1.0 * (ir != ic) #除了对角线外，所有单元都赋值为1.0
+   
+   print(mtx.todense())
+   [[0. 1. 1. 1. 1.]
+    [1. 0. 1. 1. 1.]
+    [1. 1. 0. 1. 1.]
+    [1. 1. 1. 0. 1.]
+    [1. 1. 1. 1. 0.]]
+   ```
+
+## LIL
+
+1. LIL：对于矩阵的每一行，都用一个列表来记录下非0的位置和值。这种格式支持切片和索引。
+
+2. LIL的数据结构是列表, 每一行对应着的矩阵中该行, 而LIL中每一行都是一个列表, 包含在该行出现非0元素的列位置以及非0元素的值, 可能的实现方式是每一行都包含一个列表, 该列表是个升序排序后的列表，每个元素代表在原矩阵中在该行非0元素出现的列位置。
+
+3. 例子：
+
+   ```python
+   from scipy import sparse
+   from numpy.random import rand
+   import numpy as np
+   mtx = sparse.lil_matrix((4, 5)) #全为0的稀疏矩阵
+   data = np.round(rand(2, 3)) #二维数组
+   
+   print(data)
+   [[0. 1. 0.]
+    [1. 1. 1.]]
+   
+   mtx[:2, [1, 2, 3]] = data #对第0，1行，第1，2，3列的交叉项构成的子矩阵赋值
+   
+   print(mtx)
+   (0, 2)        1.0
+   (1, 1)        1.0
+   (1, 2)        1.0
+   (1, 3)        1.0
+   
+   print(mtx.todense())
+   [[0. 0. 1. 0. 0.]
+    [0. 1. 1. 1. 0.]
+    [0. 0. 0. 0. 0.]
+    [0. 0. 0. 0. 0.]]
+   
+   print(mtx[:2, :]) #取第0和1行的子矩阵
+   (0, 2)        1.0
+   (1, 1)        1.0
+   (1, 2)        1.0
+   (1, 3)        1.0
+   
+   print(mtx[:2, :].todense())
+   [[0. 0. 1. 0. 0.]
+        [0. 1. 1. 1. 0.]]
+   
+   print(mtx[1:2, [0,2]].todense())
+   [[0. 1.]]
+   ```
+
+## CSR
+
+1. CSR用三个列表来表达稀疏矩阵，和COO较为相似，但比COO更进一步的是其还将每一行的空间压缩了，这种类型的数据结构支持快速row access和矩阵的相加，同理CSC支持快速column access和矩阵的相加。
+
+2. 优点：高效的矩阵加法和乘法操作；高效的行切片；快速的矩阵和向量乘法。
+
+3. 缺点：较慢的列切片，稀疏结构的更改代价高昂。
+
+4. 例子：
+
+   ```python
+   import numpy as np
+   from scipy import sparse
+   indptr = np.array([0, 2, 3, 6]) #除了最后一个元素意外，以第i个元素的值作为下标，在indices数组中作用，结果就是第i行的非零元素的列号。最后一个元素代表整个矩阵中所有非0元素的数量。例如，用indptr的值当作下标，来对数组indices进行切片，[[0,2],[1],[0,1,2]]，这就表明第0行的第0和2列有非零元素，第1行的第1列有非零元素，第2行的第0,1,2列有非零元素。
+   indices = np.array([0, 2, 1, 0, 1, 2]) #代表每一行的非0元素的位置
+   data = np.array([1, 2, 3, 4, 5, 6])
+   mtx = sparse.csr_matrix((data, indices, indptr), shape=(3, 3)) #和mtx1完全相同
+   print(mtx) #可以根据下面的键值对来分别还原上述三个数组数组，首先需要将所有非零元素先按照行排序，然后按照列排序：
+   # 将所有的列按照顺序输出即可得到indices数组，也就是[0,2,1,0,1,2]。
+   # 将行号变化的编号输出得到[0,2,3]，然后追加上非零元素的总数，得到[0,2,3,6]。
+   # 将所有键值对的值按顺序输出即可得到data数组，也就是[1,2,3,4,5,6]。
+     (0, 0)        1
+     (0, 2)        2
+     (1, 1)        3
+     (2, 0)        4
+     (2, 1)        5
+     (2, 2)        6
+   mtx.toarray()
+   array([[1, 0, 2],
+          [0, 3, 0],
+          [4, 5, 6]])
+   ```
+
+## CSC
+
+1. CSC和CSR的构造方式几乎一样，只不过之前是一行一行开始扫描indptr和indices的，现在变为一列一列了。
+
+2. 优点：高效的矩阵加法和乘法操作；高效的列切片；快速的矩阵和向量乘法。
+
+3. 缺点：较慢的行切片，稀疏结构的更改代价高昂。
+
+4. 例子：
+
+   ```python
+   import numpy as np
+   from scipy import sparse
+   
+   indptr = np.array([0, 2, 3, 6])
+   indices = np.array([0, 2, 2, 0, 1, 2])
+   data = np.array([1, 2, 3, 4, 5, 6])
+   mtx = sparse.csc_matrix((data, indices, indptr), shape=(3, 3))
+   print(mtx) #可以看到以csc格式存储的数组，默认是按列存储的，一列存储完再存储下一列。
+   (0, 0)        1
+   (2, 0)        2
+   (2, 1)        3
+   (0, 2)        4
+   (1, 2)        5
+   (2, 2)        6
+   mtx.toarray()
+   array([[1, 0, 4],
+          [0, 0, 5],
+          [2, 3, 6]])
+   ```
+
+
+# 稀疏矩阵特征值问题
+
+1. SCIPY支持使用ARPACK库来求解稀疏矩阵的特征值。两个接口，`scipy.sparse.linalg.eigs`用来求解非对称的实/复矩阵的特征值/特征向量。`scipy.sparse.linalg.eigsh`用来求解实对称/复共轭对称矩阵的特征值/特征向量。
+2. ARPACK可以求解标准$Ax=\lambda x$或广义特征值问题$Ax=\lambda Mx$：
+3. ARPACK的强大在于，它可以只计算一部分的特征值/特征向量对，这通过which参数来确定：
+   1. `which = 'LM'`：
+   2. `which = 'SM'`：
+   3. `which = 'LR'`：
+   4. `which = 'SR'`：
+   5. `which = 'LI'`：
+   6. `which = 'SI'`：
+   7. `which = 'LA'`：
+   8. `which = 'SA'`：
+   9. `which = 'BE'`：
+4. ARPACK通常更擅长寻找极值特征值，例如最大幅值的特征值。因此如果`which="SM"`，可能会导致求解缓慢或结果异常。推荐使用移位逆（Shift-invert）模式。
+5. 
+6. 
+7. 
+8. 
+9. 
+10. 
+11. 
+12. 
+
 # SymPy
 
 1. SymPy是一套符号运算的扩展库，完全采用python编写。
