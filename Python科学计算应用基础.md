@@ -926,7 +926,49 @@
    #注意上面的矩阵和行向量的乘法，也不是左乘，这里都是右乘。
    ```
 
-7. 统计运算，默认将多维数组看作一维的：
+7. 三维矢量的叉乘：
+
+   ```python
+   import numpy as np
+   G_1 = np.array([1, 0, 0])
+   G_2 = np.array([0, 1, 0])
+   G_3 = np.cross(G_1, G_2) #可得G_3 = array([0, 0, 1])
+   ```
+
+8. 用矢量拼接构成矩阵：
+
+   ```python
+   import numpy as np
+   G_1 = np.array([1, 0, 0])
+   G_2 = np.array([0, 1, 0])
+   G_3 = np.array([1, 1, 1])
+   G_xy = np.array([G_1,G_2,G_3])
+   # 结果为
+   array([[1, 0, 0],
+          [0, 1, 0],
+          [1, 1, 1]])
+   #如果想当作列向量拼接，可以对上述结果转置.T即可。
+   ```
+
+9. 例子，计算度量张量在两个互相对偶的基底下的矩阵是互逆的：
+
+   ```python
+   import numpy as np
+   G_1 = np.array([1, 0, 2]) #G_1,G_2,G_3为一个基底
+   G_2 = np.array([0, 3, 0])
+   G_3 = np.array([1, 1, 1])
+   k = np.dot(np.cross(G_1, G_2), G_3)
+   G1 = np.cross(G_2, G_3)/k #G1,G2,G3是和上面对偶的基底
+   G2 = np.cross(G_3, G_1)/k
+   G3 = np.cross(G_1, G_2)/k
+   A = np.array([G_1, G_2, G_3])
+   B = np.array([G1, G2, G3])
+   G_xy = A.dot(A.T) #G_1,G_2,G_3构成的度量矩阵
+   Gxy = B.dot(B.T)  #G1,G2,G3构成的度量矩阵
+   G_xy.dot(Gxy)     #结果为单位矩阵
+   ```
+
+10. 统计运算，默认将多维数组看作一维的：
 
    ```python
    A.min()      #等价于np.min(A)
@@ -943,28 +985,28 @@
    np.count_nonzero(a1 == 3)  #计算a中=0的元素的个数，等价于np.sum(a1 == 3) 
    ```
 
-8. 如果要沿行或列方向进行统计，那么要设置axis值。对min，max等操作也都可以设置axis值。
+11. 如果要沿行或列方向进行统计，那么要设置axis值。对min，max等操作也都可以设置axis值。
 
-   ```python
-   A = np.arange(9).reshape(3,-1) #结果为
-   array([[0, 1, 2],
-          [3, 4, 5],
-          [6, 7, 8]])
-   A.sum() #默认当作一维数组看，结果为36
-   A.sum(axis=0) #把二维数组当做多个列向量拼接起来的，结果为array([ 9, 12, 15])
-   A.sum(axis=1) #把二维数组当做多个行向量拼接起来的，结果为array([ 3, 12, 21])
-   ```
+    ```python
+    A = np.arange(9).reshape(3,-1) #结果为
+    array([[0, 1, 2],
+           [3, 4, 5],
+           [6, 7, 8]])
+    A.sum() #默认当作一维数组看，结果为36
+    A.sum(axis=0) #把二维数组当做多个列向量拼接起来的，结果为array([ 9, 12, 15])
+    A.sum(axis=1) #把二维数组当做多个行向量拼接起来的，结果为array([ 3, 12, 21])
+    ```
 
-9. arg索引运算，例如a.min()是获得数组a的最小值，而对应的索引运算a.argmin()是获得该最小值的索引位置。
+12. arg索引运算，例如a.min()是获得数组a的最小值，而对应的索引运算a.argmin()是获得该最小值的索引位置。
 
-   ```python
-   A = np.arange(9).reshape(3,-1)
-   a1.max() #结果为8
-   a1.argmax() #结果为8。和max一样，它可以可以使用axis参数。
-   a1.reshape(-1)[a1.argmax()] == a1.max() #结果恒为True
-   ```
+    ```python
+    A = np.arange(9).reshape(3,-1)
+    a1.max() #结果为8
+    a1.argmax() #结果为8。和max一样，它可以可以使用axis参数。
+    a1.reshape(-1)[a1.argmax()] == a1.max() #结果恒为True
+    ```
 
-10. 排序：
+13. 排序：
 
     ```python
     A = np.arange(16)
@@ -1000,7 +1042,7 @@
     array([ 0,  1,  2,  6, 14, 12,  7,  8,  3,  4, 11, 10,  5, 15, 13,  9])
     ```
 
-11. 适用于浮点数组的近似比较：
+14. 适用于浮点数组的近似比较：
 
     ```python
     numpy.isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=False) #逐个比较数组a和b中对应的元素。rtol为相对差异，以b的元素为基准，atol为绝对差异，都应是正值。如果待比较的数字本身很小，则atol可能不合适。

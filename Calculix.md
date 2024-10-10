@@ -570,21 +570,50 @@
 1. 流号和文件名对应，所有的文件都是使用Fortran的open函数打开。
 
    ```shell
+   #在整个源代码工程中搜索open（Fortran）和fopen（C）函数，统计所有的文件读写
    #流号  文件名
    1      jobname.inp #输入文件
+   2      jobname.rfn.inp #网格refine后的inp文件
    5      jobname.dat #输出的结果
    7      jobname.frd #结果数据库文件，类似于abaqus的.odb文件
    8      jobname.sta #
+   9      TetMasterSubmodel.frd #四面体网格
+   10     jobname.vwf #辐射分析中的viewfactor
+   10     vector_.out #矢量数据，调试会用到
+   10     matrix_.out #矩阵数据，调试会用到
    11     jobname.cvg #收敛状态文件
-   12     jobname.fcv #
+   12     jobname.fcv #收敛数据
+   12     jobname.mtx #子结构的矩阵
    15     jobname.rout#重启动相关
+   16     input.inpc #对inp文件进行初步处理后的结果
+   16     input.ipoinp
+   16     input.inp
+   16     input.ipoinpc
+   18     spooles_matrix #spooles矩阵
+   20     jobname.equ #
    27     jobname.cel #接触单元
+   27     jobname.sen0 #敏感性分析
+   27     jobname_force#复数形式的力
+   40     jobname.nam #质量缩放
+   40     jobname_WarnNodeMissMultiStage.nam #多阶段MPC
+   50     jobname.lhs #trilinos的左侧
+   50     jobname.rhs #trilinos的右侧
+   50     jobname.rig #trilinos的刚体模式
+   88     jobname.wb  #
+          spooles.out #spooles的输出
+          jobname.eig #特征值和质量矩阵
+          jobname.stm #刚度矩阵
+          jobname.dof #自由度
+          jobname.sti #刚度矩阵
+          jobname.mas #质量矩阵
+          jobname.con #热传导矩阵
+          jobname.sph #比热容矩阵
    ```
 
 2. Fortran使用//拼接字符串，这句代码会被翻译成多个函数调用：
 
    ```fortran
-   fndat=jobname(1:i)//'.dat' !如果再调试时，需要跳过过程
+   fndat=jobname(1:i)//'.dat' !如果在调试时，需要跳过过程才可以跳过这一行
    ```
 
 # 修改工作目录
@@ -794,295 +823,435 @@
    *USERMATERIAL
    ```
 
+# test/compare
 
-# allocation.f90
+1. 官方提供的例子，也可以用于校验编译结果是否正确：
 
-1. 逐个注释allocation的所有参数：
-
-   ```fortran
-   nload_ !
-   nforc_ !
-   nboun_ !约束的自由度总数，整型
-   nk_ !
-   ne_ !
-   nmpc_ !
-   nset_ !
-   nalset_ !
-   nmat_ !
-   ntmat_ !
-   npmat_ !
-   norien_ !
-   nam_ !amplitude的计数
-   nprint_ !
-   mi !mi(1)为单元的积分点个数，mi(2)为每个节点的自由度个数，mi(3)为单元的层数，复合材料中使用。
-   ntrans_ !
-   set !
-   meminset !存储着set数组中对应的集合中的元素个数，整型数组。meminset(i)表示第i个set中元素的个数。
-   rmeminset !缩减的元素个数，使用了generate的造成的，整型数组。
-   ncs_ !
-   namtot_ ! amplitude的总数据点个数。*AMPLITUDE的一个数据行最多4个数据点。
-   ncmat_ !
-   memmpc_ !
-   ne1d !
-   ne2d !
-   nflow !
-   jobnamec !
-   irstrt !
-   ithermal !
-   nener !
-   nstate_ !
-   istep !
-   inpc !
-   ipoinp !
-   inp !
-   ntie_ !
-   nbody_ !
-   nprop_ !属性的个数，整型
-   ipoinpc !
-   nevdamp_ !
-   npt_ !
-   nslavs !
-   nkon_ !
-   mcs !
-   mortar !
-   ifacecount !
-   nintpoint !
-   infree !
-   nheading_ !
-   nobject_ !
-   iuel !
-   iprestr !
-   nstam !
-   ndamp !
-   nef !
-   nbounold !
-   nforcold !
-   nloadold !
-   nbodyold !
-   mpcend !
-   irobustdesign !
-   nfc_ !
-   ndc_
+   ```shell
+   #!/bin/sh
+   export OMP_NUM_THREADS=1
+   rm -f error.*      #删除掉之前生成的错误文件
+   tempfile=temp.$$   #$$表示当前进程的PID，一般用于生成唯一的文件名
+   errorfile=error.$$
+   #逐个对每个.inp文件进行处理
+   for i in *.inp; do
+           echo " "
+           echo "example ${i%.inp}"
+           echo " "
+   # 不处理以下.inp文件，因为它们是通过运行其他例子产生的
+   	if [ $i = circ10pcent.rfn.inp ]
+   	then
+   	    continue
+   	fi
+   	
+   	if [ $i = circ10p.rfn.inp ]
+   	then
+   	    continue
+   	fi
+   	
+   	if [ $i = segmentsmooth.rfn.inp ]
+   	then
+   	    continue
+   	fi
+   	
+   	if [ $i = segmentsmooth2.rfn.inp ]
+   	then
+   	    continue
+   	fi
+   # 删除掉之前运行产生的对应的.dat和.frd文件
+   	rm -f ${i%.inp}.dat  #${i%.inp}表示从i的末尾去掉.inp
+   	rm -f ${i%.inp}.frd
+   # 执行Calculix，生成.dat和.frd文件，将命令行输出保存到tempfile文件。需要的话可以修改可执行文件的路径
+           ~/CalculiX/CalculiX  ${i%.inp} >> $tempfile 2>&1
+   # 检查是否生成了对应的.dat和自带的.dat.ref文件是否存在
+   	if [ ! -f ${i%.inp}.dat ]; then
+   	   echo "${i%.inp}.dat does not exist" >> $errorfile #将错误输出到errorfile中
+   	   continue
+   	fi
+   	if [ ! -f ${i%.inp}.dat.ref ]; then
+   	   echo "${i%.inp}.dat.ref does not exist" >> $errorfile
+   	   continue
+   	fi
+   # 检查.dat和.dat.ref这两个文件行数是否一致
+   	export sum1=`wc -l ${i%.inp}.dat | awk '{print$1}'`
+   	export sum2=`wc -l ${i%.inp}.dat.ref | awk '{print$1}'`
+   	if [ $sum1 != $sum2 ]; then
+   	   echo "${i%.inp}.dat and ${i%.inp}.dat.ref do not have the same size !!!!!!!!!!" >> $errorfile
+   	   echo " ">> $errorfile
+   	   continue
+   	fi
+   # 检查.dat文件中是否存在NaN
+   	if grep "NaN" ${i%.inp}.dat ; then
+   	   echo "${i%.inp}.dat contains NaN !!!!!!!!!!" >> $errorfile
+   	   echo " " >> $errorfile
+   	   continue
+   	fi
+   # 检查.dat和.dat.ref文件中数字的偏差是否在允许范围内，具体由datcheck.pl负责
+   	./datcheck.pl ${i%.inp} >> $errorfile
+   # 检查.frd和.frd.ref文件是否存在
+   	if grep "^ -5" ${i%.inp}.frd >| abc  ||[ -f ${i%.inp}.frd.ref ] ; then
+   		if [ ! -f ${i%.inp}.frd ]; then
+   			echo "${i%.inp}.frd does not exist" >> $errorfile
+   			continue
+   		fi
+   		if [ ! -f ${i%.inp}.frd.ref ]; then
+   			echo "${i%.inp}.frd.ref does not exist" >> $errorfile
+   			continue
+   		fi
+   # 检查.dat和.dat.ref这两个文件行数是否一致
+   		export sum1=`wc -l ${i%.inp}.frd | awk '{print$1}'`
+   		export sum2=`wc -l ${i%.inp}.frd.ref | awk '{print$1}'`
+   		if [ $sum1 != $sum2 ]; then
+               echo "${i%.inp}.frd and ${i%.inp}.frd.ref do not have the same size !!!!!!!!!!!!!!!!!!!!!!" >> $errorfile
+               echo " ">> $errorfile
+               continue
+   		fi
+   # 检查.dat和.dat.ref文件中数字的偏差是否在允许范围内，具体由frdcheck.pl负责
+   	    ./frdcheck.pl ${i%.inp} >> $errorfile
+           fi
+   done
+   rm -f *.rfn.inp #删除掉生成的中间文件
+   rm -f $tempfile #删除掉生成的命令行输出文件
+   echo "check the existence of file $errorfile" #检查是否存在errorfile，如果不存在，则表明计算结果和参考结果的误差可忽略不计
+   echo "if this file does not exist, the present results"
+   echo "agree with the reference results"
+   echo " "
    ```
 
-# calinput.f90
+2. 
 
-1. 逐个注释所有参数：
 
-   ```fortran
-   co !
-   nk !
-   kon !
-   ipkon !
-   lakon !
-   nkon !
-   ne !
-   nodeboun !
-   ndirboun !
-   xboun !
-   nboun !
-   ipompc !
-   nodempc !
-   coefmpc !
-   nmpc !
-   nmpc_ !
-   nodeforc !
-   ndirforc !
-   xforc !
-   nforc !
-   nforc_ !
-   nelemload !
-   sideload !
-   xload !
-   nload !
-   nload_ !
-   nprint !
-   prlab !
-   prset !
-   mpcfree !
-   nboun_ !
-   mei !
-   set !存储所有集合的名称，字符串数组，每个字符串81个字符
-   istartset !
-   iendset !
-   ialset !
-   nset !set数组的元素个数
-   nalset !
-   elcon !
-   nelcon !
-   rhcon !
-   nrhcon !
-   alcon !
-   nalcon !
-   alzero !
-   t0 !
-   t1 !
-   matname !存储所有材料的名称，字符串数组，每个字符串长度为80
-   ielmat !
-   orname !存储所有方向的名称，字符串数组，每个字符串长度为80
-   orab !
-   ielorien !
-   amname !
-   amta !
-   namta !
-   nam !
-   nmethod !
-   iamforc !
-   iamload !
-   iamt1 !
-   ithermal !
-   iperturb !
-   istat !
-   istep !
-   nmat !材料的数量，整型
-   ntmat_ !
-   norien !方向的数量，整型
-   prestr !
-   iprestr !
-   isolver !
-   fei !
-   veold !
-   timepar !
-   xmodal !
-   filab !
-   jout !
-   nlabel !
-   idrct !
-   jmax !
-   iexpl !
-   alpha !
-   iamboun !
-   plicon !
-   nplicon !
-   plkcon !
-   nplkcon !
-   iplas !
-   npmat_ !
-   mi !
-   nk_ !
-   trab !
-   inotr !
-   ntrans !
-   ikboun !
-   ilboun !
-   ikmpc !
-   ilmpc !
-   ics !
-   dcs !
-   ncs_ !
-   namtot_ !
-   cs !
-   nstate_ !
-   ncmat_ !
-   iumat !
-   mcs !
-   labmpc !
-   iponor !
-   xnor !
-   knor !
-   thickn !
-   thicke !
-   ikforc !
-   ilforc !
-   offset !
-   iponoel !
-   inoel !
-   rig !
-   infree !
-   nshcon !
-   shcon !
-   cocon !
-   ncocon !
-   physcon !
-   nflow !
-   ctrl !
-   maxlenmpc !
-   ne1d !
-   ne2d !
-   nener !
-   vold !
-   nodebounold !
-   ndirbounold !
-   xbounold !
-   xforcold !
-   xloadold !
-   t1old !
-   eme !
-   sti !
-   ener !
-   xstate !
-   jobnamec !
-   irstrt !
-   ttime !
-   qaold !
-   output !
-   typeboun !
-   inpc !
-   ipoinp !
-   inp !
-   tieset !
-   tietol !
-   ntie !
-   fmpc !
-   cbody !
-   ibody !
-   xbody !
-   nbody !
-   nbody_ !
-   xbodyold !
-   nam_ !
-   ielprop !
-   nprop !
-   nprop_ !
-   prop !
-   itpamp !
-   iviewfile !
-   ipoinpc !
-   nslavs !
-   t0g !
-   t1g !
-   network !
-   cyclicsymmetry !
-   idefforc !
-   idefload !
-   idefbody !
-   mortar !
-   ifacecount !
-   islavsurf !
-   pslavsurf !
-   clearini !
-   heading !
-   iaxial !
-   nobject !
-   objectset !
-   nprint_ !
-   iuel !
-   nuel_ !
-   nodempcref !
-   coefmpcref !
-   ikmpcref !
-   memmpcref_ !
-   mpcfreeref !
-   maxlenmpcref !
-   memmpc_ !
-   isens !
-   namtot !
-   nstam !
-   dacon !
-   vel !
-   nef !
-   velo !
-   veloo !
-   ne2boun !
-   itempuser !
-   irobustdesign !
-   irandomtype !
-   randomval !
-   nfc !
-   nfc_ !
-   coeffc !
-   ikdc !
-   ndc !
-   ndc_ !
-   edc !
+# 变量
+
+1. ccx_2.20.c文件开头的部分：
+
+   ```c
+   FILE *f1 = NULL; //公用的一个文件流指针
+   char *sideload = NULL,
+        *set = NULL,
+        *matname = NULL,
+        *orname = NULL,
+        *amname = NULL,
+        *filab = NULL,
+        *lakon = NULL,
+        *labmpc = NULL,
+        *prlab = NULL,
+        *prset = NULL,
+         jobnamec[792] = "", //132*6个字符，直接拷贝完-i的参数，后续的都是\0，是C风格的字符串。
+         jobnamef[132] = "", //同样拷贝-i的参数，不够132个字符的部分都会被填充成空格
+         tmpjobname[132] = "",
+         output[5] = "",
+        *typeboun = NULL,
+        *inpc = NULL, //包含简化后的inp文件的内容，去掉了换行，通过
+        *tieset = NULL,
+        *cbody = NULL,
+         fneig[132] = "",
+        *sideloadtemp = NULL,
+         kind1[2] = "",
+         kind2[2] = "",
+        *heading = NULL,
+        *objectset = NULL;
+   
+   ITG *kon = NULL,
+       *nodeboun = NULL,
+       *ndirboun = NULL,
+       *ipompc = NULL,
+       *nodempc = NULL,
+       *nodeforc = NULL,
+       *ndirforc = NULL,
+       *nelemload = NULL,
+        im = 0,
+       *inodesd = NULL,
+        nload1 = 0,
+       *idefforc = NULL,
+       *nactdof = NULL,
+       *icol = NULL,
+       *ics = NULL,
+        itempuser[3] = {0},
+       *jq = NULL,
+       *mast1 = NULL,
+       *irow = NULL,
+       *rig = NULL,
+       *idefbody = NULL,
+       *ikmpc = NULL,
+       *ilmpc = NULL,
+       *ikboun = NULL,
+       *ilboun = NULL,
+       *nreorder = NULL,
+       *ipointer = NULL,
+       *idefload = NULL,
+       *istartset = NULL,
+       *iendset = NULL,
+       *ialset = NULL,
+       *ielmat = NULL,
+       *ielorien = NULL,
+       *nrhcon = NULL,
+       *nodebounold = NULL,
+       *ndirbounold = NULL,
+       *nelcon = NULL,
+       *nalcon = NULL,
+       *iamforc = NULL,
+       *iamload = NULL,
+       *iamt1 = NULL,
+       *namta = NULL,
+       *ipkon = NULL,
+       *iamboun = NULL,
+       *nplicon = NULL,
+       *nplkcon = NULL,
+       *inotr = NULL,
+       *iponor = NULL,
+       *knor = NULL,
+       *ikforc = NULL,
+       *ilforc = NULL,
+       *iponoel = NULL,
+       *inoel = NULL,
+       *nshcon = NULL,
+       *ncocon = NULL,
+       *ibody = NULL,
+       *ielprop = NULL,
+       *islavsurf = NULL,
+       *ipoinpc = NULL, //整数数组，nline个元素，存储着inp文件中的每一行的开头在inpc字符数组中的下标。
+        mt = 0,
+        nxstate = 0,
+        nload0 = 0,
+        iload = 0,
+       *iuel = NULL,
+       *ne2boun = NULL,
+       *irandomtype = NULL,
+        irobustdesign[3] = {0},
+       *iparentel = NULL,
+        ifreebody = 0,
+       *ipobody = NULL,
+        inewton = 0,
+       *iprfn = NULL,
+       *konrfn = NULL;
+   ITG  nk = 0,
+        ne = 0,
+        nboun = 0, //约束的自由度总数，整型
+        nmpc = 0,
+        nforc = 0,
+        nload = 0,
+        nprint = 0,
+        nset = 0,
+        nalset = 0,
+        nentries = 18, //需要按照顺序解析的关键字组
+        nmethod = 0,
+        neq[3] = {0},
+        i = 0,
+        mpcfree = 0,
+        mei[4] = {0},
+        j = 0,
+        nzl = 0,
+        nam = 0,
+        nbounold = 0,
+        nforcold = 0,
+        nloadold = 0,
+        nbody = 0,
+        nbody_ = 0,
+        nbodyold = 0,
+        network = 0,
+        nheading_ = 0,
+        k = 0,
+        nzs[3] = {0},
+        nmpc_ = 0,
+        nload_ = 0,
+        nforc_ = 0,
+        istep = 0,
+        istat = 0,
+        nboun_ = 0,
+        nintpoint = 0,
+        iperturb[2] = {0},
+        nmat = 0,
+        ntmat_ = 0,
+        norien = 0,
+        ithermal[2] = {0}, //热力耦合的情况，这个参数不是从属于某个特定的分析步，而是整个分析的，而且它的取值和关键字出现的顺序有关。
+   // 如果只有这3个力学分析步的关键字（*STATIC，*VISCO或*DYNAMIC），则ithermal[1]为0或1(如果*INITIALCONDITIONS包含TYPE=TEMPERATURE参数)。
+   // 如果只有*HEATTRANSFER关键字，则ithermal[1]=2。
+   //如果先是力学分析步关键字，后是热传导关键字，则ithermal[1]=2或3(如果*INITIALCONDITIONS包含TYPE=TEMPERATURE参数)。
+   // 如果先是热传导关键字，后是力学分析步关键字，则ithermal[1]=3。
+   // 如果包含*COUPLEDTEMPERATURE-DISPLACEMENT，则ithermal[1]=3。
+   // 如果包含*UNCOUPLEDTEMPERATURE-DISPLACEMENT，则ithermal[1]=3。
+   // 如果包含*ELECTROMAGNETICS，则ithermal[1]=3。
+        nmpcold = 0,
+        iprestr = 0,
+        kode = 0,
+        isolver = 0,
+        nslavs = 0,
+        nkon_ = 0,
+        ne0 = 0,
+        nkon0 = 0,
+        mortar = 0,
+        jout[2] = {0},
+        nlabel = 0,
+        nkon = 0,
+        idrct = 0,
+        jmax[2] = {0},
+        iexpl = 0,
+        nevtot = 0,
+        ifacecount = 0,
+        iplas = 0,
+        npmat_ = 0,
+        mi[3] = {0}, //mi(1)为单元的积分点个数，mi(2)为每个节点的自由度个数，mi(3)为单元的层数，复合材料中使用。
+        ntrans = 0,
+        mpcend = 0,
+        namtot_ = 0,
+        iumat = 0,
+        iheading = 0,
+        icascade = 0,
+        maxlenmpc = 0,
+        mpcinfo[4] = {0},
+        ne1d = 0,
+        ne2d = 0,
+        infree[4] = {0},
+        callfrommain = 0,
+        nflow = 0,
+        jin = 0, //记录命令行参数中-i的个数，处理完命令行会检测，如果为0，则表示没有-i参数，会将第1个参数当作jobname。
+        irstrt[2] = {0},
+        nener = 0,
+        jrstrt = 0,
+        nenerold = 0,
+        nline = 0, //整个inp文件经过简化后的总行数。
+       *ipoinp = NULL,//2*nentries个元素的数组，可以认为是nentries行，2列的数组，每一行的第0列表示在该类在inp数组中的起始行号，第1列表示该类在inp数组中的结束行号。
+       *inp = NULL, //存储inp_size个元素，可以当作inp_size/3行，3列的数组，存储一个链状数据，同类的行都在同一个链上。
+        ntie = 0,
+        ntie_ = 0,
+        mcs = 0,
+        nprop_ = 0,
+        nprop = 0, //属性的个数，整型
+        itpamp = 0,
+        iviewfile = 0,
+        nkold = 0,
+        nevdamp_ = 0,
+        npt_ = 0,
+        cyclicsymmetry = 0,
+        nmethodl = 0,
+        iaxial = 0,
+        inext = 0,
+        icontact = 0,
+        nobject = 0,
+        nobject_ = 0,
+        iit = 0,
+        nzsprevstep[3] = {0},
+        memmpcref_ = 0,
+        mpcfreeref = 0,
+        maxlenmpcref = 0,
+       *nodempcref = NULL,
+       *ikmpcref = NULL,
+        isens = 0,
+        namtot = 0, //amplitude的总数据点个数。*AMPLITUDE的一个数据行最多4个数据点。
+        nstam = 0,
+        ndamp = 0,
+        nef = 0,
+        inp_size = 0, //存储inp数组的元素个数
+       *ipoinp_sav = NULL, //ipoinp数组的备份
+       *inp_sav = NULL, //inp数组的备份
+        irefineloop = 0,
+        icoordinate = 0,
+       *nodedesi = NULL,
+        ndesi = 0,
+        nobjectstart = 0,
+        nfc_ = 0,
+        ndc_ = 0,
+        nfc = 0,
+        ndc,
+       *ikdc = NULL;
+   
+   
+   ITG *meminset = NULL, //存储着set数组中对应的集合中的元素个数，整型数组。meminset(i)表示第i个set中元素的个数。
+       *rmeminset = NULL; //缩减的元素个数，使用了generate的造成的，整型数组。
+   ITG  nzs_ = 0,
+        nk_ = 0,
+        ne_ = 0,
+        nset_ = 0, //逐行解析inp文件得到的set的数量，包括*ELEMENT，*ELSET，*NODE，*NSET，*SURFACE，*SUBMODEL关键字，其中1个*SUBMODEL关键字会增加2个set。
+        nalset_ = 0,
+        nmat_ = 0,
+        norien_ = 0,
+        nam_ = 0, //!amplitude的计数
+        ntrans_ = 0,
+        ncs_ = 0,
+        nstate_ = 0,
+        ncmat_ = 0,
+        memmpc_ = 0,
+        nprint_ = 0,
+        nuel_ = 0; //用户自定义单元的种类，也就是*USERELEMENT关键字的出现次数。
+   
+   double *co = NULL,
+          *xboun = NULL,
+          *coefmpc = NULL,
+          *xforc = NULL,
+          *clearini = NULL,
+          *xload = NULL,
+          *xbounold = NULL,
+          *xforcold = NULL,
+          *randomval = NULL,
+          *vold = NULL,
+          *sti = NULL,
+          *xloadold = NULL,
+          *xnor = NULL,
+          *reorder = NULL,
+          *dcs = NULL,
+          *thickn = NULL,
+          *thicke = NULL,
+          *offset = NULL,
+          *elcon = NULL,
+          *rhcon = NULL,
+          *alcon = NULL,
+          *alzero = NULL,
+          *t0 = NULL,
+          *t1 = NULL,
+          *prestr = NULL,
+          *orab = NULL,
+          *amta = NULL,
+          *veold = NULL,
+          *accold = NULL,
+          *t1old = NULL,
+          *eme = NULL,
+          *plicon = NULL,
+          *pslavsurf = NULL,
+          *plkcon = NULL,
+          *xstate = NULL,
+          *trab = NULL,
+          *ener = NULL,
+          *shcon = NULL,
+          *cocon = NULL,
+          *cs = NULL,
+          *tietol = NULL,
+          *fmpc = NULL,
+          *prop = NULL,
+          *t0g = NULL,
+          *t1g = NULL,
+          *xbody = NULL,
+          *xbodyold = NULL,
+          *coefmpcref = NULL,
+          *dacon = NULL,
+          *vel = NULL,
+          *velo = NULL,
+          *veloo = NULL,
+          energy[5] = {0},
+          *ratiorfn = NULL,
+          *dgdxglob = NULL,
+          *g0 = NULL,
+          *xdesi = NULL,
+          *coeffc = NULL,
+          *edc = NULL;
+   
+   double ctrl[57] = {0};
+   double fei[3] = {0},
+         *xmodal = NULL,
+          timepar[5] = {0},
+          alpha[2] = {0},
+          ttime,
+          qaold[2] = {0},
+          physcon[14] = {0};
+   double totalCalculixTime = 0.0; //
    ```
+
+2. 
+
+3. 
+
+4. 
+
+5. 
+
+6. 
