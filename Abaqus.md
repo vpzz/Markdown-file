@@ -67,7 +67,7 @@
     2. Abaqus Benchmarks Guide     包含了NAFEMS规定的一些例子。
     3. Abaqus Verification Guide
 
-31. ABAQUS官方给的例子中，包含了一系列的inp文件，使用方法：
+31. ABAQUS官方给的例子中，包含了一系列的inp文件，保存在(EstProducts\2023\win_b64\SMA\samples\job_archive目录中)，使用方法：
 
     ```
     abaqus fetch job=xxx.inp
@@ -701,7 +701,7 @@
 
 # 命令
 
-1. ABAQUS的两个主要模块为cae和viewer。可以使用如下命令启动。在cae中可以打开.cae和.odb文件，但是在viewer中只能打开.odb文件。replay选项支持一个Python脚本，启动后会立即执行该脚本。
+1. ABAQUS的两个主要模块为cae和viewer，可以使用如下命令启动。在cae中可以打开.cae和.odb文件，但是在viewer中只能打开.odb文件。replay选项支持一个Python脚本，启动后会立即执行该脚本。
 
    ```shell
    abaqus cae or viewer 
@@ -724,65 +724,45 @@
 2. 通过命令行给Python脚本传递参数，这些参数会被CAE忽略，但是会传递给Python解释器。
 
    ```python
+   #python脚本test.py
    import sys
-   print sys.argv[-1]     #获取最后一个参数，即argument1。
-   
-   abaqus cae script=try.py -- argument1  #运行该命令，会打开ABAQUS，在Python输出窗口输出argument1
+   print sys.argv     #获取所有命令行参数。
+   print len(sys.argv) #获取命令行参数的个数。
+   #shell命令
+   abaqus cae script=test.py -- argument1 argument2  #运行该命令，会打开ABAQUS，在内置的Python输出窗口输出如下
+   argv = ['D:\\SIMULIA\\EstProducts\\2023\\win_b64\\code\\bin\\ABQcaeK.exe', '-cae', '-lmlog', 'ON', '-tmpdir', 'C:\\Users\\zj\\AppData\\Local\\Temp', 'argument1', 'argument2'] #因此推荐使用argv[-1]，argv[-2]来获取argument2和argument1。
+   8
    ```
 
-3. 从下面可以看出：除了额外输入的3个参数，一共还有8个参数。
+3. 不打开ABAQUS图形界面运行。`abaqus cae noGui=checkPartValidity.py`。可以和参数结合使用。
 
-   ```shell
-   G:\Abaqus file>abaqus cae noGui=checkPartValidity.py -- test.cae Model-1 Part-1
-   
-   Abaqus License Manager checked out the following license(s):
-   "cae" release 6.14 from Flexnet server 20190927ZJ
-   <1023 out of 1024 licenses remain available>.
-   
-   D:\SIMULIA\Abaqus\6.14-1\code\bin\ABQcaeK.exe
-   -cae
-   -noGUI
-   checkPartValidity.py
-   -lmlog
-   ON
-   -tmpdir
-   C:\Users\ADMINI~1\AppData\Local\Temp
-   test.cae
-   Model-1
-   Part-1
-   ```
+4. ABAQUS会将用户对GUI界面的设置保存在abaqus_v6.14.gpr（或abaqus_2023.gpr对于abaqus2023）文件中，还会将本次的用户的操作保存在abaqus.rpy文件（Python脚本）中，方便用户复现之前的操作。每次打开CAE都会新建一个rpy文件，并将之前存在的rpy文件重命名。
 
-4. 不打开ABAQUS图形界面运行。这个可以和参数结合使用。`abaqus cae noGui=checkPartValidity.py`。
+5. 如果启动CAE时，使用了noSavedOptions选项。CAE将不会读取abaqus_v6.14.gpr中的设置。
 
-5. ABAQUS会将用户对GUI界面的设置保存在abaqus_v6.14.gpr文件中，还会将用户的操作保存在abaqus.rpy文件（Python脚本）中，方便用户复现之前的操作。每次打开CAE都会新建一个rpy文件，并将之前存在的rpy文件重命名。
+6. 默认情况下，启动CAE时，会依次读取家目录（Windows下为C:\Users\zj）和启动CAE时的目录中的.gpr文件。关闭CAE时，会自动保存当前的GUI设置到家目录中的文件。也可以删除该文件，来还原默认设置。
 
-6. 如果启动CAE时，使用了noSavedOptions 选项。CAE将不会读取abaqus_v6.14.gpr中的设置。
+7. CAE内部包含了一个非活动的计时器，如果应用长时间不活动，license就会被服务器收回，给其他用户使用。默认时间是60分钟。可以通过修改环境变量文件abaqus_v6.env中的cae_timeout来更改时间。
 
-7. 默认情况下，启动CAE时，会依次读取家目录和启动CAE是的目录中的.gpr文件。关闭CAE时，会自动保存当前的GUI设置到家目录中的文件。也可以删除该文件，来还原设置。
+8. 系统的abaqus_v6.env文件放在/SMA/site（abaqus2023中为EstProducts\2023\win_b64\SMA\site，不过文件名也是abaqus_v6.env）路径下。也可以在用户家目录，启动目录中存放该文件。CAE启动的时候会依次读取。使用的是Python语法。
 
-8. CAE内部包含了一个非活动的计时器，如果应用长时间不活动，license就会被服务器收回，给其他用户使用。默认时间是60分钟。可以通过修改环境变量文件abaqus_v6.env中的cae_timeout来更改时间。
+9. 视图中的部分，在打印出图时会用到：
 
-9. 系统的abaqus_v6.env文件放在/SMA/site路径下。也可以在用户家目录，启动目录中存放该文件。CAE启动的时候会依次读取。使用的是Python语法。
+   1. viewport decorations→title border
+   2. viewport annotations→legend, state block, title block, view orientation triad, and 3D compass
 
-10. 视图中的部分，在打印出图时会用到：
+10. 链接的窗口只能有一个，打开该功能后，勾选需要链接的窗口即可。链接的窗口可以选择要同步的选项。一般来说就同步位置和视角就行了，而具体的field output就按照各个
 
-    1. viewport decorations→title border
-    2. viewport annotations→legend, state block, title block, view orientation triad, and 3D compass
+11. <img src="Abaqus.assets/image-20210320111520801.png" alt="image-20210320111520801" style="zoom: 80%;" />
 
-11. 链接的窗口只能有一个，打开该功能后，勾选需要链接的窗口即可。链接的窗口可以选择要同步的选项。一般来说就同步位置和视角就行了，而具体的field output就按照各个
-
-12. <img src="Abaqus.assets/image-20210320111520801.png" alt="image-20210320111520801" style="zoom: 80%;" />
-
-13. 
-
-14. 如果工作目录有空格，则在使用cae提交inp形式的job时，会报错，有两种方案：①修改工作目录，删掉其中的空格，不过可能会触发下一个错误②使用命令行`abaqus job=xxx`，不用.inp的后缀。
+12. 如果工作目录有空格，则在使用cae提交inp形式的job时，会报错，有两种方案：①修改工作目录，删掉其中的空格，不过可能会触发下一个错误②使用命令行`abaqus job=xxx`，不用.inp的后缀。
 
     ```shell
     Abaqus Error: Command line option "input" value must not contain whitespace characters.
     Abaqus/Analysis exited with error(s).
     ```
 
-15. 如果修改了工作目录的文件名，启动时会报错，这是由于想要在不存在的目录产生一个新的abaqus.rpy文件，因此会报错。此时可以修改快捷方式的起始位置为新的工作目录。
+13. 如果修改了工作目录的路径名，下一次启动cae时会报错，这是由于想要在不存在的目录产生一个新的abaqus.rpy文件，因此会报错。此时可以修改快捷方式的起始位置为新的工作目录。
 
     ```python
     IOError: abaqus.rpy: Permission denied
@@ -790,4 +770,1502 @@
     Abaqus Error: Abaqus/CAE Kernel exited with an error.
     ```
 
-16. 如果不打开cae的话，是不会产生.rpy文件的。例如只使用命令行提交.inp文件。
+14. 如果不打开cae的话，是不会产生.rpy文件的。例如只使用命令行提交.inp文件。
+
+
+# User Subroutine
+
+1. 通过用户子程序，用户可以开发出ABAQUS原来并不具备的材料、单元、载荷等，或者干预ABAQUS的内核计算过程，以满足自身个性化的分析目的和需求。
+
+2. 子程序可以使用C，C++，Fortran编写，因为编译后都是包含汇编指令的目标文件，不过需要注意不同语言间数组的定义，基本数据类型的尺寸兼容，还有函数调用的传参约定。
+
+3. 用C++编写的用户子程序，实际上最终是还是由Fortran调用的（因为abaqus的核心程序是用Fortran编写的），所以C++子程序必须满足Fortran的调用规则：函数名必须表达成Fortran的形式；传入的参数实际上是实参的引用（或者说地址）。因此相当于混合编程。
+
+4. 每个子程序都需要遵从特定的接口定义，这里可以去Verification Guide中寻找对应的官方例子文件的名称，然后fetch出来，复制程序头部即可。
+
+5. 下图为Standard从开始分析到一个分析步结束的总体流程，以及相应的子程序调用的位置。
+
+6. ![基于ABAQUS的有限元子程序开发与应用](Abaqus.assets/基于ABAQUS的有限元子程序开发与应用.jpg)
+
+7. 下图为上图中应力应变更新和单元刚度计算的详细图：
+
+8. ![基于ABAQUS的有限元子程序开发与应用](Abaqus.assets/基于ABAQUS的有限元子程序开发与应用-1731143195719-2.jpg)
+
+9. 在一个增量步的第一次迭代时，上面两张图中的每个用户子程序被调用了两次。第一次调用时，通过增量步开始时的构型来计算模型的初始刚度矩阵；第二次调用时，通过更新的构型计算一个新的刚度矩阵。在接下来的每个迭代步中，每个子程序只被调用一次，在这次调用中，总是通过上一个迭代步结束时的模型刚度来修正模型当前构型的刚度。
+
+10. 在子程序中也可以读写外部文件，编号为15-18，以及>100的编号可以在子程序中被用于读写文件；其他编号可能被ABAQUS内部的子程序使用，因此在用户子程序中不要使用。
+
+11. 例如在Standard的子程序中，用户可以向消息文件（.msg，编号为7）或者打印输出文件（.dat，编号为6）写入debug的信息。这些文件在子程序中不需要打开（open），直接写入即可（因为已经被abaqus打开了）。在Explicit中，编号为6的文件被用于指示状态文件（.sta）。
+
+12. 除了输出消息之外，还可以输出求解相关的数据，用于后处理。
+
+13. 当一个文件在用户子程序中被打开时，abaqus默认这个文件位于工作目录中。也可以指定完整路径来在其他位置存储该文件。
+
+14. 可以观察官方的例子，所有函数的参数，都不声明变量类型，只有是数组的时候，才会用DIMENSION声明一下维度，这是因为它使用隐式变量类型声明。通过INCLUDE 'ABA_PARAM.INC'，该语句将Abaqus编写好的数值精度声明包含其中。这个文件位于ABAQUS的默认目录中，不需要人为地去找到它并指定它的路径，ABAQUS会自动找到它，`EstProducts\2023\SMAUsubs\PublicInterfaces`。
+
+    ```fortran
+    implicit real*8(a-h,o-z) !声明了数值精度，即以a-h和o-z开头的变量都是双精度，也就是说ijklmn都是整型，除此之外都是浮点数。
+    parameter (nprecd=2)
+    ```
+
+15. 具体包含3个对应的文件：
+
+    1. aba_param.inc，隐式使用。
+
+    2. vaba_param_dp.inc，显式双精度使用。
+
+    3. vaba_param_sp.inc，显式单精度使用。
+
+16. 测试用户子程序的一些编程技巧：
+
+    1. 尽可能地测试最小的模型。例如，测试UEL时，简历包含一个单元的模型。
+
+    2. 在测试时不要引入其他复杂的特性，如接触，除非它对于测试这个子程序是必须引入的。
+
+    3. 在向子程序中继续加入新的代码之前，测试所有可能的基本的变量，并保证正确。
+
+    4. 数组尽量给定大小，随时检查数组是否越界。这可能发生不可预知的错误。
+
+    5. 按照固定的命名习惯去命名，包括对文档，对象变量和模块的命名。
+
+    6. 将程序编写到多个文件中，每个文件的代码不要太长。不要将所有程序都写进同一个文件，特别是在子程序非常复杂和庞大的情况下。
+
+    7. 在程序的源文件中，为每个主要程序段添加注释，以解释代码的基本逻辑，最好注明程序的构建和修改日期，以及修改的原因。
+
+    8. 定期为程序写说明文档。特别是在程序版本升级之后，一定要更新程序的说明文档。
+
+17. 求解依赖的状态变量SDV有以下几种方式来定义和使用：
+
+    1. UMAT，VUMAT中，每个积分点或节点上的SDV个数通过关键字*DEPVAR定义，可以通过CAE来设置。
+    2. UEL，UELMAT和VUEL中，通过关键字*USER ELEMENT定义，只能通过修改inp文件设置。
+    3. FRIC，VFRIC中，通过关键字*FRICTION定义。这个在CAE中的Edit Contact Property→Friction Formulation中设置。
+
+18. 有两种方法可以定义SDV的初始值：
+
+    1. 通过关键字*Initial Conditions，Type＝Solution。这个不支持在CAE中设置。
+
+    2. 更加复杂的情况，可使用用户子程序SDVINI来定义。只能在Standard中使用，此时需要在关键字*Initial Conditions，Type＝Solution后面加上参数User。
+
+19. 子程序的调试：
+
+    1. 安装好匹配的VS，Intel Fortran，Abaqus。
+
+    2. 编辑win86_64.env，在compile_fortran中添加/Od和/Zi选项，使得编译器生成调试符号信息。在link_sl和link_exe中添加/debug选项， 使得链接器链接调试符号信息到.obj和.exe文件。
+
+    3. 在子程序开头的位置添加一些可以使进程暂停的代码，例如read或sleep语句。
+
+       ```fortran
+       debug = 0 !标志变量，如果需要调试，则将其置为1，这样就会进入下面的语句块，否则置为0。
+       if(debug == 1)then
+           write(*,*) "Please input an integer."
+           read(*,*) tempread !一个临时变量，让程序停在这里
+           debug=0 !进入调试后，就恢复debug的值，因为子程序会被反复调用，一旦通过VS附加上进程以后，就可以手动在VS中添加断点了，不用依赖这个。
+       endif
+       ```
+
+    4. 提交任务`Abaqus job=JobName user=SubroutineName int`。程序运行到请求输入的地方会暂停。
+
+    5. 此时打开VS，调试→附加到进程，然后在任务管理器中寻找对应的进程。隐式计算是standard.exe，显式计算是Package.exe和Explicit.exe。
+
+    6. 在命令行输入一个数字，让程序继续运行。VS会打开一个临时生成的和源文件内容完全相同的临时代码文件，并在设置断点的位置暂停，此时即可开始正常的调试过程。
+
+20. 也可以在子程序中直接使用write来输出调试信息到命令行窗口。
+
+21. 在子程序中可以使用Fortran内置的运算函数来简化运算，避免编写多层循环，例如矩阵乘法，向量内积等函数。
+
+22. 使用子程序来自定义材料，在创建材料的界面中，General→User Material。可以选择力学，传热或热力耦合材料，它们分别会调用名称的不同的子程序，standard下为UMAT和UMATHT，explicit下为VUMAT，此时只支持力学分析。然后在下方的Mechanical Constants中输入需要的参数，它们会被当作UMAT函数的PROPS数组传入，整型参数NPROPS记录PROPS数组的大小。
+
+23. PROPS一般是材料参数，例如弹性模量，线性强化系数，初始屈服应力等，也可以是几何参数，例如板厚度，层厚度。注意，在UMAT中修改这里的数据是无效的，每次UMAT调用都会使用inp文件中定义的值。
+
+24. 使用General→Depvar，来定义求解依赖变量（只能是标量，张量的话，需要自己安排存储方式）的数量，可以用来存储材料的状态，例如等效塑性应变。UMAT函数的整型NSTATEV参数保存这个值，在函数内通过STATEV数组来使用。用户需要自己约定数组的每个元素代表什么含义。在后处理中，以SDV1，SDV2等来表示。SDV是Solution-Dependent State Variables的缩写。
+
+25. Abaqus计算单元的响应（分析步→增量步→迭代步，这些值会作为子程序的参数输入，例如DLOAD就需要它们来计算荷载）时，会在积分点上计算，对于材料属性为user defined的材料，都会调用UMAT，因此UMAT是会被非常频繁地调用的，每次调用之间是没有关系的，因此对于一些有记忆效应的材料，为了记录不同积分点的历史，abaqus会为单元的每个积分点存储状态变量，不同的积分点的状态变量不同，意味着这些点处理不同的应力应变状态，同时每次UMAT返回前，还应该更新状态变量，以便记录历史，下次从此处算起。如果有多种自定义材料，那么在UMAT内需要根据材料名称CMNAME参数来区分，分别引用不同的本构。
+
+26. 如果VUMAT中需要模拟材料的损伤演化，需要据此删除一些单元，可以在增加第二个参数的值。只能在explicit中使用。
+
+27. 创建job时，在General→User subroutine file选择fortran文件即可，只能选择一个文件，这意味着所有的子程序，都要写在该文件中，在不同的子程序内部可以通过材料名称来区分请i去的是哪个材料的响应。也可以卸载其他文件中，但是需要在主文件中使用include语句包含进来，此时子程序的文件名不能重复。
+
+28. 当一个含有用户子程序的分析需要进行重启动分析时，需要重新指定子程序文件的位置。这是因为，在重启动文件（.res）中并没有保存子程序的源代码。
+
+29. abaqus会调用编译器编译子程序文件，然后将其和abaqus的核心程序链接到一起，以便在求解中调用。
+
+30. UMAT只能计算局部响应，也就是根据一点的过去状态，计算该点的现在状态。如果要计算非局部响应，应该使用UGENS，它用于壳单元。
+
+
+## DFLUX
+
+1. 可以通过DFLUX设置复杂传热传质边界条件（只能在传热或质量扩散分析步中使用，），该程序的主要功能就是定义FLUX数组：
+   1. 第一个元素是从当前点（积分点）流入的流量幅值q。在热传导分析中，该流量可以是表面热流或者体积热流；在质量扩散分析中，该流量可以是表面质量流量或者体积质量流量。
+   2. 第二个元素是表示流量的变化率，热通量关于温度的导数，或质量通量关于浓度的导数，这个类似于DDSDDE，这个量的值不影响计算结果，但会影响计算的收敛性。
+
+2. 热荷载有三种模式，表面，体积和集中热通量。前两个可以使用DFLUX，最后一个只能是均匀的。
+
+3. 通过DFLUX计算的通量值还会乘以Magnitude和Amplitude。其中Amplitude可以通过子程序来控制，这样可以得到随时间变化的边界条件了。不过DFLUX中也可以设置荷载随时间变化，其中是包含时间参数的。当荷载是空间和时间解耦的，推荐使用Amplitude方式。
+
+4. 质量扩散问题比传热要复杂点，因为他还会在物体中引起等效压应力。同时材料的热传导率一般和浓度无关，但是物质的扩散率可能和温度有关。因此质量扩散时，DFLUX中的TEMP表示温度，PRESS表示等效压应力。而质量扩散和传热问题中，SOL分别表示浓度和温度。
+
+
+## DLOAD
+
+1. 通常可以用Amplitude来施加随时间变化的荷载。但是当荷载是空间或时间的复杂函数时，一般使用用户自定义荷载：隐式的DLOAD和UTRACLOAD，显式的VDLOAD。
+
+2. DLOAD和VDLOAD用于定义压力载荷和体积力载荷，包括分布线，面和体荷载。
+
+3. UTRACLOAD用于定义表面（surface traction）或边（shell edge load）收到的力，例如表面压力，表面剪切力。
+
+4. 例如壳单元的平面外的压力荷载，通过pressure功能的DLOAD函数定义，壳边缘的分布线荷载使用shell edge load的UTRACLOAD函数定义。
+
+5. 可以通过\*DLOAD或\*DSLOAD在inp文件中指明要使用自定义荷载，也可以通过CAE设置。注意
+
+   ```shell
+   *DSLOAD
+   Surf-top, PNU, 10.0 #第一个参数表示单元集合标记，第二个参数是LOAD type label，表示由子程序计算的非均匀分布的压力，第三个参数是Magnitude，只对DLOAD起作用，而VDLOAD会忽略它。
+   ```
+
+6. 需要注意的是，幅值曲线和自定义荷载子程序不能同时使用。如果分布载荷不止和单元的位置有关，还和单元的变形有关，那么此时自定义载荷子程序也就无法满足要求。这类更复杂的载荷，需要编写用户单元子程序UEL、UELMAT或VUEL。
+
+7. DLOAD函数的主要功能就是给参数`f`赋值，根据载荷类型的不同，单位也不同。
+
+8. 如果在模型中多出都要使用用户自定义压力载荷，则需要在DLOAD函数内根据JLTYPE判断载荷类型，SNAME判断表面名称，然后分别计算目标载荷。
+
+9. 与其他显式子程序类似，VDLOAD会一次性更新nblock个积分点上的载荷，而不是一个。数组value则对应于DLOAD中的f，需要在函数内去赋值。和隐式分析不同的是，这里多了积分点的速度，问题模型的维数，面的方向等参数。速度和面方向本来是矢量，一维存储即可，但是这里存储的是整个block的数据，因此是二维的。
+
+10. 在UTRACLOAD中，有两个变量是必须更新的：
+
+    1. alpha，分布载荷的大小。
+    2. t_user数组，分布载荷的作用方向。ABAQUS会自动对t_user向量进行正则化（在用户子程序UTRACLOAD的外部），所以无论在函数内赋值的t_user是否为单位向量，函数返回后都会被转换为单位向量。
+
+11. 这里载荷不能以三个分量的形式单独给出，只能按照幅值和方向来给出。
+
+12. 通常情况下，变量alpha和t_user都存储在总体坐标系下，如果这两个变量被定义在局部坐标系下，则它们的值也是在局部坐标系下的。
+
+
+## USDFLD
+
+1. 如果要定义复杂的材料行为，但又不想使用UMAT或VUMAT，则可以使用USDFLD或VUSDFLD来实现。例如，当某个积分点的应力达到某个阈值后，该积分点失效不再承载。对于这种材料行为，使用USDFLD或VUSDFLD可以方便地实现。
+
+2. ABAQUS中的大部分材料属性（例如弹性模量，泊松比等）可以定义为场变量$f_i$的函数，而USDFLD和VUSDFLD允许用户在单元的积分点（材料点）上自定义场变量。并且这两个子程序可以在求解过程中访问结果数据，因此，我们可以定义依赖于求解结果的材料属性，$f_i=f_i(\sigma,\varepsilon,\varepsilon^{pl},\cdots)$。
+
+3. 在CAE的edit material→user defined field来指示材料使用USDFLD或VUSDFLD。或者在.inp文件的材料声明内部添加一行`*USER DEFINED FIELD`。
+
+4. 上面的设置只是声明了模型中要用到USDFLD或VUSDFLD，而如果想要是材料属性依赖于场变量的值，还需要通过CAE中的数据表格或其他子程序（例如CREEP）来设置具体的依赖关系。假设材料属性依赖于两个场变量$f_1$和$f_2$。其中材料的杨氏模量只依赖于场变量$f_1$，而热膨胀系数依赖于场变量$f_1$和$f_2$，具体的依赖关系由表格给出，其他值下的依赖关系通过表格中的数据线性插值得到。
+
+5. ![基于ABAQUS的有限元子程序开发及应用 (王涛等 编著) (Z-Library)](Abaqus.assets/基于ABAQUS的有限元子程序开发及应用 (王涛等 编著) (Z-Library).jpg)
+
+6. 可以观察到，如果Number of field variables为默认的0，此时弹性属性的表格只能输入一行2列，也就是杨氏模量和泊松比。
+
+7. 如果Number of field variables不为0，则可以添加多行。这个对于温度依赖的材料属性也是一样的。因此可以认为膨胀系数是两个场变量$f_1$和$f_2$的函数，就像认为它是温度的函数一样。温度可以看作是一个特殊的场，Field 0。和温度依赖时的插值一样，对于场边量在其他值下的依赖通过表格中的数据线性插值得到。
+
+8. 在USDFLD或VUSDFLD中，必须使用solution dependent state variables来存储用户自定义的场变量，此时需要定义状态变量的个数，在CAE中使用Depvar，在.inp中使用*DEPVAR，这里类似于UMAT的情况。
+
+9. USDFLD和VUSDFLD可以和（CREEP，UMAT，VUMAT，UHYPEL等）联合使用，前者定义的场变量会传入后者，从而可以定义更加复杂的材料行为。
+
+10. USDFLD，VUSDFLD不能直接使用结果数据，需要通过实用子程序GETVRM和VGETVRM来间接使用。需要注意的是，USDFLD和VUSDFLD都只能在增量开始时能访问积分点的值。因此，以这种方式引入的解是显式的，结果的准确性取决于时间增量的大小。对于Standard，用户可以通过变量PNEWDT来控制USDFLD中的时间增量，以达到求解的准确性。而对于Explicit，这通常不是问题，因为它的稳定时间增量通常足够小，可以确保求解的准确性。
+
+11. GETVRM的接口如下：
+
+    ```fortran
+    DIMENSION ARRAY(15), JARRAY(15)
+    CHARACTER*3 FLGRAY(15)
+    ...
+    CALL GETVRM('VAR',ARRAY,JARRAY,FLGRAY,JRCD,JMAC,JMATYP,MATLAYO,LACCFLA)
+    !第一个字符串参数是输出变量key，用来标记要访问哪个结果数据变量，例如'S'表示要访问应力张量；'MISES'表示要访问Mises应力。
+    !ARRAY参数表示结果数据的浮点型分量
+    !JARRAY参数表示结果数据的整型分量
+    !FLGARY参数表示结果数据的字符型分量，字符串数组，可以是YES，NO或N/A。
+    !以上三个只有一个有效，具体是哪个取决于具体的输出变量的数据类型。
+    !JRCD参数表示本次调用成功与否，0表示成功，1表示出错或着请求的所有分量都是0。
+    !最后4个参数JMAC,JMATYP,MATLAYO,LACCFLA，直接把USDFLD的对应后4个参数传入即可。
+    !对于一维数据，例如向量，按照顺序输出即可。对于二维数据，分两种情况，如果是对称的例如应力张量，按照11，22，33，12，13，23。如果是非对称的例如变形梯度张量，按照11，22，33，12，13，23，21，31，32。
+    !例如，对于平面应力单元的应力张量，array变量的存储顺序为:array(1)=S11，array(2)=S22，array(3)=0.0，array(4)=S12，后续的11元素个都是0。
+    !无论分析的维度如何，主值的请求总是返回三个值，最小值，中值，最大值。
+    ```
+
+12. 注意，并不是所有单元都支持GETVRM。由于它访问的是单元的材料点，因此所有不具有材料点的单元都不支持该子程序，如所有声学单元、接触单元和流体单元。
+
+13. VGETVRM和GETVRM类似，输出变量的顺序相同，例如，对于三维实体单元的应力张量，rData返回的分量为S11、S22、S33、S12、S13、S23，jData返回的全是0，cData返回的都是N/A。
+
+14. 注意，VGETVRM返回的应变分量是应变张量的分量，而GETVRM返回的是工程应变分量。
+
+15. USDFLD：
+
+    ```fortran
+    SUBROUTINE USDFLD(FIELD,STATEV,PNEWDT,DIRECT,T,CELENT,
+        TIME,DTIME,CMNAME,ORNAME,NFIELD,NSTATV,NOEL,NPT,LAYER,
+        KSPT,KSTEP,KINC,NDI,NSHR,COORD,JMAC,JMATYP,MATLAYO,LACCFLA)
+    ```
+
+16. 必须定义和更新的变量，`FIELD(NFIELD)`，场变量数组，包含了当前积分点上的所有场变量，进入函数时其值为当前增量步开始时节点上值的插值。更新后的场变量的值会传入以下子程序：CREEP，HETVAL，UEXPAN，UHYPEL，UMAT，UMATHT和UTRS。
+
+17. 可以定义和更新的变量：
+
+    1. `STATEV(NSTATV)`，状态变量数组，包含了所有解依赖的状态变量，其值是当前增量步开始时的状态变量的值。
+
+    2. PNEWDT，时间比， 建议的时间增量与当前使用的时间增量（dtime）的比值。
+
+18. 除了上面提到的三个变量外，其他变量都是只读的，修改它们会出现功能错误。
+
+
+## UEL
+
+1. 单元的性能决定了它可模拟计算的问题和可扩展的空间，ABAQUS为用户提供了用户自定义单元的程序接口，允许用户自定义地实现线性和非线性的单元，可以定义任意复杂度的任何单元，使得用户可以方便地对ABAQUS的功能进行扩展，以满足复杂的个性化求解需求。
+
+2. 对于一些耦合了力学行为的物理过程，载荷和求解的结果有关；在求解的过程中激活控制机制等的问题，ABAQUS现有的单元库还无法满足分析需求，需要我们编写用户子程序来实现。
+
+3. 相比于写一个完整的有限元求解程序，在一些现有程序的基础上（如ABAQUS）编写用户单元可以大大降低开发成本、缩短开发时间，并且可以充分利用ABAQUS提供的强大的前后处理能力。此外，ABAQUS内置的求解器的效率非常高，求解非线性问题具有很好的收敛性，这也使得用户单元子程序具有非常广的应用前景。
+
+4. 多个用户单元可以在单个模型中一起使用，其使用方法与多个UMAT在同一个模型中一起使用是类似的，只需给每个单元一个特定的名称，然后定义其在inp文件中对应的UEL的变量property即可。
+
+5. 定义用户单元的方式：
+   1. 线性单元，在Standard中，可以通过直接使用关键字*MATRIX在.inp文件中定义单元的刚度矩阵和质量矩阵，从而可以定义一个线性的用户单元（无须写编用户子程序）。
+
+   2. 任意单元，在Standard中，可通过UEL或UELMAT来定义任意单元；在Explicit中，可通过VUEL来实现非线性单元。
+
+6. 在Standard中，有两个用户单元的接口程序：UELMAT可以直接访问ABAQUS内置的材料模型，这样用户就不需要自己去编写材料的本构关系了。但是，UELMAT支持的分析步类型比UEL少，此时我们只能通过UEL来实现。
+7. 在使用UEL或UELMAT之前，需要在.inp文件中定义以下单元信息：
+   1. 用户单元的节点数
+   2. 每个节点的坐标数
+   3. 每个节点激活的自由度
+   4. 单元的属性参数的个数
+   5. 每个单元中需要存储的解依赖的状态变量（SDV）的个数
+   6. 单元可用载荷类型的个数
+
+8. 
+
+## Sensor和UAMP
+
+1. 要想在ABAQUS中建立一个逻辑运算模型，功能类似于matlab的simulink。需要有以下几个部分：
+
+   1. 有一个常规的力学分析的有限元模型，该模型可以独立进行正常的力学计算。
+   2. 在该模型的基础上，建立以下三个模块：
+      1. 传感器Sensor，用于获取模型的实时状态，将数据输出给控制器。
+      2. 控制系统，根据传感器的输入和控制算法来决定激励大小，这部分需要通过UAMP或VUAMP来实现。
+      3. 激励器Amplitude，根据控制器来做出指定的动作，例如调整载荷。
+
+2. 传感器数据是控制器的输入，控制器的输出是激励器，利用控制器在传感器和激励器之间建立连接和反馈调整的机制。
+
+3. 应用：
+
+   1. 板件深压成型，根据模具侧边支撑力的大小适时调整冲压力的大小，压力太大容易引起板件撕裂，此时应该减少支撑力，压力太小容易发生褶皱，此时应该增大支撑力。
+   2. 倒立摆，根据杆顶部相对与杆底部的位置（需要2个传感器），来决定底部物体的运动或施加其上的荷载。一般要使用PID算法来控制。
+
+4. 通常情况下，可以在一个模型中使用多个传感器，每个传感器都会和一个特定的标量输出（如U1、RF3等）建立关联，同时需要给每个传感器起一个独一无二的名字，以便能够在UAMP中找到它。
+
+5. 每个传感器只能与一个单元（或节点）相关联，也可以是只包含一个单元或节点的集合。
+
+6. 定义Sensor的两种方式：
+
+   1. .inp文件中：
+
+      ```shell
+      *OUTPUT, HISTORY, SENSOR, NAME=Horiz_Transl_motion #创建了一个历史输出请求，将它和一个名为Horiz_Transl_motion传感器关联。
+      *ELEMENT OUTPUT, ELSET=SR-SS_CnSet #在历史输出内指明要输出单元集合（只能有一个单元）SR-SS_CnSet中单元的数据，此时传感器就和该单元集合建立了关联。
+      ```
+
+   2. 在CAE中，Edit History Output Request→勾选Include sensor when avaliable。
+
+7. 定义Amplitude的两种方式：
+
+   1. .inp文件中：
+
+      ```shell
+      *AMPLITUDE, DEFINITION=USER, NAME=MOTOR_WITH_STOP_SENSOR, VARIABLES=2, PROPERTIES=3 #定义了一个名为MOTOR_WITH_STOP_SENSOR的AMPLITUDE，指示通过UAMP获取值。该AMPLITUDE有2个状态变量，可以随时间变化，类似于UMAT，但是互相独立。还有2个属性，不能随时间变化，也类似于UMAT。
+      7.5d4, 1.0, 5.5e6
+      #在*STEP内
+      BOUNDARY, TYPE=VELOCITY, AMPLITUDE=MOTOR_WITH_STOP_SENSOR #定义速度边界，幅值使用上边定义的MOTOR_WITH_STOP_SENSOR。
+      ```
+
+   2. 在CAE中，Create Amplitude（输入名称）→User，选择合适的变量个数。
+
+8. 定义完成Sensor和Amplitude后，就可以通过UAMP或VUAMP来定义Amplitude的值，从而控制荷载或边界条件了。和普通的Amplitude不同，这里还可以参考Sensor的值来完成反馈控制。
+
+9. UAMP和VUAMP可以完成以下功能：
+
+   1. 定义一个依赖于时间的幅值曲线。
+   2. 定义一个依赖于给定数量的状态变量的幅值曲线。
+   3. 如果模型中使用了传感器，则可以给出依赖于传感器值得幅值曲线。
+   4. 计算幅值曲线的导数和积分，曲线为将所有点用折线连接起来的结果。
+
+10. 传入UAMP的所有信息或要更新的数据都是该增量开始时的值。
+
+11. 例子：
+
+    ```fortran
+          SUBROUTINE UAMP( !UAMP的主要功能就是定义AmpValueNew的值，即当前时刻的幅值
+        * ampName, time, ampValueOld, dt, nProps, props, nSvars,
+        * svars, lFlagsInfo,
+        * nSensor, sensorValues, sensorNames, jSensorLookUpTable,
+        * AmpValueNew,lFlagsDefine,
+        * AmpDerivative, AmpSecDerivative, AmpIncIntegral,AmpDoubleIntegral)
+    !定义了一些常数，用于索引数组
+          parameter (iInitialization = 1,iRegularInc = 2,iCuts = 3,ikStep = 4,nFlagsInfo = 4) !对lFlagsInfo(nFlagsInfo)数组进行索引
+          parameter (iComputeDeriv = 1,iComputeSecDeriv = 2,iComputeInteg = 3,iComputeDoubleInteg = 4,iStopAnalysis = 5,iConcludeStep = 6,nFlagsDefine = 6) !对lFlagsDefine(nFlagsDefine)数组进行索引
+    ```
+
+12. 必须更新的变量AmpValueNew。
+
+13. 可以被定义和赋值的变量，`lFlagsDefine(nFlagsDefine)`：整数数组，用于决定是否需要额外计算并提供一些变量的值以及提供分析的连续性需求。该数组中每个值的含义如下：
+
+    1. iComputeDeriv，为1表示子程序的编写者必须提供幅值的导数（AmpDerivative），为0（默认值），则ABAQUS会计算幅值的导数。
+    2. iComputeSecDeriv，为1表示子程序的编写者必须提供幅值的二阶导数（AmpSecDerivative），为0（默认值），则ABAQUS会计算幅值的二阶导数。
+    3. iComputeInteg，为1表示子程序的编写者必须提供幅值的增量积分（AmpIncIntegral），为0（默认值），则ABAQUS会计算幅值的积分。
+    4. iComputeDoubleInteg，为1表示子程序的编写者必须提供幅值的二次积分（AmpDoubleIntegral），为0（默认值），则ABAQUS会计算幅值的积分。
+    5. iStopAnalysis，为1表示分析终止，并抛出一个错误信息。为0（默认值），则ABAQUS不会终止分析。
+    6. iConcludeStep，为1，则结束当前分析步进入下一个分析步（如果有的话）。为0（默认值），则ABAQUS不会结束当前分析步。
+
+14. 有些时候，abaqus会请求幅值的导数或积分，而非本身（因为只给定特定点的值，不足以刻画出点之间的过渡，这些需要用导数给出，会自动算出），此时会根据lFlagsDefine数组中对应项的设置，来决定使用用户提供的值，还是由abaqus自己计算。
+
+15. ampName为幅值的名称。
+
+16. ampValueOld为上一个增量步开始时的幅值。
+
+17. sensorValues(nSensor)，模型中可用的传感器数据的数组，存储的上一增量步结束时传感器的值，和ampValueOld不同的是，这里是上一步结束时的值，因为上一步已经计算完成了，因此可以得到。
+
+18. 每个传感器值对应于与定义传感器的输出数据库请求相关联的历史输出变量。
+
+19. sensorNames，整个模型中用户定义的传感器名称数组，左对齐。如果定义中使用了小写或大小写混合字符，则所有名称都将转换为大写字符。
+
+20. jSensorLookUpTable，是需要传递给IGETSENSORID和GETSENSORVALUE的参数。
+
+21. svars(nSvars)，存储和这个幅值定义关联的状态变的量数组。
+
+22. props(nProps)，和这个幅值定义关联的常数数组。
+
+23. `lFlagsInfo(nFlagsInfo)`：整数标志数组，包含当前对UAMP调用的信息：
+
+    1. iInitialization，为1表示从第一个分析步骤的初始化阶段调用。
+    2. iRegularInc，为1表示在常规增量步中调用。
+    3. iCuts，本次增量中的cutback次数。每次的cutback对应一次的不收敛，一般是因为增量步长太大了，这个数据可以用于调整增量大小。
+    4. ikStep，分析步编号，因为荷载或边界条件是可以横跨多个分析步的，通过这个参数可以决定在不同的分析步取不同的值。
+
+24. UAMP和VUAMP的接口（子程序参数的名称、顺序和意义）完全相同。
+
+25. 使用GETSENSORVALUE来查询传感器的值，使用IGETSENSORID来查询传感器的ID，这两个函数用于Standard，只能在UAMP中调用：
+
+    ```fortran
+    !给定用户定义的传感器名称，此程序可使用高效的搜索技术获得传感器ID或值。
+    character*80 mySensorName !要查询的传感器名称
+    !第一种使用方式，根据名称找到ID(也就是数组下标)，然后数组中使用ID获取传感器的值。
+    iMySensorID = IGETSENSORID(mySensorName, jSensorLookUpTable) !获取传感器的ID，第二个参数是UAMP的参数，指向包含传感器二叉树查找表的对象的指针，直接传入即可。
+    dMySensorValue = sensorValues(iMySensorID) !从数组中获取传感器的值。
+    !第二种使用方式，根据名称直接查询值，推荐使用。
+    dMySensorValue = GETSENSORVALUE(mySensorName, jSensorLookUpTable, sensorValues)
+    ```
+
+26. 由于通过传感器，只能获取当前值，不能获取历史值，因此如果要计算传感器值的导数，可以在状态变量中存储每次的值，以便下次使用。
+
+## 用C/C++编写子程序
+
+1. 首先需要在源文件中包含下面的语句。将所有的ABAQUS子程序名包含到FOR_NAME宏中使用。这些用户子程序都通过下面的方法来连接它的接口，进行相应的数据传递。在此以用户子程序UMAT为例，通过下面的代码来访问用户子程序UMAT的C＋＋语言接口：
+
+   ```c++
+   #include <aba_for_c.h>
+   
+   
+   ```
+
+2. Standard和Explicit都支持使用C++语言编写子程序。但是在ABAQUS2020中仍然不支持直接在CAE中指定.cpp扩展名的子程序，因此只能通过命令行的参数`user=xxx.cpp`来指定使用C++子程序。
+
+3. 因此，在编写子程序时需要注意C++语言用户子程序与Fortran语言用户子程序的区别。其中，有两个重要的区别需要特别关注，分别是：
+
+   1. 对于二维数组在内存中的存储，在C++语言中是行优先，而在Fortran语言中则是列优先。
+   2. C++语言中数组的下标从0开始计数，而Fortran语言中则从1开始计数。
+
+4. 可以在子程序中使用外部库，安装完库之后，还需要配置，这里以blas和lapack为例：
+
+   1. 修改abaqus_v6.env中的link_sl变量，在其末尾添加两个文件名：blas_win64_MT.lib和lapack_win64_MT.lib。
+   2. 将文件blas_win64_MT.lib 和lapack_win64_MT.lib 复制到VS的cpp库中，具体目录为`C:/ProgramFiles(x86)/Microsoft Visual Studio 11.0/VC/lib/amd64`。
+   3. 将对应的两个.dll文件复制到system32目录中，或者将所在路径添加到path中。
+
+5. 要想在C++的子程序中调用实用子程序Utility，需要先在用户子程序外部声明被调用的实用子程序Utility。
+
+   ```c++
+   extern "C" void NameOfUtility_(parameters)
+   ```
+
+6. 对于比较复杂大型的代码，C++语言丰富的库函数非常有优势。
+
+# User Subroutine配置
+
+1. 可以参考视频https://www.youtube.com/watch?v=qGNAdlDoeTs。
+
+2. 应该先VS，再安装Intel Fortran，这样Intel Fortran会自动关联到VS，可以在vs中新建Fortran的项目。
+
+   1. 首先安装VS2019，然后再下载Intel® Fortran Compiler Classic and Intel® Fortran Compiler，下载地址为：`https://www.intel.com/content/www/us/en/developer/articles/tool/oneapi-standalone-components.html#fortran`。
+   2. 选择在线或离线包都可以，推荐下载离线版，方便以后使用。
+   3. 每个Intel Fortran编译器都有配合的多个VS版本，安装其中一个即可。
+   4. 亲测abaqus2023 + vs2019 + Intel oneAPI2024.0可以搭配。
+
+3. ABAQUS的安装顺序可以任意，在配置关系上，它和（VS+Intel Fortran）是相互独立的。
+
+4. Intel Parallel Studio XE 已经不更新了，被新的Intel oneAPI替代了。
+
+   ```shell
+   #oneAPI中最常用2个套件为Intel oneAPI Base Toolkit和Intel HPC Toolkit，前者包含C/C++的编译器和MKL库，后者包含了Fortran编译器和MPI库。
+   #abaqus在安装时会默认安装微软的MPI库，因此没必要安装Intel的MPI库。MKL库可以加速求解。
+   #最精简的安装可以是只安装Fortran编译器。
+   https://www.intel.com/content/www/us/en/developer/tools/oneapi/toolkits.html # 下载地址，可以单独下载套件内的每个模块
+   ```
+
+5. vs和Microsoft visual studio build tools的区别，前者包含后者，如果只安装后者，则只能使用命令行界面编译。
+
+6. 要想使用Intel Fortran命令行，需要先执行vs的命令行进行配置，然后在其中执行Intel Fortran的命令行，也可以配置环境变量`VS2019INSTALLDIR`为`D:\Program Files (x86)\Microsoft Visual Studio\2019\Community`来替代执行vs命令行，因为Intel Fortran命令行会自动寻找环境变量`VS2019INSTALLDIR`，来执行vs命令行。结果显示如下：
+
+   ```shell
+   #VS的命令行
+   "D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+   #执行结果为
+   **********************************************************************
+   ** Visual Studio 2019 Developer Command Prompt v16.11.28
+   ** Copyright (c) 2021 Microsoft Corporation
+   **********************************************************************
+   [vcvarsall.bat] Environment initialized for: 'x64'
+   #Intel Fortran的命令行
+   "D:\Program Files (x86)\Intel\oneAPI\setvars.bat" intel64 vs2019
+   #执行结果为
+   :: initializing oneAPI environment...
+      Initializing Visual Studio command-line environment...
+      Visual Studio version 16.11.28 environment configured.
+      "D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\"
+      Visual Studio command-line environment initialized for: 'x64'
+   :  compiler -- latest
+   :  debugger -- latest
+   :  mpi -- latest
+   :: oneAPI environment initialized ::
+   ```
+
+7. 和abaqus相关的目录：
+
+   ```shell
+   #Solver_install_directory
+   D:\SIMULIA\EstProducts\2023\win_b64\SMA\site
+   #Cae_install_directory
+   D:\SIMULIA\EstProducts\2023\win_b64\code\bin
+   #Cae_launcher_directory
+   D:\SIMULIA\EstProducts\2023\win_b64\resources\install\cae
+   #Commands_directory
+   D:\SIMULIA\Commands
+   ```
+
+8. 需要修改的文件，可以修改Fortran编译器的默认选项。
+
+   ```shell
+   #win86_64.env 在Solver_install_directory，这个文件里的功能是Compile and Link commands for ABAQUS on the Windows 64 Platform。
+   compile_fortran=['ifort',
+                    '/Qmkl:sequential', #<-- MKL，新加入的，指示使用MKL
+                    '/free', #<-- free format Fortran95，新加入的，指示将.for后缀的文件识别为自由格式的。官方的例子都是固定格式的。
+                    '/c', '/fpp', '/extend-source', 
+   ```
+
+9. 由于abaqus CAE要求子程序使用.for的后缀名，因此如果不加/free的话，编译器会将其识别为固定格式的，此时用户也只能以固定格式来书写代码，不方便。
+
+10. 在abaqus_v6.env（在Solver_install_directory中）末尾追加如下代码，注意不能出现中文，注释也不行：
+
+   ```python
+   compile_fortran += ['/names:lowercase',] # Solves problem with naming convention。修改编译器的标志，以便在编译器中将外部名称转换为小写。
+   # 回调函数，初始化时会自动执行，不需要在这里手动执行，只需要定义即可。
+   def onCaeStartup():
+   	#设置.rpy文件中的几何编码为坐标，默认是mask，这个效率更高，但是不利于阅读。
+   	session.journalOptions.setValues(recoverGeometry=COORDINATE)
+   ```
+
+11. 修改D:\SIMULIA\Commands\abq2023.bat文件
+
+   ```shell
+   @echo off
+   setlocal
+   set ABA_DRIVERNAME=%~nx0
+   call "D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x64 #新增加的一行，配置vs环境，需要先执行。
+   call "D:\Program Files (x86)\Intel\oneAPI\setvars.bat" intel64 vs2019 #新增加的一行，配置Intel Fortran的环境。
+   "D:\SIMULIA\EstProducts\2023\win_b64\code\bin\SMALauncher.exe" %*
+   endlocal
+   ```
+
+11. 需要在path中添加两个环境变量，用来指示Intel oneAPI和VS的目录（经验证，不加好像也没事，因为上面执行的vs脚本和intel fortran脚本都给定了全部目录）：
+
+    ```shell
+    D:\Program Files (x86)\Intel\oneAPI\compiler\2024.0\env
+    D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build
+    ```
+
+12. 开始菜单的命令行包含Abaqus Command（一般用这个进行命令行的操作），这个默认是直接打开cmd而不设置环境，可以修改它的快捷方式如下。
+
+    ```shell
+    #修改前
+    C:\Windows\System32\cmd.exe /k
+    #修改后。不过不修改也可以，因为在这里执行的命令都是以abaqus开头的，这条命令会自动载入对应的环境，因此建议只修改abq2023.bat这个文件。
+    "D:\Program Files (x86)\Intel\oneAPI\setvars.bat" intel64 vs2019 & C:\Windows\System32\cmd.exe /k
+    ```
+
+13. 如果要使用subroutine，在安装时应该安装caaapi（用于子程序开发的库），和sample（因为运行verification需要从中提取例子来验证，如果确信配置没有问题，可以不用安装sample，可以用自己编写的子程序来验证）。
+
+    ```shell
+    #验证配置是否成功的命令
+    abaqus verify -user_exp #显式
+    abaqus verify -user_std #隐式
+    ```
+
+14. 如果想要通过验证，就不能给win86_64.env中的compile_fortran添加/free选项。因为官方例子里的.for文件都是固定格式的，按照自由格式解析会出错。
+
+15. `/Qmkl:sequential`选项，需要安装MKL之后才可以使用，否则会报错。
+
+16. `/free`不能和VUMAT联合使用。
+
+17. 通过命令行提交job，附带子程序。
+
+    ```shell
+    abaqus job=Job-2-umat user=umat.for #inp文件中并没有关联子程序的具体文件名，如果不提供子程序的文件名，会报错。user参数的值也可以是编译好的obj目标文件。
+    #默认会提交到一个后台进程去计算，然后立即返回，可以添加interactive选项来保持前台，这样会显示log文件的内容。
+    ```
+
+18. 如果想将子程序提供给他人使用，但不希望他人看到源码，此时可将其编译为obj目标文件提供给他人，也可以用这个方法来提前检查以下语法错误：
+
+    ```shell
+    abaqus make library=umat.for object_type=fortran
+    #编译成功后会输出
+    Abaqus JOB umat.for
+    Begin Compiling Abaqus/Standard User Subroutines
+    11/9/2024 8:58:18 PM
+    Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on Intel(R) 64, Version 2021.11.0 Build 20231010_000000
+    Copyright (C) 1985-2023 Intel Corporation.  All rights reserved.
+    
+    End Compiling Abaqus/Standard User Subroutines
+    Begin Linking Abaqus/Standard User Subroutines
+      正在创建库 standardU.lib 和对象 standardU.exp
+    End Linking Abaqus/Standard User Subroutines
+    11/9/2024 8:58:25 PM
+    Abaqus JOB umat.for COMPLETED
+    ```
+
+19. 如果发现Intel Fortran的命令行环境配置结果中，没有显示compiler，则可以在卸载程序的地方双击，然后repair该程序。
+
+20. 最简单的例子，各向同性线弹性材料，需要注意的是，官方给的例子第一行SUBROUTINE前面没有空出6个字符（前6个字符是注释内容），当使用固定格式时会报错。这个材料不能用于平面应力问题：
+
+    ```fortran
+          SUBROUTINE UMAT(STRESS,STATEV,DDSDDE,SSE,SPD,SCD,
+         1 RPL,DDSDDT,DRPLDE,DRPLDT,
+         2 STRAN,DSTRAN,TIME,DTIME,TEMP,DTEMP,PREDEF,DPRED,CMNAME,
+         3 NDI,NSHR,NTENS,NSTATV,PROPS,NPROPS,COORDS,DROT,PNEWDT,
+         4 CELENT,DFGRD0,DFGRD1,NOEL,NPT,LAYER,KSPT,JSTEP,KINC)
+    C
+          INCLUDE 'ABA_PARAM.INC'
+    C
+          CHARACTER*80 CMNAME
+          DIMENSION STRESS(NTENS),STATEV(NSTATV),
+         1 DDSDDE(NTENS,NTENS),DDSDDT(NTENS),DRPLDE(NTENS),
+         2 STRAN(NTENS),DSTRAN(NTENS),TIME(2),PREDEF(1),DPRED(1),
+         3 PROPS(NPROPS),COORDS(3),DROT(3,3),DFGRD0(3,3),DFGRD1(3,3),
+         4 JSTEP(4)
+    C --------------------------
+    C User Code Begin
+    C --------------------------
+          E=PROPS(1)
+          Nu=PROPS(2)
+          Mu=E/(2.D0*(1.D0+Nu))
+          Lambda=Nu*E/((1.D0+Nu)*(1-2.D0*Nu))
+    C     CALCULATE DDSDDE
+          DO K1=1,NDI
+    	      DO K2=1,NDI
+    	          DDSDDE (K1,K2)=Lambda
+    	      END DO
+    	      DDSDDE(K1,K1)=Lambda+2.0*Mu
+    	  END DO
+    
+    	  DO K1=NDI+1,NTENS
+    	      DDSDDE(K1,K1)=Mu
+    	  END DO
+    
+    C     CALCULATE STRESS
+          DO K1=1,NTENS
+    	      DO K2=1,NTENS
+    	          STRESS(K1)=STRESS(K1)+DDSDDE(K1,K2)*DSTRAN(K2)
+              END DO
+          END DO
+    C --------------------------
+    C User Code End
+    C --------------------------
+          RETURN
+          END
+    ```
+
+21. <img src="Abaqus.assets/image-20241107225604101.png" alt="image-20241107225604101" style="zoom:50%;" />
+
+# Mises UMAT
+
+1. 获取官方的例子，在Abaqus Verification Guide的4.1.21，使用
+
+   ```shell
+   #分别获取inp文件和对应的UMAT源文件。
+   abaqus fetch job=umatmst3.inp
+   abaqus fetch job=umatmst3.f
+   ```
+
+2. 强化法则为各向同性。
+
+3. 总应变可以分解为弹性和塑性部分：$\varepsilon=\varepsilon^e+\varepsilon^p$，其中弹性应变为$\sigma/E$。因此$\sigma=E(\varepsilon-\varepsilon^p)$。
+
+4. 后继屈服段称为应变硬化strain hardening，假定后继屈服应力（流动应力）是塑性应变的函数$\sigma_y=f(\varepsilon^p)$。
+
+5. 理想弹塑性材料，没有硬化段，因为流动应力不会提高。
+
+6. 双线性（$E$和$E_t$）材料的流动应力复合线性强化模型：$\sigma_y=\sigma_{y0}+H\varepsilon_p$。H为强化参数，$\varepsilon_p$是等效塑性应变。$1/H=1/E_t-1/E$。
+
+7. 单轴拉伸时，只需比较$\sigma$和$\sigma_y$即可确定是否是屈服状态，类比单轴拉伸的情况，多轴时使用等效应力$\sigma_e$代替单轴拉伸的应力，使用等效塑性应变增量$d\varepsilon_p$代替单轴拉伸的塑性应变增量$d\varepsilon^p$。之所以在应变处使用增量或率，是因为要增量地求解问题。
+
+8. 偏应力张量$s=\sigma-pI$，$p=\text{tr}(\sigma)/3$。其第二不变量$J_2=\frac{1}{2}s:s^T=\frac{1}{2}s:s$，因为$s$是对称的。
+
+9. $\sigma_e=\sqrt{\frac{3}{2}s:s}=\sqrt{3J_2}$。等效应力和$J_2$有关，因此也称为$J_2$塑性。系数$\frac{3}{2}$可以通过单轴拉伸的情况来验证，同时将$\sigma_e$取为轴向应力$\sigma$，计算$J_2=\frac{1}{3}\sigma^2$。
+
+10. 由于Mises准则认为材料的塑性变形只有剪切变形，没有体积变形，此时为不可压缩的，塑性应变的泊松比为0.5，因此$d\varepsilon^p$的迹为0，因此累加起来后导致$\text{tr}(\varepsilon^p)=0$，即塑性应变张量是个偏张量。而且该准则适用于拉压性能相同的材料。
+
+11. $d\varepsilon_p = \sqrt{\frac{2}{3}d\varepsilon^p:d\varepsilon^p}$。系数$\frac{2}{3}$可以通过单轴拉伸的情况来验证，注意这里和应力的情况不同，系数为2/3，此时另外两个方向的应变均为-0.5轴向应变，不为0。将这三个量带入最开始的式子，可得$d\varepsilon_p=d\varepsilon^p$。
+
+12. 屈服准则为：$f=\sigma_e-\sigma_y$。其中流动应力$\sigma_y$与等效塑性应变$\varepsilon_p$有关。
+
+13. 使用正交流动假设，获得$d\varepsilon^p$的方向，$d\varepsilon^p=d\lambda \cdot n$，$n_{ij} = \frac{\partial f}{\partial \sigma_{ij}}$，并非单位长度的（因为二阶张量也无法谈论长度），只是一般的梯度。由于$f$的第二项不是$\sigma$的函数，因此$n = \frac{\partial \sigma_e}{\partial \sigma}=\frac{3}{2}\frac{s}{\sigma_e}$，使用链式法则即可，可以看出这里$n$是一个二阶张量。
+
+14. 将$d\varepsilon^p=d\lambda \frac{3}{2}\frac{\acute{\sigma}}{\sigma_e}$，带入$d\varepsilon_p = \sqrt{\frac{2}{3}d\varepsilon^p:d\varepsilon^p}$得：
+
+15. $d\varepsilon_p=\sqrt{\frac{2}{3}d\lambda\frac{3}{2}\frac{s}{\sigma_e}:d\lambda\frac{3}{2}\frac{s}{\sigma_e}}=\frac{d\lambda}{\sigma_e}\sqrt{\frac{3}{2}s:s}=d\lambda$，可得出$d\lambda = d\varepsilon_p$。因此$d\varepsilon^p=d\varepsilon_p \frac{3}{2}\frac{s}{\sigma_e}$。
+
+16. 由一致性条件，可求得$d\varepsilon_p$的大小。$f=\sigma_e(\sigma)-\sigma_y(\varepsilon_p)$。$df(\sigma,\varepsilon_p)= \frac{\partial f}{\partial \sigma}:d\sigma+\frac{\partial f}{\partial \varepsilon_p}d\varepsilon_p=0$。根据线性强化本构关系，$\frac{\partial f}{\partial \varepsilon_p}=H$。根据正交流动假设$\frac{\partial f}{\partial \sigma}=n$。
+
+17. 由$d\sigma = C:d\varepsilon^e=C:(d\varepsilon-d\varepsilon^p)=C:(d\varepsilon-d\varepsilon_p\cdot n)$。
+
+18. 推出，$d\varepsilon_p = \frac{n:C:d\varepsilon}{n:C:n-\frac{\partial f}{\partial \varepsilon_p}}=\frac{n:C:d\varepsilon}{n:C:n-H}$。
+
+19. 数值求解是增量进行的，步骤如下：
+
+    1. 首先已知量为：第$k$步开始时（也是$k-1$步结束时）的总应变$\varepsilon_k$，等效塑性应变$\varepsilon_{p,k}$，总应力$\sigma_k$。还知道下一步的应变增量$\Delta\varepsilon$。需要计算的是第$k+1$步结束时的上述四个量。
+    1. 因此需要将应变增量$\Delta\varepsilon$分解为弹性$\Delta\varepsilon^e$和塑性$\Delta\varepsilon^p$部分。使用图返回算法Return Mapping。
+    1. 弹性应变增量和应力增量的计算有关，因为$\sigma=C:\varepsilon^e$，这个对弹性和塑性状态都成立，其增量形式也成立：$\Delta\sigma=C:\Delta\varepsilon^e$。
+    1. 如果线弹性材料是各向同性的，此时C可以由2个Lame参数确定$\lambda,\mu=G$，带入可得：$\sigma=2G\varepsilon^e+\lambda\text{tr}(\varepsilon^e)I$。
+    1. 上式在任何时候都成立，取第$k+1$步开始时刻，$\sigma_{k+1}=2G\varepsilon_{k+1}^e+\lambda\text{tr}(\varepsilon_{k+1}^e)I$。根据增量关系，$\varepsilon_{k+1}^e=\varepsilon_k^e+\Delta\varepsilon^e=\varepsilon_k^e+\Delta\varepsilon-\Delta\varepsilon^p$。将此式子带入前式，由于塑性应变及其增量始终为偏状态张量，即$\text{tr}(\varepsilon^p)=\text{tr}(\Delta\varepsilon^p)=0$。
+    1. 因此$\sigma_{k+1}=2G(\varepsilon_k^e+\Delta\varepsilon)+\lambda\text{tr}(\varepsilon_k^e+\Delta\varepsilon)I-2G\Delta\varepsilon^p$。将等号右侧的前两项称为试应力：$\sigma^{tr}=2G(\varepsilon_k^e+\Delta\varepsilon)+\lambda\text{tr}(\varepsilon_k^e+\Delta\varepsilon)I=\sigma_k+C:\Delta\varepsilon$。因为应力关系对于第$k$步开始时刻，也是成立的。等号右侧最后一项被称为塑性纠正项（plastic corrector）。
+    1. 之所以称其为试应力（trial stress），或者弹性预测，是因为这里假设应变增量都是弹性的，即$\Delta\varepsilon=\Delta\varepsilon^e$。
+    1. 因此$\sigma_{k+1}=\sigma^{tr}-2G\Delta\varepsilon^p$。
+    1. 根据正交性假设，$d\varepsilon^p=d\varepsilon_p \frac{3}{2}\frac{s}{\sigma_e}$，将微分变为增量，$\Delta\varepsilon^p=\Delta\varepsilon_p \frac{3}{2}\frac{s}{\sigma_e}$​。
+    1. 得到方程$\sigma_{k+1}=\sigma^{tr}-2G\Delta\varepsilon_p \frac{3}{2}\frac{s}{\sigma_e}$。其中$\sigma^{tr}$是已知的，$s,\sigma_e$都和$\sigma_{k+1}$有关。
+    1. 分情况讨论：
+         1. 如果$\sigma_k$是弹性状态（带入屈服函数，结果$<0$），且$\sigma^{tr}$也是弹性状态，那么说明没有塑性应变，不需要进行塑性纠正，此时$\sigma_{k+1}=\sigma^{tr}$。
+         1. 如果$\sigma_k$是弹性或塑性状态，而$\sigma^{tr}$​是塑性状态（屈服面外），此时通过塑性纠正项，将应力点拉回到新的屈服面上。当然这里也要计算屈服面的变化，因此需要迭代计算。
+    1. 因为最终状态$\sigma_{k+1}$是在新的屈服面上（带入屈服函数，结果$=0$）。求解第10条的6元方程组就可以得到$\sigma_{k+1}$。但是这里还可以简化为一元方程。
+    1. 将方程左侧分解为$\sigma=s+pI$，移项合并后为$(1+3G\frac{\Delta\varepsilon_p}{\sigma_e})s=\sigma^{tr}-pI=s^{tr}$。最后一项偏试应力张量。
+    1. 然后对上式两侧进行双缩并然后开平方，利用$A=B\to A:A=B:B$，和试应力的定义$\sigma_e=\sqrt{\frac{3}{2}s:s}$。可得$(1+3G\frac{\Delta\varepsilon_p}{\sigma^e})\sigma_e=\sigma^{tr}_e$，化简为$\sigma_e+3G\Delta\varepsilon_p=\sigma^{tr}_e$。这里还可以得出一个有用的结论，即$\frac{s}{\sigma_e}=\frac{s^{tr}}{\sigma^{tr}_e}$，即可以通过试应力来计算流动方向，因此$\Delta\varepsilon^p=\Delta\varepsilon_p \frac{3}{2}\frac{s^{tr}}{\sigma^{tr}_e}$。
+    1. 将上述一元方程带入屈服条件得$f=\sigma_e-\sigma_y=\sigma^{tr}_e-3G\Delta\varepsilon_p-(\sigma_{y0}+H(\varepsilon_{p,k}+\Delta\varepsilon_p))$。其中$\varepsilon_{p,k}$表示$k$时刻开始时的等效塑性应变，运用一致性条件$f=0$，得$\Delta\varepsilon_p=\frac{\sigma^{tr}_e-\sigma_{y0}-H\varepsilon_{p,k}}{3G+H}$。
+    1. 对于线性硬化问题，方程为线性（$f'$为常数，等于$-3G-H$​​）的，可以直接求解，不用迭代。
+    1. 如果使用牛顿迭代法，为$x_{n+1}=x_n-\frac{f(x_n)}{f'(x_n)}$。这里$f=\sigma^{tr}_e-3G\Delta\varepsilon_p-\sigma_y$。$f'=-3G-H$，这里是对$\Delta\varepsilon_p$求导，因为$d\sigma_y/d\Delta\varepsilon_p=H$​。$x_n$的初始值可以设为0。
+    1. 如果是分段线性硬化材料，则需要根据$\sigma$的值，来选择使用哪个$H$。
+    1. 计算出等效塑性应变增量$\Delta\varepsilon^p$后，带入$\Delta\varepsilon^p=\Delta\varepsilon_p \frac{3}{2}\frac{s^{tr}}{\sigma^{tr}_e}$，得到塑性应变增量$\Delta\varepsilon^p$，更新塑性应变$\varepsilon^p_{k+1}=\varepsilon^p_k+\Delta\varepsilon^p$。
+    1. 然后根据$\Delta\varepsilon^e=\Delta\varepsilon-\Delta\varepsilon^p$，得到弹性应变增量。
+    1. 根据$\sigma_{k+1}=\sigma_k+C:\Delta\varepsilon^e$。或者使用试应力+塑性纠正方法计算$\sigma_{k+1}=\sigma^{tr}-2G\Delta\varepsilon^p$。
+    1. ![image-20241108184030608](Abaqus.assets/image-20241108184030608.png)
+
+20. 需要从UMAT函数的参数中读取状态变量，这里只有一个有效塑性应变，还有2个材料参数，初始屈服应力和线性强化的斜率参数。
+
+21. UMAT中将应力张量使用voigt标记为列向量：$[\sigma_{11},\sigma_{22},\sigma_{33},\sigma_{12},\sigma_{13},\sigma_{23}]^T$。应变使用的是工程应变张量，即$[\varepsilon_{11},\varepsilon_{22},\varepsilon_{33},\gamma_{12},\gamma_{13},\gamma_{23}]=[\varepsilon_{11},\varepsilon_{22},\varepsilon_{33},2\varepsilon_{12},2\varepsilon_{13},2\varepsilon_{23}]^T$。对于线弹性材料，$\tau=G\gamma$。
+
+22. 在Standard中需要计算雅可比矩阵$\frac{\partial \delta \sigma}{\partial \delta \varepsilon}$（实际是一个四阶张量）表示应变增量的改变对应力增量改变的影响。在UMAT中用二维数组$DDSDDE(i,j)$表示，也就是第i个应力分量的变分对第j个应变分量的变分的偏导数。
+
+23. 使用它来计算刚度矩阵。因此只在standard中需要，在Explicit中，不需要计算DDSDDE。
+
+24. 精确的雅可比矩阵可以使收敛更快。
+
+25. 对于线弹性材料，$\sigma=C:\varepsilon$，变分为$\delta\sigma=C:\delta\varepsilon$。求偏导可得$DDSDDE=C$。
+
+26. 对于各向同性强化的Mises塑性材料，步骤如下：
+
+    1. 对$\sigma=s+pI$进行变分，$\delta\sigma=\delta s+\delta pI$。
+
+    2. $\delta p=K\delta V=K\text{tr}(\delta\varepsilon^e)=K\text{tr}(\delta\varepsilon-\delta\varepsilon^p)$。由于$\text{tr}(\varepsilon^p)=0$，因此$\delta p=K\text{tr}(\delta\varepsilon)$，$\delta\sigma=\delta s+K\text{tr}(\delta\varepsilon)I$​。
+
+    3. 现在寻找$\delta s$和$\delta\varepsilon$的关系，在推导Mises塑性时，获得了$(1+3G\frac{\Delta\varepsilon_p}{\sigma^e})s=s^{tr}$，对此变分可得：$(1+3G\frac{\Delta\varepsilon_p}{\sigma_e})\delta s+3G\frac{\delta\Delta\varepsilon_p}{\sigma_e}s-3G\frac{\Delta\varepsilon_p}{\sigma_e^2}\delta\sigma_es=\delta s^{tr}$。
+
+    4. 还有一个公式，$\sigma_e+3G\Delta\varepsilon_p=\sigma^{tr}_e$，变分为$\delta\sigma_e+3G\delta\Delta\varepsilon_p=\delta\sigma^{tr}_e$。
+
+    5. 根据屈服准则$f=\sigma_e-\sigma_y=0$，变分为$0=\delta f=\delta\sigma_e-H\delta\Delta\varepsilon_p$。
+
+    6. 将$\Delta\varepsilon_p$，$\delta\Delta\varepsilon_p$和$\delta\sigma_e$带入第三步的式子。
+
+27. 
+
+28. 代码：
+
+    ```fortran
+          SUBROUTINE UMAT(STRESS,STATEV,DDSDDE,SSE,SPD,SCD,
+         1 RPL,DDSDDT,DRPLDE,DRPLDT,
+         2 STRAN,DSTRAN,TIME,DTIME,TEMP,DTEMP,PREDEF,DPRED,CMNAME,
+         3 NDI,NSHR,NTENS,NSTATV,PROPS,NPROPS,COORDS,DROT,PNEWDT,
+         4 CELENT,DFGRD0,DFGRD1,NOEL,NPT,LAYER,KSPT,JSTEP,KINC)
+    C
+          INCLUDE 'ABA_PARAM.INC'
+    C
+          CHARACTER*80 CMNAME
+          DIMENSION STRESS(NTENS),STATEV(NSTATV),
+         1 DDSDDE(NTENS,NTENS),DDSDDT(NTENS),DRPLDE(NTENS),
+         2 STRAN(NTENS),DSTRAN(NTENS),TIME(2),PREDEF(1),DPRED(1),
+         3 PROPS(NPROPS),COORDS(3),DROT(3,3),DFGRD0(3,3),DFGRD1(3,3),
+         4 JSTEP(4)
+    
+    	  DIMENSION FLOW(NTENS),STRESST(NTENS),DPSTRAN(NTENS),DESTRAN(NTENS)
+    
+    	  PARAMETER (ZERO=0.D0,ONE=1.D0,TWO=2.D0,THREE=3.D0,SIX=6.D0,
+    	  NEWTON=10,TOLER=1.0D-6)
+    
+          EMOD=PROPS(1)
+          ENU=PROPS(2)
+          EBULK3=EMOD/(ONE-TWO*ENU)
+          EG2=EMOD/(ONE+ENU)
+          EG=EG2/TWO
+          EG3=EG*THREE
+          ELAM=(EBULK3-EG2)/THREE
+    
+    C     CALCULATE DDSDDE
+          DO K1=1,NDI
+              DO K2=1,NDI
+                  DDSDDE (K1,K2)= ELAM
+              END DO
+              DDSDDE(K1,K1)= ELAM+EG2
+          END DO
+    	   
+          DO K1=NDI+1,NTENS
+              DDSDDE(K1,K1)= EG
+          END DO
+    	   
+    C     CALCULATE TRIAL STRESS
+          DO K1=1,NTENS
+              DO K2=1,NTENS
+                   STRESST(K1) = STRESS(K1)+DDSDDE(K1,K2)*DSTRAN(K2)
+              END DO
+          END DO
+    	   
+    C     CALCULATE EFFECTIVE TRIAL STRESS
+          SMISES = (STRESST(1)-STRESST(2))**2+(STRESST(2)-STRESST(3))**2+(STRESST(3)-STRESST(1))**2
+          DO K1=NDI+1,NTENS
+    	      SMISES = SMISES +SIX*STRESST(K1)**2
+          END DO
+          SMISES = SQRT(SMISES/TWO)
+    
+    C     CALCULATE YIELD FUNCTION ,Read state variable & properties
+          EQPLAS = STATEV(1)
+          SYIEL0 = PROPS(3)
+          HARD = PROPS(4)
+          SYIELD = SYIEL0+HARD*EQPLAS
+          F = SMISES-SYIELD
+          DEQPL=ZERO
+    
+          IF(F .GT. TOLER*SYIELD)THEN
+          SHYDRO = (STRESST(1)+STRESST(2)+STRESST(3))/THREE
+    
+          DO K1=1,NDI
+              FLOW(K1) = (STRESST(K1)-SHYDRO)/SMISES
+          END DO
+          DO K1=NDI+1,NTENS
+              FLOW(K1) = STRESST(K1)/SMISES
+          END DO
+    C     ITERATIVE CALCULATION OF EFFECTIVE PLASTIC STRAIN INCREMENT
+          RHS = SMISES-EG3*DEQPL-SYIELD
+          DO WHILE(KEWTON .LT. NEWTON .AND. ABS(RHS) .GT. TOLER*SYIELD)
+              SYIELD = SYIELD+HARD*DEQPL
+              RHS = SMISES-EG3*DEQPL-SYIELD
+              DDEQPL = RHS/(EG3+HARD)
+              DEQPL = DEQPL+DDEQPL
+              KEWTON = KEWTON+1
+          END DO
+          END IF
+    
+    C     UPDATE STRESS TENSOR
+          DO K1=1,NTENS
+              DPSTRAN(K1) = THREE/TWO*DEQPL*FLOW(K1)
+          END DO
+          DO K1=1,NTENS
+              DESTRAN(K1) = DSTRAN(K1)-DPSTRAN(K1)
+          END DO
+          DO K1=1,NTENS
+              DPSTRAN(K1) = THREE/TWO*DEQPL*FLOW(K1)
+          END DO
+          DO K1=1,NTENS
+              DO K2=1,NTENS
+                  STRESS(K1) = STRESS(K1)+DDSDDE(K1,K2)*DESTRAN(K2)
+              END DO
+          END DO
+    
+          EQPLAS = EQPLAS+DEQPL
+          STATEV(1) = EQPLAS
+    C     CALCULATE JACOBIAN MATRIX
+          IF(F .GT. TOLER*SYIELD)THEN
+              EFFG = EG*SYIELD/SMISES
+              EFFG2 = TWO*EFFG
+              EFFG3 = EFFG*THREE
+              EFFLAM = (EBULK3-EFFG2)/THREE
+              EFFHRD = EG3*HARD/(EG3+HARD)-EFFG3
+              DO K1=1,NDI
+                  DO K2=1,NDI
+                      DDSDDE (K1,K2)= EFFLAM
+                  END DO
+                  DDSDDE(K1,K1)= EFFLAM+EFFG2
+              END DO
+    
+              DO K1=NDI+1,NTENS
+                  DDSDDE(K1) = EFFG
+              END DO
+              DO K1=1,NTENS
+                  DO K2=1,NTENS
+                      DDSDDE (K2,K1)= DDSDDE(K2,K1)+EFFHRD*FLOW(K2)*FLOW(K1)
+                  END DO
+              END DO
+          END IF
+    
+          RETURN
+          END
+    ```
+
+30. $\sigma_{new}=\sigma_{old}+DDSDDE.\Delta\varepsilon$。应力更新公式，矩阵形式的操作。使用初始应力和应变增量来计算结果应力。
+
+31. 
+
+32. 
+
+32. 
+
+# 单元库
+
+1. 梁单元：
+
+   ```shell
+   #平面，一次梁
+   B21    2-node linear beam in a plane
+   B21H   2-node linear beam in a plane, hybrid formulation
+   #平面，二次梁
+   B22    3-node quadratic beam in a plane
+   B22H   3-node quadratic beam in a plane, hybrid formulation
+   #平面，三次梁
+   B23    2-node cubic beam in a plane
+   B23H   2-node cubic beam in a plane, hybrid formulation
+   #空间，一次梁
+   B31    2-node linear beam in space
+   B31H   2-node linear beam in space, hybrid formulation
+   B31OS  2-node linear open-section beam in space
+   B31OSH 2-node linear open-section beam in space, hybrid formulation
+   #空间，二次梁
+   B32    3-node quadratic beam in space
+   B32H   3-node quadratic beam in space, hybrid formulation
+   B32OS  3-node quadratic open-section beam in space
+   B32OSH 3-node quadratic open-section beam in space, hybrid formulation
+   #空间，三次梁
+   B33    2-node cubic beam in space
+   B33H   2-node cubic beam in space, hybrid formulation
+   ```
+
+2. 连续体单元：
+
+   ```shell
+   #线性，四面体
+   C3D4	4-node linear tetrahedron
+   C3D4E	4-node linear piezoelectric tetrahedron
+   C3D4H	4-node linear tetrahedron, hybrid, linear pressure
+   C3D4P	4-node linear coupled pore pressure element
+   C3D4T	4-node thermally coupled tetrahedron, linear displacement and temperature
+   #线性，三棱柱
+   C3D6	6-node linear triangular prism
+   C3D6E	6-node linear piezoelectric triangular prism
+   C3D6H	6-node linear triangular prism, hybrid, constant pressure
+   C3D6P	6-node linear coupled pore pressure element
+   C3D6T	6-node thermally coupled triangular prism, linear displacement and temperature
+   #线性，六面体
+   C3D8	8-node linear brick
+   C3D8E	8-node linear piezoelectric brick
+   C3D8H	8-node linear brick, hybrid, constant pressure
+   C3D8HT	8-node thermally coupled brick, trilinear displacement and temperature, hybrid, constant pressure
+   C3D8I	8-node linear brick, incompatible modes
+   C3D8IH	8-node linear brick, hybrid, linear pressure, incompatible modes
+   C3D8P	8-node brick, trilinear displacement, trilinear pore pressure
+   C3D8PH	8-node brick, trilinear displacement, trilinear pore pressure, hybrid, constant pressure
+   C3D8PHT	8-node brick, trilinear displacement, trilinear pore pressure, trilinear temperature, hybrid, constant pressure
+   C3D8PT	8-node brick, trilinear displacement, trilinear pore pressure, trilinear temperature
+   C3D8R	8-node linear brick, reduced integration, hourglass control
+   C3D8RH	8-node linear brick, hybrid, constant pressure, reduced integration, hourglass control
+   C3D8RHT	8-node thermally coupled brick, trilinear displacement and temperature, reduced integration, hourglass control, hybrid, constant pressure
+   C3D8RP	8-node brick, trilinear displacement, trilinear pore pressure, reduced integration
+   C3D8RPH	8-node brick, trilinear displacement, trilinear pore pressure, reduced integration, hybrid, constant pressure
+   C3D8RPHT 8-node brick, trilinear displacement, trilinear pore pressure, trilinear temperature, reduced integration, hybrid, constant pressure
+   C3D8RPT	8-node brick, trilinear displacement, trilinear pore pressure, trilinear temperature, reduced integration
+   C3D8RT	8-node thermally coupled brick, trilinear displacement and temperature, reduced integration, hourglass control
+   C3D8T	8-node thermally coupled brick, trilinear displacement and temperature
+   #二次，四面体
+   C3D10	10-node quadratic tetrahedron
+   C3D10E	10-node quadratic piezoelectric tetrahedron
+   C3D10H	10-node quadratic tetrahedron, hybrid, constant pressure
+   C3D10I	10-node general-purpose quadratic tetrahedron, improved surface stress visualization
+   C3D10M	10-node modified tetrahedron, hourglass control
+   C3D10MH	10-node modified quadratic tetrahedron, hybrid, linear pressure, hourglass control
+   C3D10MHT 10-node thermally coupled modified quadratic tetrahedron, hybrid, linear pressure, hourglass control
+   C3D10MP	10-node modified displacement and pore pressure tetrahedron, hourglass control
+   C3D10MPH 10-node modified displacement and pore pressure tetrahedron, hybrid, linear pressure, hourglass control
+   C3D10MPT 10-node modified displacement, pore pressure, and temperature tetrahedron, linear pressure, hourglass control
+   C3D10MT	10-node thermally coupled modified quadratic tetrahedron, hourglass control
+   #二次，三棱柱
+   C3D15	15-node quadratic triangular prism
+   C3D15E	15-node quadratic piezoelectric triangular prism
+   C3D15H	15-node quadratic triangular prism, hybrid, linear pressure
+   C3D15V	15 to 18-node triangular prism
+   C3D15VH	15 to 18-node triangular prism, hybrid, linear pressure
+   #二次，六面体
+   C3D20	20-node quadratic brick
+   C3D20E	20-node quadratic piezoelectric brick
+   C3D20H	20-node quadratic brick, hybrid, linear pressure
+   C3D20HT	20-node thermally coupled brick, triquadratic displacement, trilinear temperature, hybrid, linear pressure
+   C3D20P	20-node brick, triquadratic displacement, trilinear pore pressure
+   C3D20PH	20-node brick, triquadratic displacement, trilinear pore pressure, hybrid, linear pressure
+   C3D20R	20-node quadratic brick, reduced integration
+   C3D20RE	20-node quadratic piezoelectric brick, reduced integration
+   C3D20RH	20-node quadratic brick, hybrid, linear pressure, reduced integration
+   C3D20RHT 20-node thermally coupled brick, triquadratic displacement, trilinear temperature, hybrid, linear pressure, reduced integration
+   C3D20RP	20-node brick, triquadratic displacement, trilinear pore pressure, reduced integration
+   C3D20RPH 20-node brick, triquadratic displacement, trilinear pore pressure, hybrid, linear pressure, reduced integration
+   C3D20RT	20-node thermally coupled brick, triquadratic displacement, trilinear temperature, reduced integration
+   C3D20T	20-node thermally coupled brick, triquadratic displacement, trilinear temperature
+   #二次，六面体，节点数量可变
+   C3D27	21 to 27-node brick
+   C3D27H	21 to 27-node brick, hybrid, linear pressure
+   C3D27R	21 to 27-node brick, reduced integration
+   C3D27RH	21 to 27-node brick, hybrid, linear pressure, reduced integration
+   ```
+
+3. 轴对称单元：
+
+   ```shell
+   #线性，三角形
+   CAX3	3-node linear axisymmetric triangle
+   CAX3E	3-node linear axisymmetric piezoelectric triangle
+   CAX3H	3-node linear axisymmetric triangle, hybrid, constant pressure
+   CAX3T	3-node axisymmetric thermally coupled triangle, linear displacement and temperature
+   #线性，四边形
+   CAX4	4-node bilinear axisymmetric quadrilateral
+   CAX4E	4-node bilinear axisymmetric piezoelectric quadrilateral
+   CAX4H	4-node bilinear axisymmetric quadrilateral, hybrid, constant pressure
+   CAX4HT	4-node axisymmetric thermally coupled quadrilateral, bilinear displacement and temperature, hybrid, constant pressure
+   CAX4I	4-node bilinear axisymmetric quadrilateral, incompatible modes
+   CAX4IH	4-node bilinear axisymmetric quadrilateral, hybrid, linear pressure, incompatible modes
+   CAX4P	4-node axisymmetric quadrilateral, bilinear displacement, bilinear pore pressure
+   CAX4PH	4-node axisymmetric quadrilateral, bilinear displacement, bilinear pore pressure, hybrid, constant pressure
+   CAX4PT	4-node axisymmetric quadrilateral, bilinear displacement, bilinear pore pressure, bilinear temperature
+   CAX4R	4-node bilinear axisymmetric quadrilateral, reduced integration, hourglass control
+   CAX4RH	4-node bilinear axisymmetric quadrilateral, hybrid, constant pressure, reduced integration, hourglass control
+   CAX4RHT	4-node thermally coupled axisymmetric quadrilateral, bilinear displacement and temperature, reduced integration, hourglass control
+   CAX4RP	4-node axisymmetric quadrilateral, bilinear displacement, bilinear pore pressure, reduced integration
+   CAX4RPH	4-node axisymmetric quadrilateral, bilinear displacement, bilinear pore pressure, hybrid, constant pressure, reduced integration
+   CAX4RPHT 4-node axisymmetric quadrilateral, bilinear displacement, bilinear pore pressure, bilinear temperature, hybrid, constant pressure, reduced integration
+   CAX4RPT	4-node axisymmetric quadrilateral, bilinear displacement, bilinear pore pressure, bilinear temperature, reduced integration
+   CAX4RT	4-node thermally coupled axisymmetric quadrilateral, bilinear displacement and temperature, hybrid, constant pressure, reduced integration, hourglass control
+   CAX4T	4-node axisymmetric thermally coupled quadrilateral, bilinear displacement and temperature
+   #二次，三角形
+   CAX6	6-node quadratic axisymmetric triangle
+   CAX6E	6-node quadratic axisymmetric piezoelectric triangle
+   CAX6H	6-node quadratic axisymmetric triangle, hybrid, linear pressure
+   CAX6M	6-node modified axisymmetric triangle, hourglass control
+   CAX6MH	6-node modified quadratic axisymmetric triangle, hybrid, linear pressure, hourglass control
+   CAX6MHT	6-node modified axisymmetric thermally coupled triangle, hybrid, linear pressure, hourglass control
+   CAX6MP	6-node modified displacement and pore pressure axisymmetric triangle, hourglass control
+   CAX6MPH	6-node modified displacement and pore pressure axisymmetric triangle, hybrid, linear pressure, hourglass control
+   CAX6MT	6-node modified axisymmetric thermally coupled triangle, linear pressure, hourglass control
+   #二次，四边形
+   CAX8	8-node biquadratic axisymmetric quadrilateral
+   CAX8E	8-node biquadratic axisymmetric piezoelectric quadrilateral
+   CAX8H	8-node biquadratic axisymmetric quadrilateral, hybrid, linear pressure
+   CAX8HT	8-node axisymmetric thermally coupled quadrilateral, biquadratic displacement, bilinear temperature, hybrid, linear pressure
+   CAX8P	8-node axisymmetric quadrilateral, biquadratic displacement, bilinear pore pressure
+   CAX8PH	8-node axisymmetric quadrilateral, biquadratic displacement, bilinear pore pressure, hybrid, linear pressure
+   CAX8R	8-node biquadratic axisymmetric quadrilateral, reduced integration
+   CAX8RE	8-node biquadratic axisymmetric piezoelectric quadrilateral, reduced integration
+   CAX8RH	8-node biquadratic axisymmetric quadrilateral, hybrid, linear pressure, reduced integration
+   CAX8RHT	8-node axisymmetric thermally coupled quadrilateral, biquadratic displacement, bilinear temperature, hybrid, linear pressure, reduced integration
+   CAX8RP	8-node axisymmetric quadrilateral, biquadratic displacement, bilinear pore pressure, reduced integration
+   CAX8RPH	8-node axisymmetric quadrilateral, biquadratic displacement, bilinear pore pressure, hybrid, linear pressure, reduced integration
+   CAX8RT	8-node axisymmetric thermally coupled quadrilateral, biquadratic displacement, bilinear temperature, reduced integration
+   CAX8T	8-node axisymmetric thermally coupled quadrilateral, biquadratic displacement, bilinear temperature
+   #非线性轴对称
+   CAXA4N     Bilinear asymmetric-axisymmetric, Fourier quadrilateral with 4 nodes per r–z plane
+   CAXA4HN    Bilinear asymmetric-axisymmetric, Fourier quadrilateral with 4 nodes per r–z plane, constant Fourier pressure, hybrid
+   CAXA4RN    Bilinear asymmetric-axisymmetric, Fourier quadrilateral with 4 nodes per r–z plane, reduced integration in r–z planes, hourglass control
+   CAXA4RHN   Bilinear asymmetric-axisymmetric, Fourier quadrilateral with 4 nodes per r–z plane, constant Fourier pressure, hybrid, reduced integration in r–z planes
+   CAXA8N     Biquadratic asymmetric-axisymmetric, Fourier quadrilateral with 8 nodes per r–z plane
+   CAXA8HN    Biquadratic asymmetric-axisymmetric, Fourier quadrilateral with 8 nodes per r–z plane, linear Fourier pressure, hybrid
+   CAXA8PN    Biquadratic asymmetric-axisymmetric, Fourier quadrilateral with 8 nodes per r–z plane, bilinear Fourier pore pressure
+   CAXA8RN    Biquadratic asymmetric-axisymmetric, Fourier quadrilateral with 8 nodes per r–z plane, reduced integration in r–z planes
+   CAXA8RHN   Biquadratic asymmetric-axisymmetric, Fourier quadrilateral with 8 nodes per r–z plane, linear Fourier pressure, hybrid, reduced integration in r–z planes
+   CAXA8RPN   Biquadratic asymmetric-axisymmetric, Fourier quadrilateral with 8 nodes per r–z plane, bilinear Fourier pore pressure, reduced integration in r–z planes
+   ```
+
+4. 圆柱棱柱体单元，母线是曲线的棱柱体，分为三棱柱和四棱柱。
+
+   ```shell
+   #线性，三角形
+   CCL9	9-node cylindrical prism
+   CCL9H	9-node cylindrical hybrid prism
+   #线性，四边形
+   CCL12	12-node cylindrical brick
+   CCL12H	12-node cylindrical hybrid brick
+   #二次，三角形
+   CCL18	18-node cylindrical prism
+   CCL18H	18-node cylindrical hybrid prism
+   #二次，四边形
+   CCL24	24-node cylindrical brick
+   CCL24H	24-node cylindrical hybrid brick
+   CCL24R	24-node cylindrical brick with reduced integration
+   CCL24RH	24-node cylindrical hybrid brick with reduced integration
+   ```
+
+5. 包含扭转（广义）的轴对称单元：
+
+   ```shell
+   #线性，三角形
+   CGAX3	3-node generalized linear axisymmetric triangle, twist
+   CGAX3H	3-node generalized linear axisymmetric triangle, hybrid, constant pressure, twist
+   CGAX3HT	3-node generalized axisymmetric thermally coupled triangle, hybrid, constant pressure, linear displacement and temperature, twist
+   CGAX3T	3-node generalized axisymmetric thermally coupled triangle, linear displacement and temperature, twist
+   #线性，四边形
+   CGAX4	4-node generalized bilinear axisymmetric quadrilateral, twist
+   CGAX4H	4-node generalized bilinear axisymmetric quadrilateral, hybrid, constant pressure, twist
+   CGAX4HT	4-node generalized axisymmetric thermally coupled quadrilateral, hybrid, constant pressure, bilinear displacement and temperature, twist
+   CGAX4R	4-node generalized bilinear axisymmetric quadrilateral, reduced integration, hourglass control, twist
+   CGAX4RH	4-node generalized bilinear axisymmetric quadrilateral, hybrid, constant pressure, reduced integration, hourglass control, twist
+   CGAX4RHT	4-node generalized axisymmetric thermally coupled quadrilateral, bilinear displacement and temperature, hybrid, constant pressure, reduced integration, hourglass control, twist
+   CGAX4RT	4-node generalized axisymmetric thermally coupled quadrilateral, bilinear displacement and temperature, reduced integration, hourglass control, twist
+   CGAX4T	4-node generalized axisymmetric thermally coupled quadrilateral, bilinear displacement and temperature, twist
+   #二次，三角形
+   CGAX6	6-node generalized quadratic axisymmetric triangle, twist
+   CGAX6H	6-node generalized quadratic axisymmetric triangle, hybrid, linear pressure, twist
+   CGAX6M	6-node generalized modified axisymmetric triangle, twist, hourglass control
+   CGAX6MH	6-node generalized modified axisymmetric triangle, twist, hybrid, linear pressure, hourglass control
+   CGAX6MHT	6-node generalized modified thermally coupled axisymmetric triangle, quadratic displacement, linear temperature, hybrid, linear pressure, twist, hourglass control
+   CGAX6MT	6-node generalized modified thermally coupled axisymmetric triangle, quadratic displacement, linear temperature, twist, hourglass control
+   #二次，四边形
+   CGAX8	8-node generalized biquadratic axisymmetric quadrilateral, twist
+   CGAX8H	8-node generalized biquadratic axisymmetric quadrilateral, hybrid, linear pressure, twist
+   CGAX8HT	8-node generalized axisymmetric thermally coupled quadrilateral, biquadratic displacement, bilinear temperature, hybrid, linear pressure, twist
+   CGAX8R	8-node generalized biquadratic axisymmetric quadrilateral, reduced integration, twist
+   CGAX8RH	8-node generalized biquadratic axisymmetric quadrilateral, hybrid, linear pressure, reduced integration, twist
+   CGAX8RHT	8-node generalized axisymmetric thermally coupled quadrilateral, biquadratic displacement, bilinear temperature, hybrid, linear pressure, reduced integration, twist
+   CGAX8RT	8-node generalized axisymmetric thermally coupled quadrilateral, biquadratic displacement, bilinear temperature, reduced integration, twist
+   CGAX8T	8-node generalized axisymmetric thermally coupled quadrilateral, biquadratic displacement, bilinear temperature, twist
+   ```
+
+6. infinite单元：
+
+   ```shell
+   CIN3D8    8-node linear one-way infinite brick
+   CIN3D12R  12-node quadratic one-way infinite brick
+   CIN3D18R  18-node quadratic one-way infinite brick
+   CINAX4    4-node linear axisymmetric one-way infinite quadrilateral
+   CINAX5R   5-node quadratic axisymmetric one-way infinite quadrilateral
+   CINPE4    4-node linear plane strain one-way infinite quadrilateral
+   CINPE5R   5-node quadratic plane strain one-way infinite quadrilateral
+   CINPS4    4-node linear plane stress one-way infinite quadrilateral
+   CINPS5R   5-node quadratic plane stress one-way infinite quadrilateral
+   ```
+
+7. cohesive单元：
+
+   ```shell
+   #轴对称
+   COHAX4	4-node axisymmetric cohesive element
+   COHAX4P	6-node axisymmetric pore pressure cohesive element
+   #二维
+   COH2D4	4-node two-dimensional cohesive element
+   COH2D4P	6-node two-dimensional pore pressure cohesive element
+   #三维
+   COH3D6	6-node three-dimensional cohesive element
+   COH3D6P	9-node three-dimensional pore pressure cohesive element
+   COH3D8	8-node three-dimensional cohesive element
+   COH3D8P	12-node three-dimensional pore pressure cohesive element
+   ```
+
+8. Connector单元：
+
+   ```shell
+   CONN2D2 Connector element in a plane between two nodes or ground and a node
+   CONN3D2 Connector element in space between two nodes or ground and a node
+   ```
+
+9. 平面应变单元：
+
+   ```shell
+   #线性，三角形
+   CPE3	3-node linear plane strain triangle
+   CPE3E	3-node linear plane strain piezoelectric triangle
+   CPE3H	3-node linear plane strain triangle, hybrid, constant pressure
+   CPE3T	3-node plane strain thermally coupled triangle, linear displacement and temperature
+   #线性，四边形
+   CPE4	4-node bilinear plane strain quadrilateral
+   CPE4E	4-node bilinear plane strain piezoelectric quadrilateral
+   CPE4H	4-node bilinear plane strain quadrilateral, hybrid, constant pressure
+   CPE4HT	4-node plane strain thermally coupled quadrilateral, bilinear displacement and temperature, hybrid, constant pressure
+   CPE4I	4-node bilinear plane strain quadrilateral, incompatible modes
+   CPE4IH	4-node bilinear plane strain quadrilateral, hybrid, linear pressure, incompatible modes
+   CPE4P	4-node plane strain quadrilateral, bilinear displacement, bilinear pore pressure
+   CPE4PH	4-node plane strain quadrilateral, bilinear displacement, bilinear pore pressure, hybrid, constant pressure
+   CPE4R	4-node bilinear plane strain quadrilateral, reduced integration, hourglass control
+   CPE4RH	4-node bilinear plane strain quadrilateral, hybrid, constant pressure, reduced integration, hourglass control
+   CPE4RHT	4-node bilinear plane strain thermally coupled quadrilateral, hybrid, constant pressure, reduced integration, hourglass control
+   CPE4RP	4-node plane strain quadrilateral, bilinear displacement, bilinear pore pressure, reduced integration, hourglass control
+   CPE4RPH	4-node plane strain quadrilateral, bilinear displacement, bilinear pore pressure, hybrid, constant pressure, reduced integration, hourglass control
+   CPE4RT	4-node bilinear plane strain thermally coupled quadrilateral, bilinear displacement and temperature, reduced integration, hourglass control
+   CPE4T	4-node plane strain thermally coupled quadrilateral, bilinear displacement and temperature
+   #二次，三角形
+   CPE6	6-node quadratic plane strain triangle
+   CPE6E	6-node quadratic plane strain piezoelectric triangle
+   CPE6H	6-node quadratic plane strain triangle, hybrid, linear pressure
+   CPE6M	6-node modified quadratic plane strain triangle, hourglass control
+   CPE6MH	6-node modified quadratic plane strain triangle, hybrid, linear pressure, hourglass control
+   CPE6MHT	6-node modified quadratic plane strain thermally coupled triangle, hybrid, linear pressure, hourglass control
+   CPE6MP	6-node modified displacement and pore pressure plane strain triangle, hourglass control
+   CPE6MPH	6-node modified displacement and pore pressure plane strain triangle, hybrid, linear pressure, hourglass control
+   CPE6MT	6-node modified quadratic plane strain thermally coupled triangle, hourglass control
+   #二次，四边形
+   CPE8	8-node biquadratic plane strain quadrilateral
+   CPE8E	8-node biquadratic plane strain piezoelectric quadrilateral
+   CPE8H	8-node biquadratic plane strain quadrilateral, hybrid, linear pressure
+   CPE8HT	8-node plane strain thermally coupled quadrilateral, biquadratic displacement, bilinear temperature, hybrid, linear pressure
+   CPE8P	8-node plane strain quadrilateral, biquadratic displacement, bilinear pore pressure
+   CPE8PH	8-node plane strain quadrilateral, biquadratic displacement, bilinear pore pressure, hybrid, linear pressure stress
+   CPE8R	8-node biquadratic plane strain quadrilateral, reduced integration
+   CPE8RE	8-node biquadratic plane strain piezoelectric quadrilateral, reduced integration
+   CPE8RH	8-node biquadratic plane strain quadrilateral, hybrid, linear pressure, reduced integration
+   CPE8RHT	8-node plane strain thermally coupled quadrilateral, biquadratic displacement, bilinear temperature, reduced integration, hybrid, linear pressure
+   CPE8RP	8-node plane strain quadrilateral, biquadratic displacement, bilinear pore pressure, reduced integration
+   CPE8RPH	8-node biquadratic displacement, bilinear pore pressure, reduced integration, hybrid, linear pressure
+   CPE8RT	8-node plane strain thermally coupled quadrilateral, biquadratic displacement, bilinear temperature, reduced integration
+   CPE8T	8-node plane strain thermally coupled quadrilateral, biquadratic displacement, bilinear temperature
+   ```
+
+10. 广义平面应变：
+
+    ```shell
+    #线性，三角形
+    CPEG3	3-node linear generalized plane strain triangle
+    CPEG3H	3-node linear generalized plane strain triangle, hybrid, constant pressure
+    CPEG3HT	3-node generalized plane strain thermally coupled triangle, linear displacement and temperature, hybrid, constant pressure
+    CPEG3T	3-node generalized plane strain thermally coupled triangle, linear displacement and temperature
+    #线性，四边形
+    CPEG4	4-node bilinear generalized plane strain quadrilateral
+    CPEG4H	4-node bilinear generalized plane strain quadrilateral, hybrid, constant pressure
+    CPEG4HT	4-node generalized plane strain thermally coupled quadrilateral, bilinear displacement and temperature, hybrid, constant pressure
+    CPEG4I	4-node bilinear generalized plane strain quadrilateral, incompatible modes
+    CPEG4IH	4-node bilinear generalized plane strain quadrilateral, hybrid, linear pressure, incompatible modes
+    CPEG4R	4-node bilinear generalized plane strain quadrilateral, reduced integration, hourglass control
+    CPEG4RH	4-node bilinear generalized plane strain quadrilateral, hybrid, constant pressure, reduced integration, hourglass control
+    CPEG4RHT 4-node generalized plane strain thermally coupled quadrilateral, bilinear displacement and temperature, hybrid, constant pressure, reduced integration, hourglass control
+    CPEG4RT	4-node generalized plane strain thermally coupled quadrilateral, bilinear displacement and temperature, reduced integration, hourglass control
+    CPEG4T	4-node generalized plane strain thermally coupled quadrilateral, bilinear displacement and temperature
+    #二次，三角形
+    CPEG6	6-node quadratic generalized plane strain triangle
+    CPEG6H	6-node quadratic generalized plane strain triangle, hybrid, linear pressure
+    CPEG6M	6-node modified generalized plane strain triangle, hourglass control
+    CPEG6MH	6-node modified generalized plane strain triangle, hybrid, linear pressure, hourglass control
+    CPEG6MHT	6-node modified generalized plane strain thermally coupled triangle, quadratic displacement, linear temperature, hybrid, constant pressure, hourglass control
+    CPEG6MT	6-node modified generalized plane strain thermally coupled triangle, quadratic displacement, linear temperature, hourglass control
+    #二次，四边形
+    CPEG8	8-node biquadratic generalized plane strain quadrilateral
+    CPEG8H	8-node biquadratic generalized plane strain quadrilateral, hybrid, linear pressure
+    CPEG8HT	8-node generalized plane strain thermally coupled quadrilateral, biquadratic displacement, bilinear temperature, hybrid, linear pressure
+    CPEG8R	8-node biquadratic generalized plane strain quadrilateral, reduced integration
+    CPEG8RH	8-node biquadratic generalized plane strain quadrilateral, hybrid, linear pressure, reduced integration
+    CPEG8RHT 8-node generalized plane strain thermally coupled quadrilateral, biquadratic displacement, bilinear temperature, hybrid, linear pressure, reduced integration
+    CPEG8T	8-node generalized plane strain thermally coupled quadrilateral, biquadratic displacement, bilinear temperature
+    ```
+
+11. 平面应力单元：
+
+    ```shell
+    #线性，三角形
+    CPS3	3-node linear plane stress triangle
+    CPS3E	3-node linear plane stress piezoelectric triangle
+    CPS3T	3-node plane stress thermally coupled triangle, linear displacement and temperature
+    #线性，四边形
+    CPS4	4-node bilinear plane stress quadrilateral
+    CPS4E	4-node bilinear plane stress piezoelectric quadrilateral
+    CPS4I	4-node bilinear plane stress quadrilateral, incompatible modes
+    CPS4R	4-node bilinear plane stress quadrilateral, reduced integration, hourglass control
+    CPS4RT	4-node plane stress thermally coupled quadrilateral, bilinear displacement and temperature, reduced integration, hourglass control
+    CPS4T	4-node plane stress thermally coupled quadrilateral, bilinear displacement and temperature
+    #二次，三角形
+    CPS6	6-node quadratic plane stress triangle
+    CPS6E	6-node quadratic plane stress piezoelectric triangle
+    CPS6M	6-node modified second-order plane stress triangle, hourglass control
+    CPS6MT	6-node modified second-order plane stress thermally coupled triangle, hourglass control
+    #二次，四边形
+    CPS8	8-node biquadratic plane stress quadrilateral
+    CPS8E	8-node biquadratic plane stress piezoelectric quadrilateral
+    CPS8R	8-node biquadratic plane stress quadrilateral, reduced integration
+    CPS8RE	8-node biquadratic plane stress piezoelectric quadrilateral, reduced integration
+    CPS8RT	8-node plane stress thermally coupled quadrilateral, biquadratic displacement, bilinear temperature, reduced integration
+    CPS8T	8-node plane stress thermally coupled quadrilateral, biquadratic displacement, bilinear temperature
+    ```
+
+12. 阻尼器单元：
+
+    ```shell
+    DASHPOT1	Dashpot between a node and ground, acting in a fixed direction
+    DASHPOT2	Dashpot between two nodes, acting in a fixed direction
+    DASHPOTA	Axial dashpot between two nodes, whose line of action is the line joining the two nodes
+    ```
+
+13. 管道单元：
+
+    ```shell
+    #线性，平面
+    PIPE21	2-node linear pipe in a plane
+    PIPE21H	2-node linear pipe in a plane, hybrid formulation
+    #二次，平面
+    PIPE22	3-node quadratic pipe in a plane
+    PIPE22H	3-node quadratic pipe in a plane, hybrid formulation
+    #线性，空间
+    PIPE31	2-node linear pipe in space
+    PIPE31H	2-node linear pipe in space, hybrid formulation
+    #二次，空间
+    PIPE32	3-node quadratic pipe in space
+    PIPE32H	3-node quadratic pipe in space, hybrid formulation
+    ```
+
+14. gap单元：
+
+    ```shell
+    GAPCYL    Cylindrical gap between two nodes
+    GAPSPHER  Spherical gap between two nodes
+    GAPUNI    Unidirectional gap between two nodes
+    GAPUNIT   Unidirectional gap and thermal interactions between two nodes
+    ```
+
+15. gasket单元：
+
+    ```shell
+    #线性，二维
+    GK2D2	2-node two-dimensional gasket element
+    GK2D2N	2-node two-dimensional gasket element with thickness-direction behavior only
+    GK3D2	2-node three-dimensional gasket element
+    GK3D2N	2-node three-dimensional gasket element with thickness-direction behavior only
+    #线性，三维
+    GK3D4L	4-node three-dimensional line gasket element
+    GK3D4LN	4-node three-dimensional line gasket element with thickness-direction behavior only
+    #
+    GK3D6L	6-node three-dimensional line gasket element
+    GK3D6LN	6-node three-dimensional line gasket element with thickness-direction behavior only
+    GK3D6	6-node three-dimensional gasket element
+    GK3D6N	6-node three-dimensional gasket element with thickness-direction behavior only
+    
+    GK3D8	8-node three-dimensional gasket element
+    GK3D8N	8-node three-dimensional gasket element with thickness-direction behavior only
+    
+    GK3D12M	12-node three-dimensional gasket element
+    GK3D12MN	12-node three-dimensional gasket element with thickness-direction behavior only
+    
+    GK3D18	18-node three-dimensional gasket element
+    GK3D18N	18-node three-dimensional gasket element with thickness-direction behavior only
+    #轴对称
+    GKAX2	2-node axisymmetric gasket element
+    GKAX2N	2-node axisymmetric gasket element with thickness-direction behavior only
+    GKAX4	4-node axisymmetric gasket element
+    GKAX4N	4-node axisymmetric gasket element with thickness-direction behavior only
+    GKAX6	6-node axisymmetric gasket element
+    GKAX6N	6-node axisymmetric gasket element with thickness-direction behavior only
+    #平面应变
+    GKPE4	4-node plane strain gasket element
+    GKPE6	6-node plane strain gasket element
+    #平面应力
+    GKPS4	4-node plane stress gasket element
+    GKPS4N	4-node two-dimensional gasket element with thickness-direction behavior only
+    GKPS6	6-node plane stress gasket element
+    GKPS6N	6-node two-dimensional gasket element with thickness-direction behavior only
+    ```
+
+16. membrane单元：
+
+    ```shell
+    #线性，三角形
+    M3D3	3-node triangular membrane
+    M3D4	4-node quadrilateral membrane
+    #线性，四边形
+    M3D4R	4-node quadrilateral membrane, reduced integration, hourglass control
+    #二次，三角形
+    M3D6	6-node triangular membrane
+    #二次，四边形
+    M3D8	8-node quadrilateral membrane
+    M3D8R	8-node quadrilateral membrane, reduced integration
+    #二次，四边形，多了中心节点
+    M3D9	9-node quadrilateral membrane
+    M3D9R	9-node quadrilateral membrane, reduced integration, hourglass control
+    #轴对称
+    MAX1	2-node linear axisymmetric membrane
+    MAX2	3-node quadratic axisymmetric membrane
+    #圆柱
+    MCL6	6-node cylindrical membrane
+    MCL9	9-node cylindrical membrane
+    #考虑扭转的（广义）
+    MGAX1	2-node linear axisymmetric membrane, twist
+    MGAX2	3-node quadratic axisymmetric membrane, twist
+    ```
+
+17. 管土相互作用单元：
+
+    ```
+    PSI24	4-node 2D pipe-soil interaction element
+    PSI26	6-node 2D pipe-soil interaction element
+    PSI34	4-node 3D pipe-soil interaction element
+    PSI36	6-node 3D pipe-soil interaction element
+    ```
+
+18. rigid单元：
+
+    ```shell
+    R2D2	2-node 2D linear rigid link (for use in plane strain or plane stress)
+    
+    R3D3	3-node 3D rigid triangular facet
+    R3D4	4-node 3D bilinear rigid quadrilateral
+    
+    RAX2	2-node linear axisymmetric rigid link (for use in axisymmetric planar geometries)
+    
+    RB2D2	2-node 2D rigid beam
+    RB3D2	2-node 3D rigid beam
+    ```
+
+19. 壳单元：
+
+    ```shell
+    #线性，三角形
+    S3   3-node triangular general-purpose shell, finite membrane strains
+    S3T  3-node thermally coupled triangular general-purpose shell, finite membrane strains
+    S3R  3-node triangular general-purpose shell, finite membrane strains
+    S3RT 3-node thermally coupled triangular general-purpose shell, finite membrane strains
+    #线性，四边形
+    S4	4-node general-purpose shell, finite membrane strains
+    S4T	4-node thermally coupled general-purpose shell, finite membrane strains
+    S4R	4-node general-purpose shell, reduced integration, hourglass control, finite membrane strains
+    S4RT 4-node thermally coupled general-purpose shell, reduced integration, hourglass control, finite membrane strains
+    S4R5 4-node thin shell, reduced integration, hourglass control, using five degrees of freedom per node
+    #二次，四边形
+    S8R	8-node doubly curved thick shell, reduced integration
+    S8R5 8-node doubly curved thin shell, reduced integration, using five degrees of freedom per node
+    S8RT 8-node thermally coupled quadrilateral general thick shell, biquadratic displacement, bilinear temperature in the shell surface
+    #二次，四边形，多一个中心节点，每个节点5个自由度。
+    S9R5 9-node doubly curved thin shell, reduced integration, using five degrees of freedom per node
+    ```
+
+20. 轴对称壳：
+
+    ```shell
+    SAX1	2-node linear axisymmetric thin or thick shell
+    SAX2	3-node quadratic axisymmetric thin or thick shell
+    SAX2T	3-node axisymmetric thermally coupled thin or thick shell, quadratic displacement, linear temperature in the shell surface
+    SAXA1N	Linear asymmetric-axisymmetric, Fourier shell element with 2 nodes in the generator direction and N Fourier modes
+    SAXA2N	Quadratic asymmetric-axisymmetric, Fourier shell element with 3 nodes in the generator direction and N Fourier modes
+    ```
+
+21. 连续体壳单元：
+
+    ```shell
+    #结构单元
+    SC6R	6-node triangular in-plane continuum shell wedge, general-purpose continuum shell, finite membrane strains.
+    SC8R	8-node quadrilateral in-plane general-purpose continuum shell, reduced integration with hourglass control, finite membrane strains.
+    #考虑温度
+    SC6RT	6-node linear displacement and temperature, triangular in-plane continuum shell wedge, general-purpose continuum shell, finite membrane strains.
+    SC8RT	8-node linear displacement and temperature, quadrilateral in-plane general-purpose continuum shell, reduced integration with hourglass control, finite membrane strains.
+    ```
+
+22. surface单元：
+
+    ```shell
+    #线性，三角形
+    SFM3D3	3-node triangular surface element
+    #线性，四边形
+    SFM3D4	4-node quadrilateral surface element
+    SFM3D4R	4-node quadrilateral surface element, reduced integration
+    #二次，三角形
+    SFM3D6	6-node triangular surface element
+    #二次，四边形
+    SFM3D8	8-node quadrilateral surface element
+    SFM3D8R	8-node quadrilateral surface element, reduced integration
+    #线性，轴对称
+    SFMAX1	2-node linear axisymmetric surface element
+    #二次，轴对称
+    SFMAX2	3-node quadratic axisymmetric surface element
+    #圆柱
+    SFMCL6	6-node cylindrical surface element
+    SFMCL9	9-node cylindrical surface element
+    #考虑扭转的轴对称
+    SFMGAX1	2-node linear axisymmetric surface element, twist
+    SFMGAX2	3-node quadratic axisymmetric surface element, twist
+    ```
+
+23. 弹簧单元：
+
+    ```shell
+    SPRING1	Spring between a node and ground, acting in a fixed direction
+    SPRING2	Spring between two nodes, acting in a fixed direction
+    SPRINGA	Axial spring between two nodes, whose line of action is the line joining the two nodes. This line of action may rotate in large-displacement analysis.
+    ```
+
+24. 桁架单元：
+
+    ```shell
+    #线性，平面
+    T2D2	2-node linear 2D truss
+    T2D2E	2-node 2D piezoelectric truss
+    T2D2H	2-node linear 2D truss, hybrid
+    T2D2T	2-node 2D thermally coupled truss
+    #二次，平面
+    T2D3	3-node quadratic 2D truss
+    T2D3E	3-node 2D piezoelectric truss
+    T2D3H	3-node quadratic 2D truss, hybrid
+    T2D3T	3-node 2D thermally coupled truss
+    #线性，空间
+    T3D2	2-node linear 3D truss
+    T3D2E	2-node 3D piezoelectric truss
+    T3D2H	2-node linear 3D truss, hybrid
+    T3D2T	2-node 3D thermally coupled truss
+    #二次，空间
+    T3D3	3-node quadratic 3D truss
+    T3D3E	3-node 3D piezoelectric truss
+    T3D3H	3-node quadratic 3D truss, hybrid
+    T3D3T	3-node 3D thermally coupled truss
+    ```
+
+25. 杂项：
+
+    ```shell
+    DCOUP2D	Two-dimensional distributing coupling element
+    DCOUP3D	Three-dimensional distributing coupling element
+    
+    DRAG2D  2D drag chain, for use in cases where only horizontal motion is being studied
+    DRAG3D  3D drag chain
+    
+    FRAME2D 2-node two-dimensional straight frame element
+    FRAME3D 2-node three-dimensional straight frame element
+    
+    IRS21A  Axisymmetric rigid surface eleme
+    IRS22A  Axisymmetric rigid surface eleme
+    
+    ISL21A	2-node axisymmetric slide line eleme
+    ISL22A	3-node axisymmetric slide line eleme
+    
+    ITSCYL	Cylindrical geometry tube support interaction element
+    ITSUNI	Unidirectional tube support interaction element
+    
+    ITT21	Tube-tube element for use with first-order, 2D beam and pipe elements
+    ITT31	Tube-tube element for use with first-order, 3D beam and pipe elements
+    
+    JOINTC	Three-dimensional joint interaction element
+    
+    LS3S	3-node second-order line spring for use on a symmetry plane
+    LS6	6-node general second-order line spring. This element can be used only with linear elastic material behavior.
+    
+    MASS	Point mass
+    
+    ROTARYI	Rotary inertia at a point
+    
+    STRI3	3-node triangular facet thin shell
+    STRI65	6-node triangular thin shell, using five degrees of freedom per node
+    
+    WARP2D3	3-node linear 2D warping element
+    WARP2D4	4-node bilinear 2D warping element
+    ```

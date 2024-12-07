@@ -2629,7 +2629,9 @@
 
 1. 使用工具生成函数调用图可以更直观地理解一个新的项目。
 
-2. egypt是一个perl脚本，它会调用graphviz来生成调用图（静态代码分析），步骤如下：
+2. 它既不分析源代码，也不绘制图表。相反，它将源代码分析留给GCC，将图形布局留给Graphviz，这两者在各自的工作中都比Egypt要好。egypt只是一个将这些现有工具粘合在一起的小型Perl脚本。因此需要安装gcc，Perl，Graphviz。
+
+3. egypt是一个perl脚本，它会调用graphviz来生成调用图（静态代码分析），步骤如下：
 
     1. 使用`-fdump-rtl-expand`编译所有的源代码，这会生成对应的`.c.229r.expand`文件。
 
@@ -2640,13 +2642,16 @@
         ```shell
         egypt *.expand | dot -Gsize=3000,3000 -Grankdir=LR -Tpng -o callgraph.png #表示生成一个3000*3000像素的png图片，LR表示从左到右，也可以为BT，从上到下。
         egypt *.expand | dot -Gsize=8.5,11 -Grankdir=LR -Tpdf -o callgraph.pdf #也可以生成pdf，8.5英寸*11英寸
-        
-        --callees getnewline #仅显示getnewline调用的函数
-        --callers getnewline #仅显示调用getnewline的函数。
-        --summarize-callers 5 #如果一个函数被调用超过5次，则不显示箭头，只显示一个数字标记。
+        #以下选项都是egypt的
+        --callees getnewline #仅显示getnewline调用的函数，多个函数可以用逗号分隔。
+        --callers getnewline #仅显示调用getnewline的函数，可以和上面的--callees同时使用。
+        --omit flux #忽略flux函数，也就是将它从图中删除。
+        --summarize-callers 5 #如果一个函数被调用≥5次，则不显示箭头，只显示一个数字标记，推荐使用，来减少显示对工具函数的调用。
+        #例如：
+        egypt *.expand --summarize-callers 5 | dot -Gsize=8.5,11 -Grankdir=LR -Tpdf -o callgraph.pdf
         ```
 
-3. egypt的安装：
+4. egypt的安装：
 
     ```shell
     wget https://www.gson.org/egypt/download/egypt-1.11.tar.gz #下载源代码
@@ -2657,21 +2662,21 @@
     make install
     ```
 
-4. 节点表示函数，实线表示直接调用，虚线表示使用指针调用。
+5. 节点表示函数，实线表示直接调用，虚线表示使用指针调用。
 
-5. 不过这个对于大项目来说，生成的图片过于复杂，不太实用。虽然egypt说可以处理C程序，实际上任何语言都可以处理，因为GCC在编译时，会产生中间表示IR，egypt是利用改描述来生成调用关系的。IR是和具体语言没关系的。
+6. 不过这个对于大项目来说，生成的图片过于复杂，不太实用。虽然egypt说可以处理C程序，实际上任何语言都可以处理，因为GCC在编译时，会产生中间表示IR，egypt是利用改描述来生成调用关系的。IR是和具体语言没关系的。
 
-6. caller为调用者，主动发起调用；callee为被调用者。
+7. caller为调用者，主动发起调用；callee为被调用者。
 
-7. 可以看到，大部分的函数都由main函数调用，但是也有一些函数不和任何函数相关联，这一般有两种情况：
+8. 可以看到，大部分的函数都由main函数调用，但是也有一些函数不和任何函数相关联，这一般有两种情况：
 
     1. 该函数实际上也不会被调用。可能只是一个无关的函数，或者是被注释了。
 
-    2. 嵌入式代码的中断服务例程
+    2. 嵌入式代码的中断服务例程。
 
-8. 由于调用图不会显示全局变量，因此通过全局变量传递参数的情况，则无法在图中表示。这会导致调试困难，因此不建议使用。
+9. 由于调用图不会显示全局变量，因此通过全局变量传递参数的情况，则无法在图中表示。这会导致调试困难，因此不建议使用使用全局变量传递参数。
 
-9. 另一个可以使用的是cflow，不太推荐使用，她不是使用IR，因此一些编译指令或选项对于他来说无效，例如-D的宏设置。
+10. 另一个可以使用的是cflow，不太推荐使用，她不是使用IR，因此一些编译指令或选项对于他来说无效，例如-D的宏设置。
 
 # Valgrind
 

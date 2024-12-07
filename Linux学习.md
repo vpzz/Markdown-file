@@ -4654,32 +4654,6 @@
 
 3. 然后重启虚拟机即可。
 
-
-
-# 缺少libgfortran.so.4
-
-1. Calculix2.20需要链接libgfortran.so.4，而ubuntu22.04后，默认使用gcc-11，默认仓库也不再提供libgfortran.so.4。使用ldd命令来查看可执行文件需要的动态库，参数需要是完整路径名。=>表示在本机匹配到的具体路径名。
-
-   ```shell
-   zj@zj-virtual-machine:~$ ldd /usr/local/bin/ccx
-           linux-vdso.so.1 (0x00007ffcaab24000)
-           libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007ff8e9cac000)
-           libgfortran.so.4 => /lib/x86_64-linux-gnu/libgfortran.so.4 (0x00007ff8e9acb000)
-           libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007ff8e99e4000)
-           libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007ff8e97bc000)
-           libgomp.so.1 => /lib/x86_64-linux-gnu/libgomp.so.1 (0x00007ff8e9770000)
-           libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007ff8e9750000)
-           libquadmath.so.0 => /lib/x86_64-linux-gnu/libquadmath.so.0 (0x00007ff8e9708000)
-           /lib64/ld-linux-x86-64.so.2 (0x00007ff8e9cc4000)
-   ```
-
-2. 需要修改/etc/apt/sources.list文件，然后运行sudo apt update，sudo apt install gfortran-7。
-
-   ```shell
-   deb [arch=amd64] http://cn.archive.ubuntu.com/ubuntu focal main universe
-   ```
-
-
 # VSCode登录问题
 
 1. 一个虚拟机如果可以使用putty顺利登录，双向ping也都顺畅，但是使用VSCode远程登录虚拟机时，可能会报错如下：过程试图写入的管道不存在。这是由于：当前 known_hosts 文件保存的是之前连接的秘钥，现在没有更新。可以打开本地`C:\Users\你的用户名\.ssh\known_hosts`，并删掉远程主机对应的那行秘钥，重新连接即可。或者删掉整个文件即可。
