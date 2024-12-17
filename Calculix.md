@@ -50,7 +50,7 @@
           EXTERNAL F
     ```
 
-   11. 对ARPACK和SPOOLES分别进行测试：
+   11. 使用正则表达式在VSCODE中搜索中文，`.*[\u4E00-\u9FA5]+`。
 
 12. 
 
@@ -94,174 +94,196 @@
 
 # 文件结构
 
-1. 注意CalculiX.h的X是大写，书写Makefile的依赖和包含头文件时不要写错。
+1. Spooles2.2：可以用来求解稀疏实数/复数线性方程组。非稀疏矩阵使用LU分解及其变种，稀疏矩阵使用Krylov迭代法的变种。使用C语言编写，支持多线程并行计算。
 
-2. 程序内有Bug，如果修改SFREE的宏，使得其每次释放内存后，都将指针置为NULL，则运行时会报错，卡住在extraploate.f90，ielorien指针在这里已经是NULL了，结果这里还使用了它。当然也不排除是因为修改了太多的源代码导致的。
+2. Arpack：使用隐式重启Arnoldi方法（IRAM）或对称矩阵的Lanczos算法的相应变体来计算大型稀疏或结构化矩阵（结构化意味着矩阵向量积需要n阶而不是通常的n**2阶浮点运算）的几个特征值和相应的特征向量。普通和广义特征值问题都可以求解，实数和复数都可以处理。针对带状矩阵有优化，可以进行奇异值分解。使用Fortran77编写，支持多线程并行计算，Parpack。
 
-3. dyna.c文件中出现如下笔误：
+3. 当矩阵对称时，IRAM简化为Lanczos过程的一种变体，称为隐式重启Lanczos方法（IRLM）。
+
+4. 这些变体可以被视为Arnoldi/Lanczos过程与适用于大规模问题的隐式移位QR技术的合成。对于许多标准问题，不需要矩阵分解。只需要矩阵对向量的作用。存储要求大约为n*k个位置。不需要辅助存储。计算了所需k维特征空间的一组Schur基向量，该向量在数值上与工作精度正交。可根据要求提供数字精确的特征向量。
+
+5. ARPACK使用反向通信接口（类似于排序函数，需要用户自己提供用于比较两个元素的回调函数），使用户能够轻松使用任何稀疏矩阵格式，或提供定制的稀疏矩阵向量乘法子程序。当需要矩阵操作时，它将控制权交给调用程序，并带有一个标志，指示需要什么操作。然后，调用程序必须执行该操作，并再次调用ARPACK例程以继续。这些操作通常是矩阵向量积和求解线性系统。本软件中会将arpack的矩阵操作分派给spooles。
+
+6. 由于上游开发停滞不前，ARPAСK已被分叉为ARPACK-NG，作为依赖ARPACK的各个团体合作的一种形式。
+
+7. 在计算数学中，无矩阵方法是一种求解线性方程组或特征值问题的算法，它不显式存储系数矩阵，而是通过计算矩阵向量积来访问矩阵。当矩阵太大，即使使用稀疏矩阵的方法，存储和操作它也会花费大量的内存和计算时间，此时这种方法可能更可取。许多迭代方法允许无矩阵实现，包括：
+
+   1. 幂迭代
+
+   2. Lanczos算法
+
+   3. 共轭梯度法
+
+   4. Krylov子空间迭代法
+
+8. 注意CalculiX.h的X是大写，书写Makefile的依赖和包含头文件时不要写错。
+
+9. 程序内有Bug，如果修改SFREE的宏，使得其每次释放内存后，都将指针置为NULL，则运行时会报错，卡住在extraploate.f90，ielorien指针在这里已经是NULL了，结果这里还使用了它。当然也不排除是因为修改了太多的源代码导致的。
+
+10. dyna.c文件中出现如下笔误：
 
    ```c
    SFREE(xboundiff), SFREE(xbodydiff); //如果SFREE不包含将指针置为NULL的动作，则不会有问题，反之则会报错。
    ```
 
-4. 源文件目录中
+11. 源文件目录中
 
-   1. 一共有942个.f90文件，但是gauss.f90和xlocal.f90只是被include到其他文件中，并不会单独编译，因此Makifile.inc中SCCXF一共包含940个.f90文件。
-   2. 一共有176个.c源文件，而主文件ccx_2.20.c需要单独编译，因此Makefile.inc中SCCXC只包含175个.c文件
+    1. 一共有942个.f90文件，但是gauss.f90和xlocal.f90只是被include到其他文件中，并不会单独编译，因此Makifile.inc中SCCXF一共包含940个.f90文件。
+    2. 一共有176个.c源文件，而主文件ccx_2.20.c需要单独编译，因此Makefile.inc中SCCXC只包含175个.c文件。
 
-5. 使用代码统计工具cloc统计文件数，空白行，注释行，代码行的总数：
+12. 使用代码统计工具cloc统计文件数，空白行，注释行，代码行的总数：
 
-   ```shell
-   zj@zj-hit:~/CCX/CalculiX/ccx_2.20/src$ cloc *.f90 *.c *.h
-       1127 text files.
-       1127 unique files.
-          0 files ignored.
-   
-   github.com/AlDanial/cloc v 1.90  T=0.78 s (1439.7 files/s, 384720.1 lines/s)
-   -------------------------------------------------------------------------------
-   Language                     files          blank        comment           code
-   -------------------------------------------------------------------------------
-   Fortran 90                     942            489          65562         144406
-   C                              176          10206          10620          64229
-   C/C++ Header                     9            794            168           4681
-   -------------------------------------------------------------------------------
-   SUM:                          1127          11489          76350         213316
-   -------------------------------------------------------------------------------
-   ```
+    ```shell
+    zj@zj-hit:~/CCX/CalculiX/ccx_2.20/src$ cloc *.f90 *.c *.h
+        1127 text files.
+        1127 unique files.
+           0 files ignored.
+    
+    github.com/AlDanial/cloc v 1.90  T=0.78 s (1439.7 files/s, 384720.1 lines/s)
+    -------------------------------------------------------------------------------
+    Language                     files          blank        comment           code
+    -------------------------------------------------------------------------------
+    Fortran 90                     942            489          65562         144406
+    C                              176          10206          10620          64229
+    C/C++ Header                     9            794            168           4681
+    -------------------------------------------------------------------------------
+    SUM:                          1127          11489          76350         213316
+    -------------------------------------------------------------------------------
+    ```
 
-6. 经过统计，代码行比较多的文件如下：
+13. 经过统计，代码行比较多的文件如下：
 
-   ```shell
-   cloc *.f90 *.c *.h --by-file -out stat.cloc
-       1127 text files.
-       1127 unique files.
-          0 files ignored.
-   
-   github.com/AlDanial/cloc v 1.90  T=0.82 s (1373.6 files/s, 367056.2 lines/s)
-   ----------------------------------------------------------------------------------
-   File                                           blank        comment           code
-   ----------------------------------------------------------------------------------
-   CalculiX.h                                       681             52           4040
-   nonlingeo.c                                      584            425           3653
-   steadystate.c                                    486            273           3294
-   bdfill.c                                         147            274           2572
-   arpackcs.c                                       325            182           2486
-   allocation.f90                                     0            124           2174
-   trafontmortar2.c                                 150            275           2119
-   frd.c                                            406            159           2066
-   objectivemain_se.c                               513            244           2054
-   dyna.c                                           299            194           1961
-   complexfreq.c                                    304            169           1899
-   readfrd.c                                        105            145           1780
-   electromagnetics.c                               308            209           1587
-   ccx_2.20.c                                        10            171           1553
-   ccx_2.20step.c                                     1            238           1535
-   e_c3d_se.f90                                       0            219           1495
-   e_c3d.f90                                          0            159           1428
-   e_c3d_duds.f90                                     0            215           1413
-   compfluidfem.c                                   284            153           1346
-   e_c3d_cs_se.f90                                    2            246           1338
-   calinput.f90                                       0             77           1322
-   ddebdf.f90                                         8           1606           1306
-   multimortar.c                                    150            272           1208
-   dgesv.f90                                          0            853           1143
-   ddeabm.f90                                        10           2785           1118
-   arpack.c                                         175            106           1096
-   umat_single_crystal.f90                            0            160           1095
-   pastix.c                                         239            196           1045
-   linstatic.c                                      206            116           1029
-   us3_sub.f90                                        6            459           1009
-   ```
+    ```shell
+    cloc *.f90 *.c *.h --by-file -out stat.cloc
+        1127 text files.
+        1127 unique files.
+           0 files ignored.
+    
+    github.com/AlDanial/cloc v 1.90  T=0.82 s (1373.6 files/s, 367056.2 lines/s)
+    ----------------------------------------------------------------------------------
+    File                                           blank        comment           code
+    ----------------------------------------------------------------------------------
+    CalculiX.h                                       681             52           4040
+    nonlingeo.c                                      584            425           3653
+    steadystate.c                                    486            273           3294
+    bdfill.c                                         147            274           2572
+    arpackcs.c                                       325            182           2486
+    allocation.f90                                     0            124           2174
+    trafontmortar2.c                                 150            275           2119
+    frd.c                                            406            159           2066
+    objectivemain_se.c                               513            244           2054
+    dyna.c                                           299            194           1961
+    complexfreq.c                                    304            169           1899
+    readfrd.c                                        105            145           1780
+    electromagnetics.c                               308            209           1587
+    ccx_2.20.c                                        10            171           1553
+    ccx_2.20step.c                                     1            238           1535
+    e_c3d_se.f90                                       0            219           1495
+    e_c3d.f90                                          0            159           1428
+    e_c3d_duds.f90                                     0            215           1413
+    compfluidfem.c                                   284            153           1346
+    e_c3d_cs_se.f90                                    2            246           1338
+    calinput.f90                                       0             77           1322
+    ddebdf.f90                                         8           1606           1306
+    multimortar.c                                    150            272           1208
+    dgesv.f90                                          0            853           1143
+    ddeabm.f90                                        10           2785           1118
+    arpack.c                                         175            106           1096
+    umat_single_crystal.f90                            0            160           1095
+    pastix.c                                         239            196           1045
+    linstatic.c                                      206            116           1029
+    us3_sub.f90                                        6            459           1009
+    ```
 
-7. Makefile的实际执行顺序为：
+14. Makefile的实际执行顺序为：
 
-   ```shell
-   #1.编译ccx_2.20.c主文件
-   gcc -O2  -I ../../../SPOOLES.2.2 -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DNETWORKOUT -g   -c -o ccx_2.20.o ccx_2.20.c
-   #2.编译SCCXF中的940个.f90文件
-   ...
-   gfortran -O2 --std=legacy  -c str2mat.f90
-   ...
-   #3.编译SCCXC中的175个.c文件
-   ...
-   gcc -O2  -I ../../../SPOOLES.2.2 -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DNETWORKOUT -g   -c -o writeoldmesh.o writeoldmesh.c
-   ...
-   #4.打包所有的目标文件到静态库文件
-   ar vr ccx_2.20.a absolute_relative.o ...
-   #5.修改三个重要文件中的时间标志
-   ./date.pl;
-   #6.重新编译ccx_2.20.c，不过前面修改了三个文件，这里只重新编译了一个。
-   gcc -O2  -I ../../../SPOOLES.2.2 -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DNETWORKOUT -g -c ccx_2.20.c;
-   #使用gfortran链接所有的文件，生成可执行文件ccx_2.20
-   gfortran  -Wall -O2 -o ccx_2.20 ccx_2.20.o ccx_2.20.a ../../../SPOOLES.2.2/spooles.a ../../../ARPACK/libarpack_INTEL.a -lpthread -lm -lc -fopenmp
-   ```
+    ```shell
+    #1.编译ccx_2.20.c主文件
+    gcc -O2  -I ../../../SPOOLES.2.2 -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DNETWORKOUT -g   -c -o ccx_2.20.o ccx_2.20.c
+    #2.编译SCCXF中的940个.f90文件
+    ...
+    gfortran -O2 --std=legacy  -c str2mat.f90
+    ...
+    #3.编译SCCXC中的175个.c文件
+    ...
+    gcc -O2  -I ../../../SPOOLES.2.2 -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DNETWORKOUT -g   -c -o writeoldmesh.o writeoldmesh.c
+    ...
+    #4.打包所有的目标文件到静态库文件
+    ar vr ccx_2.20.a absolute_relative.o ...
+    #5.修改三个重要文件中的时间标志
+    ./date.pl;
+    #6.重新编译ccx_2.20.c，不过前面修改了三个文件，这里只重新编译了一个。
+    gcc -O2  -I ../../../SPOOLES.2.2 -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DNETWORKOUT -g -c ccx_2.20.c;
+    #使用gfortran链接所有的文件，生成可执行文件ccx_2.20
+    gfortran  -Wall -O2 -o ccx_2.20 ccx_2.20.o ccx_2.20.a ../../../SPOOLES.2.2/spooles.a ../../../ARPACK/libarpack_INTEL.a -lpthread -lm -lc -fopenmp
+    ```
 
-8. Makefile：
+15. Makefile：
 
-   ```makefile
-   CFLAGS = -g -Wall -Wno-unused-function -Wno-unused-but-set-variable -Wno-unused-variable -Wno-maybe-uninitialized -I ../../../SPOOLES.2.2 -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DNETWORKOUT #指定SPOOLES头文件的目录，定义宏SPOOLES和ARPACK表示使用这两个库，-g调试。
-   FFLAGS = -g -Wall -Wno-unused-label -Wno-maybe-uninitialized -Wno-unused-dummy-argument -Wno-unused-variable --std=legacy -g #设置--std=legacy会使得gfortran8及以上的编译器在编译老代码中不再被支持的特性时，不会报错。
-   CC=gcc
-   FC=gfortran
-   %o : %c
-   	$(CC) $(CFLAGS) -c $<
-   %o : %f90
-   	$(FC) $(FFLAGS) -c $<
-   include Makefile.inc #其中定义了三个变量，分别为一堆文件名SCCXF包含940个.f90源文件，SCCXC包含176个.c源文件，SCCXCXX包含一个umat_dl.cpp文件。第一个字母表示source，中间的CCX表示Calculi下，最后一个F表示Fortran
-   SCCXMAIN = ccx_2.20.c #主文件，main函数所在位置
-   #分别进行后缀名替换，创建对应的目标文件集合的变量名
-   OCCXF = $(SCCXF:.f90=.o)
-   OCCXC = $(SCCXC:.c=.o)
-   OCCXMAIN = $(SCCXMAIN:.c=.o)
-   DIR=../../../SPOOLES.2.2
-   #设置要链接的库名和位置
-   LIBS = $(DIR)/spooles.a \
-   	../../../ARPACK/libarpack_INTEL.a \
-       -lpthread -lm -lc
-   ccx_2.20: $(OCCXMAIN) ccx_2.20.a  $(LIBS)
-   	./date.pl; #修改三个重要文件中的时间标志，可以定期单独在shell中执行该命令
-   	$(CC) $(CFLAGS) -c ccx_2.20.c; #单独编译主文件
-   	$(FC) $(FFLAGS) -o $@ $(OCCXMAIN) ccx_2.20.a $(LIBS) -fopenmp #使用gfortran进行链接。
-   #打包所有的目标文件到静态库文件
-   ccx_2.20.a: $(OCCXF) $(OCCXC)
-   	ar vr $@ $?
-   clean:
-   	rm -f *.o *.a ccx_2.20
-   	rm -f *.expand *.png *.pdf callgrind.out.*
-   	rm -f input.* spooles.out #并不需要了，因为已经添加了修改工作目录的代码
-   	rm -f .vscode-ctags .ctags tags
-   test:
-   	rm -f callgrind.out.*
-   	valgrind --tool=callgrind --compress-strings=no --compress-pos=no --collect-jumps=yes ./ccx_2.20 -i ../test/beamp
-   	kcachegrind callgrind.out.*
-   ```
+    ```makefile
+    CFLAGS = -g -Wall -Wno-unused-function -Wno-unused-but-set-variable -Wno-unused-variable -Wno-maybe-uninitialized -I ../../../SPOOLES.2.2 -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DNETWORKOUT #指定SPOOLES头文件的目录，定义宏SPOOLES和ARPACK表示使用这两个库，-g调试。
+    FFLAGS = -g -Wall -Wno-unused-label -Wno-maybe-uninitialized -Wno-unused-dummy-argument -Wno-unused-variable --std=legacy #设置--std=legacy会使得gfortran8及以上的编译器在编译老代码中不再被支持的特性时，不会报错。
+    CC=gcc
+    FC=gfortran
+    %o : %c
+    	$(CC) $(CFLAGS) -c $<
+    %o : %f90
+    	$(FC) $(FFLAGS) -c $<
+    include Makefile.inc #其中定义了三个变量，分别为一堆文件名SCCXF包含940个.f90源文件，SCCXC包含176个.c源文件，SCCXCXX包含一个umat_dl.cpp文件。第一个字母表示source，中间的CCX表示Calculi下，最后一个F表示Fortran
+    SCCXMAIN = ccx_2.20.c #主文件，main函数所在位置
+    #分别进行后缀名替换，创建对应的目标文件集合的变量名
+    OCCXF = $(SCCXF:.f90=.o)
+    OCCXC = $(SCCXC:.c=.o)
+    OCCXMAIN = $(SCCXMAIN:.c=.o)
+    DIR=../../../SPOOLES.2.2
+    #设置要链接的库名和位置
+    LIBS = $(DIR)/spooles.a \
+    	../../../ARPACK/libarpack_INTEL.a \
+        -lpthread -lm -lc
+    ccx_2.20: $(OCCXMAIN) ccx_2.20.a  $(LIBS)
+    	#./date.pl; #修改三个重要文件中的时间标志，可以定期单独在shell中执行该命令
+    	$(CC) $(CFLAGS) -c ccx_2.20.c; #单独编译主文件
+    	$(FC) $(FFLAGS) -o $@ $(OCCXMAIN) ccx_2.20.a $(LIBS) -fopenmp #使用gfortran进行链接。
+    #打包所有的目标文件到静态库文件
+    ccx_2.20.a: $(OCCXF) $(OCCXC)
+    	ar vr $@ $?
+    clean:
+    	rm -f *.o *.a ccx_2.20
+    	rm -f *.expand *.png *.pdf callgrind.out.*
+    	rm -f input.* spooles.out #并不需要了，因为已经添加了修改工作目录的代码
+    	rm -f .vscode-ctags .ctags tags
+    test:
+    	rm -f callgrind.out.*
+    	valgrind --tool=callgrind --compress-strings=no --compress-pos=no --collect-jumps=yes ./ccx_2.20 -i ../test/beamp
+    	kcachegrind callgrind.out.*
+    ```
 
-9. date.pl，功能是在ccx_2.20.c，frd.c中插入当前编译的时间，方便编译调试：
+16. date.pl，功能是在ccx_2.20.c，frd.c中插入当前编译的时间，方便编译调试：
 
-   ```perl
-   #!/usr/bin/env perl
-   chomp($date=`date -R`); #执行shell命令date，获取日期时间，存储到date变量中，chomp表示去掉结尾的换行符。使用-R选项，使之始终输出英文格式，如果在程序开始时修改LC_TIME环境变量，则会默认输出美国时区。
-   # update the date in ccx_2.20.c
-   @ARGV="ccx_2.20.c";
-   $^I=".old"; #先将ccx_2.20.c打开，并另存为ccx_2.20.c.old，然后再ccx_2.20.c上修改
-   while(<>){ #<>表示从@ARGV中读取内容
-       s/You are using an executable made on.*/You are using an executable made on $date\\n");/g; #正则表达式，搜索然后替换
-       print;
-   }
-   
-   # update the date in frd.c
-   @ARGV="frd.c";
-   $^I=".old";
-   while(<>){
-       s/COMPILETIME.*/COMPILETIME       $date\\n", p1);/g;
-       print;
-   }
-   system "rm -f ccx_2.20.c.old"; #删除掉备份的旧文件，保留修改后的文件
-   system "rm -f ccx_2.20step.c.old";
-   system "rm -f frd.c.old";
-   ```
-   
-10. cleanupcode，功能和make clean不同，此处是用来清理无关的源文件的，例如想把ccx中和流体网络相关的功能都删除，可以在Makefile.inc中删除对应行，然后运行此文件即可删除对应文件：
+    ```perl
+    #!/usr/bin/env perl
+    chomp($date=`date -R`); #执行shell命令date，获取日期时间，存储到date变量中，chomp表示去掉结尾的换行符。使用-R选项，使之始终输出英文格式，如果在程序开始时修改LC_TIME环境变量，则会默认输出美国时区。
+    # update the date in ccx_2.20.c
+    @ARGV="ccx_2.20.c";
+    $^I=".old"; #先将ccx_2.20.c打开，并另存为ccx_2.20.c.old，然后再ccx_2.20.c上修改
+    while(<>){ #<>表示从@ARGV中读取内容
+        s/You are using an executable made on.*/You are using an executable made on $date\\n");/g; #正则表达式，搜索然后替换
+        print;
+    }
+    
+    # update the date in frd.c
+    @ARGV="frd.c";
+    $^I=".old";
+    while(<>){
+        s/COMPILETIME.*/COMPILETIME       $date\\n", p1);/g;
+        print;
+    }
+    system "rm -f ccx_2.20.c.old"; #删除掉备份的旧文件，保留修改后的文件
+    system "rm -f ccx_2.20step.c.old";
+    system "rm -f frd.c.old";
+    ```
+
+17. cleanupcode，功能和make clean不同，此处是用来清理无关的源文件的，例如想把ccx中和流体网络相关的功能都删除，可以在Makefile.inc中删除对应行，然后运行此文件即可删除对应文件：
 
     ```shell
     #!/bin/sh
@@ -290,7 +312,7 @@
     
     ```
 
-11. hwloc可以显示CPU拓扑，比较方面地查看CPU各级缓存以及各个核、物理CPU之间，可以共享哪一级别的CPU cache。
+18. hwloc可以显示CPU拓扑，比较方面地查看CPU各级缓存以及各个核、物理CPU之间，可以共享哪一级别的CPU cache。
 
     ```shell
     zj@zj-hit:~/CCX/ARPACK$ hwloc-ls
@@ -754,7 +776,7 @@
     label open, has open     = open -- "$@"
     ```
 
-12. 有时需要不格式化保存文件，可以使用Ctrl+Shift+P，选择保存但不格式化，save without formatting即可，
+12. 有时需要不格式化保存文件，可以使用Ctrl+Shift+P，选择保存但不格式化，save without formatting即可。
 
 13. task.json，用于生成可执行文件，点击菜单栏的终端→运行生成任务，可以执行默认任务，需要打开该项目的一个文件，否则会提示无法解析fileDirname变量：
 
@@ -763,7 +785,7 @@
         "tasks": [
             {
                 "type": "cppbuild",
-                "label": "构建ccx_2.20",
+                "label": "构建ccx",
                 "command": "make", //调用make
                 "args": [
                     "-j" //并行构建
@@ -783,6 +805,16 @@
                     "isDefault": true //设置为默认的task
                 },
                 "detail": "调试器生成的任务。"
+            },
+            {
+                "type": "shell",
+                "label": "Ctags Companion: rebuild ctags",
+                "command": "ctags",
+                "args": [
+                    "-R",
+                    "--fields=+nKz"
+                ],
+                "problemMatcher": []
             }
         ],
         "version": "2.0.0"
@@ -799,7 +831,7 @@
                 "name": "(gdb) 启动",
                 "type": "cppdbg",
                 "request": "launch",
-                "program": "${workspaceFolder}/ccx_2.20", //设置可执行文件的完整路径，${workspaceFolder}为当前工作空间的位置，是/home/zj/CCX/CalculiX/ccx_2.20/src。
+                "program": "${workspaceFolder}/ccx_2.2*", //设置可执行文件的完整路径，${workspaceFolder}为当前工作空间的位置，是/home/zj/CCX/CalculiX/ccx_2.2*/src。
                 "args": [ //命令行参数
                     "-i",
                     "../test/beamp"
@@ -832,15 +864,12 @@
     ```json
     {
         "files.associations": {
-            "*.py": "python",
-            "*.oth": "xml",
             "*.f": "FortranFixedForm",
-            "calculix.h": "c",
-            "string.h": "c"
+            "*.f90": "FortranFreeForm"
         }
     }
     ```
-
+    
 16. c_cpp_properties.json，用于控制IntelliSense的高亮：
 
     ```json
@@ -849,7 +878,8 @@
             {
                 "name": "Linux", // 系统名称
                 "includePath": [ // 头文件路径
-                    "../../../SPOOLES.2.2"
+                    "../../../SPOOLES.2.2",
+                    "../../../ARPACK"
                 ],
                 "compilerPath": "/usr/bin/gcc",
                 "defines": [ // 添加全局宏定义
@@ -1540,7 +1570,7 @@
 
    ```fortran
    if((nmethod.eq.1).or.(nmethod.eq.3).or.(nmethod.eq.4).or.((nmethod.eq.2).and.((mcs.eq.0).or.(cs(2,1).lt.0)))) then
-   
+   ...
    endif
    !改为如下，将原来的语句块，用如下if包括起来，loc是获取变量的地址，如果为0表示未分配空间，因此不能进行cs(2,1)操作。
    if (loc(cs).ne.0) then
@@ -1568,37 +1598,34 @@
 
 2. 处理所有关键字的函数应该都放到前处理文件夹中。
 
-3. 分析ccx_2.20.c的架构
+3. 分析ccx_2.20.c的架构。
 
 4. 工具函数分为：
 
-   1. 几何方面，例如求交点等，
-
-      ```shell
-      # 系统功能
-      getSystemCPUs,stop,exit,stopwithout201,closefile,openfile,getversion,u_free,u_calloc,u_realloc,u_malloc,
-      #输入
-      getnewline,inputwarning,inputerror,inputinfo,strcpy1,strcmp1,strcmp2,stoi,
-      #输出
-      writeboun,writeinput,writematrix,writempc,writevector,writere,writehe,
-      #查找位置
-      cident81,nidentk,nidentll,ident2,identamta,nident2,ident,nident,
-      #排序
-      dsort,bsort,dsort,insertsortd,insertsorti,isortic,isortiddc,isortid,isorti,isortiiddc,isortiid,isortii,isortiii,qsorti,
-      #形函数，特点是不会调用其他函数，但是会被其他函数大量调用
-      shape10tet,shape15w,shape20h_ax,shape20h,shape20h_pl,shape2l,shape3l,shape3tri,shape4q,shape4tet,shape6tri,shape6tritilde,shape6tritilde_lin,shape6w,shape7tri,shape8h,shape8hr,shape8hu,shape8humass,shape8q,shape8qtilde,shape8qtilde_lin,shape9q,
-      #几何操作
-      near2d,near3d,attach_1d,attach_2d,attach_3d,attachline,straighteq3d,straighteq3dpen,straighteq2d,approxplane,neartriangle,plane_eq,planeeq,getlocno,getnumberofnodes,matrixsort,
-      #外部库中的矩阵计算
-      ddot,dscal,dswap,dgesv,ddebdf,ddeabm,dgmres,dgmres1,drfftf,dlzhes,dlzit,dsptrf,dsptri,dgetrs,drffti,cubtri,daxpy,dcopy,xermsg,hybsvd,rs,cgsolver,
-      #作者编写的矩阵计算，坐标变换，
-      op,opas,op_corio,opnonsymt,opnonsym,transformatrix,addimd,modf,add_rect,mult,multi_rect,multi_rectv,mulmatvec_asym,machpi,
-      
-      topocfdfem,rearrangecfd,flux,orifice,moehring,ts_calc,initialchannel,initialnet,resultnet,flowoutput,gapcon
-      
-      umat_main,e_c3d_u,extrapolate_u,resultsmech_u,calinput
-      ```
-   2. 简单的矩阵计算。
+   ```shell
+   # 系统功能
+   getSystemCPUs,stop,exit,stopwithout201,closefile,openfile,getversion,u_free,u_calloc,u_realloc,u_malloc,dattime
+   #输入
+   getnewline,inputwarning,inputerror,inputinfo,strcpy1,strcmp1,strcmp2,stoi,stof,stos,splitline,compare,strsplt,frecord,
+   #输出
+   writeturdir,writemaccs,writemac,writeheading,writeevcscomplex,writeevcomplex,writeev,writeview,writestadiv,writesta,writeim,writeboun,writebv,writepf,writeevcs,writeturdircs,writeelem,writeinput,writematrix,writempc,writevector,writere,writehe,frdheader
+   #查找位置插入
+   cident81,nidentk,nidentll,ident2,identamta,nident2,ident,nident,
+   #排序
+   dsort,bsort,dsort,insertsortd,insertsorti,isortic,isortiddc,isortid,isorti,isortiiddc,isortiid,isortii,isortiii,qsorti,
+   #形函数，特点是不会调用其他函数，但是会被其他函数大量调用
+   shape10tet,shape15w,shape20h_ax,shape20h,shape20h_pl,shape2l,shape3l,shape3tri,shape4q,shape4tet,shape6tri,shape6tritilde,shape6tritilde_lin,shape6w,shape7tri,shape8h,shape8hr,shape8hu,shape8humass,shape8q,shape8qtilde,shape8qtilde_lin,shape9q,evalshapefunc,dualshape3tri,dualshape4q,dualshape6tritilde,dualshape6tritilde_lin,dualshape8qtilde,dualshape8qtilde_lin,
+   #几何操作
+   near2d,near3d,attach_1d,attach_2d,attach_3d,attachline,straighteq3d,straighteq3dpen,straighteq2d,approxplane,neartriangle,plane_eq,planeeq,getlocno,getnumberofnodes,eplane,
+   #外部库中的矩阵计算
+   ddot,dscal,dswap,dgesv,ddebdf,ddeabm,dgmres,dgmres1,drfftf,dlzhes,dlzit,dsptrf,dsptri,dgetrs,drffti,cubtri,daxpy,dcopy,xermsg,hybsvd,rs,cgsolver,
+   #作者编写的矩阵计算，坐标变换
+   op,opas,op_corio,opnonsymt,opnonsym,transformatrix,addimd,modf,add_rect,mult,multvec,multi_rect,multi_rectv,mulmatvec_asym,machpi,matvec,insert,transpose,insertas_ws,insertas,calceigenvalues,matrixsort
+   #CFD相关
+   topocfdfem,rearrangecfd,flux,orifice,moehring,ts_calc,initialchannel,initialnet,resultnet,flowoutput,gapcon,
+   #重要的函数入口，后续会调用一堆函数，omit这些只是为了减少调用图的复杂度
+   umat_main,e_c3d_u,extrapolate_u,resultsmech_u,calinput
+   ```
 
 5. 还需要对循环对称，1d/2d扩展为3d进行单独处理。
 
@@ -1611,23 +1638,24 @@
 9. 使用Egypt对源码目录处理：
 
    ```shell
-   # -callees main 选项能够只显示从main调用的文件。
-   egypt *.expand -callees main --omit getnewline,inputwarning,inputerror,inputinfo,cident81,nidentk,nidentll,ident2,stoi,dsort,nident,u_free,u_calloc,u_realloc,u_malloc,nident2,ident,bsort,dsort,insertsortd,insertsorti,isortic,isortiddc,isortid,isorti,isortiiddc,isortiid,isortii,isortiii,qsorti,getSystemCPUs,stop,exit,strcpy1,strcmp1,strcmp2,transformatrix,near2d,near3d,shape10tet,shape15w,shape20h_ax,shape20h,shape20h_pl,shape2l,shape3l,shape3tri,shape4q,shape4tet,shape6tri,shape6tritilde,shape6tritilde_lin,shape6w,shape7tri,shape8h,shape8hr,shape8hu,shape8humass,shape8q,shape8qtilde,shape8qtilde_lin,shape9q,modf,attach_1d,attach_2d,attach_3d,attachline,daxpy,dcopy,xermsg,getlocno,getnumberofnodes,machpi,ddot,dscal,closefile,openfile,addimd,dswap,dgesv,ddebdf,ddeabm,dgmres,dgmres1,drfftf,rs,dlzhes,dlzit,dsptrf,dsptri,op,opas,op_corio,opnonsymt,cgsolver,hybsvd,drffti,cubtri,writeboun,writeinput,writematrix,writempc,writevector,straighteq3d,straighteq3dpen,straighteq2d,approxplane,neartriangle,plane_eq,planeeq,stopwithout201,matrixsort,identamta,dgetrs,add_rect,mult,multi_rect,multi_rectv,opnonsym,writere,writehe,topocfdfem,rearrangecfd,flux,orifice,moehring,ts_calc,initialchannel,initialnet,resultnet,flowoutput,getversion,mulmatvec_asym,calinput,umat_main,e_c3d_u,extrapolate_u,resultsmech_u,gapcon | dot -Gsize=8.5,11 -Grankdir=LR -Tpdf -o callgraph.pdf
+   # -callees main 选项能够只显示从main调用的文件。忽略一些工具函数等。
+   egypt *.expand -callees main --omit  getSystemCPUs,stop,exit,stopwithout201,closefile,openfile,getversion,u_free,u_calloc,u_realloc,u_malloc,dattime,getnewline,inputwarning,inputerror,inputinfo,strcpy1,strcmp1,strcmp2,stoi,stof,stos,splitline,compare,strsplt,writeturdir,writemaccs,writemac,writeheading,writeevcscomplex,writeevcomplex,writeev,writeview,writestadiv,writesta,writeim,writeboun,writebv,writepf,writeevcs,writeturdircs,writeelem,writeinput,writematrix,writempc,writevector,writere,writehe,frdheader,cident81,nidentk,nidentll,ident2,identamta,nident2,ident,nident,dsort,bsort,dsort,insertsortd,insertsorti,isortic,isortiddc,isortid,isorti,isortiiddc,isortiid,isortii,isortiii,qsorti,shape10tet,shape15w,shape20h_ax,shape20h,shape20h_pl,shape2l,shape3l,shape3tri,shape4q,shape4tet,shape6tri,shape6tritilde,shape6tritilde_lin,shape6w,shape7tri,shape8h,shape8hr,shape8hu,shape8humass,shape8q,shape8qtilde,shape8qtilde_lin,shape9q,evalshapefunc,dualshape3tri,dualshape4q,dualshape6tritilde,dualshape6tritilde_lin,dualshape8qtilde,dualshape8qtilde_lin,near2d,near3d,attach_1d,attach_2d,attach_3d,attachline,straighteq3d,straighteq3dpen,straighteq2d,approxplane,neartriangle,plane_eq,planeeq,getlocno,getnumberofnodes,eplane,ddot,dscal,dswap,dgesv,ddebdf,ddeabm,dgmres,dgmres1,drfftf,dlzhes,dlzit,dsptrf,dsptri,dgetrs,drffti,cubtri,daxpy,dcopy,xermsg,hybsvd,rs,cgsolver,op,opas,op_corio,opnonsymt,opnonsym,transformatrix,addimd,modf,add_rect,mult,multvec,multi_rect,multi_rectv,mulmatvec_asym,machpi,matvec,insert,transpose,insertas_ws,insertas,calceigenvalues,matrixsort,topocfdfem,rearrangecfd,flux,orifice,moehring,ts_calc,initialchannel,initialnet,resultnet,flowoutput,gapcon,umat_main,e_c3d_u,extrapolate_u,resultsmech_u,calinput | dot -Gsize=8.5,11 -Grankdir=LR -Tpdf -o callgraph.pdf
    
-   #删除如下文件
-   rm crackpropagation.c.245r.expand 
-   rm robustdesign.c.245r.expand 
-   rm refinemesh.c.245r.expand 
-   rm sensi_coor.c.245r.expand 
-   rm sensi_orien.c.245r.expand 
-   rm feasibledirection.c.245r.expand 
-   rm compfluidfem.c.245r.expand 
-   rm objectivemain_se.c.245r.expand 
-   rm electromagnetics.c.245r.expand 
-   rm objective_shapeener_dx.f90.245r.expand 
-   rm printoutfluidfem.f90.245r.expand 
-   rm mafillnet.f90.245r.expand 
-   rm labyrinth.f90.245r.expand 
+   #删除如下文件，确认为非必须文件
+   rm crackpropagation.c.245r.expand
+   rm robustdesign.c.245r.expand
+   rm refinemesh.c.245r.expand
+   rm readnewmesh.c.245r.expand
+   rm sensi_coor.c.245r.expand
+   rm sensi_orien.c.245r.expand
+   rm feasibledirection.c.245r.expand
+   rm compfluidfem.c.245r.expand
+   rm objectivemain_se.c.245r.expand
+   rm electromagnetics.c.245r.expand
+   rm objective_shapeener_dx.f90.245r.expand
+   rm printoutfluidfem.f90.245r.expand
+   rm mafillnet.f90.245r.expand
+   rm labyrinth.f90.245r.expand
    rm film.f90.245r.expand
    rm envtemp.f90.245r.expand
    ```
@@ -2755,17 +2783,5 @@
    zeta_calc.f90 #计算不同部分总水头损失限制器的不同ζ指数
    zienzhu.f90 #修正的zienkiewicz-zhu逐点误差估计器
    ```
-
-11. 
-
-12. 
-
-13. 
-
-14. 
-
-15. 
-
-16. 
 
 17. 
