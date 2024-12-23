@@ -1,14 +1,28 @@
 # 基础
 
-1. ABAQUS的所有GUI操作都有对应的Python命令。这些命令发送到ABAQUS/CAE kernel。工作目录下会有一个.rpy文件记录这些命令，表示replay。Python脚本允许用户绕过GUI直接和kernel交互。
+1. 从Abaqus 2024x GA版本开始将python解释器的版本从2.7改变为3.10。Abaqus 2024包含一个用于将脚本从Python 2转换为Python 3的工具。它主要基于Python的原生2to3转换工具，但添加了许多其他功能，以方便创建在版本之间交叉兼容的脚本。
 
-2. 打开CAE之后，再切换工作目录，则不会改变Python脚本的记录位置，即rpy文件，因此推荐先建立新的工作目录，然后通过命令行打开CAE。
+   ```shell
+   abaqus python -m abqPy2to3 xx.py
+   ```
 
-3. ABAQUS的基础架构如下：
+2. 为了更容易安装第三方软件包，从Abaqus 2024 FD02开始添加了abqPip命令。可以使用`abaqus python -m abqPip -h`查看帮助。
 
-4. ![image-20210610094648581](ABAQUS-Python脚本.assets/image-20210610094648581.png)
+3. abaqus的不同版本的脚本之间可能存在兼容性，因为abaqus偶尔会更改一些接口，因此abaqus提供了一个工具来升级脚本
 
-5. 常见的执行.py脚本的方法：
+   ```shell
+   abaqus python -m upgradeScript xx.py #会升级到当前软件的版本，-backup备份旧版本
+   ```
+
+4. ABAQUS的所有GUI操作都有对应的Python命令。这些命令发送到ABAQUS/CAE kernel。工作目录下会有一个.rpy文件记录这些命令，表示replay。Python脚本允许用户绕过GUI直接和kernel交互。
+
+5. 打开CAE之后，再切换工作目录，则不会改变Python脚本的记录位置，即rpy文件，因此推荐先建立新的工作目录，然后通过命令行打开CAE。
+
+6. ABAQUS的基础架构如下：
+
+7. ![image-20210610094648581](ABAQUS-Python脚本.assets/image-20210610094648581.png)
+
+8. 常见的执行.py脚本的方法：
 
    1. 系统命令行执行`abaqus cae script=myscript.py`或`abaqus cae noGUI=myscript.py`。如下命令可以以不显示GUI的模式运行ABAQUS。方便批量进行前后处理，加快速度。
 
@@ -17,10 +31,11 @@
       #通过系统命令行执行Python脚本时，可以传递参数，在脚本内通过sys.argv[1]，argv[2]等来获取，需要先导入sys库。
       ```
    2. CAE内的Python命令行执行`execfile('myscript.py')`。
+   3. CAE内的File→Run Script，可以是python源文件或编译后的pyc文件。
 
-6. 推荐使用Macro Manager来录制动作，生成指定的Python脚本，然后再进行修改，这样比从头编写效率高，修改完之后，需要reload脚本才可以run。可以手动删除一些视口操作。
+9. 推荐使用Macro Manager来录制动作，生成指定的Python脚本，然后再进行修改，这样比从头编写效率高，修改完之后，需要reload脚本才可以run。可以手动删除一些视口操作。
 
-7. 所有的ABAQUS Python脚本都必须在开头包含这两行：
+10. 所有的ABAQUS Python脚本都必须在开头包含这两行：
 
    ```python
    from abaqus import *      #这行使得系统默认的session和mdb对象可以被使用。
@@ -30,25 +45,25 @@
    from visualization import *    #可视化需要
    ```
 
-8. import语法：
+11. import语法：
 
-   1. import一个模块后，无法卸载它，除非重启Python的解释器。
-   2. from math import sin   后可以只用使用sin
-   3. import math 后需要通过math.sin来使用
+   12. import一个模块后，无法卸载它，除非重启Python的解释器。
+   13. from math import sin   后可以只用使用sin
+   14. import math 后需要通过math.sin来使用
 
-9. rpy文件第一行为如下，mbcs表示多字节编码系统，也就是Windows下的ANSI。对于简体中文Windows系统就是GBK。
+15. rpy文件第一行为如下，mbcs表示多字节编码系统，也就是Windows下的ANSI。对于简体中文Windows系统就是GBK。
 
-   ```python
-   # -*- coding: mbcs -*-
-   ```
+    ```python
+    # -*- coding: mbcs -*-
+    ```
 
-10. 获取ABAQUS教程中的脚本文件，保存到当前目录`abaqus fetch job=scriptName`。
+16. 获取ABAQUS教程中的脚本文件，保存到当前目录`abaqus fetch job=scriptName`。
 
-11. ABAQUS的环境文件abaqus_v6.env是Python的语法。replay文件.rpy也是Python语法。
+17. ABAQUS的环境文件abaqus_v6.env是Python的语法。replay文件.rpy也是Python语法。
 
-12. 在系统命令行输入abaqus python来使用ABAQUS提供的Python解释器。
+18. 在系统命令行输入abaqus python来使用ABAQUS提供的Python解释器。
 
-13. Python可以用6个"包裹起来多行注释
+19. Python可以用6个"包裹起来多行注释
 
     ```python
     """
@@ -58,22 +73,22 @@
     """
     ```
 
-14. 用户编写的脚本在Script命名空间中执行，称为main。而GUI操作在Journal命名空间中执行，称为journaling。不过不同命名空间都是在操作同一个对象模型树。
+20. 用户编写的脚本在Script命名空间中执行，称为main。而GUI操作在Journal命名空间中执行，称为journaling。不过不同命名空间都是在操作同一个对象模型树。
 
     ```python
     p1 = mdb.models['Model A'].parts['Part 3D A']  #例如在replay文件中发现这样一句话，即p1变量是在journal空间中的，在脚本中引用p1会提示找不到。
     ```
 
-15. Abaqus PDE(Python development environment)可以在CAE内打开，也可以单独打开。PDE可以识别.py或.guiLog文件，后者是通过CAE录制的脚本。
+21. Abaqus PDE(Python development environment)可以在CAE内打开，也可以单独打开。PDE可以识别.py或.guiLog文件，后者是通过CAE录制的脚本。
 
-16. ABAQUS默认的选择是通过mask，这种方式对于大量选择效率很高，但是不方便用户查看，可以在env文件中加入如下代码来达到开启cae时，就设置：
+22. ABAQUS默认的选择是通过mask，这种方式对于大量选择效率很高，但是不方便用户查看，可以在env文件中加入如下代码来达到开启cae时，就设置：
 
     ```python
     def onCaeStartup():
         session.journalOptions.setValues(replayGeometry=INDEX)
     ```
 
-17. 如果要在程序中提交job后直接进行后处理分析，需要写成如下形式：
+23. 如果要在程序中提交job后直接进行后处理分析，需要写成如下形式：
 
     ```python
     mdb.jobs[job1].submit() #提交到求解器
@@ -81,7 +96,9 @@
     ... #后续代码
     ```
 
-18. 可以使用abaqus自带的RSG（Really Simple GUI） Dialog Builder来创建待GUI界面的用户插件。参考手册为Abaqus GUI Toolkit User's Guide。
+24. 提交之后，CAE就会卡死，此时可以通过.sta文件查看迭代收敛的情况。
+
+25. 可以使用abaqus自带的RSG（Really Simple GUI） Dialog Builder来创建待GUI界面的用户插件。参考手册为Abaqus GUI Toolkit User's Guide。
 
 # 对象与方法
 
