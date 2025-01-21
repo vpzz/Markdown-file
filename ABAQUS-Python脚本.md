@@ -1,6 +1,6 @@
 # 基础
 
-1. 从Abaqus 2024x GA版本开始将python解释器的版本从2.7改变为3.10。Abaqus 2024包含一个用于将脚本从Python 2转换为Python 3的工具。它主要基于Python的原生2to3转换工具，但添加了许多其他功能，以方便创建在版本之间交叉兼容的脚本。
+1. abaqus最早的python是基于python2.7的，而在2020年，python2.7不在维护了。因此从Abaqus 2024x GA版本开始将python解释器的版本从2.7改变为3.10。Abaqus 2024包含一个用于将脚本从Python 2转换为Python 3的工具。它主要基于Python的原生2to3转换工具，但添加了许多其他功能，以方便创建在版本之间交叉兼容的脚本。
 
    ```shell
    abaqus python -m abqPy2to3 xx.py

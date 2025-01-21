@@ -75,88 +75,90 @@
     Abaqus/Explicit Timing Problems #不在帮助文档中
     ```
 
-18. 官方的在线帮助文档支持模糊搜索，可以使用双引号包括起来进行精确搜索。
+18. 通过findkeyword找到了特定的inp文件名后，可以在帮助文档中搜索该文件名，可找到使用它的页面，离线文档不支持搜索文件名。
 
-19. 本地安装的文档需要在文件`D:\SIMULIA\EstProducts\2023\win_b64\SMA\site\EstablishedProductsConfig.ini`中添加一行`documentation=http://desktop-r2r1l2q:4040/English/`才可以关联到abaqus内部。
+19. 官方的在线帮助文档支持模糊搜索，可以使用双引号包括起来进行精确搜索。
 
-20. 打开软件前应设置工作目录，推荐的方法是在特定的文件夹打开命令行窗口，然后运行`abaqus cae`即可。
+20. 本地安装的文档需要在文件`D:\SIMULIA\EstProducts\2023\win_b64\SMA\site\EstablishedProductsConfig.ini`中添加一行`documentation=http://desktop-r2r1l2q:4040/English/`才可以关联到abaqus内部。
 
-21. 默认在job提交后，才会生成对应的job.inp，计算完成后生成结果文件job.odb。也可以使用write input来只生成inp文件而不计算。运行datacheck也会产生inp文件和odb文件，不过对应的输出都是0。
+21. 打开软件前应设置工作目录，推荐的方法是在特定的文件夹打开命令行窗口，然后运行`abaqus cae`即可。
 
-22. job内并没有存储模型的内容，因此如果计算失败，然后修改模型，再进行计算时，可以不用新建Job，直接Submit之前的那个Job即可，这样会覆盖掉之前的那个job对应的结果文件，由一个job产生的所有结果文件只是后缀名不同。
+22. 默认在job提交后，才会生成对应的job.inp，计算完成后生成结果文件job.odb。也可以使用write input来只生成inp文件而不计算。运行datacheck也会产生inp文件和odb文件，不过对应的输出都是0。
 
-23. 输出图片print到file，可以选择eps格式，再输出为tif，这样既清晰，体积又小。如果想要直接截图，可以按F11来全屏显示视口。还可以在viewport annotation option中取消所有其他挂件的显示。默认的背景是渐变的，出图时推荐切换为纯白颜色，在Graphics options→viewport background。
+23. job内并没有存储模型的内容，因此如果计算失败，然后修改模型，再进行计算时，可以不用新建Job，直接Submit之前的那个Job即可，这样会覆盖掉之前的那个job对应的结果文件，由一个job产生的所有结果文件只是后缀名不同。
 
-24. abaqus还提供了一个官方插件save current viewport，它可以保存透明背景的图片，会保存到工作目录中文件夹additionalImages。
+24. 输出图片print到file，可以选择eps格式，再输出为tif，这样既清晰，体积又小。如果想要直接截图，可以按F11来全屏显示视口。还可以在viewport annotation option中取消所有其他挂件的显示。默认的背景是渐变的，出图时推荐切换为纯白颜色，在Graphics options→viewport background。
 
-25. .inp文件是ABAQUS/CAE和求解器之间的唯一沟通媒介。.inp文件中没有几何，只有网格。一个job对应一个jobname.inp文件。
+25. abaqus还提供了一个官方插件save current viewport，它可以保存透明背景的图片，会保存到工作目录中文件夹additionalImages。
 
-26. *开头表示是关键字。**开头表示注释。黄色区块内的关键字已经要在蓝色之后，区块内部的关键字顺序可以互换。
+26. .inp文件是ABAQUS/CAE和求解器之间的唯一沟通媒介。.inp文件中没有几何，只有网格。一个job对应一个jobname.inp文件。
 
-27. ![image-20200617012530360](Abaqus.assets/image-20200617012530360.png)
+27. *开头表示是关键字。**开头表示注释。黄色区块内的关键字已经要在蓝色之后，区块内部的关键字顺序可以互换。
 
-28. 之所以存在inp文件，是因为某些功能在CAE中还不支持。例如指定梁单元的法线。
+28. ![image-20200617012530360](Abaqus.assets/image-20200617012530360.png)
 
-29. 如果直接编辑.inp文件，这是不会影响CAE中的设定的。如果要运行修改后的inp，可以在create job是选择使用input file。
+29. 之所以存在inp文件，是因为某些功能在CAE中还不支持。例如指定梁单元的法线。
 
-30. 另外一种方式是在CAE中编辑关键字（在model上右键→Edit keywords），这样CAE中会变更，此时如果再生成inp文件时也会保存之前的修改。如果通过这种方式改了很多，要想恢复最初的状态，也可以按Discard all edits。
+30. 如果直接编辑.inp文件，这是不会影响CAE中的设定的。如果要运行修改后的inp，可以在create job是选择使用input file。
 
-31. inp文件也可以作为ABAQUS和其他软件之间交互的媒介（可以包含除了几何以外的任意数据）。
+31. 另外一种方式是在CAE中编辑关键字（在model上右键→Edit keywords），这样CAE中会变更，此时如果再生成inp文件时也会保存之前的修改。如果通过这种方式改了很多，要想恢复最初的状态，也可以按Discard all edits。
 
-32. 可以将一个已有的inp文件导入到CAE中，然后修改模型，不过这里就没有几何了。需要注意，这种方法会丢弃CAE不支持的特性，例如用户通过自己修改inp文件添加的特性。
+32. inp文件也可以作为ABAQUS和其他软件之间交互的媒介（可以包含除了几何以外的任意数据）。
 
-33. 对于从外部下载或修改后的inp文件，可以在CAE中重新创建job来运行，但是如果文件路径包含空格，会报错。这时建议使用命令行提交计算。`abaqus job=xx int`。
+33. 可以将一个已有的inp文件导入到CAE中，然后修改模型，不过这里就没有几何了。需要注意，这种方法会丢弃CAE不支持的特性，例如用户通过自己修改inp文件添加的特性，观察CAE的消息区域获得具体信息。
 
-34. 但是不建议在CAE中导入inp后再以此模型创建job，提交分析，因为这会将CAE不支持的关键字或操作方式都删除掉。
+34. 对于从外部下载或修改后的inp文件，可以在CAE中重新创建job来运行，但是如果文件路径包含空格，会报错。这时建议使用命令行提交计算。`abaqus job=xx cpus=4 int`。
 
-35. ABAQUS的.cae文件不同版本是向下兼容。但是.inp文件是前后都兼容的，可以跨版本。当升级.cae的版本时，abaqus会自动将所有的part和assembly都锁住，避免以外修改，可以在模型树中对应的位置解锁即可。升级会将已有的xx.cae重命名为xx-6.14-1.cae，然后将转化后的文件保存为xx.cae。
+35. 但是不建议在CAE中导入inp后再以此模型创建job，提交分析，因为这会将CAE不支持的关键字或操作方式都删除掉。
 
-36. 使用命令行来执行inp文件。job名可以不加.inp后缀。还可以在最后添加int参数，进行互动，展示计算信息。
+36. ABAQUS的.cae文件不同版本是向下兼容。但是.inp文件是前后都兼容的，可以跨版本。当升级.cae的版本时，abaqus会自动将所有的part和assembly都锁住，避免以外修改，可以在模型树中对应的位置解锁即可。升级会将已有的xx.cae重命名为xx-6.14-1.cae，然后将转化后的文件保存为xx.cae。
+
+37. 使用命令行来执行inp文件。job名可以不加.inp后缀。还可以在最后添加int参数，进行互动，展示计算信息。
 
     ```shell
     abaqus job=要执行的inp文件名 oldjob=多个分析工作之间如果有数据传输需求，这里为数据来源的文件名 cpus=使用的核心数量
     ```
 
-37. 如果静态分析中出现numerical singularity数值奇异或zero pivot，就是矩阵的主元为0的错误，一般情况下是缺少了限制刚体位移的约束。
+38. 如果静态分析中出现numerical singularity数值奇异或zero pivot，就是矩阵的主元为0的错误，一般情况下是缺少了限制刚体位移的约束。
 
-38. ABAQUS后处理时会将默认30个数据达成一个group（例如history 数据包含大量的能量曲线），可以右键group children，取消group。
+39. ABAQUS后处理时会将默认30个数据达成一个group（例如history 数据包含大量的能量曲线），可以右键group children，取消group。
 
-39. 推荐观看士盟科技的视频中的例子。
+40. 推荐观看士盟科技的视频中的例子。
 
-40. abaqus支持多核并行计算，几十个核心内，还是可以保持线性增长的。
+41. abaqus支持多核并行计算，几十个核心内，还是可以保持线性增长的。
 
-41. abaqus的用户界面是使用fox-toolkit开发的，它是跨平台的，规模小巧。支持多种语言的绑定，例如python。
+42. abaqus的用户界面是使用fox-toolkit开发的，它是跨平台的，规模小巧。支持多种语言的绑定，例如python。
 
-42. abaqus插件ODB reduction plug-in可以将选定的frame单独保存到odb文件中，实现减小odb文件体积的功能。它是通过创建一个空的odb文件，然后向其中添加frame完成的。
+43. abaqus插件ODB reduction plug-in可以将选定的frame单独保存到odb文件中，实现减小odb文件体积的功能。它是通过创建一个空的odb文件，然后向其中添加frame完成的。
 
-43. isight是达索公司的参数优化软件，可以调用多种软件，例如matlab，excel，abaqus等。
+44. isight是参数优化软件，可以调用多种软件，例如matlab，excel，abaqus等。
 
-44. tosca是几何优化（非参数的）软件，例如减少模型的质量。
+45. tosca是几何优化（非参数的）软件，例如减少模型的质量。
 
-45. fe-safe是用来做疲劳分析或可靠度评估的。需要先进行有限元分析，然后将其结果导入到fe-safe中。
+46. fe-safe是用来做疲劳分析或可靠度评估的。需要先进行有限元分析，然后将其结果导入到fe-safe中。
 
-46. 在job的编辑页面，General→Preprocessor Printout中可以勾选，以输出预处理器的相关信息。对应的关键字为*PREPRINT。
+47. 在job的编辑页面，General→Preprocessor Printout中可以勾选，以输出预处理器的相关信息。对应的关键字为*PREPRINT。
 
-47. job的编辑页面最上方的描述可以添加说明内容，对应的关键字为*HEADINGS。
+48. job的编辑页面最上方的描述可以添加说明内容，对应的关键字为*HEADINGS。
 
-48. inp文件中包含`*PART`和`*END PART`。part中包含`*NODE`，`*ELEMENT`，`NSET`，`*ELSET`，`*SOLID SECTION`等关键字。
+49. inp文件中包含`*PART`和`*END PART`。part中包含`*NODE`，`*ELEMENT`，`NSET`，`*ELSET`，`*SOLID SECTION`等关键字。
 
-49. inp文件中包含`*ASSEMBLY`和`*END ASSEMBLY`。assembly中包含`*Instance`等关键字。
+50. inp文件中包含`*ASSEMBLY`和`*END ASSEMBLY`。assembly中包含`*Instance`等关键字。
 
-50. 这样组织并非是必须的，CalculiX就没有这么做，这样做可以在后处理中方便聚类处理。
+51. 这样组织并非是必须的，CalculiX就没有这么做，这样做可以在后处理中方便聚类处理。如果不需要，可以在Edit→attributes中勾选Do not use parts and assemblies in input files
 
-51. abaqus通过AM Modeler插件支持增材制造（就是3D打印）和切削仿真。
+52. abaqus通过AM Modeler插件支持增材制造（就是3D打印）和切削仿真。
 
-52. abaqus官方社区为SIMULIA User Communities，这里可以提问，也可以找到官方的一些插件或教程。
+53. abaqus官方社区为SIMULIA User Communities，这里可以提问，也可以找到官方的一些插件或教程。
 
-53. abaqus支持import ANSYS的cdb文件，但是不支持导入LS-DYNA的k文件，不过提供了一个小工具可以将k文件转化成inp文件：
+54. abaqus支持import ANSYS的cdb文件，但是不支持导入LS-DYNA的k文件，不过提供了一个小工具可以将k文件转化成inp文件：
 
     ```shell
     abaqus fromdyna job=output.inp input=input.k
     #还有一个参数splitFile，默认为OFF，为ON时，会将节点，单元数据单独提取出来，为.inc文件，然后用一个总的inp文件导入include它们。
     ```
 
-54. inp文件支持参数化，参数的定义遵循python的语法（因此可以使用简单的数学函数），虽然这是在inp文件中。
+55. inp文件支持参数化，参数的定义遵循python的语法（因此可以使用简单的数学函数），虽然这是在inp文件中。
 
     ```python
     *PARAMETER
@@ -166,7 +168,7 @@
     <width>, <height> #引用参数时，需要用<>包括起来。
     ```
 
-55. 非独立参数有两种定义方式：
+56. 非独立参数有两种定义方式：
 
     1. 表达式依赖
 
@@ -178,11 +180,19 @@
 
     2. 表格依赖，通过指定依赖和独立参数以及依赖表来定义参数之间的关系。定义参数之间依赖关系的表每行的值必须与依赖参数的数量加上将使用它的独立参数的数量一样多。该表必须只包含实数；首先给出依赖参数值，然后给出独立参数值。参数名和字符串不能在表中使用。
 
-56. 
+57. 线性屈曲分析，不需要为材料设置密度，但是频率提取就需要设置密度。但是频率提取会忽略荷载，因此是否施加重力加速度没有区别，而线性屈曲分析对荷载是敏感的，==是否能同时施加重力荷载和集中力荷载==。
 
-57. 
+58. 壳单元可以较好地计算横向剪切效应（壳平面内和法向的剪应力），因为它在厚度方向有至少5个积分点，这在厚板中不可忽略。如果使用实体单元模拟，则需要建模多层。
 
-58. 
+59. 
+
+60. 
+
+61. 
+
+62. 
+
+63. 
 
 
 
@@ -198,68 +208,79 @@
 7. 可以在sketch option中将图片导入作为背景，这对于描绘很有帮助。
 8. sketch option中可以改变sketch坐标系的原点和转动坐标系，这对于复杂建模有帮助。
 9. 2D底稿sketch推荐使用AutoCAD的.dxf格式或.iges格式来导入。
-10. 复杂的三维实体建议从CAD软件中导入，建议使用ACIS的.sat和STEP的.step格式。不建议使用.iges格式。
+10. 复杂的三维实体建议从CAD软件中导入，建议使用ACIS的.sat和STEP的.step（或.stp）格式。不建议使用.iges格式。
 11. ACIS的.sat格式是ABAQUS内核使用的格式，是最可靠的导入格式。ACIS是由Spatial Technology公司开发的。IGES的实体是使用一系列的面来构成的，缝合这些面构成一个水密watertight的实体，对于大型模型，会很耗时。
-12. STEP格式是替代IGES格式的。STEP使用B-rep格式来表示实体。
-13. 每一个model只包含一个assembly。一个assembly可以包含part的实例，也可以包含其他model的assembly。一个model中可以有多个part，part需要被实例化为part instance才可以组装为assembly，只有在assembly中的物体才会被最终计算分析。同一个part的所有instance具有相同的section。
-14. part的第一个feature都是在XY平面内创建的。
-15. part模块中不能进行布尔运算，只能进行拉伸增长或切除之类的操作，一个part必须是连通的。可以在assembly中将多个part的instance进行布尔运算，合并成一个新的part。
-16. 有两种instance类型：
+12. STEP（Standard for the Exchange of Product model data）格式是替代IGES格式的，STEP使用B-rep格式来表示实体，是ASCII格式的。细节由国际标准ISO 10303规定。
+13. step文件是由多个part组成的，导入时，可以将每个part独立导入，或者合并为一个part导入（推荐，同时应勾选merge和retain）。
+14. 导入时，可以设置导入的part是变形体，离散刚体或欧拉part。还可以选择是否缩放尺寸。
+15. 每一个model只包含一个assembly。一个assembly可以包含part的实例，也可以包含其他model的assembly。一个model中可以有多个part，part需要被实例化为part instance才可以组装为assembly，只有在assembly中的物体才会被最终计算分析。同一个part的所有instance具有相同的section。
+16. part的第一个feature都是在XY平面内创建的。
+17. part模块中不能进行布尔运算，只能进行拉伸增长或切除之类的操作，一个part必须是连通的。可以在assembly中将多个part的instance进行布尔运算，合并成一个新的part。
+18. 有两种instance类型：
     1. 独立的，mesh是在instance上，和part无关，每个instance需要单独划分网格。
     2. 非独立的，mesh在part上，只需对part划分一次，之后的所有instance的网格都一样。
 
-17. 一个part的所有instance要么都是独立，要么都是非独立。
-18. 使用assembly的好处是，可以修改part中的模型，进而自动修改assembly中的模型。
-19. 组装时定位的方式有两种：
+19. 一个part的所有instance要么都是独立，要么都是非独立。
+20. 使用assembly的好处是，可以修改part中的模型，进而自动修改assembly中的模型。
+21. 组装时定位的方式有两种：
     1. 平移和旋转。
     2. 使用constraint来对点线面进行约束。使用constraint时，可能会产生冲突。注意设定好哪些instance是可以动的，那些是不动的。
 
-20. 可以将几何constraint转化成固定的（Instance→Convert Constraints），也就是打断，并且instance保持现在位置，这样做是为了防止后续的其他修改影响现有的instance位置。这一点和cad软件完全相反。
-21. 每个自由度都用数字来表示，123分别表示xyz方向的线位移。456分别表示绕xyz轴旋转。其他的自由度例如温度用11来表示。
-22. part包括4种：可变形体，离散刚体（可以使复杂的外形，可以从外部导入几何，需要划分网格），解析刚体（只能用简单的外形，一般用来定义刚性面，只能在CAE中创建，不能从外部导入），欧拉零件（用于欧拉分析，网格不动，材料在网格内流动）。两种刚体受力都不变形，解析刚体比离散刚体计算效率更高，因为离散刚体还包含很多网格，需要逐个判定接触。
-23. 壳和梁都是3D单元，创建part时应选择3D。因为它们都有3个方向的位移。
+22. 可以将几何constraint转化成固定的（Instance→Convert Constraints），也就是打断，并且instance保持现在位置，这样做是为了防止后续的其他修改影响现有的instance位置。这一点和cad软件完全相反。
+23. 每个自由度都用数字来表示，123分别表示xyz方向的线位移。456分别表示绕xyz轴旋转。其他的自由度例如温度用11来表示。
+24. part包括4种：可变形体，离散刚体（可以使复杂的外形，可以从外部导入几何，需要划分网格），解析刚体（只能用简单的外形，一般用来定义刚性面，只能在CAE中创建，不能从外部导入），欧拉零件（用于欧拉分析，网格不动，材料在网格内流动）。两种刚体受力都不变形，解析刚体比离散刚体计算效率更高，因为离散刚体还包含很多网格，需要逐个判定接触。
+25. 壳和梁都是3D单元，创建part时应选择3D。因为它们都有3个方向的位移。
 
-24. part的外形可以由以下三种方式定义：
+26. part的外形可以由以下三种方式定义：
     1. 直接在CAE模块中建立，称为native geometry。
     2. 从其他CAD系统中导入，分为原生格式（proE或CATIA等默认的格式）和中立格式（通用的文件交换格式，例如.sat）。推荐使用原生格式。
     3. 导入的单独的网格，orphan mesh，独立网格也称为孤儿网格，不含几何部分。这可以从.inp，.odb，.cdb（ANSYS专用），STL(via plug-in)等文件中导入。
-25. 还支持连接导入associative import，这样在CAD系统中修改后，abaqus的part会自动修改，这对于已经设置好荷载和边界条件的情况非常好用。
-26. 导入的part都会有一个feature，表示它是哪种格式导入的。
-27. 如果是在CAE模块中建立的part，就会保留许多建立时候的feature，可以进行修改。ABAQUS很少有撤回的动作，一般使用feature来记录操作，删除feature就可以撤销操作。
-28. feature就是对part，datum，partition，assembly等进行的操作。
-29. ABAQUS可以为part建立基准Datum点线面参考系（分析时不会考虑）。可以利用基准平面来创建任意方向的part。同时基准几何还可以用来在assembly时进行定位。
-30. 在assembly中第一次创建instance时，会产生一个用户自定义的直角坐标系Datum csys-1，它是assembly级别的feature。注意，它并不是全局直角坐标系（名称为Global），不过它俩是重合的，在施加荷载选取坐标系时可以看出来。
-31. set用来保存一组选择，可以包含点(vertex)线面，节点(node)或单元。一般用来设定荷载和边界条件，或者定制输出变量。
-32. surfaces集合分为几何面和单元面face，是用来定义接触（接触是根据surface来判断的，接受surface，而不是set）和施加分布载荷的。face是单元的表面，由node构成。
-33. 如果没有划分网格，则只能定义几何的set和surface。划分网格之后，还可以定义关于node或element的set，关于mesh的surface。划分网格之后，默认仅在Mesh模组中显示网格和seed，这个可以通过工具栏的按钮开启或关闭，在其他模组中的显示情况。
-34. 不同模块的顶部菜单来中都有set和surface的管理窗口，但是part和assembly中建立的set和surface，只在各自的层级的manager看到。
-35. 施加荷载或边界条件时，可以选择已定义好的set或surface，基于part和assembly的都会显示，但是只会显示和荷载或边界条件对应的set或surface。例如集中力荷载只允许选择点的set，压力荷载只允许选择surface。
-36. 虽然可以将一个edge和vertex都包含在同一个几何set中，但是在施加集中力时，不会显示在可选的set中。
-37. 施加集中力时，如果选择的是包含多个node或vertex的set，则会给集合中每个点都施加同样大小的力。
-38. 可以选择多个set或surface，进行bool运算。如果一个master要和多个slave接触或者反过来，则可以将多个slave合并为一个surface，这样只用一个接触对就可以定义接触。
-39. set或者surface中不能既有几何，又有单元。删除set或surfaces并不会删除真实的几何或单元。
-40. 同一个surface中的单元应该是相容的，同维度，同阶插值，同为可变性或不可变形的。
-41. 推荐在assembly中定义set或surface。也可以在part下建立的set，在assembly中也会看到，会重命名，反之不会。例如在名为trussrod的part中建立名为Set-1的set，那么assembly中存在一个trussrod-3这样的instance，则对应的set名字为trussrod-3.Set-1，每个instance都会有对应的set。
-42. 施加荷载或边界条件等时，也会提示创建新的set或surface，如果取消勾选，也会创建内部set，但是不在CAE中显示（能够让用户使用CAE时不会眼花缭乱），导出的inp文件中会包含，关键字表示如下，因此后处理中可以查看到。
+27. 还支持连接导入associative import，这样在CAD系统中修改后，abaqus的part会自动修改，这对于已经设置好荷载和边界条件的情况非常好用。
+28. 导入的part都会有一个feature，表示它是哪种格式导入的。
+29. 如果是在CAE模块中建立的part，就会保留许多建立时候的feature，可以进行修改。ABAQUS很少有撤回的动作，一般使用feature来记录操作，删除feature就可以撤销操作。
+30. feature就是对part，datum，partition，assembly等进行的操作。
+31. ABAQUS可以为part建立基准Datum点线面参考系（分析时不会考虑）。可以利用基准平面来创建任意方向的part。同时基准几何还可以用来在assembly时进行定位。
+32. 在assembly中第一次创建instance时，会产生一个用户自定义的直角坐标系Datum csys-1，它是assembly级别的feature。注意，它并不是全局直角坐标系（名称为Global），不过它俩是重合的，在施加荷载选取坐标系时可以看出来。
+33. set用来保存一组选择，可以包含点(vertex)线面，节点(node)或单元。一般用来设定荷载和边界条件，或者定制输出变量。
+34. 可以在inp文件中创建同时包含node和element的set，只要Nset和Elset的名称相同即可，这种在cae中会显示node+element，但是无法在cae中创建这样的，Nset和Elset重名时会报错。
+35. surfaces集合分为几何面和单元面face，是用来定义接触（接触是根据surface来判断的，接受surface，而不是set）和施加分布载荷的。face是单元的表面，由node构成。
+36. 如果没有划分网格，则只能定义几何的set和surface。划分网格之后，还可以定义关于node或element的set，关于mesh的surface。划分网格之后，默认仅在Mesh模组中显示网格和seed，这个可以通过工具栏的按钮开启或关闭，在其他模组中的显示情况。
+37. 不同模块的顶部菜单来中都有set和surface的管理窗口，但是part和assembly中建立的set和surface，只在各自的层级的manager看到。
+38. 施加荷载或边界条件时，可以选择已定义好的set或surface，基于part和assembly的都会显示，但是只会显示和荷载或边界条件对应的set或surface。例如集中力荷载只允许选择点的set，压力荷载只允许选择surface。
+39. 虽然可以将一个edge和vertex都包含在同一个几何set中，但是在施加集中力时，不会显示在可选的set中。
+40. 施加集中力时，如果选择的是包含多个node或vertex的set，则会给集合中每个点都施加同样大小的力。
+41. 可以选择多个set或surface，进行bool运算。如果一个master要和多个slave接触或者反过来，则可以将多个slave合并为一个surface，这样只用一个接触对就可以定义接触。
+42. set或者surface中不能既有几何，又有单元。删除set或surfaces并不会删除真实的几何或单元。
+43. 同一个surface中的单元应该是相容的，同维度，同阶插值，同为可变性或不可变形的。
+44. 推荐在assembly中定义set或surface。也可以在part下建立的set，在assembly中也会看到，会重命名，反之不会。例如在名为trussrod的part中建立名为Set-1的set，那么assembly中存在一个trussrod-3这样的instance，则对应的set名字为trussrod-3.Set-1，每个instance都会有对应的set。
+45. 施加荷载或边界条件等时，也会提示创建新的set或surface，如果取消勾选，也会创建内部set，但是不在CAE中显示（能够让用户使用CAE时不会眼花缭乱），导出的inp文件中会包含，关键字表示如下，因此后处理中可以查看到。
 
     ```shell
     *Nset, nset=_PickedSet2, internal, generate #generate表示通过数据行的等差数列生成。
        1,  396,    1
     ```
-43. 显示群组可以用来观察结构的内部，也可以用来进行施加载荷时方便选取，而不用建立set。它可以保存起来。
-44. ![image-20201026190047643](Abaqus.assets/image-20201026190047643.png)
-45. part模块可以使用view cut工具，来对零件裁切视图，来观察零件是实体还是薄壳。另一种方法是使用query information→geometry diagnostic，选择topology→solid cell和shell face，如果是没有进行partition的实体，则solid cell为1，shell face为0。如果是薄壳，则可能有多个shell face，但solid cell为0。可以观察输出区域的结果进行分析。
-46. partition一般是用来分隔part，进而给同一个part的不同区域分配不同的材料，截面等参数。也可以是为了提高网格质量而界定边界。因为在partition的边界处一定会产生网格节点。
-47. 未进行partition前，一个part由一个cell组成。对于非独立的instance，不能在assembly上进行partition，只能在对应的part上进行。对part切割之后，对应的所有instance都会被切割。
-48. partition有3种情况，edge，face，cell。分别产生新的点，线，面。
-49. 一个instance无论如何进行partition，都是相连的，划分网格后，节点是共用的。
-50. 进行显式分析时，要手动选择显式分析的单元，因为默认是Standard的。
-51. 使用embedded region构建钢筋混凝土构件时，可以打开透视，来选择混凝土内部的钢筋骨架。
-52. 对于金属冲压成型问题，不要求板件和模具一开始贴合，可以分离开，分析开始会快速推进，然后接触发生后就会产生小增量。
-53. 经常用到的sketch（例如多个part通过一个螺栓孔连接起来，都要进行拉伸切除），可以保存起来，后面可以载入到part中。
-54. sketch绘图中可以将不在绘图平面的edge投影到平面上，这方便进行定位，注意这些并不是参考几何。
-55. 拉伸时，可以扭转twist（需要在建模时添加一个单独的点，这个点会被当作旋转中心），也可以拔模draft。
-56. 3D的线可以被当成零件或用来放样，例如用二次曲线连接多个点，折线段或者从薄壳或实体零件的边转成的线。
+46. 显示群组可以用来观察结构的内部，也可以用来进行施加载荷时方便选取，而不用建立set。它可以保存起来。
+47. ![image-20201026190047643](Abaqus.assets/image-20201026190047643.png)
+48. part模块可以使用view cut工具，来对零件裁切视图，来观察零件是实体还是薄壳。另一种方法是使用query information→geometry diagnostic，选择topology→solid cell和shell face，如果是没有进行partition的实体，则solid cell为1，shell face为0。如果是薄壳，则可能有多个shell face，但solid cell为0。可以观察输出区域的结果进行分析。
+49. partition一般是用来分隔part，进而给同一个part的不同区域分配不同的材料，截面等参数。也可以是为了提高网格质量而界定边界。因为在partition的边界处一定会产生网格节点。
+50. 未进行partition前，一个part由一个cell组成。对于非独立的instance，不能在assembly上进行partition，只能在对应的part上进行。对part切割之后，对应的所有instance都会被切割。
+51. partition有3种情况，edge，face，cell。分别产生新的点，线，面。
+52. 一个instance无论如何进行partition，都是相连的，划分网格后，节点是共用的。
+53. 进行显式分析时，要手动选择显式分析的单元，因为默认是Standard的。
+54. 使用embedded region构建钢筋混凝土构件时，可以打开透视Toggle Global Translucency，来选择混凝土内部的钢筋骨架。
+55. 对于金属冲压成型问题，不要求板件和模具一开始贴合，可以分离开，分析开始会快速推进，然后接触发生后就会产生小增量。
+56. 经常用到的sketch（例如多个part通过一个螺栓孔连接起来，都要进行拉伸切除），可以保存起来，后面可以载入到part中。
+57. sketch绘图中可以将不在绘图平面的edge投影到平面上，这方便进行定位，注意这些并不是参考几何。
+58. 拉伸时，可以扭转twist（需要在建模时添加一个单独的点，这个点会被当作旋转中心），也可以拔模draft。
+59. 3D的线可以被当成零件或用来放样，例如用二次曲线连接多个点，折线段或者从薄壳或实体零件的边转成的线。
+60. 使用分离式方法对钢筋混凝土结构建模时，钢筋可以使用桁架来简化，和用梁的结构差别不大。桁架的section只需要提供截面积即可，而梁的section还需要提供具体的beam profile。
+61. 分离式方法中，钢筋和混凝土的耦合是通过embedded region约束来实现的，先选择所有钢筋为embedded region，然后选择混凝土本身为host region。
+62. 混凝土单元推荐选择C3D8I，不使用缩减积分，因为容易发生沙漏。
+63. 对梁进行受弯模拟时，可以施加平面外变形的约束，防止它发生屈曲。
+64. 集中质量的施加：先建立ref point，然后将其和结构的一部分耦合到一起，可以是rigid body或coupling，然后在interaction→special→inertia→point mass中添加。一般是各向同性，也可以设置各向异性，这样对于相同的加速度，各个方向的惯性力不一样，或者对于同样的力，各个方向的加速度不同。
+65. 一个方便记忆壳offset的方法是，将其当作要把section的哪个面和参考曲面重合。
+66. 对于多层框架结构，part都是一些梁柱的线，可以在assembly中组装好，然后merge到一起，这样就不用将重合节点tie到一起了。
+67. 由于abaqus早期没有CAE，全部依赖于用户手动编写inp文件，因此存在一些诸如`NFILL, ELGEN`的关键字，它们是用来简化用户输入的，这对于使用CAE的用户来说不是必须的。
 
 # 几何修复和虚拟拓扑
 
@@ -298,25 +319,36 @@
 15. 线弹性材料也可以是各向同性，正交各向异性的和各向异性。
 16. 胡克定律的一般形式：$\sigma=D^{el}:\varepsilon^{el}$。
 17. 定义塑性材料行为需要先定义弹性行为。表格数据的第一行为初始屈服应力和对应的0塑性应变。这是定义Mises塑性的步骤，Hill塑性需要使用suboption→potential选项。Mises用来对金属的初始等向屈服行为，Hill用于金属的初始非等向屈服行为，例如因为冷加工导致的，该模型假设非等向不介入材料的塑性变形，只能用于应变<5%的情况。
-18. ABAQUS可以建立材料库.lib文件，来共享材料数据，存储位置可以选择home（C:/user/xxx/abaqus_plugin目录下）和当前工作目录下的abaqus_plugin文件夹。
-19. 存放在home目录下，所有的cae工程都可以使用，如果存在当前目录下，则只有该cae工程可以使用。
-20. ![image-20201026152232425](Abaqus.assets/image-20201026152232425.png)
-21. ABAQUS对于3D的单元也是用截面来定义材料，选择均质homogeneous即可。壳单元截面包含材料，节点厚度和积分选项，梁单元截面包含截面形状和材料。
-22. 梁和壳都会提示选择截面积分的方法，对于线性分析，分析前积分就可以，非线性的话应选择分析中积分，因为截面性质会变化。
-23. 同一种材料可以用于不同的section。将section指定给part（或part中的单元构成的set region）之后，对应的part就有了材料和尺寸的定义。没有指定section的part会显示为白色，指定了1个section的为绿色，多个的为黄色。
-24. 想要显示壳单元的厚度和梁单元的截面，则需要在view→对应的display option中勾选下面的选项。只有在赋予了section后才可以看到。
-25. ![image-20201026154608506](Abaqus.assets/image-20201026154608506.png)
-26. 材料的方向对于实体单元默认使用全局直角坐标，而壳单元，则是采用在全局直角坐标在参考面上的投影，随着单元面的法向方向变化。
-27. 对于壳/膜单元，局部坐标系的1方向是全局X轴在单元参考面上的投影。参考面的法线方向（按照顶点顺序，右手定则）作为3方向，2方向由1和3方向确定。如果全局X轴和参考面法向很接近，则使用全局Z轴投影替代。如果是轴对称的壳/膜单元（模型为线段），局部坐标系1方向平行于r-z平面，2方向为环向，即+θ向。
-28. 对于梁/桁架单元，局部坐标系的1方向沿着单元的指向，由起止节点确定。
-29. 在几何非线性分析中，梁/桁架，壳/膜等单元的预设方向会随着单元的运动而运动。实体单元的则不会，始终和全局坐标系一致。
-30. 如果对单元定义了局部坐标系，则单元内的任意点都会应用该坐标系。除非在节点定义了局部坐标系，否则节点的123方向和整体坐标系平行。
-31. 实体单元如果发生了大转动，它的积分点的坐标系仍然是按照未变化全局坐标系来的，输出可能会不方便。用户可以为单元变量定义一个局部坐标系，该坐标系会跟随积分点旋转，方便输出。
-32. 自定义材料方向就是建立局部坐标系，它会影响材料性质的输入和结果分量的输出。自定义的坐标系都会跟随积分点转动。
-33. 支持的坐标系类型由直角，柱，球三种，其他的坐标系可以通过子程序设定。
-34. 应力应变的输出和材料方向有关。如果想要输出第二种图形，则要后处理中，在result option→transformation→user defined，指定自定义的坐标系，这相当于坐标变换，得到新坐标的分量。不过这对于不变量来说没有用，因为他们是标量，不依赖于坐标系。
-35. ![image-20200614230943958](Abaqus.assets/image-20200614230943958.png)
-36. 截面点就是厚度方向的积分点，一般使用simpson数值积分法，它和高斯积分的区别在于，高斯积分点都是在区间内不，simpson会用到边界的点，这样方便观察梁/壳表面的情况。
+18. 材料的损伤一般是指，应力软化（也就是应力应变曲线的下降段）和刚度损失（卸载时的刚度小于初始刚度）。应力软化并非是金属材料的颈缩段，后者是因为使用了名义应力应变曲线导致的，也就是应变局部化导致的，金属的真实应力应变曲线仍然是上升的。混凝土材料会出现真实的下降段。
+19. 塑性是指弹性到应力软件之间的区域，这还是上升阶段，只是没有弹性段的斜率大了。
+20. 对于包含颈缩段的工程应力应变曲线，要转化为真实应力应变曲线，应该分为两段：
+    1. 颈缩前，使用上述公式转换即可。
+    2. 颈缩后，找到破坏点的真实应力（破坏力/断口面积，后者需要测量），真实应变（使用上述公式转换），然后认为颈缩开始点到破坏点之间为直线。如果没有测量端口面积，则可以认为颈缩后为颈缩点的切线，或者使用幂函数关系插值。
+
+21. ![无标题](Abaqus.assets/无标题-1735044355658-1.png)
+22. 整体上看，真实应力应变曲线相比于工程应力应变曲线，会偏左上。
+23. 塑性定义的hardening rule对于单调加载（即不卸载）没有用。
+24. 推荐论文：`Constitutive Modeling of Structural Steels: Nonlinear Isotropic/Kinematic Hardening Material Model and Its Calibration`。
+25. ABAQUS可以建立材料库.lib文件，来共享材料数据，存储位置可以选择home（C:/user/xxx/abaqus_plugin目录下）和当前工作目录下的abaqus_plugin文件夹。
+26. 存放在home目录下，所有的cae工程都可以使用，如果存在当前目录下，则只有该cae工程可以使用。
+27. ![image-20201026152232425](Abaqus.assets/image-20201026152232425.png)
+28. ABAQUS对于3D的单元也是用截面来定义材料，选择均质homogeneous即可。壳单元截面包含材料，节点厚度和积分选项，梁单元截面包含截面形状和材料。
+29. 梁和壳都会提示选择截面积分的方法，对于线性分析，分析前积分就可以，非线性的话应选择分析中积分，因为截面性质会变化。
+30. 同一种材料可以用于不同的section。将section指定给part（或part中的单元构成的set region）之后，对应的part就有了材料和尺寸的定义。没有指定section的part会显示为白色，指定了1个section的为绿色，多个的为黄色。
+31. 想要显示壳单元的厚度和梁单元的截面，则需要在view→对应的display option中勾选下面的选项。只有在赋予了section后才可以看到。
+32. ![image-20201026154608506](Abaqus.assets/image-20201026154608506.png)
+33. 材料的方向对于实体单元默认使用全局直角坐标，而壳单元，则是采用在全局直角坐标在参考面上的投影，随着单元面的法向方向变化。
+34. 对于壳/膜单元，局部坐标系的1方向是全局X轴在单元参考面上的投影。参考面的法线方向（按照顶点顺序，右手定则）作为3方向，2方向由1和3方向确定。如果全局X轴和参考面法向很接近，则使用全局Z轴投影替代。如果是轴对称的壳/膜单元（模型为线段），局部坐标系1方向平行于r-z平面，2方向为环向，即+θ向。
+35. 对于梁/桁架单元，局部坐标系的1方向沿着单元的指向，由起止节点确定。
+36. 在几何非线性分析中，梁/桁架，壳/膜等单元的预设方向会随着单元的运动而运动。实体单元的则不会，始终和全局坐标系一致。
+37. 如果对单元定义了局部坐标系，则单元内的任意点都会应用该坐标系。除非在节点定义了局部坐标系，否则节点的123方向和整体坐标系平行。
+38. 实体单元如果发生了大转动，它的积分点的坐标系仍然是按照未变化全局坐标系来的，输出可能会不方便。用户可以为单元变量定义一个局部坐标系，该坐标系会跟随积分点旋转，方便输出。
+39. 自定义材料方向就是建立局部坐标系，它会影响材料性质的输入和结果分量的输出。自定义的坐标系都会跟随积分点转动。
+40. 支持的坐标系类型由直角，柱，球三种，其他的坐标系可以通过子程序设定。
+41. 应力应变的输出和材料方向有关。如果想要输出第二种图形，则要后处理中，在result option→transformation→user defined，指定自定义的坐标系，这相当于坐标变换，得到新坐标的分量。不过这对于不变量来说没有用，因为他们是标量，不依赖于坐标系。
+42. ![image-20200614230943958](Abaqus.assets/image-20200614230943958.png)
+43. 截面点就是厚度方向的积分点，一般使用simpson数值积分法，它和高斯积分的区别在于，高斯积分点都是在区间内不，simpson会用到边界的点，这样方便观察梁/壳表面的情况。
+44. 各向同性塑性相当于应力空间的屈服面关于静水压力轴是对称的。因此可以用拉压子午线来描述屈服面。到静压轴的径向距离是等效剪切应力的度量。一般模型都假设最初是各向同性的，不过可以通过随动强化发展称各向异性的，此时只要将屈服面沿背应力平移回来，仍然是关于静水轴对称的。
 
 # 分析步
 
@@ -369,7 +401,7 @@
 39. 频率提取分析步，由于时间步长为0，因此没有history数据。但是会产生field数据（例如振型），abaqus会自动为摄动分析和通用分析步分别建立两个输出请求。
 40. 输出请求默认会对其后的所有分析步都有效，也可以在分析步之间改变请求的变量和频率。
 41. 输出的频率设定：
-    1. Last increment，最后一个增量，即仅在每个step的最后一个增量输出一次。
+    1. Last increment，最后一个增量，即仅在每个step的最后一个增量输出一次。这个在Explicit中没有。
     2. Every n increments，每n个增量步输出一次。
     3. Evenly spaced time intervals，一个step内输出固定的次数，时间平均的概念。
     4. Every x units of time，每隔x时长输出一次。
@@ -381,64 +413,72 @@
 46. 阶跃振幅虽然看从0到第一个增量之间是斜线，而非一开始就是最大振幅值，实际上这对于模拟是没有区别的，因为幅值只会在增量点上被取值，增量点之间的变化是没有用的（但是定义振幅的点的变化会有用，如果增量点比较密集，就会感知到振幅的变化）。而且无论多小的初始增量，阶跃振幅都能保证第一个增量的幅值为1。人工构造阶跃振幅时，用两点（0，1）和（1，1）即可。
 47. 如果定义的幅值是高频变化的，那么为了确保这些变化被真实的施加在结构上，需要确保结构的最大增量不能太大，这个过程相当于对幅值进行采样。因此可以使用香农的采样定理来确定最大增量，1/最大增量>2*幅值的最高频率，幅值的最高频率可以用其中的最小时间间隔的倒数代替，也可以对幅值进行傅里叶分析来测试。
 48. abaqus不能进行像XY data一样，对幅值进行运算，只能通过base值进行缩放。用户可以自己通过第三方软件构造好，然后输入。
-49. 阶跃载荷一般用在有时间意义的程序中，例如瞬态分析。斜坡载荷一般用在没有时间意义的程序中，例如静态分析等。
-50. 显式分析默认是阶跃，隐式分析默认是斜坡，不过都可以通过amplitude进行修改。可以让显式分析使用逐渐变化的荷载（tabular，设置两个点，ABAQUS会自动在两者之间进行插值），实现准静态分析。
-51. 在瞬态分析中可以定义amplitude来获得任意随时间变化的荷载。
-52. 如果荷载不是空间均匀分布的，可以使用analytical field（解析场）或discrete field（离散场）来设置。前者使用数学表达式，后者根据指定点的值来插值。
-53. 荷载和边界条件一旦设定，默认在所有的step都生效，可以设定无效和恢复。
-54. predefined field是设置初始状态的，例如初始速度或初始应力或温度场。
-55. 预设的位移或速度在边界条件中设置，而非荷载。
-56. 在边界条件中进行位移加载时。设置为0的位移和不设置约束不一样，前者表示固定位置不懂，后者表示可以自由运动。对于垂直下压的刚性面，不仅要设置下压的位移，其他方向的位移要约束住（勾选即可），否则会乱动。
-57. pressure的荷载可以施加在实体的表面，正值表示压力，和面的法线反向。
-58. <img src="Abaqus.assets/image-20241212152256464.png" alt="image-20241212152256464" style="zoom:67%;" />
-59. 金属成型中，第一步使用位移控制加载，第二步不应该是将下压轴的位移设置为0，而是deactivate位移约束，让工件自由回弹，或者释放下压轴的位移约束，保持其他轴的约束，避免工件飞走。
-60. 分析步中可以设置如果某个region完全进入塑性阶段，则停止当前分析步。在Edit step→Stop when region xxx is fully plastic。
-61. 
+49. 幅值可以由外部文件给出，例如`*AMPLITUDE, NAME=HAMP, INPUT=koyna_haccel.inp`。.inp文件中内容的布局就和关键字的数据行一样，一行8个数，逗号分隔，一个时间，一个幅值，依此类推。
+50. 阶跃载荷一般用在有时间意义的程序中，例如瞬态分析。斜坡载荷一般用在没有时间意义的程序中，例如静态分析等。
+51. 显式分析默认是阶跃，隐式分析默认是斜坡，不过都可以通过amplitude进行修改。可以让显式分析使用逐渐变化的荷载（tabular，设置两个点，ABAQUS会自动在两者之间进行插值），实现准静态分析。
+52. 在瞬态分析中可以定义amplitude来获得任意随时间变化的荷载。
+53. 如果荷载不是空间均匀分布的，可以使用analytical field（解析场）或discrete field（离散场）来设置。前者使用数学表达式，后者根据指定点的值来插值。
+54. 荷载和边界条件一旦设定，默认在所有的step都生效，可以设定无效和恢复。
+55. predefined field是设置初始状态的，例如初始速度或初始应力或温度场。
+56. 预设的位移或速度在边界条件中设置，而非荷载。
+57. 在边界条件中进行位移加载时。设置为0的位移和不设置约束不一样，前者表示固定位置不懂，后者表示可以自由运动。对于垂直下压的刚性面，不仅要设置下压的位移，其他方向的位移要约束住（勾选即可），否则会乱动。
+58. pressure的荷载可以施加在实体的表面，正值表示压力，和面的法线反向。
+59. <img src="Abaqus.assets/image-20241212152256464.png" alt="image-20241212152256464" style="zoom:67%;" />
+60. 金属成型中，第一步使用位移控制加载，第二步不应该是将下压轴的位移设置为0，而是deactivate位移约束，让工件自由回弹，或者释放下压轴的位移约束，保持其他轴的约束，避免工件飞走。
+61. 分析步中可以设置如果某个region完全进入塑性阶段，则停止当前分析步。在Edit step→Stop when region xxx is fully plastic。
+62. 
+63. 
 
 # 荷载与边界条件
 
 1. 集中力和集中力矩都只能施加在节点或参考点上，如果是几何非线性问题，节点在分析中可能经历大转动，如果需要让荷载方向随节点转动而转动，Follow nodal rotation，则可也勾选该功能，应该视情况来决定。Shell edge load中自动是follow rotation。
 2. shell edge load荷载只能对曲面的边施加，也就是要用壳单元模拟的结构的边缘施加。有3个方向，分别使得shell受压（normal），受弯（transverse），受剪（shear）的分布力，还有一个沿edge方向的分布力矩。单位都是单位长度的力或力矩。
 3. 柱和球坐标系中的点的坐标值或向量的坐标中角度的单位都是deg，而非弧度。abaqus中没有明确指明的角度单位都是deg。
-4. 
-5. 
+4. 重力荷载无法在initial 分析步施加，需要单独一个分析步，静态的即可。
+5. 对结构进行地震分析时，需要在initial step中约束住支座其他方向的自由度，然后在动态分析步中为特定自由度设置加速度/速度/位移的边界条件。
 6. 
 7. 
 8. 
 9. 
 10. 
-11. 
 
 # 重启动分析
 
 1. 重启动分析允许用户从之前分析的某个时刻继续分析，3大应用场景：
 
-   1. 继续因人为终止的分析，例如包含多个分析步的变参数分析，之前的若干分析步如果相同，就没必要重复分析，可以直接读取中间某步的结果，而只计算不一样的后续步骤。有时对于大模型的分析，需要先观察一下求解情况，来修改求解设置或荷载/边界条件。例如对于包含接触的问题，如果只有分析的后一部分有明显的接触行为，此时可以共享前一部分的结果，后一部分可以使用多种接触属性来分析，观察接触属性对结果的影响。
+   1. 继续因人为终止的分析，例如包含多个分析步的变参数分析，之前的若干分析步如果相同，就没必要重复分析，可以直接读取中间某步的结果，而只计算不一样的后续步骤。有时对于大模型的分析，需要先观察一下求解情况，来修改求解设置或荷载/边界条件。例如对于包含接触的问题，如果只有分析的后一部分有明显的接触行为，此时可以共享前一部分的结果，后一部分可以使用多种接触属性来分析，观察接触属性对结果的影响。这是只需要让abaqus在特定分析步的结束时刻输出重启动文件即可。
    2. 继续因意外终止的分析，例如断电，系统崩溃，磁盘空间不足，如果以一定的频率输出一些可以用于重启动分析的数据，就可以避免从头开始计算。
    3. 有时需要在隐式和显式求解器之间接力分析，此时需要互相读取对方的结果，这样可以充分利用两个求解器各自的优势。例如金属冲压涉及复杂接触，使用Explicit分析，后续回弹可以使用Standard分析。这里的重启动输出设置一般只输出最后结果即可，但是不能根据正常分析输出的文件接续分析，因为这相比重启动分析，少了很多文件。
 
-2. 在原始模型中创建输出请求，Step→output→restart request，按照一定规律输出用于重启动的文件，对应于关键字`*RESTART, WRITE`。Standard还可以指定每多少个增量输出一次。Explicit只能指定分析步内一共输出多少次（interval）重启动文件，因为它的增量数量太多了，不适合用于控制输出，而且分析前用户也不知道增量是多大。
-3. 文件：
+2. 创建分析步后，会自动产生该分析步内的restart request，且不能新增。在Step→output→restart request中查看，对应的关键字为`*Restart, write, frequency=0`，可以在Edit keyword中查看到。frequency=0表示不输出，该参数的默认值为1表示每个增量都输出重启动文件，但是对于CAE，默认生成的参数值为0，并非该参数的默认值。只要frequency≠0，就会在分析步末尾输出，因此如果只想在分析步末尾输出，可以将该值设置成很大。
+3. 新的重启动文件默认不会覆盖旧的，可以使用overlay参数来覆盖，不过也只能覆盖同一个分析步的，不同分析步可以有不同的overlay参数值。需要注意的是，一个job的多次输出重启动文件，并不会真正产生多个.res文件。
+4. Standard还可以指定每多少个增量输出一次。Explicit只能指定分析步内一共输出多少次（NUMBER INTERVAL参数）重启动文件，因为它的增量数量太多了，不适合用于控制输出，而且分析前用户也不知道增量是多大。指定NUMBER INTERVAL而非FREQUENCY是co-simulation推荐的方法。NUMBER INTERVAL和FREQUENCY是互斥的，只能指定一个，二者的默认值都是0。
+5. 文件：
 
    ```shell
-   .res #restart
+   .res #restart，文件大小上限为16GB
    .abq .mdl .pac .stt #analysis database
    .prt #part
    .sel #selected results
    .odb #output database
    ```
-4. 读取相关数据重启动分析，使用`RESTART, READ`，需要指定分析步和interval编号。还可以选择是否要继续指定分析步或者终止它。
-5. 重启动的分析必须要和原始分析使用相同的模型，可以在CAE中copy model。不能修改在原始模型中定义的几何，网格，材料，surface等。不能修改在重启位置前的任何分析步，荷载，边界条件，场或interaction。
-6. 在复制后的model上右键→Edit Attributes，为Read data from job指定要读取的那个job的名称（通过它可以找到所有的重启动所需的文件，因为只有后缀名不同）。然后指定重启动的step，还可以指定是从该step的结尾开始继续，还是某个increment，interval，iteration等（具体的含义取决于该job中定义restart request时的情况）。如果从中途继续，还需要指定是否继续完成当前step，或者跳过直接进行下一个step的分析。
-7. 可以根据需要添加新的step，不过需要注意新step的时间长度。对于原始分析中依据total time定义的amplitude，有必要的话也要新建替代，新建的可能需要基于total time。
-8. 最后创建新的job，在Edit job→Submission→Job type选择restart。
-9. 从Explicit传递数据给Standard时，需要保持几何非线性的开启。导入先前分析结果需要使用Create Predefine Field，在initial step，other→Initial state。然后输入job名称，step，frame编号。如果勾选了update reference configuration，则会以变形后的构型作为新的参考构型，否则以最开始的构型作为参考构型。创建job时不再使用restart，而是full analysis。
-10. 将两个重启动分析的odb文件合并，打开Visulization：
+6. 读取相关数据重启动分析，使用`RESTART, READ`，需要指定分析步和interval编号。还可以选择是否要继续指定分析步或者终止它。
+7. 重启动的分析必须要和原始分析使用相同的模型，推荐在CAE中copy model。不能修改在原始模型中定义的几何，网格，材料，surface等。不能修改在重启位置前的任何分析步，荷载，边界条件，场或interaction。
+8. 在复制后的model上右键→Edit Attributes，为Read data from job指定要读取的那个job的名称（通过它可以找到所有的重启动所需的文件，因为只有后缀名不同）。然后指定重启动的step，还可以指定是从该step的结尾开始继续，还是某个increment，interval，iteration等（increment是对standard来说，interval是对explicit来说，iteration是对direct cyclic分析来说）。如果从中途继续，还需要指定是否继续完成当前step，或者跳过当前步直接进行下一个step的分析（terminate）。
+9. 可以根据需要添加新的step，不过需要注意新step的时间长度。对于原始分析中依据total time定义的amplitude，有必要的话也要新建替代，新建的可能需要基于total time。
+10. 最后创建新的job，在Edit job→Submission→Job type选择restart。
+11. 后处理中，重启动产生的odb文件会从重启动的位置记录step和increment。
+12. 从Explicit传递数据给Standard时，需要保持几何非线性的开启。导入先前分析结果需要使用Create Predefine Field，在initial step，other→Initial state。然后输入job名称，step，frame编号。如果勾选了update reference configuration，则会以变形后的构型作为新的参考构型，否则以最开始的构型作为参考构型。创建job时不再使用restart，而是full analysis。
+13. 将两个重启动分析的odb文件合并，打开Visulization：
 
     ```shell
-    abaqus restartjoin originodb=name_1 restartodb=name_2 history int
+    abaqus restartjoin originodb=name_1 restartodb=name_2 history
+    #copyoriginal参数，这样会新建一个odb（名称前缀Restart_），而不是直接修改originodb文件。
+    #history参数，也会复制history data
+    #compressresult参数，压缩结果
     ```
-11. 
+14. 重启动文件和inp，odb文件一样，都不会保存用户子程序，如果原始分析包含任何用户子程序，则必须在重新启动中再次包含这些子程序。子程序可以在重新启动时进行修改，但应谨慎进行修改，因为可能会使重新启动的解无效。
+15. 无法在线性摄动步中输出重启动文件。
 
 # 单元
 
@@ -545,10 +585,9 @@
 85. ![image-20241214105211329](Abaqus.assets/image-20241214105211329.png)
 86. 可以使用query information→mesh gap/intersection来侦测网格间隙和干涉。abaqus不支持几何干涉侦测，只能对划分后的网格进行侦测。
 87. Mesh菜单栏中可以将网格保存到part，也就是orphan网格。还可以将网格和几何取消关联，这样就会产生orphan，之后再对几何进行重新划分，会和原有网格重叠。可以使用query diagnostic→Unassociated geometry中高亮显示未关联的。
-88. 
+88. 在划分四面体网格时，默认会将内部的网格密度设置的比表面的粗糙（Mesh control→Tet→Free→Non-standard interior element growth），这是为了减少单元的数量，因为对大部分的材料来说，最大应力位置很大可能出现在外表面。
 89. 
 90. 
-91. 
 
 # 自适应网格划分
 
@@ -589,82 +628,86 @@
 
 1. 求解过程中的信息会输出到jobname.sta，jobname.dat或jobname.msg文件，同时也会显示在monitor框内，最上方的迭代细节保存在.sta文件中。
 
-2. increment是求解时的概念，frame是后处理时的概念，一般来说，每个frame都对应某个increment的结果。
+2. 可以在求解过程中打开odb，查看结果，如果后续又写入frame，不会自动更新，需要按下播放按钮的下一帧来重新载入。
 
-3. 如果显式分析中单元尺寸变化不大，则可以认为总时间为：monitor第一行显示的时间*20。因为Explicit中field输出请求默认是均分20段。Standard的默认是每个Increment输出一次。
+3. increment是求解时的概念，frame是后处理时的概念，一般来说，每个frame都对应某个increment的结果。
 
-4. 对于动力分析，可以观察到动能和内能总是此消彼长的，同步反向变化。
+4. 如果显式分析中单元尺寸变化不大，则可以认为总时间为：monitor第一行显示的时间*20。因为Explicit中field输出请求默认是均分20段。Standard的默认是每个Increment输出一次。
 
-5. viewport的legend，title block，status block的显示，字体大小都在Viewport→Viewport Annotation Options中设置。
+5. 对于动力分析，可以观察到动能和内能总是此消彼长的，同步反向变化。
 
-6. ABAQUS使用canvas画布来摆放多个viewport。
+6. viewport的legend，title block，status block的显示，字体大小都在Viewport→Viewport Annotation Options中设置。
 
-7. 视图中的部分，在打印出图时会用到：
+7. ABAQUS使用canvas画布来摆放多个viewport。
+
+8. 视图中的部分，在打印出图时会用到：
 
    1. viewport decorations→title border
    2. viewport annotations→legend, state block, title block, view orientation triad, and 3D compass
 
-8. 链接的窗口只能有一个，打开该功能后，勾选需要链接的窗口即可。链接的窗口可以选择要同步的选项。一般来说就同步位置和视角就行了。
+9. 链接的窗口只能有一个，打开该功能后，勾选需要链接的窗口即可。链接的窗口可以选择要同步的选项。一般来说就同步位置和视角就行了。
 
-9. <img src="Abaqus.assets/image-20210320111520801.png" alt="image-20210320111520801" style="zoom: 67%;" />
+10. <img src="Abaqus.assets/image-20210320111520801.png" alt="image-20210320111520801" style="zoom: 67%;" />
 
-10. common option 可以设置显示的透明度和是否显示网格。如果网格过于密集，可以取消显示网格，选择visible edges→Feature edge即可，这样会使得云图变亮很多。
+11. common option 可以设置显示的透明度和是否显示网格。如果网格过于密集，可以取消显示网格，选择visible edges→Feature edge即可，这样会使得云图变亮很多。
 
-11. ODB display option可以显示梁/壳的实际形状，显示边界条件和点单元，显示constraints和coupling，还可以对模型进行镜像或阵列（适用于对称模型），扫掠或拉伸（适用于轴对称或平面应力等）。
+12. ODB display option可以显示梁/壳的实际形状，显示边界条件和点单元，显示constraints和coupling，还可以对模型进行镜像或阵列（适用于对称模型），扫掠或拉伸（适用于轴对称或平面应力等）。
 
-12. 如果要同时查看变形和未变形状态，可以先选中 Allow Multiple Plot States，然后再选中变形和未变形的状态。白色表示未变形，绿色表示变形后的状态。
+13. 如果要同时查看变形和未变形状态，可以先选中 Allow Multiple Plot States，然后再选中变形和未变形的状态。白色表示未变形，绿色表示变形后的状态。
 
-13. symbol可以显示箭头，例如反力大小和方向。还可以用Material Orientation显示材料方向，这样可以确定shell的top和bottom。
+14. symbol可以显示箭头，例如反力大小和方向。还可以用Material Orientation显示材料方向，这样可以确定shell的top和bottom。
 
-14. 在后处理中显示边界条件，View→ODB Display Option→Entity Option。
+15. 在后处理中显示边界条件，View→ODB Display Option→Entity Option。
 
-15. View cut可以切开模型，显示内部的云图，这里也可以输出截面合力，合力矩（但是不支持对壳，梁单元输出，它们具有单独的SF场输出）。还可以创建关于当前显示云图的isosurface等值面，如果更换了云图变量，需要进行edit中update变量。这可以用来寻找模型内部不可见的最大应力值的区域。
+16. 如果要查看梁/桁架单元的截面合力或合力矩，可以勾选SF（section force and moment）。如果要查看实体或壳单元的节点力，可以勾选NFORC（Nodal forces due to element stress）。
 
-16. 可以利用显示群组，只显示一部分，然后输出这部分的截面合力，合力矩。
+17. View cut可以切开模型，显示内部的云图，这里也可以输出截面合力，合力矩（但是不支持对壳，梁单元输出，它们具有单独的SF场输出），free body plot option设置中可以输出合力或分量形式，分量默认是按照全局坐标系分解，可以设置在自定义坐标系上分解。还可以设置显示群组，只显示一部分构件，这样得到的合力/矩就只和显示的部分有关，否则是所有切开截面的合力。还可以在保持切开的状态下，输出截面合力/矩随时间变化的结果，XY data→Free body。
 
-17. 将数据以报告的形式输出到文本文件中，Report→Field Output。
+18. 还可以创建关于当前显示云图的isosurface等值面，如果更换了云图变量，需要进行edit中update变量。这可以用来寻找模型内部不可见的最大应力值的区域。
 
-18. 绘图产生的各种数据，可以用Report→XY，将内容输出到rpt文件中，方便导入到专业绘图软件中绘图。
+19. 可以利用显示群组，只显示一部分，然后输出这部分的截面合力，合力矩。
 
-19. 第一次预览动画的时候会卡，因为在同步生成动画，走完整个steptime后就会平顺些。菜单来animation→save as可以保存动画，推荐使用AVI，编码器选择Microsoft Video 1，默认的编码器有问题，质量拉满。实际的帧率由frame rate设置，而非播放的快慢。
+20. 将数据以报告的形式输出到文本文件中，Report→Field Output。
 
-20. 动画可以和XY-data同时播放，包括combine后不显含时间的曲线，即在animation options→viewports勾选两个视口，然后播放动画即可同步。
+21. 绘图产生的各种数据，可以用Report→XY，将内容输出到rpt文件中，方便导入到专业绘图软件中绘图。
 
-21. 在显式分析的后处理中，位移形状缩放因子默认为1。
+22. 第一次预览动画的时候会卡，因为在同步生成动画，走完整个steptime后就会平顺些。菜单来animation→save as可以保存动画，推荐使用AVI，编码器选择Microsoft Video 1，默认的编码器有问题，质量拉满。实际的帧率由frame rate设置，而非播放的快慢。
 
-22. 有多个零件发生接触时，如果缩放因子过大， 会观察到穿透，这只是显示错误。
+23. 动画可以和XY-data同时播放，包括combine后不显含时间的曲线，即在animation options→viewports勾选两个视口，然后播放动画即可同步。
 
-23. 如果在通用分析步中间包含频率提取分析步，则在后处理播放动画时，应该将其屏蔽掉，因为他们的物理意义不同。频率提取分析步在后处理中显示的也是mode，其他的都是increment。
+24. 在显式分析的后处理中，位移形状缩放因子默认为1。
 
-24. 频率提取分析步的云图中，每一阶模态会显示Value（特征值）和Freq（频率，单位是Hz）。二者的关系是$Value=(2\pi\cdot Freq)^2$。显示的云图内容为位移，最大值为1，它是归一化的。
+25. 有多个零件发生接触时，如果缩放因子过大， 会观察到穿透，这只是显示错误。
 
-25. history会输出位移-时间，应力分量-时间的曲线，如果要输出位移-力的曲线，则应该将二者combine起来。先后选择要作为X和Y的数据，然后右键save as，勾选combine(XY，XY)即可。
+26. 如果在通用分析步中间包含频率提取分析步，则在后处理播放动画时，应该将其屏蔽掉，因为他们的物理意义不同。频率提取分析步在后处理中显示的也是mode，其他的都是increment。
 
-26. 也可以先分别save as 保存两个曲线，然后创建一个新的曲线，operate on XY data。这些函数都是对纵坐标值进行运算，如果要对横坐标运算，需要先调用swap函数。这里还可以滤波。
+27. history会输出位移-时间，应力分量-时间的曲线，如果要输出位移-力的曲线，则应该将二者combine起来。先后选择要作为X和Y的数据，然后右键save as，勾选combine(XY，XY)即可。
 
-27. 很多导出量（例如应力，应变）都是在积分点上求解出来的，不过还是根据节点的位移求解的，因为使用了高斯积分，因此积分点的导出量的精度更高。积分点在单元内部，单元的node值是从积分点外插得到的。同一个node属于多个element，因此多个单元都在该node有一个外插值，可以设置平均算法来获得node的值。
+28. 也可以先分别save as 保存两个曲线，然后创建一个新的曲线，operate on XY data。这些函数都是对纵坐标值进行运算，如果要对横坐标运算，需要先调用swap函数。这里还可以滤波。
 
-28. 默认的阈值是75%。表示如果不同单元得到的node值的最大和最小值差异比例小于75%，就平均，否则就不平均。阈值为0%表示无论差异多小，都不会平均，这样会看到云图有间断，100%表示无论差异多大，都会平均。
+29. 很多导出量（例如应力，应变）都是在积分点上求解出来的，不过还是根据节点的位移求解的，因为使用了高斯积分，因此积分点的导出量的精度更高。积分点在单元内部，单元的node值是从积分点外插得到的。同一个node属于多个element，因此多个单元都在该node有一个外插值，可以设置平均算法来获得node的值。
 
-29. 对于应力集中的区域，应该进行加密，而不是平均，因为平均的结果可信度较低。加密网格后，平均与否对于结果的影响会变小。
+30. 默认的阈值是75%。表示如果不同单元得到的node值的最大和最小值差异比例小于75%，就平均，否则就不平均。阈值为0%表示无论差异多小，都不会平均，这样会看到云图有间断，100%表示无论差异多大，都会平均。
 
-30. 应力奇异：随着网格密度的增加，特定位置的应力持续增加无法收敛的情况。经常发生在单点受力，尖锐转角，单点接触，单点约束的情况。尖锐转角可以用圆角过度来缓解。单点受力和约束可以用coupling来缓解。
+31. 对于应力集中的区域，应该进行加密，而不是平均，因为平均的结果可信度较低。加密网格后，平均与否对于结果的影响会变小。
 
-31. 如果应力奇异发生在不重要的位置，可以忽略，因为它是数值计算造成的，并非真实，可以参考位移场，因为它比应力更可靠。
+32. 应力奇异：随着网格密度的增加，特定位置的应力持续增加无法收敛的情况。经常发生在单点受力，尖锐转角，单点接触，单点约束的情况。尖锐转角可以用圆角过度来缓解。单点受力和约束可以用coupling来缓解。
 
-32. 如果应力奇异的地方很重要，则需要圆角过渡，同时进行子模型分析。先用粗略网格分析，作为奇异部分子模型的边界条件，用细化网格分析，这样可以得到收敛解。
+33. 如果应力奇异发生在不重要的位置，可以忽略，因为它是数值计算造成的，并非真实，可以参考位移场，因为它比应力更可靠。
 
-33. ![image-20241214121746966](Abaqus.assets/image-20241214121746966.png)
+34. 如果应力奇异的地方很重要，则需要圆角过渡，同时进行子模型分析。先用粗略网格分析，作为奇异部分子模型的边界条件，用细化网格分析，这样可以得到收敛解。
 
-34. 差异比例的计算方法：(节点上各个单元外插的最大值-节点上各个单元外插的最小值)/(模型区域内最大值-模型区域内最小值)。默认的模型区域是截面性质相同的区域。还可以选择为elementset或显示群组。
+35. ![image-20241214121746966](Abaqus.assets/image-20241214121746966.png)
 
-35. <img src="Abaqus.assets/image-20200616011552372.png" alt="image-20200616011552372" style="zoom:80%;" />
+36. 差异比例的计算方法：(节点上各个单元外插的最大值-节点上各个单元外插的最小值)/(模型区域内最大值-模型区域内最小值)。默认的模型区域是截面性质相同的区域。还可以选择为elementset或显示群组。
 
-36. <img src="Abaqus.assets/image-20200616012007640.png" alt="image-20200616012007640" style="zoom: 80%;" />
+37. <img src="Abaqus.assets/image-20200616011552372.png" alt="image-20200616011552372" style="zoom:80%;" />
 
-37. Query information→probe value，使用探针查看单元或节点等的数据时，可以在积分点上查看，可以在单元的中心Centroid查看，也可以是单元的节点，也可以是单元的面face。
+38. <img src="Abaqus.assets/image-20200616012007640.png" alt="image-20200616012007640" style="zoom: 80%;" />
 
-38. ```shell
+39. Query information→probe value，使用探针查看单元或节点等的数据时，可以在积分点上查看，可以在单元的中心Centroid查看，也可以是单元的节点，也可以是单元的面face。
+
+40. ```shell
     #单元的积分点
     Part Instance  Element ID        Type     Int. Pt.     S, Mises
     ---------------------------------------------------------------------------
@@ -703,49 +746,53 @@
     
     ```
 
-39. XYdata输出场变量时，如果勾选积分点，则应选择单元，如果勾选unique nodal，则应勾选节点。
+41. XYdata输出场变量时，如果勾选积分点，则应选择单元，如果勾选unique nodal，则应勾选节点。
 
-40. Report输出中，Element Nodal表示每个单元的节点，这个是一个二级表单的形式展示的，单元共用的节点会出现多次。Unique Nodal是全局编号，只有一级，和单元无关，不会重复。Centroid表示单元的形心，也不会重复。
+42. Report输出中，Element Nodal表示每个单元的节点，这个是一个二级表单的形式展示的，单元共用的节点会出现多次。Unique Nodal是全局编号，只有一级，和单元无关，不会重复。Centroid表示单元的形心，也不会重复。
 
-41. <img src="Abaqus.assets/image-20210319145101051.png" alt="image-20210319145101051" style="zoom:80%;" />
+43. <img src="Abaqus.assets/image-20210319145101051.png" alt="image-20210319145101051" style="zoom:80%;" />
 
-42. 对于两个相邻的C3D20R单元（一共有2x2x2=8个积分点）来说，element Nodal是按照单元来组织的，2个单元，每个20个，但是其中会有重复的，相邻的face上的所有Node都有重复。而Unique Nodal是不考虑单元，只考虑这些node，不重复出现。一共有2x20-8=32个。
+44. 对于两个相邻的C3D20R单元（一共有2x2x2=8个积分点）来说，element Nodal是按照单元来组织的，2个单元，每个20个，但是其中会有重复的，相邻的face上的所有Node都有重复。而Unique Nodal是不考虑单元，只考虑这些node，不重复出现。一共有2x20-8=32个。
 
-43. 对于壳体，后处理时可以显示section上不同的point，顶部，底部的数据等。如果是多层复合材料，则要选择plies。因为壳在受弯时，一个面受拉，另一个面受压，应选择正确的location显示。
+45. 对于壳体，后处理时可以显示section上不同的point，顶部，底部的数据等。如果是多层复合材料，则要选择plies。因为壳在受弯时，一个面受拉，另一个面受压，应选择正确的location显示。
 
-44. ![image-20200616011256150](Abaqus.assets/image-20200616011256150.png)
+46. ![image-20200616011256150](Abaqus.assets/image-20200616011256150.png)
 
-45. 默认的field输出请求只会输出top和bottom截面点的结果，如果需要特定截面点的值，需要在输出请求中设置，Outputs at shell，beam，and layerd section points→Specify，例如1,2,3,4,5。这里的截面点编号需要在壳或梁的总截面点数量范围内。
+47. 默认的field输出请求只会输出top和bottom截面点的结果，如果需要特定截面点的值，需要在输出请求中设置，Outputs at shell，beam，and layerd section points→Specify，例如1,2,3,4,5。这里的截面点编号需要在壳或梁的总截面点数量范围内。
 
-46. 后处理中创建的XY表格，都是保存在session中，而不是ODB结果文件中，因为ODB文件一般都是以只读的形式打开的。
+48. 后处理中创建的XY表格，都是保存在session中，而不是ODB结果文件中，因为ODB文件一般都是以只读的形式打开的。
 
-47. ![image-20210319151834552](Abaqus.assets/image-20210319151834552.png)
+49. ![image-20210319151834552](Abaqus.assets/image-20210319151834552.png)
 
-48. ABAQUS可以将用户自己生成XY data存放在当前的session中，不过下次再打开odb文件默认看不见，需要载入之前保存的session。
+50. ABAQUS可以将用户自己生成XY data存放在当前的session中，不过下次再打开odb文件默认看不见，需要载入之前保存的session。
 
-49. 另一种方法是将数据其存放到odb文件中，右键save as，然后在XY Data Manager中选择Copy to ODB就可以了。但是ABAQUS在打开odb文件时（从job→result打开），默认都是以只读的方式打开，这样能够防止对数据进行错误修改，因此不能存储新的东西。应该重新使用非只读的打开方式。也可以将odb中保存的XYdata load到session中。
+51. 另一种方法是将数据其存放到odb文件中，右键save as，然后在XY Data Manager中选择Copy to ODB就可以了。但是ABAQUS在打开odb文件时（从job→result打开），默认都是以只读的方式打开，这样能够防止对数据进行错误修改，因此不能存储新的东西。应该重新使用非只读的打开方式。也可以将odb中保存的XYdata load到session中。
 
-50. abaqus提供了插件（Plug-ins→Tools→Excel Utilities），可以将XY data批量导出到Excel中，反之也可以，格式为XYXY……。
+52. abaqus提供了插件（Plug-ins→Tools→Excel Utilities），可以将XY data批量导出到Excel中，反之也可以，格式为XYXY……。
 
-51. XY data可以是空间位置的函数，例如创建path（菜单栏→tools→path，可以使用node-list），然后输出随真实距离（或者节点顺序，特定坐标，正规化后的距离）变化的场值。有必要的话，应该勾选Include intersection和Undeformed。
+53. XY data可以是空间位置的函数，例如创建path（菜单栏→tools→path，可以使用node-list），然后输出随真实距离（或者节点顺序，特定坐标，正规化后的距离）变化的场值。有必要的话，应该勾选Include intersection和Undeformed。
 
-52. XY data可以是关于Thickness的，这是专门为shell服务的，默认会将厚度作为纵轴（默认是0到5，表示第0到5个积分点，0号积分点在SNEG上，也就是bottom面），物理量作为X轴，如果需要反转，可以使用swap函数。
+54. XY data可以是关于Thickness的，这是专门为shell服务的，默认会将厚度作为纵轴（默认是0到5，表示第0到5个积分点，0号积分点在SNEG上，也就是bottom面），物理量作为X轴，如果需要反转，可以使用swap函数。
 
-53. 如果要模型的不同部分显示不同的内容，例如被压部分显示应力，压头部分显示为透明的。这是可以将他们分别加入不同的显示群组，然后在odb display group manager中lock锁住状态。
+55. 如果要模型的不同部分显示不同的内容，例如被压部分显示应力，压头部分显示为透明的。这是可以将他们分别加入不同的显示群组，然后在odb display group manager中lock锁住状态。
 
-54. view→tool bar→color code可以为不同的part或材料设置不同的颜色，一般在显示多刚体机构运动时使用。
+56. view→tool bar→color code可以为不同的part或材料设置不同的颜色，一般在显示多刚体机构运动时使用。
 
-55. view→tool bar→view option可以设置是否开启透视。
+57. view→tool bar→view option可以设置是否开启透视。
 
-56. 后处理中观察等效塑性应变PEEQ，它只能增大，且卸载后不会不会变小。
+58. 后处理中观察等效塑性应变PEEQ，它只能增大，且卸载后不会不会变小。
 
-57. session中可以保存的内容如下，主要是用户创建的东西，或显示的设置，可以将其保存到.xml文件，.cae文件或.odb文件。
+59. session中可以保存的内容如下，主要是用户创建的东西，或显示的设置，可以将其保存到.xml文件，.cae文件或.odb文件。
 
-58. <img src="Abaqus.assets/image-20241218194405039.png" alt="image-20241218194405039" style="zoom: 80%;" />
+60. <img src="Abaqus.assets/image-20241218194405039.png" alt="image-20241218194405039" style="zoom: 80%;" />
 
-59. 
+61. 后处理中输出S11等分量时，对于壳/梁，是将张量在各自的坐标系进行分解，并非一个统一的坐标系。
 
-60. 
+62. 使用弧长法可以在Standard中追踪结构的软化行为。
+
+63. riks使用弧长法进行分析，是按照弧长arch length输出，而非时间。因此在后处理中，提取的各种变量都是随弧长变化，而非时间，因此无法和其他以时间为横坐标的分析步一同绘制。
+
+64. 实际的荷载等于LPF和施加的参考荷载的乘积，这一点类似于线性屈曲分析。
 
 # 约束
 
@@ -836,11 +883,15 @@
 
     3. 循环对称模型比较特殊，它类似于轴对称模型，但是它是绕对称轴旋转特定角度（360/整数）才可以重合，轴对称是旋转任意角度都可以重合。建模按照正常的3Dpart进行，需要在interaction→Cyclic symmetry中设置，需要分别选择master和slave surface（就是旋转后能重合的两个面），然后选择转动轴。然后制定多少个sector。
 
-32. 
+32. abaqus缺少周期性边界条件，也就是平移后可以重合，需要用户手动使用equation约束来施加。
 
 33. 
 
 34. 
+
+35. 
+
+36. 
 
 # 接触
 
@@ -943,7 +994,7 @@
 
 34. 菜单栏→interaction中还包含接触初始化，稳定算法和控制。
 
-35. 初始干涉的来源：刻意制造，为了模拟interference fit；薄壳单元的厚度以及offset；前处理的错误；曲面离散化的结果。下图就是网格划分造成的初始干涉，可以通过增加网格密度来避免。
+35. 初始干涉的来源：刻意制造，例如卡扣，它在制造和建模时都是自然状态，而装配后，就会产生干涉；薄壳单元的厚度以及offset；前处理的错误；曲面离散化的结果。下图就是网格划分造成的初始干涉，可以通过增加网格密度来避免。
 
 36. <img src="Abaqus.assets/image-20241215214943205.png" alt="image-20241215214943205" style="zoom:50%;" />
 
@@ -986,27 +1037,29 @@
 
 52. <img src="Abaqus.assets/image-20241214211928036.png" alt="image-20241214211928036" style="zoom:67%;" />
 
-53. 自接触时，会计算两次，分别当作master和slave，使用平均的结果。
+53. 使用小滑移计算时，需要在节点上输出CSL_NORMALIZED，它等于CSLIPEQ/正规化距离。用来度量滑移量的大小，如果大于0.5则表示该区域不适合使用小滑移。
 
-54. Direct（拉格朗日乘子法）会修改待求解的线性方程组，λ是包含所有约束自由度的向量。优点是准确，会完全满足约束条件，缺点是会增加求解成本，增大了系数矩阵的阶数，由于接触刚度的突变会造成潜在的收敛问题。接触约束可能与MPC冲突。
+54. 自接触时，会计算两次，分别当作master和slave，使用平均的结果。
 
-55. <img src="Abaqus.assets/image-20241215210912956.png" alt="image-20241215210912956" style="zoom:50%;" />
+55. Direct（拉格朗日乘子法）会修改待求解的线性方程组，λ是包含所有约束自由度的向量。优点是准确，会完全满足约束条件，缺点是会增加求解成本，增大了系数矩阵的阶数，由于接触刚度的突变会造成潜在的收敛问题。接触约束可能与MPC冲突。
 
-56. penalty分为线性和非线性两种，线性可以可以设置一个接触力不为0的起始间隙C0（默认为0），让真正接触之前就产生接触力。接触刚度默认是接触面下单元的刚度的10倍，可以手动调整这个值（如果倍数太大，abaqus会使用拉格朗日乘子，避免病态状况）。非线性的一开始也是线性倾斜上升，然后是二次函数。线性容易收敛，适用于稳定接触的问题。非线性初始刚度低，适用于颤动问题，末端高刚度可以降低穿透，但是会降低收敛性。
+56. <img src="Abaqus.assets/image-20241215210912956.png" alt="image-20241215210912956" style="zoom:50%;" />
 
-57. <img src="Abaqus.assets/image-20241215212158047.png" alt="image-20241215212158047" style="zoom:50%;" />
+57. penalty分为线性和非线性两种，线性可以可以设置一个接触力不为0的起始间隙C0（默认为0），让真正接触之前就产生接触力。接触刚度默认是接触面下单元的刚度的10倍，可以手动调整这个值（如果倍数太大，abaqus会使用拉格朗日乘子，避免病态状况）。非线性的一开始也是线性倾斜上升，然后是二次函数。线性容易收敛，适用于稳定接触的问题。非线性初始刚度低，适用于颤动问题，末端高刚度可以降低穿透，但是会降低收敛性。
 
-58. penalty的优点，大幅提高收敛速度，由于没有拉格朗日乘子的额外自由度，因此方程求解成本也较低。缺点，存在微量穿透，某些情况，可能需要调整接触刚度。
+58. <img src="Abaqus.assets/image-20241215212158047.png" alt="image-20241215212158047" style="zoom:50%;" />
 
-59. Direct相当于位移边界条件，penalty相当于弹簧边界。
+59. penalty的优点，大幅提高收敛速度，由于没有拉格朗日乘子的额外自由度，因此方程求解成本也较低。缺点，存在微量穿透，某些情况，可能需要调整接触刚度。
 
-60. 摩擦是高度非线性问题，非必要不考虑。摩擦行为是非保守的，会使得稀疏矩阵变成非对称的。当摩擦系数>0.2或和接触压力有依赖关系，Standard会自动使用非对称求解器。
+60. Direct相当于位移边界条件，penalty相当于弹簧边界。
 
-61. 摩擦的拉格朗日乘子法只能用于接触对，认为只有当剪应力达到临界时才会滑动，否则没有相对滑动（stick），是理想行为，类似于法向接触行为的direct方法。假设动摩擦因数等于静摩擦因数。会增加计算成本，收敛效率低。
+61. 摩擦是高度非线性问题，非必要不考虑。摩擦行为是非保守的，会使得稀疏矩阵变成非对称的。当摩擦系数>0.2或和接触压力有依赖关系，Standard会自动使用非对称求解器。
 
-62. 摩擦的Penalty方法允许在剪应力达到临界前产生弹性滑动。
+62. 摩擦的拉格朗日乘子法只能用于接触对，认为只有当剪应力达到临界时才会滑动，否则没有相对滑动（stick），是理想行为，类似于法向接触行为的direct方法。假设动摩擦因数等于静摩擦因数。会增加计算成本，收敛效率低。
 
-63. 滑动面上自然有一个法向，使用壳的方法来定义其上的局部1，2方向，这样就可以定义各向异性摩擦行为。
+63. 摩擦的Penalty方法允许在剪应力达到临界前产生弹性滑动。
+
+64. 滑动面上自然有一个法向，使用壳的方法来定义其上的局部1，2方向，这样就可以定义各向异性摩擦行为。
 
 
 # 屈曲分析
@@ -1091,7 +1144,7 @@
 
 17. 隐式时间积分采用HHT方法，是Newmark-β法的正规化（包含了数值阻尼）。该方法是二阶精确的，意味着可以对加速度进行精确求解。
 
-18. 显式时间积分也是HHT方法，参数γ=1/2，β=1。先求出当前时刻的加速度（通过内外力之差和质量矩阵的逆），然后积分得到速度和位移。同时一般采用集中质量法，此时M为对角矩阵，因此刚度矩阵也是对角的，所以每次增量计算速度特别快。
+18. 显式时间积分也是HHT方法，参数γ=1/2，β=1。先求出当前时刻的加速度（通过内外力之差和质量矩阵的逆），然后积分得到速度和位移。同时一般采用集中质量法（这样质量都集中在节点上），此时M为对角矩阵，因此刚度矩阵也是对角的，所以每次增量计算速度特别快。
 
 19. $$
     \bar{K}=\frac{M}{\Delta t^2}+\frac{C}{2\Delta t}
@@ -1101,25 +1154,47 @@
 
 21. <img src="Abaqus.assets/image-20241214124524279.png" alt="image-20241214124524279" style="zoom:67%;" />
 
-22. 显式方法只需建立一次系统的刚度矩阵，不用计算切线刚度矩阵。条件稳定，只有时间增量小于一个临界值，才可以计算出有限解（非发散的）。稳定时间增量取决于最高特征频率$\omega_{\text{max}}$和该模态的临界阻尼$\xi$，阻尼会缩短稳定时间增量，或者用单元尺寸/波速 $\Delta t=L_e/c_d$​，也就是膨胀波穿过任何一个单元所需要的时间，对于弹性问题，$c_d=\sqrt{E/\rho}$​。
+22. 显式方法只需建立一次系统的刚度矩阵，不用计算切线刚度矩阵。条件稳定，只有时间增量小于一个临界值，才可以计算出有限解（非发散的）。稳定时间增量取决于最高特征频率$\omega_{\text{max}}$和该模态的临界阻尼$\xi$，阻尼会缩短稳定时间增量，或者用单元尺寸/波速 $\Delta t=L_e/c_d$​，也就是膨胀波穿过任何一个单元所需要的时间，对于弹性问题，$c_d=\sqrt{E/\rho}$​。这也被称为CFL条件。
     $$
     \Delta t_{\min} \le \frac{2}{\omega_{\max}}(\sqrt{1+\xi^2}-\xi)
     $$
 
-23. 降低材料的可压缩性，也可以增大$c_d$​​。
+23. 降低材料的可压缩性，也可以增大$c_d$​。钢材的波速大约为5000m/s，混凝土的波速大约为3000m/s。因此如果一个钢结构的最小网格尺寸在5mm的量级，那么稳定时间增量为1μs。
 
-24. 显式求解中，如果增量大小查过了稳定时间增量，一开始不会有问题，随着计算的进行，会偏差越来越大。
+24. 可以在verify mesh→size metric中找到尺寸最小的单元，然后使用网格编辑工具，对其附近的单元重新划分，例如合并小的单元。或者使用虚拟拓扑，来忽略细小的特征。
 
-25. 由于显式求解会产生大量的增量，因此求解时必须开启双精度避免误差累积，在Edit job→precision→Double-analysis+packager。而隐式分析则不用考虑误差累积，因此abaqus只提供了单精度。
+25. 显式求解中，如果增量大小超过了稳定时间增量，一开始不会有问题，随着计算的进行，会偏差越来越大。
 
-26. 应力波的传播例子，见官方手册1.6.2。
+26. 隐式求解的基本物理量为节点位移，通过它可以求单元内的应力应变，节点速度，加速度。显式求解的基本物理量为节点加速度，通过它可以求节点速度，位移，然后再求单元内的应力应变。
 
-27. ALE和CEL都是Explicit的特有功能，Standard没有：
+27. 由于显式求解会产生大量的增量，因此求解时必须开启双精度避免误差累积，在Edit job→precision→Double-analysis+packager。而隐式分析则不用考虑误差累积，因此abaqus只提供了单精度。
+
+28. 使用Explicit模拟准静态问题，需要注意：
+
+    1. 加载速率必须足够慢，使得惯性力可以忽略。对于大多数结构工程，应<5mm/s。
+
+    2. 动能和外力功，内能相比，应该足够小，一般<5%。这可以在后处理中检验。模拟进行中，可以在monitor中观察动能本身，应该在10^-6mJ数量级左右。
+
+29. 如果通过对最小尺寸单元附近重新划分网格后，稳定时间增量依然很小，此时可以使用Edit step→mass scaling。两种方式：直接给定一个大于1的系数来增大密度或者指定稳定时间增量要调整到的值，具体系数由abaqus来计算，默认只对稳定时间增量小于指定值的单元进行调整，这样不会对结构整体有较大影响。
+
+30. 质量缩放建议仅对准静态分析使用，对于动态分析来说，密度会极大影响惯性力。如果增加的太多，则可能产生不稳定的解，导致解出现噪声，结构异常振动。在verify mesh→size metric中可以将稳定时间增量小于某个值的单元都高亮显示，或者保存到set中，这样可以知道具体对多少单元进行了质量缩放。无论如何，不应在材料定义中直接对密度进行缩放，因为这会对所有单元产生影响，造成结果失真。
+
+31. 对于Explicit来说，输出方式常用：Every x units of time，每隔x时长输出一次。
+
+32. 应力波的传播例子，见官方手册1.6.2。
+
+33. ALE和CEL都是Explicit的特有功能，Standard没有：
 
     1. ALE（Coupled Eulerian Lagrangian），使用ALE技术的自适应网格可以提供高度非线性问题的精确解。网格会根据解答来变化，避免变形造成的过度扭曲。
     2. CEL（Coupled Eulerian Lagrangian），ALE始终是对物质域进行划分网格，而CEL是对空间进行划分，材料在网格内流动，因此永远不会出现网格扭曲的问题。CEL适用于流动问题或高度变形的结构问题。
 
-28. 对于跌落冲击问题，可以不用将模型从头开始释放，而是直接计算出接触时的速度，在initial分析步施加预定义速度场即可，注意不是速度边界条件，边界条件表示要在任意时刻的速度都是指定的值，这是动力加载，而不是跌落冲击。不过还是要施加上重力加速度load，因为他也会影响受力。
+34. 对于跌落冲击问题，可以不用将模型从头开始释放，而是直接计算出接触时的速度，在initial分析步施加预定义速度场即可，注意不是速度边界条件，边界条件表示要在任意时刻的速度都是指定的值，这是动力加载，而不是跌落冲击。不过还是要施加上重力加速度load，因为它也会影响受力。
+
+35. 频率提取的结果可以在.dat文件中查看，每一阶模态会显示Eigenvalue（特征值）和Freq（频率，单位是Hz或cycle/time）。二者的关系是$Value=(2\pi\cdot Freq)^2$。显示的云图内容为位移，最大值为1，它是归一化的。
+
+36. 除了频率外，还会输出每阶模态在6个方向上的阵型参与系数（Participation factor），有效质量（effective mass）和总质量。可以观察每阶模态的有效质量在各个方向上的分布，可以判断该阶模态的主要振动方向。观察总质量随模态阶数的变化，可以判定提取的模态阶数是否足够。这些数据在history data中也都有输出。
+
+37. 
 
 
 # 多体动力学与Connector
@@ -1159,8 +1234,20 @@
     2. 梁模型，优点：建模简单，计算高效，可以输出轴力，用于校验螺栓强度。缺点：无法设置预紧力，除非配合其他单元（例如弹簧），但是麻烦。
     3. 连接器模型，优点：简单，可以输出轴向力，可以施加预紧力。缺点：需要对CAE有足够的认知，才可以选择合适的单元。
 28. 不论是哪种模型，都应给定预紧力，这样会和实际相符。且都应该将施加预紧力应该作为initial step后的第一个分析步，然后才可以进行后续的其他分析（有一个特例是，通过参考长度施加的预紧力会在第一个分析步中以step的幅值直接施加，一步到位，因为在builder中并没有指定分析步和幅值。这在Standard中可能会造成收敛问题）。预紧力可以通过bolt load（实体模型）或connector load（连接器模型）施加横截面的轴力或轴向变形，viewport中会显示是拉紧还是放松，注意区分。
-29. 新版的bolt load可以在设置时勾选在part级别上施加，这样只需要选择一个螺栓instance的中心面，然后施加载荷，预紧力会在所有同类的instance上都施加。
-30. bolt load的荷载形式只在standard中存在，Explicit中可以使用温度梯度来变相施加预紧力，来曲线救国。
+29. 新版的bolt load可以在设置时勾选在part级别上施加，这样只需要选择一个螺栓instance的中心面，然后施加载荷，预紧力会在所有同类的instance上都施加。bolt load是可以设置幅值的。
+30. bolt load的荷载形式只在standard中存在，Explicit中可以使用如下方法来变相完成：
+
+    1. 进行热力耦合分析，对螺栓施加温度梯度来变相施加预紧力。
+    2. 将使用Standard的预紧力步骤的结果作为初始几何缺陷导入到Explicit中，不过这只会导入结点位移，并不会导入应力，但是这并不代表结构在Explicit的开始时刻没有应力，因为不平衡的结点位移会使得结构产生内力，类似于残余应力，不过实际的应力水平要比Standard的最后要小。对于应力不可忽略的情况，例如预应力筋的张拉，不建议使用这个。
+
+       ```shell
+       *IMPERFECTION, FILE=job-1, STEP=1
+       1, 1
+       #这里使用step编号，而非名称。这里数据行的第一个数必须为1，第二个数为缩放倍率。
+       #INC参数可以指定要读取的增量编号，如果省略，Abaqus将读取可用的最后一个增量。
+       ```
+    3. 将使用Standard的预紧力步骤的结果，通过重启动方式，导入到Explicit中继续分析，这种方法会保持应力和位移。
+
 31. 如果在施加预紧力时，bolt load是使用施加力的方式，则需要在该分析步结束后，将其修改为Fix at current length，因为螺栓并非是只能承受特定大小的力，它是一个弹簧，其中的力可以随外荷载变化。
 32. 使用connector时，还可以通过设置参考长度来设置预紧力，如果初始长度和参考长度不同，则表示目前connector中存在拉力或压力。当前长度<参考长度时，内力为拉力，对应于预紧力。
 33. 一种可行的方法是通过field variable来逐渐提升connector的刚度。并通过predefine variable来控制connector的variable值及其幅值完成。
@@ -1199,88 +1286,110 @@
 
 1. 边界元、有限元或有限差分法最初是最常见的CFD模拟方法之一，但有限体积法在过去20年中得到了突出发展，现在已成为标准。最近，硬件性能的提高意味着格子玻尔兹曼方法LBM也变得可行。
 
-2. 流体运动的控制方程可以有Navier-Stokes方程，LBM方程。Navier-Stokes方法将流体视为连续体，而Lattice-Boltzmann方法将其视为离散粒子。
+2. 流体运动的控制方程可以有Navier-Stokes方程，LBM方程。Navier-Stokes方法将流体视为连续体，而Lattice-Boltzmann方法将其视为离散粒子。将LBM使用Chapman-Enskog扩展就可以得到N-S方程。在求解上，有限体积法类似于结构求解的隐式方法，LBM类似于结构求解的显式方法。LBM特别适合并行计算。
 
-3. LBM方法：基于气体动力学理论的离散形式，通过离散的空间和时间跟踪流体粒子的微观运动，以模拟气体和液体的流动。流体空间被自动离散化为立方体单元，边界被离散化为曲面，从而消除了传统体积和边界层网格生成的需要。
+3. LBM方法：基于气体动力学理论的离散形式，通过离散的空间和时间跟踪流体粒子的微观运动，以模拟气体和液体的流动。流体空间被自动离散化为立方体单元，边界被离散化为曲面，从而消除了传统体积和边界层网格生成的需要，特别适合复杂边界。
 
-4. 没有适用于所有应用的最佳CFD模拟方法，工程师必须为每个工业工作流程选择合适的工具：
+4. 流动模拟可以分为3个尺度：
+   1. 微观（分子动力学理论，由Hamilton方程控制，需要为每个分子建模，待求量为分子的位置，速度，计算量太大，标况下1L气体包含1mol个分子，也就是6.02x10^23个，不现实）
+
+   2. 介观，LBM使用的方法，既有微观粒子的特性，又有宏观的特性。将一群分子作为研究的基本单位。待求变量是分布函数。
+
+   3. 宏观（由N-S方程控制，一般使用有限体积法，将空间离散为有限体积的cell，待求变量是速度，压力等物理量，它是在一个cell内平均的，它包含大量的粒子，控制方程是在每个cell上被满足的）。
+
+5. LBM中，粒子群的性质由LBE（LB方程）的分布函数表示。相邻时刻的增量推进通过streaming和collision这两个过程完成。LBM认为每个格点（grid point）上有一个粒子群，每个粒子群可以沿空间的8个方向，移动到周围的格点上。
+
+6. 没有适用于所有应用的最佳CFD模拟方法，工程师必须为每个工业工作流程选择合适的工具：
    1. CEL和SPH方法适用于高耦合流固耦合问题，例如不可压缩的液压机械。这些方法在Explicit中实现。
 
    2. FVM求解器更适合稳定或适度瞬态的流动，例如管道流、热交换器、泵和暖通空调应用中的流动。该方法用于Fluid Dynamics Engineer（FMK）。
 
    3. 作为一种瞬态技术，LBM更适用于高度瞬态的流动，如空气动力学和气动声学。可以处理复杂几何模型。也可以有效地用于处理多相流动，模型中甚至可以包括任意运动部件。SIMULIA提供两种LBM产品。PowerFLOW是航空航天和汽车行业常见的空气动力学、声学和污染场景的理想选择。XFlow通常用于复杂的运动、多相问题，如润滑、晃动和一些生命科学应用。
 
-5. GPU有利于所有CFD代码，对于LBM模拟尤其有效。
+7. GPU可用于所有CFD代码，对于LBM模拟尤其有效。
 
-6. 气动声学是研究空气运动和湍流产生和传播声音的学科。气动声学噪声通常产生于运动物体、发动机和风扇的废气或空气与表面的相互作用。它不同于振动声学，振动声学是研究结构内振动和共振产生的噪声。
+8. 气动声学是研究空气运动和湍流产生和传播声音的学科。气动声学噪声通常产生于运动物体、发动机和风扇的废气或空气与表面的相互作用。它不同于振动声学，振动声学是研究结构内振动和共振产生的噪声。
 
-7. 阻力、升力、下压力和侧风等力会影响轮胎在道路上的抓地力、车辆对转向输入的响应以及车辆对道路或风况变化的稳定性。
+9. 阻力、升力、下压力和侧风等力会影响轮胎在道路上的抓地力、车辆对转向输入的响应以及车辆对道路或风况变化的稳定性。
 
-8. 水、雪、冰、泥土、岩石和其他碎屑颗粒可能会被轮胎或风从路上扬起，或者由于天气状况而存在。这些颗粒的小尺寸决定了它们受到车辆空气动力学的强烈影响，仔细的设计可以减少它们造成的污染和损坏。
+10. 水、雪、冰、泥土、岩石和其他碎屑颗粒可能会被轮胎或风从路上扬起，或者由于天气状况而存在。这些颗粒的小尺寸决定了它们受到车辆空气动力学的强烈影响，仔细的设计可以减少它们造成的污染和损坏。
 
-9. 空气动力学设计通过减少风阻和优化通过发动机的气流对燃油效率有着至关重要的影响。
+11. 空气动力学设计通过减少风阻和优化通过发动机的气流对燃油效率有着至关重要的影响。
 
-10. 流固耦合分为全耦合（full，也就是双向耦合，结构求解器和流体求解器互相通信）和顺序耦合（sequence，也就是单向耦合，先通过流体求解器计算出稳态或瞬态的结果，将结构面上的压力/温度导出，然后在结构求解器中导入计算即可）。
+12. 流固耦合分为全耦合（full，也就是双向耦合，结构求解器和流体求解器互相通信）和顺序耦合（sequence，也就是单向耦合，先通过流体求解器计算出稳态或瞬态的结果，将结构面上的压力/温度导出，然后在结构求解器中导入计算即可）。
 
-11. abaqus通过co-simulation功能完成联合计算，可以在abaqus程序或abaqus和第三方程序之间联合。这种耦合方法用于流体结构、共轭传热、电磁结构、电磁热和结构逻辑模拟，以及将Standard和Explicit耦合，用于隐式动态和显式动态之间的相互作用或Abaqus和Simpack之间的耦合。
+13. abaqus通过co-simulation功能完成联合计算，可以在abaqus程序或abaqus和第三方程序之间联合。这种耦合方法用于流体结构、共轭传热、电磁结构、电磁热和结构逻辑模拟，以及将Standard和Explicit耦合，用于隐式动态和显式动态之间的相互作用或Abaqus和Simpack之间的耦合。
 
-12. 
+14. 
 
 
 # 子模型
 
-1. 主要是解决早期电脑的计算能力和存储空间不足才产生的。无法直接对复杂模型进行细分网格的分析。
+1. submodel，主要是解决早期电脑的计算能力和存储空间不足才产生的。无法直接对复杂模型进行全局细分网格的分析。Standard和Explicit都支持子模芯特性。
 
-2. 先对母模型划分一个粗糙的网格，进行分析，观察结果，找出需要作为子模型分析的区域。然后将它的解映射到精细化的子模型中，继续求解。子模型需要是对母模型做切分得到的。
+2. 先对母模型划分一个粗糙的网格，进行分析，观察结果，找出需要作为子模型分析的区域。然后将它的解映射到精细化的子模型中，继续求解。子模型需要是对母模型做切分得到的，可以现在母模型上切分好，然后copy model，在子模型的model中删除不需要的部分即可（在part→remove face，选择cell的所有face），或者可以只对子模型的部分划分网格。
 
-3. 映射分为两种，基于node（使用节点的位移）的和基于surface的（使用积分点的应力）。
+3. 在模型上右键Edit model attributes→submodel，指定要读取的母模型odb文件的job名称。
 
-4. 结果必须以全局直角坐标形式写入才可以传递。
+4. 映射分为两种：
+   1. 基于node（使用节点的位移），在边界条件→other→submodel中，选择和母模型相连接的surface，输入要耦合的自由度，一般是所有有效的自由度（例如1，2，3），还要输入从母模型的哪个分析步导入。
 
-5. 在模型上右键Edit model attributes→submodel，指定要读取的母模型odb文件的job名称。
+   2. 基于surface的（使用积分点的应力），在荷载→other→submodel中，选择和母模型相连接的surface，这里不能选择要耦合的力分量，不过同样要输入从母模型的哪个分析步导入。
 
+5. 结果必须以全局直角坐标形式写入才可以传递给子模型。
 6. 为了保证不产生数值误差累积，母模型需要输出双精度的节点值。Edit job→Precision→Nodal output precision→full。
 
-7. 对子模型施加的荷载，边界条件和初始条件，需要和母模型一致，否则没有意义。
+7. 对子模型施加的荷载，边界条件和初始条件，需要和母模型一致，否则没有意义。对于只施加在子模型以外部分的荷载于边界条件，应该予以删除。
 
+8. 子模型和母模型可以使用overlay plot方法重叠显示，分别为两个模型创建2个viewport layer。
+
+9. 
+
+10. 
+
+11. 
+
+12. 
 
 # 混凝土CDP材料模型
 
-1. Abaqus提供了三种不同的本构模型，用于分析低围压（小于单轴压缩载荷下极限压应力的四到五倍）下的混凝土：
+1. 具体细节见`https://www.youtube.com/playlist?list=PLz_XdUL-6Y_k-LgmCKo5ejqRAGpfXPk23`。
+
+2. Abaqus提供了三种不同的本构模型，用于分析低围压（小于单轴压缩载荷下极限压应力的四到五倍）下的混凝土：
    1. smeared crack concrete，Standard可用。适用于混凝土受到基本单调应变且材料点出现拉伸开裂或压缩破碎的应用。压缩中的塑性应变由“压缩”屈服面控制。开裂被认为是该行为最重要的方面，开裂和开裂后各向异性行为的表示在建模中占主导地位。
 
    2. brittle cracking model，Explicit可用。适用于混凝土的行为主要由拉伸开裂决定，压缩破坏并不重要的应用。考虑了裂纹引起的各向异性。压缩状态下，模型假设具有弹性行为。一个简单的脆性破坏标准可用于从网格中移除单元。
 
    3. concrete damaged plasticity，均可用。基于塑性的混凝土连续损伤模型，基于标量（也就是各向同性）损伤的假设，专为混凝土承受任意载荷条件（包括循环载荷）的应用而设计。考虑了拉伸和压缩时塑性应变引起的弹性刚度退化（就是损伤）。它还考虑了循环载荷下的刚度恢复（由拉伸进入压缩状态或相反时的特殊情况）效应。
 
-2. 塑性理论模拟了材料在以延性方式经历不可恢复变形时的力学响应。这些理论在金属方面得到了最深入的发展，但它们也适用于土壤、混凝土、岩石、冰、可压碎的泡沫等。它们之间差别很大，例如较大的纯静水压力值会导致金属的非弹性变形很小，但较小的静水压力值可能会导致土壤样本中显著的、不可恢复的体积变化。
+3. 塑性理论模拟了材料在以延性方式经历不可恢复变形时的力学响应。这些理论在金属方面得到了最深入的发展，但它们也适用于土壤、混凝土、岩石、冰、可压碎的泡沫等。它们之间差别很大，例如较大的纯静水压力值会导致金属的非弹性变形很小，但较小的静水压力值可能会导致土壤样本中显著的、不可恢复的体积变化。
 
-3. Abaqus中的大多数塑性模型都是基于增量理论，其中机械应变率被加法分解为弹性部分和塑性（非弹性）部分。增量塑性模型通常用以下公式表示：
+4. Abaqus中的大多数塑性模型都是基于增量理论，其中机械应变率被加法分解为弹性部分和塑性（非弹性）部分。增量塑性模型通常用以下公式表示：
    1. 屈服面，将屈服载荷的概念概括为一个测试函数，可用于确定材料在特定应力、温度等状态下是否纯弹性响应
 
    2. 流动规则，定义了当材料点不再纯粹弹性响应时发生的非弹性变形
 
    3. 硬化（屈服或流动）随着非弹性变形的演化规律。
 
-4. Standard也有变形塑性模型，即应力由总机械应变定义，也就是Ramberg-Osgood模型，主要用于延性断裂力学应用，通常需要全塑性解决方案。
+5. Standard也有变形塑性模型，即应力由总机械应变定义，也就是Ramberg-Osgood模型，主要用于延性断裂力学应用，通常需要全塑性解决方案。
 
-5. abaqus的中配合塑性材料使用的弹性行为一般都是线弹性。在Explicit中的Mises和Johnson-Cook塑性模型下，弹性行为也可以使用具有关联偏差行为的状态方程来定义。
+6. abaqus的中配合塑性材料使用的弹性行为一般都是线弹性。在Explicit中的Mises和Johnson-Cook塑性模型下，弹性行为也可以使用具有关联偏差行为的状态方程来定义。
 
-6. 在有限应变下进行弹塑性分析时，Abaqus假设塑性应变主导变形，弹性应变较小。Abaqus对使用的弹性模型施加了这一限制。这是合理的，因为大多数材料都有一个占杨氏模量的很小百分比（对于金属，大约为1%）的明确屈服点。因此，弹性应变也将小于该百分比，材料的弹性响应可以非常准确地建模为线性。
+7. 在有限应变下进行弹塑性分析时，Abaqus假设塑性应变主导变形，弹性应变较小。Abaqus对使用的弹性模型施加了这一限制。这是合理的，因为大多数材料都有一个占杨氏模量的很小百分比（对于金属，大约为1%）的明确屈服点。因此，弹性应变也将小于该百分比，材料的弹性响应可以非常准确地建模为线性。
 
-7. 在Explicit中，报告的弹性应变能是增量更新的，弹性应变能的增量=总应变能的增量-塑性能量耗散的增量，即${\Delta E_{s}} = {{\Delta E_{t}} - {\Delta E_{p}}}$，对于几乎完全塑性的变形，弹性应变能远小于后两者。在求解$\Delta E_{t}$和$\Delta E_{p}$时的近似会导致和真实解出现偏差，这对于它俩可能不重要，但是对$\Delta E_{s}$却很重要。通常，弹性应变能解非常准确，罕见情况下会导致$E_{s}$为负数。这最有可能出现在使用速率依赖塑性的分析中。只要弹性应变能的绝对值与总应变能相比非常小，弹性应变能为负值就不应被视为严重求解问题的指示。
+8. 在Explicit中，报告的弹性应变能是增量更新的，弹性应变能的增量=总应变能的增量-塑性能量耗散的增量，即${\Delta E_{s}} = {{\Delta E_{t}} - {\Delta E_{p}}}$，对于几乎完全塑性的变形，弹性应变能远小于后两者。在求解$\Delta E_{t}$和$\Delta E_{p}$时的近似会导致和真实解出现偏差，这对于它俩可能不重要，但是对$\Delta E_{s}$却很重要。通常，弹性应变能解非常准确，罕见情况下会导致$E_{s}$为负数。这最有可能出现在使用速率依赖塑性的分析中。只要弹性应变能的绝对值与总应变能相比非常小，弹性应变能为负值就不应被视为严重求解问题的指示。
 
-8. 延性行为就是材料产生了大的非弹性应变。
+9. 延性行为就是材料产生了大的非弹性应变。
 
-9. 定义塑性材料的硬化行为时，一般需要的是塑性应变，而非总应变。
+10. 定义塑性材料的硬化行为时，一般需要的是塑性应变，而非总应变。
 
-10. 可以在Abaqus中通过定义初始硬化条件，为使用经典金属塑性或Drucker-Prager塑性的单元指定等效塑性应变的初始值。这样输出的PEEQ（等效塑性应变）就会包含初始值和分析过程中因塑性应变而产生的任何额外等效塑性应变，但是PE（塑性应变张量）只会包含分析过程中变形引起的应变量。
+11. 可以在Abaqus中通过定义初始硬化条件，为使用经典金属塑性或Drucker-Prager塑性的单元指定等效塑性应变的初始值。这样输出的PEEQ（等效塑性应变）就会包含初始值和分析过程中因塑性应变而产生的任何额外等效塑性应变，但是PE（塑性应变张量）只会包含分析过程中变形引起的应变量。
 
-11. 可以模拟混凝土和其他准脆性材料。可用于素混凝土，即使它主要用于分析钢筋混凝土结构，可以与钢筋一起使用，以模拟混凝土钢筋。设计用于混凝土在低围压下承受单调、循环或动态载荷的应用。
+12. 可以模拟混凝土和其他准脆性材料。可用于素混凝土，即使它主要用于分析钢筋混凝土结构，可以与钢筋一起使用，以模拟混凝土钢筋。设计用于混凝土在低围压下承受单调、循环或动态载荷的应用。
 
-12. 在低围压下，混凝土表现出脆性，主要的破坏机制是拉伸开裂和压缩破碎。当围压足够大以防止裂缝扩展时，混凝土的脆性行为消失。此时，失效是由混凝土微孔微观结构的固结和坍塌引起的，导致宏观反应类似于具有加工硬化的延性材料。
+13. 在低围压下，混凝土表现出脆性，主要的破坏机制是拉伸开裂和压缩破碎。当围压足够大以防止裂缝扩展时，混凝土的脆性行为消失。此时，失效是由混凝土微孔微观结构的固结和坍塌引起的，导致宏观反应类似于具有加工硬化的延性材料。
 
-13. 宏观性质如下：
+14. 宏观性质如下：
     1. 拉伸和压缩的屈服强度不同，压缩的初始屈服应力比拉伸的初始屈服强度高10倍或更多
 
     2. 拉伸软化行为与压缩软化后的初始硬化相反
@@ -1291,56 +1400,115 @@
 
     5. 速率敏感性，特别是峰值强度随应变率的增加而增加
 
-14. 使用各向同性损伤弹性+各向同性拉伸和压缩塑性来表示混凝土的非弹性行为。
+15. 使用各向同性损伤弹性+各向同性拉伸和压缩塑性来表示混凝土的非弹性行为。
 
-15. 与混凝土破坏机制（开裂和压碎）相关的损伤会导致弹性刚度降低。
+16. 与混凝土破坏机制（开裂和压碎）相关的损伤会导致弹性刚度降低。
 
-16. 使用非关联多硬化塑性+标量（各向同性）损伤弹性的组合，用于描述开裂过程中发生的不可逆损伤。
+17. 使用非关联多硬化塑性+标量（各向同性）损伤弹性的组合，用于描述开裂过程中发生的不可逆损伤。
 
-17. 允许用户在循环负载反转期间控制刚度恢复recovery效果。允许根据材料失效标准移除单元。可以定义为对应变率敏感。可以与Standard中本构方程的粘塑性正则化结合使用，以提高软化状态下的收敛速度。
+18. 允许用户在循环负载反转期间控制刚度恢复recovery效果。允许根据材料失效标准移除单元。可以定义为对应变率敏感。可以与Standard中本构方程的粘塑性正则化结合使用，以提高软化状态下的收敛速度。
 
-18. 要求材料的弹性行为是各向同性和线性的。
+19. 要求材料的弹性行为是各向同性和线性的。
 
-19. 在标量损伤理论的背景下，刚度退化是各向同性的，其特征是单个退化变量d。
+20. 在标量损伤理论的背景下，刚度退化是各向同性的，其特征是单个退化变量d。
 
-20. Concrete damage plasticity的定义分为三部分组成，弹性，塑性和损伤。它假设主要的两种破坏机制是混凝土的拉伸开裂和压缩破碎。屈服（或破坏）表面的演变由两个硬化变量控制：${\overset{\sim}{\varepsilon}}_{t}^{pl}$和${\overset{\sim}{\varepsilon}}_{c}^{pl}$​，等效拉伸/压缩塑性应变，它们分别与拉伸和压缩载荷下的失效机制有关。
+21. Concrete damage plasticity的定义分为三部分组成，弹性，塑性和损伤。它假设主要的两种破坏机制是混凝土的拉伸开裂和压缩破碎。屈服（或破坏）表面的演变由两个硬化变量控制：${\overset{\sim}{\varepsilon}}_{t}^{pl}$和${\overset{\sim}{\varepsilon}}_{c}^{pl}$​，等效拉伸/压缩塑性应变，它们分别与拉伸和压缩载荷下的失效机制有关。
 
-21. 模型的假设如下：该模型假设混凝土的单轴拉伸和压缩响应以损伤塑性为特征。下图是单轴拉伸和压缩的响应，虚线为损伤后的卸载路径。
+22. 模型的假设如下：该模型假设混凝土的单轴拉伸和压缩响应以损伤塑性为特征。下图是单轴拉伸和压缩的响应，虚线为损伤后的卸载路径。
     1. 拉伸情况：初始开裂应力$\sigma_{t0}$​对应着混凝土微裂纹的产生，此后，微裂纹的形成在宏观上表现为软化应力-应变响应，这会导致混凝土结构中的应变局部化（塑性）。
 
     2. 压缩情况：塑性状态下，压缩响应通常是应力硬化，然后是超过极限应力$\sigma_{cu}$​的应变软化。
 
     3. 
 
-22. <img src="Abaqus.assets/cconcretedamaged-uniaxial.png" alt="img" style="zoom:67%;" />
+23. <img src="Abaqus.assets/cconcretedamaged-uniaxial.png" alt="img" style="zoom:67%;" />
 
-23. 
+24. 
 
-24. ${{\mathbf{\sigma} = {\left( {1 - d} \right)\mathbf{D}_{0}^{el}}}:{\left( {\mathbf{\varepsilon} - \mathbf{\varepsilon}^{pl}} \right) = \mathbf{D}^{el}}:\left( {\mathbf{\varepsilon} - \mathbf{\varepsilon}^{pl}} \right)},$
+25. ${{\mathbf{\sigma} = {\left( {1 - d} \right)\mathbf{D}_{0}^{el}}}:{\left( {\mathbf{\varepsilon} - \mathbf{\varepsilon}^{pl}} \right) = \mathbf{D}^{el}}:\left( {\mathbf{\varepsilon} - \mathbf{\varepsilon}^{pl}} \right)},$
 
-25. *Concrete Failure关键字是在2019版本中才加入的，只有Explicit可以支持，但是CDP模型对于Standard和Explicit都是可以使用的。
+26. *Concrete Failure关键字是在2019版本中才加入的，只有Explicit可以支持，但是CDP模型对于Standard和Explicit都是可以使用的。
 
-26. 在包含单元删除的模拟中，飞出去的并非是彻底损伤的单元，而是由于彻底损伤的单元被删除，导致一些还没彻底损伤的单元失去了连接，飞了出去。
-
-27. 
+27. 在包含单元删除的模拟中，飞出去的并非是彻底损伤的单元，而是由于彻底损伤的单元被删除，导致一些还没彻底损伤的单元失去了连接，飞了出去。
 
 28. 
 
-29. 
+29. 对材料模型进行验证时，应该还原材料实验的情况，如果试件端部没有涂抹凡士林，则约束较强，可以将试件端部和参考点耦合，然后约束。如果涂抹了凡士林，则不需要建立参考点，直接将轴向约束施加在端面上。
 
-30. 对材料模型进行验证时，应该还原材料实验的情况，如果试件端部没有涂抹凡士林，则约束较强，可以将试件端部和参考点耦合，然后约束。如果涂抹了凡士林，则不需要建立参考点，直接将轴向约束施加在端面上。
 
-31. 
+# 几何缺陷
 
-32. 
+1. 几何缺陷一般出现在结构构件上，它也是对缺陷敏感的。对于梁来说，存在截面缺陷（非平直，非直角）和长度缺陷（非平直）。各国设计规范对于缺陷的上限都有规定。
 
-33. 
+2. 在abaqus2023中，可以在CAE中添加几何缺陷了，在interaction→special→imperfection。
 
-34. 
+3. 几何缺陷是造成结构失稳的重要原因。在Abaqus中使用两步来模拟几何缺陷对失稳的影响：
 
-35. 
+   1. 对原始结构进行线性屈曲分析，获取多种屈曲模态（局部或整体），需要手动修改model的keyword，来在结果中输出模态的具体位移场：
 
-36. 
+      ```shell
+      #一般在屈曲分析step的*End Step之前添加下面2行
+      *NODE FILE, GLOBAL=NO, MODE=1, LASTMODE=2
+      U #这行是节点变量的标识，这里U表示结点位移
+      #GLOBAL参数仅和使用*TRANSFORM关键字定义了局部坐标系的节点有关。默认是YES，即在全局坐标系中写入张量的分量。此默认值与*NODE PRINT选项上的默认值相反，因为大多数后处理器都假设分量是在全局坐标系中给出的。
+      #此选项用于选择的节点变量将写入Standard中的.fil文件或Explicit中的.sel文件。在Explicit中，它必须与*FILE OUTPUT选项结合使用。
+      ```
+
+   2. 选择感兴趣的模态（可以是多个），对其缩放，然后附加到原始结构上，获得带特定模态几何缺陷的结构。这里也要Edit keyword：
+
+      ```shell
+      #下面内容要添加到model区域，也就是所有step之前。
+      *IMPERFECTION, FILE=job-imperfection, step=1
+      1,1.5
+      2,-1.5
+      #指示去job-imperfection.fil中的第1分析步提取节点位移。数据行的第一个数为模态阶数，第二个数为缩放倍数。如果有多个数据行的话，会叠加。
+      ```
+
+   3. 对新的结构，进行所需的分析，例如非线性屈曲分析。
+
+4. 有时可以先将模态的缩放倍数设置为较大值，然后再执行计算前，可以在后处理中观察，确认无误后，再设置回合理值提交计算。
+
+5. 在线性屈曲分析中，需要对结构施加一个参考荷载，将来计算得到的是屈曲荷载的系数，乘以参考荷载才是屈曲荷载。一般将参考荷载设置为1，这样屈曲荷载系数就是屈曲荷载。
+
+6. 屈曲模态和参考荷载的方向有关。后处理中的每个屈曲模态都会被归一化，位移的最大幅值均为1。
+
+# 残余应力
+
+1. 结构在热加工中由于受热或冷却不均匀，导致出现残余应力。下图是热轧工字钢的残余应力分布，都是垂直于横截面，即残余应力在长度方向梯度为0，可以简化为二维。
+2. 压缩残余应力在切开后，没有了压应力的约束，会膨胀。一般需要将残余应力作为应力的初始场，然后进行其他计算。
+3. 需要注意的是，每个截面的残余应力的合力需要为0，即内力平衡，否则该截面会飞走（可以取一个平行于该截面的薄片，合力不为0），这不符合残余应力的物理事实。实际的结构由于有周围部件的约束，并不会飞走，而是会继续变形，也就是释放残余应力到一个平衡的状态，这时的应力才是真实的残余应力。
+4. <img src="Abaqus.assets/无标题.png" alt="无标题" style="zoom:67%;" />
+5. 可以对规则划分网格后的单元进行分组，然后按照位置对上述残余应力场的函数进行插值，可以选择单元中心点作为位置的代表值。
+6. predefined field→stress，只能在initial步中指定，因为残余应力是在其他荷载施加前就存在的。只对轴向应力对应的σ分量进行设置。可以在后处理中的0增量检查残余应力的施加是否正确，不施加任何荷载或约束，只约束刚体位移即可。
+7. 如果边界条件没有足够的约束，则只施加残余应力的结构在不受任何外力下，也会变形。如下图，左端为自由端，右端为固定端，左端就会产生应力重分布，相当于卸载，右端由于约束充分，则不会产生应力重分布。
+8. ![无标题](Abaqus.assets/无标题-1735009237910-1.png)
+9. 
+10. 
+11. 
+12. 
+13. 
+14. 
+15. 
+16. 
+
+17. 
+
+18. 
+
+19. 
+
+20. 
+
+21. 
+
+22. 
+
+23. 
+
+24. 
+
+25. 
+
 
 
 # 常见warning和error
@@ -1361,9 +1529,15 @@
 
 # 命令
 
-1. 可以将ABAQUS的显示设置保存在文件中，abaqus_v6.14.gpr。放到路径(用户的家目录，对于Windows为 C:\Users\Administrator)中，就可以在打开的时候自动读取。
+1. 常用的提交命令：
 
-2. 查找abaqus的安装目录：
+   ```shell
+   abaqus job=xx cpus=4 user=aa.for int
+   ```
+
+2. 可以将ABAQUS的显示设置保存在文件中，abaqus_v6.14.gpr。放到路径(用户的家目录，对于Windows为 C:\Users\Administrator)中，就可以在打开的时候自动读取。
+
+3. 查找abaqus的安装目录：
 
    ```shell
    C:\Users\zj\Desktop> abaqus whereami
@@ -1374,13 +1548,13 @@
        D:\SIMULIA\EstProducts\2023\win_b64: 2022_09_29-02.11.55 183150
    ```
 
-3. 在特定目录下打开ABAQUS。切换到该目录，Shift+右键，或者直接在路径栏输入cmd，在此处打开命令窗口，输入：
+4. 在特定目录下打开ABAQUS。切换到该目录，Shift+右键，或者直接在路径栏输入cmd，在此处打开命令窗口，输入：
 
    ```shell
    abaqus cae=xxx.cae
    ```
 
-4. ABAQUS的两个主要模块为cae和viewer，可以使用如下命令启动。在cae中可以打开.cae和.odb文件，但是在viewer中只能打开.odb文件。replay选项支持一个Python脚本，启动后会立即执行该脚本。
+5. ABAQUS的两个主要模块为cae和viewer，可以使用如下命令启动。在cae中可以打开.cae和.odb文件，但是在viewer中只能打开.odb文件。replay选项支持一个Python脚本，启动后会立即执行该脚本。
 
    ```shell
    abaqus cae or viewer 
@@ -1400,7 +1574,7 @@
           [guiNoRecord]
    ```
 
-5. 通过命令行给Python脚本传递参数，这些参数会被CAE忽略，但是会传递给Python解释器。
+6. 通过命令行给Python脚本传递参数，这些参数会被CAE忽略，但是会传递给Python解释器。
 
    ```python
    #python脚本test.py
@@ -1413,26 +1587,26 @@
    8
    ```
 
-6. 不打开ABAQUS图形界面运行，`abaqus cae noGui=checkPartValidity.py`，可以和参数结合使用。
+7. 不打开ABAQUS图形界面运行，`abaqus cae noGui=checkPartValidity.py`，可以和参数结合使用。
 
-7. ABAQUS会将用户对GUI界面的设置保存在abaqus_v6.14.gpr（或abaqus_2023.gpr对于abaqus2023）文件中，还会将本次的用户的操作保存在abaqus.rpy文件（Python脚本）中，方便用户复现之前的操作。每次打开CAE都会新建一个rpy文件，并将之前存在的rpy文件重命名。
+8. ABAQUS会将用户对GUI界面的设置保存在abaqus_v6.14.gpr（或abaqus_2023.gpr对于abaqus2023）文件中，还会将本次的用户的操作保存在abaqus.rpy文件（Python脚本）中，方便用户复现之前的操作。每次打开CAE都会新建一个rpy文件，并将之前存在的rpy文件重命名。
 
-8. 如果启动CAE时，使用了noSavedOptions选项。CAE将不会读取abaqus_v6.14.gpr中的设置。
+9. 如果启动CAE时，使用了noSavedOptions选项。CAE将不会读取abaqus_v6.14.gpr中的设置。
 
-9. 默认情况下，启动CAE时，会依次读取家目录（Windows下为C:\Users\zj）和启动CAE时的目录中的.gpr文件。关闭CAE时，会自动保存当前的GUI设置到家目录中的文件。也可以删除该文件，来还原默认设置。
+10. 默认情况下，启动CAE时，会依次读取家目录（Windows下为C:\Users\zj）和启动CAE时的目录中的.gpr文件。关闭CAE时，会自动保存当前的GUI设置到家目录中的文件。也可以删除该文件，来还原默认设置。
 
-10. CAE内部包含了一个非活动的计时器，如果应用长时间不活动，license就会被服务器收回，给其他用户使用。默认时间是60分钟。可以通过修改环境变量文件abaqus_v6.env中的cae_timeout来更改时间。
+11. CAE内部包含了一个非活动的计时器，如果应用长时间不活动，license就会被服务器收回，给其他用户使用。默认时间是60分钟。可以通过修改环境变量文件abaqus_v6.env中的cae_timeout来更改时间。
 
-11. 系统的abaqus_v6.env文件放在/SMA/site（abaqus2023中为EstProducts\2023\win_b64\SMA\site，不过文件名也是abaqus_v6.env）路径下。也可以在用户家目录，启动目录中存放该文件。CAE启动的时候会依次读取。使用的是Python语法。
+12. 系统的abaqus_v6.env文件放在/SMA/site（abaqus2023中为EstProducts\2023\win_b64\SMA\site，不过文件名也是abaqus_v6.env）路径下。也可以在用户家目录，启动目录中存放该文件。CAE启动的时候会依次读取。使用的是Python语法。
 
-12. 如果工作目录有空格，则在使用cae提交inp形式的job时，会报错，有两种方案：①修改工作目录，删掉其中的空格，不过可能会触发下一个错误②使用命令行`abaqus job=xxx`，不用.inp的后缀。
+13. 如果工作目录有空格，则在使用cae提交inp形式的job时，会报错，有两种方案：①修改工作目录，删掉其中的空格，不过可能会触发下一个错误②使用命令行`abaqus job=xxx`，不用.inp的后缀。
 
     ```shell
     Abaqus Error: Command line option "input" value must not contain whitespace characters.
     Abaqus/Analysis exited with error(s).
     ```
 
-13. 如果修改了工作目录的路径名，下一次启动cae时会报错，这是由于想要在不存在的目录产生一个新的abaqus.rpy文件，因此会报错。此时可以修改快捷方式的起始位置为新的工作目录。
+14. 如果修改了工作目录的路径名，下一次启动cae时会报错，这是由于想要在不存在的目录产生一个新的abaqus.rpy文件，因此会报错。此时可以修改快捷方式的起始位置为新的工作目录。
 
     ```python
     IOError: abaqus.rpy: Permission denied
@@ -1440,7 +1614,7 @@
     Abaqus Error: Abaqus/CAE Kernel exited with an error.
     ```
 
-14. 如果不打开cae的话，是不会产生.rpy文件的。例如只使用命令行提交.inp文件。
+15. 如果不打开cae的话，是不会产生.rpy文件的。例如只使用命令行提交.inp文件。
 
 
 # User Subroutine配置
@@ -1559,8 +1733,8 @@ endlocal
 
     ```shell
     #验证配置是否成功的命令
-    abaqus verify -user_exp #显式
-    abaqus verify -user_std #隐式
+    abaqus verify -user_exp #仅显式
+    abaqus verify -user_std #仅隐式
     ```
 
 14. 如果想要通过验证，就不能给win86_64.env中的compile_fortran添加/free选项。因为官方例子里的.for文件都是固定格式的，按照自由格式解析会出错。
@@ -1576,28 +1750,33 @@ endlocal
     #默认会提交到一个后台进程去计算，然后立即返回，可以添加interactive选项来保持前台，这样会显示log文件的内容。
     ```
 
-18. 如果想将子程序提供给他人使用，但不希望他人看到源码，此时可将其编译为obj目标文件提供给他人，也可以用这个方法来提前检查以下语法错误：
+18. 如果经常需要相同的用户子程序，可以使用`abaqus make`创建包含用户子程序的共享库，然后在环境文件（abaqus_v6.env即可）中设置`usub_lib_dir`参数即可，例如`usub_lib_dir=r"E:\Abaqus file\Concrete dam"`。这将避免每次需要时都需要重新编译链接。如果分析调用的用户子程序包含在库中，则不需要user选项指定。如果指定了user选项，则不会使用环境文件参数给出的目录中包含的用户库。
+
+19. 当使用double选项运行Explicit分析时，不能使用user选项来指定对象文件，因为Explicit双精度运行需要单精度和双精度对象。此时必须设置环境文件参数，并将单精度和双精度对象文件放置在指定目录中；或者可以提供用户子例程源代码。
+
+20. 如果user没有提供后缀名，则会依次寻找：`xx.f, xx.for, xx.f90, xx.F90, xx.c, xx.C, xx.cpp, xx.c++, xx.obj`。
+
+21. 如果想将子程序提供给他人使用，但不希望他人看到源码，此时可将编译后的obj和dll文件提供给他人，也可以用这个方法来提前检查以下语法错误：
 
     ```shell
     abaqus make library=umat.for object_type=fortran
     #编译成功后会输出
     Abaqus JOB umat.for
     Begin Compiling Abaqus/Standard User Subroutines
-    11/9/2024 8:58:18 PM
-    Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on Intel(R) 64, Version 2021.11.0 Build 20231010_000000
-    Copyright (C) 1985-2023 Intel Corporation.  All rights reserved.
-    
+    ...
     End Compiling Abaqus/Standard User Subroutines
     Begin Linking Abaqus/Standard User Subroutines
       正在创建库 standardU.lib 和对象 standardU.exp
     End Linking Abaqus/Standard User Subroutines
-    11/9/2024 8:58:25 PM
     Abaqus JOB umat.for COMPLETED
+    #产生两个文件umat-std.obj和standardU.dll，前者是编译的结果，后者是链接后的结果，名称固定。如果使用user参数指定，则只需要.obj就可以。如果使用环境文件参数，则只需要standardU.dll，因为这里无法指定文件名，只能指定路径。
     ```
 
-19. 如果发现Intel Fortran的命令行环境配置结果中，没有显示compiler，则可以在卸载程序的地方双击，然后repair该程序。
+22. 编译得到的目标文件有一个后缀，指示它是用于Standard（-std）还是Explicit（单精度为-xpl，双精度为-xplD）。链接得到的Standard用户子程序共享库名为standardU.dll，Explicit共享库分别名为explicitU.dll和explicitU-D.dll。如果使用directory选项，并且包含具有所创建共享库适当后缀的对象文件，则这些文件将链接到共享库。
 
-20. 最简单的例子，各向同性线弹性材料，需要注意的是，官方给的例子第一行SUBROUTINE前面没有空出6个字符（前6个字符是注释内容），当使用固定格式时会报错。这个材料不能用于平面应力问题：
+23. 如果发现Intel Fortran的命令行环境配置结果中，没有显示compiler，则可以在卸载程序的地方双击，然后repair该程序。
+
+24. 最简单的例子，各向同性线弹性材料，需要注意的是，官方给的例子第一行SUBROUTINE前面没有空出6个字符（前6个字符是注释内容），当使用固定格式时会报错。这个材料不能用于平面应力问题：
 
     ```fortran
           SUBROUTINE UMAT(STRESS,STATEV,DDSDDE,SSE,SPD,SCD,
@@ -1646,9 +1825,9 @@ endlocal
           END
     ```
 
-21. <img src="Abaqus.assets/image-20241107225604101.png" alt="image-20241107225604101" style="zoom:50%;" />
+25. <img src="Abaqus.assets/image-20241107225604101.png" alt="image-20241107225604101" style="zoom:50%;" />
 
-22. 
+26. 
 
 
 # User Subroutine
@@ -1806,7 +1985,7 @@ endlocal
 
 8. 如果在模型中多出都要使用用户自定义压力载荷，则需要在DLOAD函数内根据JLTYPE判断载荷类型，SNAME判断表面名称，然后分别计算目标载荷。
 
-9. 与其他显式子程序类似，VDLOAD会一次性更新nblock个积分点上的载荷，而不是一个。数组value则对应于DLOAD中的f，需要在函数内去赋值。和隐式分析不同的是，这里多了积分点的速度，问题模型的维数，面的方向等参数。速度和面方向本来是矢量，一维存储即可，但是这里存储的是整个block的数据，因此是二维的。
+9. 与其他显式子程序类似，VDLOAD会一次性更新nblock个积分点上的载荷，而不是一个，因为显式分析中的增量太多了，如果一次只更新一个，该函数会被调用太多次，会导致函数进入和退出的开销占比较高。数组value则对应于DLOAD中的f，需要在函数内去赋值。和隐式分析不同的是，这里多了积分点的速度，问题模型的维数，面的方向（只对压力载荷有效）等参数。速度和面方向本来是矢量，一维存储即可，但是这里存储的是整个block的数据，因此是二维的，使用`curCoords(k,1)`获取块内第k个节点的x坐标。
 
 10. 在UTRACLOAD中，有两个变量是必须更新的：
 
@@ -2143,41 +2322,49 @@ endlocal
    abaqus fetch job=umatmst3.f
    ```
 
-2. 强化法则为各向同性。
+2. 如下是应用了J2塑性的Prandtl-Reuss模型，有3个基本假设：小变形，增量理论（描述塑性应变增量与应力增量的关系），关联流动法则（塑性应变增量方向与屈服面的法线方向一致，同时塑性势函数g和屈服函数f相同）。
 
-3. 总应变可以分解为弹性和塑性部分：$\varepsilon=\varepsilon^e+\varepsilon^p$，其中弹性应变为$\sigma/E$。因此$\sigma=E(\varepsilon-\varepsilon^p)$。
+3. 塑性势函数g：用于确定塑性应变增量的方向。$d\varepsilon^p=d\lambda\cdot\frac{\partial g}{\partial \sigma}$​。
 
-4. 后继屈服段称为应变硬化strain hardening，假定后继屈服应力（流动应力）是塑性应变的函数$\sigma_y=f(\varepsilon^p)$。
+4. 屈服函数f：定义了材料在应力空间中开始发生塑性变形的条件。
 
-5. 理想弹塑性材料，没有硬化段，因为流动应力不会提高。
+5. 对于关联流动的情况，屈服函数一般会包含一个常数项，而塑性势函数则不包含，因为前者会具体计算函数值，后者只是求导，因此常数项没有用。
 
-6. 双线性（$E$和$E_t$）材料的流动应力复合线性强化模型：$\sigma_y=\sigma_{y0}+H\varepsilon_p$。H为强化参数，$\varepsilon_p$是等效塑性应变。$1/H=1/E_t-1/E$。
+6. 强化法则为各向同性。
 
-7. 单轴拉伸时，只需比较$\sigma$和$\sigma_y$即可确定是否是屈服状态，类比单轴拉伸的情况，多轴时使用等效应力$\sigma_e$代替单轴拉伸的应力，使用等效塑性应变增量$d\varepsilon_p$代替单轴拉伸的塑性应变增量$d\varepsilon^p$。之所以在应变处使用增量或率，是因为要增量地求解问题。
+7. 总应变可以分解为弹性和塑性部分：$\varepsilon=\varepsilon^e+\varepsilon^p$，其中弹性应变为$\sigma/E$。因此$\sigma=E(\varepsilon-\varepsilon^p)$。
 
-8. 偏应力张量$s=\sigma-pI$，$p=\text{tr}(\sigma)/3$。其第二不变量$J_2=\frac{1}{2}s:s^T=\frac{1}{2}s:s$，因为$s$是对称的。
+8. 后继屈服段称为应变硬化strain hardening，假定后继屈服应力（流动应力）是塑性应变的函数$\sigma_y=f(\varepsilon^p)$。
 
-9. $\sigma_e=\sqrt{\frac{3}{2}s:s}=\sqrt{3J_2}$。等效应力和$J_2$有关，因此也称为$J_2$塑性。系数$\frac{3}{2}$可以通过单轴拉伸的情况来验证，同时将$\sigma_e$取为轴向应力$\sigma$，计算$J_2=\frac{1}{3}\sigma^2$。
+9. 理想弹塑性材料，没有硬化段，因为流动应力不会提高，因此对于循环加载，各向同性强化和运动强化没有区别。材料的塑性定义中，只有一行。
 
-10. 由于Mises准则认为材料的塑性变形只有剪切变形，没有体积变形，此时为不可压缩的，塑性应变的泊松比为0.5，因此$d\varepsilon^p$的迹为0，因此累加起来后导致$\text{tr}(\varepsilon^p)=0$，即塑性应变张量是个偏张量。而且该准则适用于拉压性能相同的材料。
+10. 双线性（$E$和$E_t$）材料的流动应力复合线性强化模型：$\sigma_y=\sigma_{y0}+H\varepsilon_p$。H为强化参数，$\varepsilon_p$是等效塑性应变。$1/H=1/E_t-1/E$。
 
-11. $d\varepsilon_p = \sqrt{\frac{2}{3}d\varepsilon^p:d\varepsilon^p}$。系数$\frac{2}{3}$可以通过单轴拉伸的情况来验证，注意这里和应力的情况不同，系数为2/3，此时另外两个方向的应变均为-0.5轴向应变，不为0。将这三个量带入最开始的式子，可得$d\varepsilon_p=d\varepsilon^p$。
+11. 单轴拉伸时，只需比较$\sigma$和$\sigma_y$即可确定是否是屈服状态，类比单轴拉伸的情况，多轴时使用等效应力$\sigma_e$代替单轴拉伸的应力，使用等效塑性应变增量$d\varepsilon_p$代替单轴拉伸的塑性应变增量$d\varepsilon^p$。之所以在应变处使用增量或率，是因为要增量地求解问题。
 
-12. 屈服准则为：$f=\sigma_e-\sigma_y$。其中流动应力$\sigma_y$与等效塑性应变$\varepsilon_p$有关。
+12. 偏应力张量$s=\sigma-pI$，$p=\text{tr}(\sigma)/3$。其第二不变量$J_2=\frac{1}{2}s:s^T=\frac{1}{2}s:s$，因为$s$是对称的。
 
-13. 使用正交流动假设，获得$d\varepsilon^p$的方向，$d\varepsilon^p=d\lambda \cdot n$，$n_{ij} = \frac{\partial f}{\partial \sigma_{ij}}$，并非单位长度的（因为二阶张量也无法谈论长度），只是一般的梯度。由于$f$的第二项不是$\sigma$的函数，因此$n = \frac{\partial \sigma_e}{\partial \sigma}=\frac{3}{2}\frac{s}{\sigma_e}$，使用链式法则即可，可以看出这里$n$是一个二阶张量。
+13. $\sigma_e=\sqrt{\frac{3}{2}s:s}=\sqrt{3J_2}$。等效应力和$J_2$有关，因此也称为$J_2$塑性。系数$\frac{3}{2}$可以通过单轴拉伸的情况来验证，同时将$\sigma_e$取为轴向应力$\sigma$，计算$J_2=\frac{1}{3}\sigma^2$。
 
-14. 将$d\varepsilon^p=d\lambda \frac{3}{2}\frac{\acute{\sigma}}{\sigma_e}$，带入$d\varepsilon_p = \sqrt{\frac{2}{3}d\varepsilon^p:d\varepsilon^p}$得：
+14. 由于Mises准则认为材料的塑性变形只有剪切变形，没有体积变形，此时为不可压缩的，塑性应变的泊松比为0.5，因此$d\varepsilon^p$的迹为0，因此累加起来后导致$\text{tr}(\varepsilon^p)=0$，即塑性应变张量是个偏张量。而且该准则适用于拉压性能相同的材料。
 
-15. $d\varepsilon_p=\sqrt{\frac{2}{3}d\lambda\frac{3}{2}\frac{s}{\sigma_e}:d\lambda\frac{3}{2}\frac{s}{\sigma_e}}=\frac{d\lambda}{\sigma_e}\sqrt{\frac{3}{2}s:s}=d\lambda$，可得出$d\lambda = d\varepsilon_p$。因此$d\varepsilon^p=d\varepsilon_p \frac{3}{2}\frac{s}{\sigma_e}$。
+15. $d\varepsilon_p = \sqrt{\frac{2}{3}d\varepsilon^p:d\varepsilon^p}$。系数$\frac{2}{3}$可以通过单轴拉伸的情况来验证，注意这里和应力的情况不同，系数为2/3，此时另外两个方向的应变均为-0.5轴向应变，不为0。将这三个量带入最开始的式子，可得$d\varepsilon_p=d\varepsilon^p$。
 
-16. 由一致性条件，可求得$d\varepsilon_p$的大小。$f=\sigma_e(\sigma)-\sigma_y(\varepsilon_p)$。$df(\sigma,\varepsilon_p)= \frac{\partial f}{\partial \sigma}:d\sigma+\frac{\partial f}{\partial \varepsilon_p}d\varepsilon_p=0$。根据线性强化本构关系，$\frac{\partial f}{\partial \varepsilon_p}=H$。根据正交流动假设$\frac{\partial f}{\partial \sigma}=n$。
+16. 屈服准则为：$f=\sigma_e-\sigma_y$。其中流动应力$\sigma_y$与等效塑性应变$\varepsilon_p$有关。
 
-17. 由$d\sigma = C:d\varepsilon^e=C:(d\varepsilon-d\varepsilon^p)=C:(d\varepsilon-d\varepsilon_p\cdot n)$。
+17. 使用正交流动假设，获得$d\varepsilon^p$的方向，$d\varepsilon^p=d\lambda \cdot n$，$n_{ij} = \frac{\partial f}{\partial \sigma_{ij}}$，并非单位长度的（因为二阶张量也无法谈论长度），只是一般的梯度。由于$f$的第二项不是$\sigma$的函数，因此$n = \frac{\partial \sigma_e}{\partial \sigma}=\frac{3}{2}\frac{s}{\sigma_e}$，使用链式法则即可，可以看出这里$n$是一个二阶张量。
 
-18. 推出，$d\varepsilon_p = \frac{n:C:d\varepsilon}{n:C:n-\frac{\partial f}{\partial \varepsilon_p}}=\frac{n:C:d\varepsilon}{n:C:n-H}$。
+18. 将$d\varepsilon^p=d\lambda \frac{3}{2}\frac{\acute{\sigma}}{\sigma_e}$，带入$d\varepsilon_p = \sqrt{\frac{2}{3}d\varepsilon^p:d\varepsilon^p}$得：
 
-19. 数值求解是增量进行的，步骤如下：
+19. $d\varepsilon_p=\sqrt{\frac{2}{3}d\lambda\frac{3}{2}\frac{s}{\sigma_e}:d\lambda\frac{3}{2}\frac{s}{\sigma_e}}=\frac{d\lambda}{\sigma_e}\sqrt{\frac{3}{2}s:s}=d\lambda$，可得出$d\lambda = d\varepsilon_p$。因此$d\varepsilon^p=d\varepsilon_p \frac{3}{2}\frac{s}{\sigma_e}$。
+
+20. 由一致性条件，可求得$d\varepsilon_p$的大小。$f=\sigma_e(\sigma)-\sigma_y(\varepsilon_p)$。$df(\sigma,\varepsilon_p)= \frac{\partial f}{\partial \sigma}:d\sigma+\frac{\partial f}{\partial \varepsilon_p}d\varepsilon_p=0$。根据线性强化本构关系，$\frac{\partial f}{\partial \varepsilon_p}=H$。根据正交流动假设$\frac{\partial f}{\partial \sigma}=n$。
+
+21. 由$d\sigma = C:d\varepsilon^e=C:(d\varepsilon-d\varepsilon^p)=C:(d\varepsilon-d\varepsilon_p\cdot n)$。
+
+22. 推出，$d\varepsilon_p = \frac{n:C:d\varepsilon}{n:C:n-\frac{\partial f}{\partial \varepsilon_p}}=\frac{n:C:d\varepsilon}{n:C:n-H}$。
+
+23. 数值求解是增量进行的，步骤如下：
 
     1. 首先已知量为：第$k$步开始时（也是$k-1$步结束时）的总应变$\varepsilon_k$，等效塑性应变$\varepsilon_{p,k}$，总应力$\sigma_k$。还知道下一步的应变增量$\Delta\varepsilon$。需要计算的是第$k+1$步结束时的上述四个量。
     1. 因此需要将应变增量$\Delta\varepsilon$分解为弹性$\Delta\varepsilon^e$和塑性$\Delta\varepsilon^p$部分。使用图返回算法Return Mapping。
@@ -2204,19 +2391,19 @@ endlocal
     1. 根据$\sigma_{k+1}=\sigma_k+C:\Delta\varepsilon^e$。或者使用试应力+塑性纠正方法计算$\sigma_{k+1}=\sigma^{tr}-2G\Delta\varepsilon^p$。
     1. ![image-20241108184030608](Abaqus.assets/image-20241108184030608.png)
 
-20. 需要从UMAT函数的参数中读取状态变量，这里只有一个有效塑性应变，还有2个材料参数，初始屈服应力和线性强化的斜率参数。
+24. 需要从UMAT函数的参数中读取状态变量，这里只有一个有效塑性应变，还有2个材料参数，初始屈服应力和线性强化的斜率参数。
 
-21. UMAT中将应力张量使用voigt标记为列向量：$[\sigma_{11},\sigma_{22},\sigma_{33},\sigma_{12},\sigma_{13},\sigma_{23}]^T$。应变使用的是工程应变张量，即$[\varepsilon_{11},\varepsilon_{22},\varepsilon_{33},\gamma_{12},\gamma_{13},\gamma_{23}]=[\varepsilon_{11},\varepsilon_{22},\varepsilon_{33},2\varepsilon_{12},2\varepsilon_{13},2\varepsilon_{23}]^T$。对于线弹性材料，$\tau=G\gamma$。
+25. UMAT中将应力张量使用voigt标记为列向量：$[\sigma_{11},\sigma_{22},\sigma_{33},\sigma_{12},\sigma_{13},\sigma_{23}]^T$。应变使用的是工程应变张量，即$[\varepsilon_{11},\varepsilon_{22},\varepsilon_{33},\gamma_{12},\gamma_{13},\gamma_{23}]=[\varepsilon_{11},\varepsilon_{22},\varepsilon_{33},2\varepsilon_{12},2\varepsilon_{13},2\varepsilon_{23}]^T$。对于线弹性材料，$\tau=G\gamma$。
 
-22. 在Standard中需要计算雅可比矩阵$\frac{\partial \delta \sigma}{\partial \delta \varepsilon}$（实际是一个四阶张量）表示应变增量的改变对应力增量改变的影响。在UMAT中用二维数组$DDSDDE(i,j)$表示，也就是第i个应力分量的变分对第j个应变分量的变分的偏导数。
+26. 在Standard中需要计算雅可比矩阵$\frac{\partial \delta \sigma}{\partial \delta \varepsilon}$（实际是一个四阶张量）表示应变增量的改变对应力增量改变的影响。在UMAT中用二维数组$DDSDDE(i,j)$表示，也就是第i个应力分量的变分对第j个应变分量的变分的偏导数。
 
-23. 使用它来计算刚度矩阵。因此只在standard中需要，在Explicit中，不需要计算DDSDDE。
+27. 使用它来计算刚度矩阵。因此只在standard中需要，在Explicit中，不需要计算DDSDDE。
 
-24. 精确的雅可比矩阵可以使收敛更快。
+28. 精确的雅可比矩阵可以使收敛更快。
 
-25. 对于线弹性材料，$\sigma=C:\varepsilon$，变分为$\delta\sigma=C:\delta\varepsilon$。求偏导可得$DDSDDE=C$。
+29. 对于线弹性材料，$\sigma=C:\varepsilon$，变分为$\delta\sigma=C:\delta\varepsilon$。求偏导可得$DDSDDE=C$。
 
-26. 对于各向同性强化的Mises塑性材料，步骤如下：
+30. 对于各向同性强化的Mises塑性材料，步骤如下：
 
     1. 对$\sigma=s+pI$进行变分，$\delta\sigma=\delta s+\delta pI$。
 
@@ -2230,7 +2417,7 @@ endlocal
 
     6. 将$\Delta\varepsilon_p$，$\delta\Delta\varepsilon_p$和$\delta\sigma_e$带入第三步的式子。
 
-27. 代码：
+31. 代码：
 
     ```fortran
           SUBROUTINE UMAT(STRESS,STATEV,DDSDDE,SSE,SPD,SCD,
@@ -2361,7 +2548,7 @@ endlocal
           END
     ```
 
-28. $\sigma_{new}=\sigma_{old}+DDSDDE.\Delta\varepsilon$。应力更新公式，矩阵形式的操作。使用初始应力和应变增量来计算结果应力。
+32. $\sigma_{new}=\sigma_{old}+DDSDDE.\Delta\varepsilon$。应力更新公式，矩阵形式的操作。使用初始应力和应变增量来计算结果应力。
 
 # Standard单元库
 
