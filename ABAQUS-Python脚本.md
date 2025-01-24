@@ -122,9 +122,15 @@
    1. repository：类似于Python中的Dictionary，使用对象的名称作为key来索引。例如myOdb.steps是一个repository对象，里边存储着多个Step对象，每个Step对象在创建时都有一个必选参数，字符串name，可以使用myOdb.steps['Step-1']来获取name属性为'Step-1'的Step对象。和字典类似，repository中的键值对是无序的，没有数字索引，也无法进行切片。
    2. sequence：类似于Python中的List，使用数字下标作为索引(0表示第一个，-1表示最后一个)。例如firstStep.frames就是一个sequence对象。
 
-7. ![image-20210610101430141](ABAQUS-Python脚本.assets/image-20210610101430141.png)
-
-8. ![image-20210610095429741](ABAQUS-Python脚本.assets/image-20210610095429741.png)
+      ```python
+      session.Viewport(name='Side view',origin = (10,10), width=50, height=50)
+      session.viewports['Side view'].viewportAnnotationOptions.setValues(legend=OFF, title=OFF)
+      
+      firstStep = myOdb.steps['Step-1']
+      secondStep = myOdb.steps['Step-2']
+      frame1 = firstStep.frames[-1]
+      frame2 = secondStep.frames[-1]
+      ```
 
 9. 一般来说如果创建对象时，需要给出name属性时，那么该对象就是存储在repository容器中，否则就是sequence容器中。
 
@@ -132,11 +138,18 @@
 
 11. 容器对象的命名习惯为全小写，复数。例如存储Step对象的容器名称为steps。
 
-12. repository对象可以用如下方法来查看键值对的对应关系。
+10. repository对象可以用如下方法来查看键值对的对应关系。
 
-13. ![image-20210610101559563](ABAQUS-Python脚本.assets/image-20210610101559563.png)
+    ```python
+    Method         #Description
+    keys()         #Returns a list of the keys in the repository.
+    has_key()      #Returns 1 if the key is found in the repository; otherwise, returns 0.
+    values()       #Returns a list of the objects in the repository.
+    items()        #Returns a list of key, value pairs in the repository.
+    changeKey(fromName, toName)     #Changes the name of a key in the repository. This method will also change the name attribute of the instance in the repository.
+    ```
 
-14. deformed variable 是用来确定变形后模型的形状。primary variable是用来确定云图或符号图的数值的。
+13. deformed variable 是用来确定变形后模型的形状。primary variable是用来确定云图或符号图的数值的。
 
 15. 使用type() 来获取一个对象的类型。
 
@@ -280,19 +293,35 @@
     mdb.models[name].rootAssembly
     ```
 
-53. 下图表示有两种方式可以获取到该对象。
+50. 下图表示有两种方式可以获取到该对象。
+
+    ```python
+    import section
+    mdb.models[name].sections[name]
+    import odbSection
+    session.odbs[name].sections[name]
+    ```
 
 54. ![image-20200615104814484](ABAQUS-Python脚本.assets/image-20200615104814484.png)
 
-55. 下图表明了该对象的构造函数的使用方法。需要加上路径。
+52. 下图表明了该对象的构造函数的使用方法。需要加上路径。
 
-56. ![image-20200615104929601](ABAQUS-Python脚本.assets/image-20200615104929601.png)
+    ```python
+    mdb.models[name].HomogeneousSolidSection
+    session.odbs[name].HomogeneousSolidSection
+    ```
 
-57. 下图这样的函数是对象的方法。
+53. 下图这样的函数是对象的方法。
 
-58. ![image-20200615105007297](ABAQUS-Python脚本.assets/image-20200615105007297.png)
+    ```python
+    setValues(...)
+      This method modifies the HomogeneousSolidSection object.
+    Required arguments
+      None.
+    Optional arguments
+    ```
 
-59. 使用dir函数来查看对象的所有属性和方法。包含了.\_\_members\_\_和.\_\_methods\_\_属性。
+54. 使用dir函数来查看对象的所有属性和方法。包含了.\_\_members\_\_和.\_\_methods\_\_属性。
 
     ```python
     >>> dir(h1)

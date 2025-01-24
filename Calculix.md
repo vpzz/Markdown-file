@@ -52,8 +52,6 @@
 
    11. 使用正则表达式在VSCODE中搜索中文，`.*[\u4E00-\u9FA5]+`。
 
-12. 
-
 # 缺少libgfortran.so.4
 
 1. 官方发布的Calculix2.20可执行文件`ccx_2.20`是动态连接的，需要libgfortran.so.4，而ubuntu22.04后，默认使用gcc-11，默认仓库也不再提供libgfortran.so.4。使用ldd命令来查看可执行文件需要的动态库，参数需要是完整路径名。=>表示在本机匹配到的具体路径名。
@@ -1016,12 +1014,6 @@
         CalculiXstep, therefore they are declared as static */
    ```
 
-3. 
-
-4. 
-
-5. 
-
 # readinput.c
 
 1. MATERIAL类别包括：
@@ -1537,10 +1529,6 @@
    	rm -f *.equ *.rout *.net *.fbd *.stm *.mtx
    ```
 
-3. 
-
-
-
 # BUG记录
 
 1. 运行`ccx -i beamd10dy`时，会在文件`steadystatedynamicss.f`中报告段错误。不过此inp文件中并没有*CYCLIC SYMMETRY MODEL关键字。同样的问题也出现在`complexfrequencys.f`和`modaldynamics.f`。
@@ -1587,8 +1575,6 @@
        endif
    endif
    ```
-
-4. 
 
 
 
@@ -2783,5 +2769,3 @@
    zeta_calc.f90 #计算不同部分总水头损失限制器的不同ζ指数
    zienzhu.f90 #修正的zienkiewicz-zhu逐点误差估计器
    ```
-
-17. 

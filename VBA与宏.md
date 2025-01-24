@@ -246,7 +246,7 @@
 
 # 面向对象
 
-68. 为了使控件不随着单元格的改变而改动，需要设置控件格式为大小和位置均固定。
+1. 为了使控件不随着单元格的改变而改动，需要设置控件格式为大小和位置均固定。
 
 2. ![image-20210215101252905](VBA与宏.assets/image-20210215101252905.png)
 
@@ -259,7 +259,7 @@
    	Range("A" & i) = 1             '执行100次，修改A1→A100为1。
    Next
    ```
-   
+
 4. For循环中可以倒序，例如 For i = 10 To 2 Step -1。需要标明step为负数。
 
 5. Worksheets，工作表对象：
@@ -274,7 +274,7 @@
    Sheets(1)        '第一张表。以Excel左下角显示的为准，计数从1开始。
    Sheets           '当前所有表的集合
    ```
-   
+
 9. 单元格对象的表示方法：
 
    ```vb
@@ -295,7 +295,7 @@
     Sheet1.Copy   '这个函数会将Sheet1复制到一个单独的Excel文件中。
     Sheet1.Copy After:=Sheet3    '将Sheet1复制到Sheet3后面，仍然在当前Excel文件中。
     ```
-    
+
 11. 模块中的代码，在执行时，会以当前的表为操作对象，如果没有指定表的话。
 
 12. 工作簿中至少要有一个工作表，即最后一个工作表是删除不掉的。
@@ -320,7 +320,7 @@
 
 18. 没有sheet类型，只有worksheet类型。有sheets和worksheets这两个变量。
 
-86. Workbooks 工作簿对象就是一个Excel文件。
+19. Workbooks 工作簿对象就是一个Excel文件。
 
     ```vb
     Workbooks.Open(Filename:="D:/data/1.xlsx")      '打开指定的文件。
@@ -331,14 +331,14 @@
     ActiveWorkbooks.Close  '关闭Excel文件
     ```
 
-87. 如果要打开文件，修改然后关闭，这样操作屏幕会一闪而过，可以设置不更新屏幕，有时候有大量操作时，会设置这个，防止Excel卡死，可以提高效率：
+20. 如果要打开文件，修改然后关闭，这样操作屏幕会一闪而过，可以设置不更新屏幕，有时候有大量操作时，会设置这个，防止Excel卡死，可以提高效率：
 
     ```vb
     Application.ScreenUpdating = False
     Application.ScreenUpdating = True     '成对出现
     ```
 
-88. 新建Excel文件，然后保存：
+21. 新建Excel文件，然后保存：
 
     ```vb
     Workbooks.Add
@@ -347,9 +347,9 @@
     ActiveWorkbook.Close
     ```
 
-89. select非当前表的单元格时候，必须要先select对应得表。
+22. select非当前表的单元格时候，必须要先select对应得表。
 
-90. 单元格对象Range。表示单元格对象的方式：
+23. 单元格对象Range。表示单元格对象的方式：
 
     ```vb
     [C2]          'C2单元格，不支持变量拼接
@@ -372,24 +372,24 @@
     Range("C2").ClearContents  '清楚内容
     ```
 
-91. Excel中在单元格上上边线双击会跳转到所在区域的边界（内部），不是表格的边界。区域之间由空白行和列分隔。
+24. Excel中在单元格上上边线双击会跳转到所在区域的边界（内部），不是表格的边界。区域之间由空白行和列分隔。
 
-92. <img src="VBA与宏.assets/image-20210215211238211.png" alt="image-20210215211238211" style="zoom:67%;" />
+25. <img src="VBA与宏.assets/image-20210215211238211.png" alt="image-20210215211238211" style="zoom:67%;" />
 
-93. 筛选：
+26. 筛选：
 
     ```vb
     Sheet1.Range("A1:F1048").AutoFilter Field:=4, Criterial:="一车间"    '筛选，第4列，值等于“一车间”
     Sheet1.Range("A1:F1048").AutoFilter         '再运行一次就表示关闭筛选功能。
     ```
 
-95. 通过输入框获取用户输入：
+27. 通过输入框获取用户输入：
 
     ```vb
     i= Inputbox("请输入内容")
     ```
 
-96. 对象的前缀相同可以使用with来简化代码。
+28. 对象的前缀相同可以使用with来简化代码。
 
     ```vb
     Sheet1.name = "12"
@@ -403,61 +403,61 @@
     	Sheet2.Range("B3") = 45      '不以.开头的按照常规进行索引。
     End With
     ```
+
+29. 对齐的设置
+
+30. ![在这里插入图片描述](VBA与宏.assets/2020050522052860.png)
+
+31. 字体格式的设置
+
+32. ![在这里插入图片描述](VBA与宏.assets/20200505220640749.png)
+
+33. Excel内置了一些事件，可以在某些动作被执行时，自动触发。例如选取变化。类似于回调函数。在VBE中，双击对应的Sheet或者Workbook，在最上边勾选对应的事件，添加代码即可。
+
+34. ![image-20210215234041165](VBA与宏.assets/image-20210215234041165.png)
+
+35. <img src="VBA与宏.assets/20200505220938485.png" alt="在这里插入图片描述" style="zoom: 50%;" />
+
+36. <img src="VBA与宏.assets/20200505220938455.png" alt="在这里插入图片描述" style="zoom:50%;" />
+
+37. 有时候需要关闭事件侦测功能，可以用一下设定：
+
+    ```vb
+    Application.EnableEvents = False
+    Application.EnableEvents = True
+    ```
+
+38. Excel中的空间分为两类，表单控件和active控件。表单控件需要指定宏，active控件具备设置事件的功能，可操作性更强，可编程的。
+
+39. 在VBA中使用公式，工作表函数(使用WorksheetFunction调用)和VBA函数。
+
+40. ```vb
+    Application.WorksheetFunction.Cos(Range("A1"))      'Application可以省略，等价于单元格中的工作表函数       =Cos("A1")
     
-97. 对齐的设置
+    VBA.Strings.Left()        'VBA函数，字符串截取左侧
+    ```
 
-98. ![在这里插入图片描述](VBA与宏.assets/2020050522052860.png)
+41. ![1613577860036](VBA与宏.assets/1613577860036.png)
 
-99. 字体格式的设置
+42. 一整行或一整列的表示方法：
 
-100. ![在这里插入图片描述](VBA与宏.assets/20200505220640749.png)
+    ```vb
+    Range("A:A")     Range("3:3")
+    Range("A3").EntireRow     Range("A3").EntireColumn
+    ```
 
-101. Excel内置了一些事件，可以在某些动作被执行时，自动触发。例如选取变化。类似于回调函数。在VBE中，双击对应的Sheet或者Workbook，在最上边勾选对应的事件，添加代码即可。
+43. 在VBA中调用某些函数，可能会出错，例如利用VLookUp进行查找时，此时可以设置，使得程序继续运行下面的代码：
 
-103. ![image-20210215234041165](VBA与宏.assets/image-20210215234041165.png)
+    ```vb
+    On Error Resume  Next     '一旦该行出错，执行下一行，而不是报错停止运行。
+    On Error Go To
+    ```
 
-104. <img src="VBA与宏.assets/20200505220938485.png" alt="在这里插入图片描述" style="zoom: 50%;" />
+44. 给定义了类型的变量赋予不对应的值，会引发错误，例如给整型变量赋予字符串。
 
-105. <img src="VBA与宏.assets/20200505220938455.png" alt="在这里插入图片描述" style="zoom:50%;" />
-
-106. 有时候需要关闭事件侦测功能，可以用一下设定：
-
-     ```vb
-     Application.EnableEvents = False
-     Application.EnableEvents = True
-     ```
-
-109. Excel中的空间分为两类，表单控件和active控件。表单控件需要指定宏，active控件具备设置事件的功能，可操作性更强，可编程的。
-
-110. 在VBA中使用公式，工作表函数(使用WorksheetFunction调用)和VBA函数。
-
-111. ```vb
-     Application.WorksheetFunction.Cos(Range("A1"))      'Application可以省略，等价于单元格中的工作表函数       =Cos("A1")
-     
-     VBA.Strings.Left()        'VBA函数，字符串截取左侧
-     ```
-
-112. ![1613577860036](VBA与宏.assets/1613577860036.png)
-
-113. 一整行或一整列的表示方法：
-
-     ```vb
-     Range("A:A")     Range("3:3")
-     Range("A3").EntireRow     Range("A3").EntireColumn
-     ```
-
-114. 在VBA中调用某些函数，可能会出错，例如利用VLookUp进行查找时，此时可以设置，使得程序继续运行下面的代码：
-
-     ```vb
-     On Error Resume  Next     '一旦该行出错，执行下一行，而不是报错停止运行。
-     On Error Go To
-     ```
-
-115. 给定义了类型的变量赋予不对应的值，会引发错误，例如给整型变量赋予字符串。
-
-116. ```vb
-     Val("4")          '结果为数字4。
-     IsNumeric (3)     '判断参数是否为数字，返回值为布尔型。
-     InStr("2015-07-27", "-")   '在字符串中寻找字符-，返回位置，结果为5，如果找不到则返回0。
-     Split("2015-07-27", "-")  '用第二个参数讲第一个参数分割，返回一个字符串数组。
-     ```
+45. ```vb
+    Val("4")          '结果为数字4。
+    IsNumeric (3)     '判断参数是否为数字，返回值为布尔型。
+    InStr("2015-07-27", "-")   '在字符串中寻找字符-，返回位置，结果为5，如果找不到则返回0。
+    Split("2015-07-27", "-")  '用第二个参数讲第一个参数分割，返回一个字符串数组。
+    ```

@@ -180,11 +180,7 @@
 
 11. 标准库主要使用了复合关系，例如set对象内部拥有一个rb_tree对象。在C++11中slist改名为forward_list。容器的大小和它内部存储元素种类和数量无关，因为都是通过指针管理的。例如vector\<string\>还有vector\<int\>的大小是一样的。但是不同实现下，大小不一定相同，GNUC 2.9中为12B，而MSVC2107中为16B。
 
-16. <img src="C++STL标准库和泛型编程.assets/image-20210822234600786.png" alt="image-20210822234600786" style="zoom:67%;" />
-
-17. 
-
-16. 
+12. <img src="C++STL标准库和泛型编程.assets/image-20210822234600786.png" alt="image-20210822234600786" style="zoom:67%;" />
 
 # 泛型编程
 
