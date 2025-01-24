@@ -77,6 +77,7 @@ for md_file_name in files:
         mdfile.seek(0)
         mdfile.writelines(lines)
     os.utime(md_file_name+".md", (stinfo.st_atime, stinfo.st_mtime))  # 恢复修改时间
+
 # 输出一下一共有多少图片从未被引用过，接下来要删除这些图片
 for folder in dirs:
     for pic in dirs[folder]:
