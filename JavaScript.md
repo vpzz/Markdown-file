@@ -854,7 +854,7 @@
    <h1>&#9760;</h1>        <!-- 十进制9760，对应16进制2620，输出的和上面的相同。 -->
    ```
 
-   ![1613920612796](JavaScript.assets/1613920612796.png)
+   <img src="JavaScript.assets/1613920612796.png" alt="1613920612796" />
 
 9. == 相等运算符，当左右操作数的类型不同，则会进行隐式类型转换，然后再比较。因此  "1" == 1的结果为true。
 
@@ -876,7 +876,7 @@
 
 16. 运算符的优先级：
 
-17. ![1613926279007](JavaScript.assets/1613926279007.png)
+17. <img src="JavaScript.assets/1613926279007.png" alt="1613926279007" />
 
     
 
@@ -1500,7 +1500,7 @@
 
 1. DOM（Document Object Model），文档对象模型，浏览器对HTML页面进行解析生成DOM树，JS通过DOM来操作网页中的标签，元素。顶级对象是document。
 
-2. ![1614100614015](JavaScript.assets/1614100614015.png)
+2. <img src="JavaScript.assets/1614100614015.png" alt="1614100614015" />
 
 3. BOM（Browser Object Model），浏览器对象模型，JS通过BOM来操作浏览器窗口，例如alert。顶级对象是window。
 
@@ -1515,7 +1515,7 @@
 
 6. 各种类型节点的3个属性：
 
-7. <img src="JavaScript.assets/1614100841255.png" alt="1614100841255" style="zoom:67%;" />
+7. <img src="JavaScript.assets/1614100841255.png" alt="1614100841255"  />
 
 8. document中保存着对一些顶级标签的引用。
 

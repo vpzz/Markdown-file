@@ -71,7 +71,7 @@
 
 25. 树的查找算法复杂度为O(logn)，每询问一次，就将问题的规模缩减为原来的一半。
 
-26. <img src="Python科学计算应用基础.assets/image-20200831211316165.png" alt="image-20200831211316165" style="zoom:50%;" />
+26. <img src="Python科学计算应用基础.assets/image-20200831211316165.png" alt="image-20200831211316165"  />
 
 27. 可以使用IPython自带的计时功能来对一行或一段代码进行性能分析：
 
@@ -1177,7 +1177,7 @@
 
 18. $m\times n$阶矩阵A对$k\times l$阶矩阵求导，结果为4阶张量$m\times n\times l\times k$。第$(i,j,p,q)$元素为A的第$(i,j)$元素对B的第$(p,q)$元素的偏导。分母不变，分子逆序。
 
-19. 向量求导的链式法则：![image-20240524221736716](Python科学计算应用基础.assets/image-20240524221736716.png)
+19. 向量求导的链式法则：<img src="Python科学计算应用基础.assets/image-20240524221736716.png" alt="image-20240524221736716" />
 
 # SciPy
 
@@ -1276,7 +1276,7 @@
 
    2. 函数最小值（fmin），Rosenbrock函数是一个常用来测试最优化算法性能的非凸函数，$f(x,y)=(1-x)^2+100(y-x^2)^2$。其全域最小值位于抛物线型的山谷中，但是在山谷中值的变化不大，要找到全域的最小值相当困难。
 
-   3. ![image-20201007103553654](Python科学计算应用基础.assets/image-20201007103553654.png)
+   3. <img src="Python科学计算应用基础.assets/image-20201007103553654.png" alt="image-20201007103553654" />
 
    4. ```python
       import numpy as np
@@ -1578,7 +1578,7 @@
     
     ```
 
-    ![image-20201007194028190](Python科学计算应用基础.assets/image-20201007194028190.png)
+    <img src="Python科学计算应用基础.assets/image-20201007194028190.png" alt="image-20201007194028190" />
 
 18. 傅里叶变换，将一个复杂的周期信号分解为多个正弦信号：
 
@@ -2048,7 +2048,7 @@
    plt.show()       #一张图中画了两条曲线。
    ```
 
-3. ![image-20201019095656225](Python科学计算应用基础.assets/image-20201019095656225.png)
+3. <img src="Python科学计算应用基础.assets/image-20201019095656225.png" alt="image-20201019095656225" />
 
 4. 子图
 
@@ -2075,7 +2075,7 @@
    plt.show()
    ```
 
-   ![image-20201019151416047](Python科学计算应用基础.assets/image-20201019151416047.png)
+   <img src="Python科学计算应用基础.assets/image-20201019151416047.png" alt="image-20201019151416047" />
 
 8. 可用的线型有    '-', '--', '-.', ':', 'None', ' ', '', 'solid', 'dashed', 'dashdot', 'dotted'
 
@@ -2109,7 +2109,7 @@
     plt.show()
     ```
 
-    ![image-20201019153922560](Python科学计算应用基础.assets/image-20201019153922560.png)
+    <img src="Python科学计算应用基础.assets/image-20201019153922560.png" alt="image-20201019153922560" />
 
 13. 使用opencv读取图片，结果为ndarray类型，3维数组，每个数据是uint8。
 
@@ -2145,7 +2145,7 @@
 
 6. DataFrame的dtypes属性，可以给出每一列的数据类型。
 
-7. ![image-20201007212851391](Python科学计算应用基础.assets/image-20201007212851391.png)
+7. <img src="Python科学计算应用基础.assets/image-20201007212851391.png" alt="image-20201007212851391" />
 
 8. ```python
    data.index
@@ -2185,7 +2185,7 @@
 
 10. dataframe是把多个列组合到一起，并为每一列添加了列名。
 
-11. ![image-20201007223738443](Python科学计算应用基础.assets/image-20201007223738443.png)
+11. <img src="Python科学计算应用基础.assets/image-20201007223738443.png" alt="image-20201007223738443" />
 
 12. ```python
     import numpy as np
@@ -2716,31 +2716,31 @@
 
 28. Excel操作，读取Excel2003的.xls文件需要xlrd库，读取Excel2007以后的.xlsx文件需要xlrd或openpyxl库：
 
-29. ![image-20201009141656736](Python科学计算应用基础.assets/image-20201009141656736.png)
+29. <img src="Python科学计算应用基础.assets/image-20201009141656736.png" alt="image-20201009141656736" />
 
 30. 默认返回第一个sheet的dataframe。如果参数是是none，那么字典的键是各个sheet的名字字符串。
 
-31. ![image-20201009141731212](Python科学计算应用基础.assets/image-20201009141731212.png)
+31. <img src="Python科学计算应用基础.assets/image-20201009141731212.png" alt="image-20201009141731212" />
 
 32. 对于没有表头的表格，需要设定header=none，如果有表头，则设置为0。
 
 33. 默认情况下header=0，index_col=None。如果设置了header不为0，那么会跳过header上面的行。
 
-34. ![image-20201009142701957](Python科学计算应用基础.assets/image-20201009142701957.png)
+34. <img src="Python科学计算应用基础.assets/image-20201009142701957.png" alt="image-20201009142701957" />
 
 35. usecols参数可以只读取部分列，提高效率。切片包含左右边界值。下图中的AAA那一行为表头。str-list方法比较好，可读性好，也不怕列顺序变动。
 
-36. ![image-20201009143401457](Python科学计算应用基础.assets/image-20201009143401457.png)
+36. <img src="Python科学计算应用基础.assets/image-20201009143401457.png" alt="image-20201009143401457" />
 
 37. skiprows跳过行。一般如果要跳过列的话，可以用usecols来操作。
 
-38. ![image-20201009144034860](Python科学计算应用基础.assets/image-20201009144034860.png)
+38. <img src="Python科学计算应用基础.assets/image-20201009144034860.png" alt="image-20201009144034860" />
 
 39. 如果源文件没有标题行，则可以使用names来手动设置，记得设置header=None，也可以在读完之后，用dataframe.columns=来设置。
 
 40. 可以通过dtype参数传入一个字典，来对每一列设置类型。
 
-41. ![image-20201009144642905](Python科学计算应用基础.assets/image-20201009144642905.png)
+41. <img src="Python科学计算应用基础.assets/image-20201009144642905.png" alt="image-20201009144642905" />
 
 42. 设置Series内储存数据的类型，object表示Series内的数据类型不唯一。下图中画框的类型是可以自动推导的。其余的要手动设置。也可以在dataframe的dtypes属性中查看类型。使用dataframe的astype()函数设置类型。
 
@@ -2748,37 +2748,37 @@
 
 44. 设置dtype的目的是，不同的类型有不同的操作函数。所以一般都要有一个明确的类型，而不是object。
 
-45. <img src="Python科学计算应用基础.assets/image-20201009144801373.png" alt="image-20201009144801373" style="zoom: 50%;" />
+45. <img src="Python科学计算应用基础.assets/image-20201009144801373.png" alt="image-20201009144801373"  />
 
 46. 选择对应的列为日期列，并解析它们。
 
-47. ![image-20201009150223029](Python科学计算应用基础.assets/image-20201009150223029.png)
+47. <img src="Python科学计算应用基础.assets/image-20201009150223029.png" alt="image-20201009150223029" />
 
 48. 下图左边的标准日期类型，不用设置日期解析器，右边的非标准的日期就需要手动设置。
 
-49. ![image-20201009150310684](Python科学计算应用基础.assets/image-20201009150310684.png)
+49. <img src="Python科学计算应用基础.assets/image-20201009150310684.png" alt="image-20201009150310684" />
 
 50. 在自动推导的时候，会参考Excel的列类型。可以通过多个分别表示时间的列（例如，年月日放在3个不同的列）合并成一个。
 
-51. ![image-20201009152929202](Python科学计算应用基础.assets/image-20201009152929202.png)
+51. <img src="Python科学计算应用基础.assets/image-20201009152929202.png" alt="image-20201009152929202" />
 
 52. data_parser接受一个函数，如下format参数可以解析2002年2月13日之类的日期。
 
-53. ![image-20201009153646698](Python科学计算应用基础.assets/image-20201009153646698.png)
+53. <img src="Python科学计算应用基础.assets/image-20201009153646698.png" alt="image-20201009153646698" />
 
 54. Pandas中常用NaN表示缺失值，是一个float类型。可以用na_values参数来指定那些内容被解析为NaN。可接受list，或字符串，数字等。默认全局的对应内容都会被解析为NaN，可以使用字典来直解析某些列中对应的内容为NaN（key是列名）。
 
-55. ![image-20201009154410609](Python科学计算应用基础.assets/image-20201009154410609.png)
+55. <img src="Python科学计算应用基础.assets/image-20201009154410609.png" alt="image-20201009154410609" />
 
 56. na_values = ['a',1]，这样所有内容为'a'或1的单元格会被解析为NaN。
 
 57. 值转换函数，参数为一个字典，键为列明或索引，值为函数，可以对指定的列进行修改。可以用来对数据进行清洗，预处理。
 
-58. ![image-20201009155038237](Python科学计算应用基础.assets/image-20201009155038237.png)
+58. <img src="Python科学计算应用基础.assets/image-20201009155038237.png" alt="image-20201009155038237" />
 
 59. true_values false_values两个参数可以接受list，将对应的字符串转化为true或FALSE，只有某一列的内容全部可以转化时，才会转化该列。只对字符串有效。
 
-60. ![image-20201009155450713](Python科学计算应用基础.assets/image-20201009155450713.png)
+60. <img src="Python科学计算应用基础.assets/image-20201009155450713.png" alt="image-20201009155450713" />
 
 61. Excel中的列名可以重复，但是dataframe中不可以重复。
 
@@ -2786,21 +2786,21 @@
 
 63. 使用dataframe.to_excel（）将对应的dataframe写入Excel文件。
 
-64. <img src="Python科学计算应用基础.assets/image-20201009160627716.png" alt="image-20201009160627716" style="zoom: 67%;" />
+64. <img src="Python科学计算应用基础.assets/image-20201009160627716.png" alt="image-20201009160627716"  />
 
 65. 一般如果是默认的列索引，则可以不输出列索引。
 
-66. ![image-20201009160801818](Python科学计算应用基础.assets/image-20201009160801818.png)
+66. <img src="Python科学计算应用基础.assets/image-20201009160801818.png" alt="image-20201009160801818" />
 
 67. 在写入的时候，需要确保该文件当前没有被打开。
 
 68. 实际使用的时候，index列也应该有一个名字，可以使用dataframe.index.name = 来设置。
 
-69. ![image-20201009161227716](Python科学计算应用基础.assets/image-20201009161227716.png)
+69. <img src="Python科学计算应用基础.assets/image-20201009161227716.png" alt="image-20201009161227716" />
 
 70. 使用ExcelWriter可以一次写入多个sheet，同时修改时间格式。用ExcelWriter打开一个文件，to_excel可以往该writer代表的文件中写入多次数据。
 
-71. ![image-20201009162057738](Python科学计算应用基础.assets/image-20201009162057738.png)
+71. <img src="Python科学计算应用基础.assets/image-20201009162057738.png" alt="image-20201009162057738" />
 
 72. 不过以上的所有的to_excel都会导致覆盖原有的所有数据，这时需要使用openpyxl引擎来操作Excel。例如：
 
@@ -2831,7 +2831,7 @@
 
 73. 读写CSV文件。大部分参数和Excel是一样的。读写CSV文件需要特别注意编码。CSV文件在写入时，都要设置index=False，否则产生不是标准的CSV文件。
 
-74. ![image-20201009195256960](Python科学计算应用基础.assets/image-20201009195256960.png)
+74. <img src="Python科学计算应用基础.assets/image-20201009195256960.png" alt="image-20201009195256960" />
 
 # openpyxl
 
@@ -2840,9 +2840,8 @@
 3. 不存在另存为，可以保存到另一个路径下即可。
 4. 用[]从工作簿中获得工作表，不可以使用数字索引，只能使用工作表名称。可以用wb.worksheets[0]来索引第一个工作表。
 5. wb.active获取保存前的那个工作表，也就是用软件打开的默认的那个工作表。
-6. ![image-20201010202522664](Python科学计算应用基础.assets/image-20201010202522664.png)
-7. 
-8. ![image-20201010204129508](Python科学计算应用基础.assets/image-20201010204129508.png)
+6. <img src="Python科学计算应用基础.assets/image-20201010202522664.png" alt="image-20201010202522664" />
+7. ![image-20201010204129508](Python科学计算应用基础.assets/image-20201010204129508.png)
 9. 工作表['A1']或者工作表.cell(1,1)都可以或得单元格，单元格.value可以获得单元格的值。行列的起始从0开始。
 10. 也可以进行行列区域的选择，例如   ['A2:C4']  交叉的单元格  或者   ['A:C']  A-C列    或者    ['2:5']   2-5行。
 11. 对于['A2:C4']，获得的是一个二维的元组，索引方式类似于二维数组。['A2:C4']\[0\]获得的是第2行的数据。先索引行，再索引列。

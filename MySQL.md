@@ -36,6 +36,6 @@
     select database()        显示当前所在的数据库。
     ```
 
-11. ![image-20201204185846576](MySQL.assets/image-20201204185846576.png)
+11. <img src="MySQL.assets/image-20201204185846576.png" alt="image-20201204185846576" />
 
 12. MySQL的命令要以;结尾。

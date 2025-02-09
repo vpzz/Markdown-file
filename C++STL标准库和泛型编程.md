@@ -86,7 +86,7 @@
    3. Unordered Set，不定序容器，内部使用hashtable Separate Chaining实现。碰撞的内容放到一个篮子内的链表中，不过如果碰撞的次数太多，一个篮子的链表过长，也会分在不同的篮子里。
    4. Unordered Map，和上面Unordered Set几乎一样，不过每个节点是一个键值对。
 
-5. <img src="C++STL标准库和泛型编程.assets/image-20210821231224676.png" alt="image-20210821231224676" style="zoom:80%;" />
+5. <img src="C++STL标准库和泛型编程.assets/image-20210821231224676.png" alt="image-20210821231224676"  />
 
 6. Array的使用测试：
 
@@ -176,11 +176,11 @@
 
 9. MSVC实现中Vector的capacity增长规律，不是2倍扩充规律，而是1.5倍。
 
-10. ![image-20210822132229570](C++STL标准库和泛型编程.assets/image-20210822132229570.png)
+10. <img src="C++STL标准库和泛型编程.assets/image-20210822132229570.png" alt="image-20210822132229570" />
 
 11. 标准库主要使用了复合关系，例如set对象内部拥有一个rb_tree对象。在C++11中slist改名为forward_list。容器的大小和它内部存储元素种类和数量无关，因为都是通过指针管理的。例如vector\<string\>还有vector\<int\>的大小是一样的。但是不同实现下，大小不一定相同，GNUC 2.9中为12B，而MSVC2107中为16B。
 
-12. <img src="C++STL标准库和泛型编程.assets/image-20210822234600786.png" alt="image-20210822234600786" style="zoom:67%;" />
+12. <img src="C++STL标准库和泛型编程.assets/image-20210822234600786.png" alt="image-20210822234600786"  />
 
 # 泛型编程
 

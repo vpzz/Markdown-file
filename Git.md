@@ -23,9 +23,11 @@
 
 1. 配置文件一共有3种：
 
-   1. /etc/gitconfig	                            系统级配置文件             	git config --system     需要管理员权限才可以设置
-   2. \~/.gitconfig或\~/.config/git/config  用户级配置文件            	git config --golbal
-   3. .git/config	 		 		 		 	 仓库级配置文件          		git config --local    默认是这个
+   ```shell
+   /etc/gitconfig #系统级配置文件 git config --system 需要管理员权限才可以设置
+   ~/.gitconfig或~/.config/git/config  #用户级配置文件 git config --golbal
+   .git/config    #仓库级配置文件 git config --local    默认是这个
+   ```
 
 2. Windows下系统级配置文件在Msys的根目录下的etc/gitconfig文件。用户级配置文件在$HOME下的.gitconfig文件，仓库级的配置文件和linux下相同。
 
@@ -168,7 +170,7 @@
 
 8. 此时文件xxx.txt同时位于暂存区和非暂存区。如果此时commit，会提交位于暂存区的版本，而不是和工作目录相同的文件内容。
 
-9. ![image-20220721001718319](Git.assets/image-20220721001718319.png)
+9. <img src="Git.assets/image-20220721001718319.png" alt="image-20220721001718319" />
 
 10. 对于于上面的三种状态，也存在区域：
 
@@ -1200,13 +1202,11 @@
 
 21. 如果master分支的代码出现bug需要修复，则应该新增一个分支iss53，进行修改，如果在修改的过程中，出现了一个紧急的问题，那么就应该先commit 分支iss53，切回主分支，然后创建一个新的分支hotfix，用于修复紧急问题。此时git的提交对象链出现分叉。
 
-22. ![image-20201203104616856](Git.assets/image-20201203104616856.png)
+22. <img src="Git.assets/image-20201203104616856.png" alt="image-20201203104616856" />
 
 23. 合并是有方向的，应该是主分支合并修改分支，父分支合并子分支。
 
-24. 
-
-25. ![image-20201203105559321](Git.assets/image-20201203105559321.png)
+25. <img src="Git.assets/image-20201203105559321.png" alt="image-20201203105559321" />
 
 26. 如果此时hotbug修复完成，想要合并到master分支上线：
 
@@ -1220,17 +1220,15 @@
      1 file changed, 1 insertion(+)
     ```
 
-27. ![image-20201203105854106](Git.assets/image-20201203105854106.png)
+27. <img src="Git.assets/image-20201203105854106.png" alt="image-20201203105854106" />
 
 28. 此时hotbug分支可以删除了，删除hotbug后，分支如下。
 
-29. ![image-20201203110140823](Git.assets/image-20201203110140823.png)
+29. <img src="Git.assets/image-20201203110140823.png" alt="image-20201203110140823" />
 
-30. 
+30. 此时再对iss53的问题进行修改，提交一次，查看log可以发现，iss53跑到master上面了，因为它的链比较长。
 
-31. 此时再对iss53的问题进行修改，提交一次，查看log可以发现，iss53跑到master上面了，因为它的链比较长。
-
-32. ![image-20201203110631196](Git.assets/image-20201203110631196.png)
+32. <img src="Git.assets/image-20201203110631196.png" alt="image-20201203110631196" />
 
 33. 如果iss53也修复好了，需要合并到主分支，此时不能再进行快速合并。因为iss53是从之前的主分支延伸过来的，他也具有hotbug的问题。
 
@@ -1238,9 +1236,9 @@
 
 35. 合并出现冲突，在a.txt中
 
-36. ![image-20201203111350154](Git.assets/image-20201203111350154.png)
+36. <img src="Git.assets/image-20201203111350154.png" alt="image-20201203111350154" />
 
-37. ![image-20201203151139549](Git.assets/image-20201203151139549.png)
+37. <img src="Git.assets/image-20201203151139549.png" alt="image-20201203151139549" />
 
 38. 打开冲突的文件a.txt，删除不需要的行，留下有用的行。
 
@@ -1257,13 +1255,13 @@
 
 41. 查看分支历史如下。
 
-42. ![image-20201203151053425](Git.assets/image-20201203151053425.png)
+42. <img src="Git.assets/image-20201203151053425.png" alt="image-20201203151053425" />
 
 43. 一般合并完分支之后，需要推送到远程仓库，更新线上的功能。
 
 44. 一般开发有一个主线分支master，还有一个开发分支develop。不同团队有各自的分支，团队内的人员有各自的分子，每个人在开发新功能的时候也会开分支，开发完善之后，再合并到自己的分支，自己的分支会定期合并到团队的分支，团队的分支会定期合并到开发分支中，开发分支定期合并到主分支中。
 
-45. ![image-20201203151919778](Git.assets/image-20201203151919778.png)
+45. <img src="Git.assets/image-20201203151919778.png" alt="image-20201203151919778" />
 
 46. .git/refs/heads保存着分支及其对应的提交对象。分支名就是文件名，内容就是提交对象的hash值。
 
@@ -1376,11 +1374,11 @@
 
 12. 现在的状态
 
-13. ![image-20201203183819918](Git.assets/image-20201203183819918.png)
+13. <img src="Git.assets/image-20201203183819918.png" alt="image-20201203183819918" />
 
 14. amend之后
 
-15. ![image-20201203184031146](Git.assets/image-20201203184031146.png)
+15. <img src="Git.assets/image-20201203184031146.png" alt="image-20201203184031146" />
 
 16. reset
 
@@ -1410,7 +1408,7 @@
 
 25. checkout 和reset --hard的区别。
 
-26. ![image-20201203204915431](Git.assets/image-20201203204915431.png)
+26. <img src="Git.assets/image-20201203204915431.png" alt="image-20201203204915431" />
 
 27. git checkout commithash  \<filename\> 会修改暂存区和工作目录中的对应文件。
 
@@ -1444,17 +1442,19 @@
       git clone https://github.com/vpzz/MyVimrc.git     #clone不需要init和新建文件夹。
       ```
 
-   6. 项目经理将团队成员加入到GitHub的团队中，允许他们Push。在项目的settings中的collaborators中，搜索GitHub用户的邮箱或者用户名，发出邀请，团队成员在邮箱或者打开邀请的链接，接受即可。![image-20201204100037409](Git.assets/image-20201204100037409.png)
+   6. 项目经理将团队成员加入到GitHub的团队中，允许他们Push。在项目的settings中的collaborators中，搜索GitHub用户的邮箱或者用户名，发出邀请，团队成员在邮箱或者打开邀请的链接，接受即可。
 
-   7. 团队成员推送commit到远程仓库
+   7. <img src="Git.assets/image-20201204100037409.png" alt="image-20201204100037409" />
 
-   8. 项目经理更新成员的提交到本地。git fetch 仓库别名，然后在本地分支master，merge远程跟踪分支。
+   8. 团队成员推送commit到远程仓库
+
+   9. 项目经理更新成员的提交到本地。git fetch 仓库别名，然后在本地分支master，merge远程跟踪分支。
 
 3. clone到本地的文件夹名和远程仓库的仓库名相同。clone下来的仓库中自动会有远程仓库的别名，默认是origin。
 
 4. 可以发现在log中，存在一个远程跟踪分支origin/master。
 
-5. ![image-20201204100756961](Git.assets/image-20201204100756961.png)
+5. <img src="Git.assets/image-20201204100756961.png" alt="image-20201204100756961" />
 
 6. 一共有三种分支：本地分支（本地仓库的状态），远程跟踪分支（本地认为的远程仓库的状态），远程仓库分支（仓库的标准状态）。
 
