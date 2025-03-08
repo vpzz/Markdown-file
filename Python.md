@@ -764,6 +764,10 @@
                \_ m1.py
    ```
 
+10. python源文件的名称不能和已有的库冲突，否则在import时，会导入该文件。这样调用库中的功能时，会报属性不存在的错误。
+
+11. 
+
 # 数学计算
 
 1. Python的整数没有限制。以0B或0b开头表示2进制，0O或0o开头表示8进制，0X或0x开头表示16进制。
@@ -3615,52 +3619,164 @@
 
 # 正则表达式
 
-1. 正则表达式：用来简介表达一组字符串的表达式。是一种通用的字符串表达框架。可以进行字符串匹配，进行查找和替换。使用前需要将符合正则表达式语法的字符串编译成正则表达式。一次编译，多次使用，效率高。
+1. 完整的正则表达式由2种字符组成，特殊字符（也成为元字符）和文字（也成为普通字符）。另一种很像正则表达式的是文件名匹配格式，例如Shell工具中`*.txt`表示所有以.txt结尾的文件。正则表达式比文件名匹配的功能更强大，因为它提供了更多的元字符。
 
-2. pattern和string还有repl可以是Unicode字符串str，也可以是8位字符数组bytes，但这三个参数必须都相同。
+2. 完整的正则表达式由小的构建模块单元组成，每个单独的构建模块很简单，不过它们可以组合起来构成复杂的正则表达式。
 
-3. 字符串的匹配指的是，有个字符串和一个正则表达式，测试一下整个字符串和这个正则表达式是否完全匹配，结果为bool值。
+3. 文本检索是正则表达式最简单的应用之一，Linux下的egrep命令就是做这个的，需要指定搜索的正则表达式（第一个参数）和文件（后续所有参数），egrep会尝试用正则表达式去匹配每个文件的每一行，并显示能够匹配的行。
 
-4. 字符串的查找指的是，有一个字符串和一个正则表达式，在这个字符串中寻找符合正则表达式的子串。可见匹配是查找的一个特例。
-
-5. 字符串abc不匹配正则表达式ab，但是在该字符串内查找正则表达式对应的字串，是可以找到的。
-
-6. 正则表达式：字符+操作符
-
-   ```python
-   P(Y|YT|YTH|YTHO)?N   #其中()，|，?都是操作符
+   ```shell
+   egrep '^(From|Subject): ' mailbox-file
+   #需要将正则表达式使用特定一对字符包裹起来，这是Shell的要求，否则会将其中的*解释为Shell所支持的通配符等，它并不是正则表达式的一部分。
    ```
 
-7. 以字符为基本操作单元。
+4. 不同命令所支持的正则表达式的元字符的数量和范围不同。正则表达式可以不包含元字符。
 
-8. ```shell
-   操作符  说明                              实例
-   .      匹配任何单个字符             a、1等
-   []     匹配字符集合中的任意一个      [abc]表示a或b或c；[a-z]表示从a到z的任意一个字符
-   [^]    匹配字符集合意外的任意一个    [^abc]表示匹配除了a、b、c以外的任意一个字符。
-   *      前一个字符的0或无限次扩展     abc*可以匹配ab、abc、abcc、abccc等
-   +      前一个字符的1或无限次扩展     abc+可以匹配abc、abcc等
-   ?      前一个字符的0或1次扩展        abc?只可以匹配ab、abc这两个字符串。
-   |      匹配左右表达式中的任意一个即可 d(abc|def)g只可以匹配dabcg、ddefg这两个字符串。    
-   {m}    前一个字符扩展m次            ab{2}c 只可以匹配abbc
-   {m,n}  前一个字符扩展m到n次(含n)    ab{1,2}c 只可以匹配abc、abbc。可以省略任意一个m最小为0，n最大为无穷大
-   ^      匹配字符串的开头             ^abc可以匹配abc,abcd、abcf、abcdefsf等。这里说的匹配是可以查找到子串的意思。
-   $      匹配字符串的结尾             abc$可以匹配dabc、dsfaabc等
-   ()     分组标记，方便后续使用的时候引用，可以和任意模式联动。他后面的*+?对整个编组起作用。
-   ```
+5. 正则表达式的搜索不是基于单词的，因为它不理解英语，只是将其当作字符序列。
 
-9. 正则表达式预先定义了一些常用的字符，元字符，大多数以\开头。例如：
+6. 用来表示行首的元字符是脱字符^，行尾的元字符为美元符号$。二者的特殊就在于它们匹配的是一个位置，而不是具体的文本。`^$`匹配一个空行，`^`匹配所有行，因为每行都有开头，`$`匹配所有行，因为每行都有结尾。
 
-   ```python
-   \d      [0-9]                #数字字符，如果是Unicode字符的话，除了[0-9]，也包括各种语言中的数字。
-   \w      [0-9a-zA-Z_]         #单词字符(英文字母，数字，下划线)
-   \s      []                   #空白字符(空格,制表符,换行符)
-   
-   #以上的元字符的字母大写，表示非对应的字符，例如\D表示出了数字字符以外的任意字符。
-   #如果要匹配.*+?这类元字符，需要使用\转义。
-   ```
+7. `^cat`应该理解为匹配的是以c作为一行的第一个字符，紧接一个a，然后是一个t的文本。而非匹配以cat开头的行。二者的含义相同，但是前者更符合正则表达式工作的逻辑。
 
-10. 经典的正则实例：
+8. 字符组可以匹配若干字符之一，`a`匹配字符a，`b`匹配字符b，`[ab]`能匹配字符a或b。例如`gr[ea]y`可以匹配grey或gray。
+
+9. 在字符组内部可以使用字符组元字符-来表示一个范围，例如`H[1-4]`等价于`H[1234]`。一个字符组内可以有多个范围简写，例如`[1-4a-d]`等价于`[1234abcd]`。
+
+10. 字符组内各字符的顺序可以交换，不影响效果，不过包含-的，需要连带-进行交换。
+
+11. 字符组的内部和外部，关于元字符的范围和含义是不同的。
+
+12. 需要注意，只有在字符组内部，-才是元字符，否则就是普通的连字符。不过当它出现在字符组内的开头时（对于排除型字符组，则是^之后的第一个字符），不表示为元字符，而是普通的连字符。同理，?和.在字符组内就是普通字符。例如正则表达式`[0-9a-z_!.?]`中包含一个字符组，该字符组中包含6类字符，只有-是元字符。
+
+13. 字符组的开头如果是^，则为排除型字符组，及匹配任何未列出的字符，例如`[^1-4]`匹配除了1到4以外的任何字符。如果该字符在字符组内，但是不是第一个字符，则表示一个普通的字符。
+
+14. 排除型字符组中只包含一个字符往往是有意义的，这个和非排除型字符组不同，例如`[a]`等价于`a`，因此几乎都会使用后者。而`[^a]`表示匹配除了a以外的任何字符，因为无法列出所有满足条件的字符，因此有时必须使用排除型字符组。
+
+15. 注意排除型字符组的意思是匹配一个未列出的字符，而非不要匹配列出的字符。也就是说排除型字符组也是需要匹配一个字符的，不能啥也不匹配。
+
+16. 通常来说，每行末尾都有一个换行符，egrep会将这些行符去掉后再进行匹配。因此`q[^u]`无法匹配`Iraq`，因为字符q后面没有一个非u字符了。
+
+17. 点号是一个元字符，表示匹配任意字符的字符组，即任意一个字符，一般用作占位符。
+
+18. 例如需要搜索不同格式的某天，例如`2025/03/05`，`2025-03-05`或`2025.03.05`等形式，可以使用`2025[-./]03[-./]05`，或者简单使用`2025.03.05`。注意，在字符组内，点号不是元字符。不能写作`[.-/]`因为-在这里表示范围，但是这不是一个有效的范围。`[./-]`也不对。
+
+19. 由于点号能匹配任何字符，因此`2025.03.05`也能匹配`2025103205`，所以用户应该在精确和易用方面进行取舍，这取决于用户对要检索的文本的了解和所需要的精确性。例如如果认为文本中不可能出现`2025103205`这样的例外，就可以使用宽泛的正则表达式。
+
+20. 普通字符组表示子集，^表示补集，点号表示全集，没有空集。
+
+21. |是一个元字符，表示或的意思，使用它将不同的表达式组合成一个总表达式，这个总表达式能够匹配任意的子表达式，也成为多选分支。`gr[ea]y`等价于`gray|grey`或`gr(e|a)y`，后者使用括号来划定多选分支的范围，其中的括号不能省略，因为`gre|ay`表示匹配gre或ay。
+
+22. 如果|出现在字符组内，则表示普通字符含义。
+
+23. 多选结构可以包含很多字符，但是不能跨越括号的界限。
+
+24. `First|1st`等价于`(Fir|1)st`。
+
+25. 注意，字符组和多选结构是不一样的，前者只能匹配多个字符中的一个，后者可以匹配多个表达式中的一个，而每个表达式可以是任意丰富的。
+
+26. 在包含多选结构的表达式中使用^和$时需要注意，例如`^From|Subject|Date: `和`^(From|Subject|Date): `不同。后者展开后是`^From: |^Subject: |^Date: `，而前者匹配的是`^From`，`Subject`，`Date: `三个中的任意一个。
+
+27. 正则表达式语法是严格区分大小写的，不过这些支持正则表达式的程序都提供忽略大小写的功能，例如egrep的-i选项，需要放在正则表达式参数之前。
+
+28. 有时希望匹配的内容出现在单词的开头或结尾，或者就是一个完整的单词，此时可以使用单词分界符，某些版本的egrep对此提供了有限的支持，元字符分别为`\<`和`\>`，类似于^和$，它们也只是位置匹配，不对应任何字符。
+
+29. 注意，`<`和`>`本身并不是元字符，只有当它们和`\`结合起来时，整个序列才表示元字符。
+
+30. 有些版本的egrep并不能很好地识别英文单词的边界，软件认为的单词并非是英文单词，而是一个连续的字母数字序列。例如
+
+    ```shell
+    That dang-tootin' #@!%* varmint's cost me $192.95!
+    ↑  ↓ ↑  ↓ ↑    ↓        ↑     ↓ ↑↓↑  ↓ ↑↓  ↑ ↓ ↑↓
+    #注意varmint's会被认为是2个单词，第二个单词就是一个字符s
+    #192.95也被认为是2个单词，分别为192和95。
+    ```
+
+31. ?表示可选项元字符，表示它前面的字符可有可无。一般将?和它前面的字符一同称为要给元字符序列，类似于`\>`这样的元字符序列。
+
+32. 例如`colou?r`可以匹配color或colour，也可以写成`color|colour`。`u?`可以匹配`ccccsa`，实际上它可以匹配任意内容。
+
+33. ?前面除了是一个字符外，还可以是表达式，此时表示该表达式可有可无，例如`4(th)?`等价于`4|4th`，此时?的作用对象是(th)。
+
+34. 括号内的表达式可以任意复杂， 但是从括号外来看是一个整体，因此可以被?作用。
+
+35. +和*的作用和?类似，统称为量词。
+
+    1. +表示前一个字符出现≥1次。
+
+    2. *表示前一个字符出现≥0次，即任意次。
+
+    3. ?表示前一个字符出现0或1次。
+
+36. 和`u?`一样，`u*`也是永远不会匹配失败。
+
+37. 
+
+38. 
+
+39. 
+
+40. 
+
+41. Python的正则表达式本质上是一种嵌入在Python中的微型、高度专业化的编程语言，可通过re模块使用。它是一种通用的字符串表达框架。可以进行字符串匹配，查找和替换。使用前需要将符合正则表达式语法的字符串编译成正则表达式（一个程序对象）。一次编译，多次使用，效率高。
+
+42. 正则表达式字符串会被编译成一系列字节码，然后由用C编写的匹配引擎执行。对于高级用途，可能需要仔细注意引擎如何执行给定的RE，并以某种方式编写RE以生成运行速度更快的字节码。
+
+43. 正则表达式语言相对较小且受限，并非所有字符串处理任务都可以使用正则表达式完成。有时正则表达式非常复杂，此时最好编写Python代码来进行处理，虽然后者运行速度较慢，但它更容易理解。
+
+44. 正则表达式背后的理论是确定性有限自动机DFA和非确定性有限自动机NFA。
+
+45. 元字符一共包含`. ^ $ * + ? { } [ ] \ | ( )`。
+
+46. 所有的元字符（除了\以外），在字符组中都不起作用。
+
+47. 
+
+48. pattern和string还有repl可以是Unicode字符串str，也可以是8位字符数组bytes，但这三个参数必须都相同。
+
+49. 两种主要的使用模式：
+
+    1. 匹配，测试一下整个字符串和这个正则表达式是否完全匹配，结果为bool值。
+
+    2. 查找，在整个字符串中寻找符合正则表达式的子串。可见匹配是查找的一个特例，相当于加了^和$。
+
+50. 字符串abc不匹配正则表达式ab，但是在该字符串内查找正则表达式对应的字串，是可以找到的。
+
+51. 正则表达式：普通字符+元字符
+
+    ```python
+    P(Y|YT|YTH|YTHO)?N   #其中()，|，?都是元字符
+    ```
+
+52. 以字符为基本操作单元。
+
+53. ```shell
+    操作符  说明                              实例
+    .      匹配任何单个字符             a、1等
+    []     匹配字符集合中的任意一个      [abc]表示a或b或c；[a-z]表示从a到z的任意一个字符
+    [^]    匹配字符集合意外的任意一个    [^abc]表示匹配除了a、b、c以外的任意一个字符。
+    *      前一个字符的0或无限次扩展     abc*可以匹配ab、abc、abcc、abccc等
+    +      前一个字符的1或无限次扩展     abc+可以匹配abc、abcc等
+    ?      前一个字符的0或1次扩展        abc?只可以匹配ab、abc这两个字符串。
+    |      匹配左右表达式中的任意一个即可 d(abc|def)g只可以匹配dabcg、ddefg这两个字符串。    
+    {m}    前一个字符扩展m次            ab{2}c 只可以匹配abbc
+    {m,n}  前一个字符扩展m到n次(含n)    ab{1,2}c 只可以匹配abc、abbc。可以省略任意一个m最小为0，n最大为无穷大
+    ^      匹配字符串的开头             ^abc可以匹配abc,abcd、abcf、abcdefsf等。这里说的匹配是可以查找到子串的意思。
+    $      匹配字符串的结尾             abc$可以匹配dabc、dsfaabc等
+    ()     分组标记，方便后续使用的时候引用，可以和任意模式联动。他后面的*+?对整个编组起作用。
+    ```
+
+54. 正则表达式预先定义了一些常用的字符，元字符，大多数以\开头。例如：
+
+    ```python
+    \d      [0-9]                #数字字符，如果是Unicode字符的话，除了[0-9]，也包括各种语言中的数字。
+    \w      [0-9a-zA-Z_]         #单词字符(英文字母，数字，下划线)
+    \s      []                   #空白字符(空格,制表符,换行符)
+    
+    #以上的元字符的字母大写，表示非对应的字符，例如\D表示出了数字字符以外的任意字符。
+    #如果要匹配.*+?这类元字符，需要使用\转义。
+    ```
+
+55. 经典的正则实例：
 
     ```shell
     ^[1-9]\d*$      #正整数，不是^[0-9]*[1-9][0-9]*$ 因为它能匹配010之类的非整数。
@@ -3673,7 +3789,7 @@
     \d{3}-\d{8}|\d{4}-\d{7}  #国内电话号码
     ```
 
-11. IP地址的精确匹配。
+56. IP地址的精确匹配。
 
     ```shell
     0-99       #[1-9]?\d
@@ -3686,9 +3802,9 @@
     #其中\.是对.的转义。
     ```
 
-12. re库使用原生字符串来表达正则表达式。原生字符串不包含转义符，即它里边的\不被解释为转义符。也可以使用string来表达，不过更复杂。
+57. re库使用原生字符串来表达正则表达式。原生字符串不包含转义符，即它里边的\不被解释为转义符。也可以使用string来表达，不过更复杂。
 
-13. 原生字符串：r"字符串内容"。
+58. 原生字符串：r"字符串内容"。
 
     ```python
     print("\n")   #表示包含一个字符的字符串
@@ -3697,7 +3813,7 @@
     \n
     ```
 
-14. re库常用方法：
+59. re库常用方法：
 
     ```python
     re.search(pattern,string,flags=0)    #在字符串string中搜索匹配正则表达式pattern的第一个位置，返回match对象。其中pattern应为原生字符串。flags为控制标记，有以下几种情况：
@@ -3723,7 +3839,7 @@
     <re.Match object; span=(0, 1), match='\n'>
     ```
 
-15. ```python
+60. ```python
     re.split(pattern, string, maxsplit, flags=0) #将字符串string按照正则表达式pattern匹配的结果进行分割，返回列表类型，每个元素都是字符串，类似于str的分割操作。其中maxsplit为最大分割数，如果达到了最大分割数，后面的匹配不会再进行分割，而是作为一整个元素存入列表。
     re.split(r"\d{6}",'HIT 150006 BIT 100081')
     ['HIT ', ' BIT ', '']  #如果匹配发生在末尾处，列表最后会有一个空字符串。
@@ -3731,7 +3847,7 @@
     ['HIT ', ' BIT 100081']#达到最大分隔数之后，就不再匹配了。
     ```
 
-16. ```python
+61. ```python
     re.sub(pattern,repl,string,count=0,flags=0) #将字符串string中所有的匹配正则表达式pattern的子串替换为repl，返回替换后的字符串。最多替换count次。repl可以是字符串或函数。如果repl是字符串，那么\1,\2等表示匹配对象的group(1)和group(2)。如果repl是函数，则在每一次匹配成功时，它都会被调用，该函数接受一个match对象作为参数，返回一个用来进行替换的字符串。
     
     re.sub(r"\d{6}","abc",'HIT 150006 BIT 100081')
@@ -3753,7 +3869,7 @@
     'HIT hlj BIT bj'
     ```
 
-17. ```python
+62. ```python
     re.match(pattern, string, flags=0) #字符串开头匹配，可以看作是只在开头进行搜索的search
     re.match(r"abc","abcdde")
     <re.Match object; span=(0, 3), match='abc'>
@@ -3765,7 +3881,7 @@
     re.fullmatch(r"abc","abcdde") #匹配失败
     ```
 
-18. ```python
+63. ```python
     re.findall(pattern, string, flags=0)  #使用正则表达式pattern不重叠地搜索整个string。将搜索到的结果存入一个列表中。
     re.findall(r"\d{6}",'HIT 150006 BIT 100081') 
     ['150006', '100081']
@@ -3776,7 +3892,7 @@
     100081
     ```
 
-19. re库除了可以使用上面的函数外，还可以先将正则表达式编译成对象，然后使用正则对象来进行查找替换等。正则对象的函数中没有原生字符串的参数，因为他已经被包含入了正则对象中。
+64. re库除了可以使用上面的函数外，还可以先将正则表达式编译成对象，然后使用正则对象来进行查找替换等。正则对象的函数中没有原生字符串的参数，因为他已经被包含入了正则对象中。
 
     ```python
     rst = re.search(r"[1-9]\d{5}","BIT 100081")
@@ -3785,7 +3901,7 @@
     rst = pat.search("BIT 100081")
     ```
 
-20. 并非每次match都是从字符串的起始位置开始匹配。
+65. 并非每次match都是从字符串的起始位置开始匹配。
 
     ```python
     pat = re.compile(r"[1-9]\d{5}")
@@ -3793,7 +3909,7 @@
     rst.pos   #结果为2
     ```
 
-21. match对象包含了匹配的相关信息。
+66. match对象包含了匹配的相关信息。
 
     ```python
     rst = re.search(r"[1-9]\d{5}","BIT 100081")
@@ -3808,7 +3924,7 @@
     rst.span()   #(4, 10)   返回(.start(),.end())
     ```
 
-22. re库默认使用贪婪匹配，当在同一个位置有多个匹配可能时，会选择最长的那个匹配。这种情况一般出现在*，+，？和{m,n}。只需要在原来的这些符号后面加上?即可执行最短匹配。
+67. re库默认使用贪婪匹配，当在同一个位置有多个匹配可能时，会选择最长的那个匹配。这种情况一般出现在*，+，？和{m,n}。只需要在原来的这些符号后面加上?即可执行最短匹配。
 
     ```shell
     re.search(r"PY.*N", "PYANBNCNDN")   #默认，执行贪婪匹配，会匹配到PYANBNCNDN整个字符串
@@ -4068,76 +4184,123 @@
 
 1. pyautogui可以执行鼠标和键盘的动作，并进行一些图像识别工作来自动化。
 
-2. 可以设置`pyautogui.PAUSE = 0.2`来在每个pyautogui调用之间插入一个休眠时间0.2秒。
+2. 在Windows上，PyAutoGUI通过内置的`types`模块访问Windows API（也称为WinAPI或win32 API）。`nicewin`模块提供了如何通过Python进行Windows API调用的演示。
 
-3. 可以设置`pyautogui.FAILSAFE = True`来开启安全模式，此时在程序运行中若将鼠标移动到左上角，则程序会异常终止，这样可以防止程序跑飞了。
+3. 可以设置`pyautogui.PAUSE = 0.2`来在每个pyautogui调用之间插入一个休眠时间0.2秒。
 
-4. 鼠标功能：
+4. 可以设置`pyautogui.FAILSAFE = True`来开启安全模式，此时在程序运行中若将鼠标移动到左上角，则程序会抛出异常`pyautogui.FailSafeException`然后终止，这样可以防止程序跑飞了。
+
+5. 对于一个1920x1080的屏幕，坐标范围为`[0,1919]x[0,1079]`。
+
+6. 建议为程序分别添加一个开始热键和结束热键，而不是一运行就开始执行任务，因为一般要达到某个初始状态才可以执行动作，按键记得有始有终，结束后应该恢复到默认状态，运行前记得检查输入法的状态是否正确。常用模板如下：
+
+   ```python
+   #! python3
+   import keyboard
+   import pyautogui
+   import time
+   import sys
+   pyautogui.PAUSE = 0.2
+   pyautogui.FAILSAFE = True
+   
+   def dosomething():
+       pyautogui.press("esc")
+       pyautogui.hotkey("ctrl", "h") #按下组合键
+       pyautogui.write(r"^TI (.*\n)*?^\w")
+       pyautogui.hotkey("alt","enter")
+       pyautogui.hotkey("alt","l")
+       pyautogui.hotkey("ctrl","h")
+       pyautogui.write(r"\n   ")
+       pyautogui.press("tab")
+       pyautogui.hotkey("ctrl","a")
+       pyautogui.press("delete")
+       pyautogui.press("space")
+       pyautogui.hotkey("ctrl","alt","enter")
+       pyautogui.press("esc")
+   
+       pyautogui.press("esc")
+       print("完成一次")
+   
+   print("自动化已启动，默认最小化窗口")
+   pyautogui.hotkey("win","down")
+   keyboard.add_hotkey("f8", dosomething) #每按一次f8，就会调用一次dosomething函数。
+   keyboard.wait("f9") #等待f9，按下后就会结束整个程序，也可以手动关闭程序。
+   ```
+
+7. 鼠标功能：
 
    ```python
    import pyautogui
    width, height = pyautogui.size()  # 返回屏幕分辨率
-   x, y = pyautogui.position()   # 返回当前鼠标位置
+   x, y = pyautogui.position()   # 返回当前鼠标位置，屏幕左上角为原点，向右为x轴正向，向下为y轴正向。
    pyautogui.onScreen(1919, 500) # 判断给定位置是否在屏幕上
-   
-   pyautogui.moveTo(900, 900, 1)  # 移动鼠标到绝对位置，第三个参数是整个动作的时长duration
-   pyautogui.move(0, 60, 1)  # 按照相对位置移动鼠标
-   
+   #移动鼠标
+   pyautogui.moveTo(900, 900, 1)  # 移动鼠标到绝对位置，第三个参数是整个动作的时长duration，前两个参数如果为None，则表示当前鼠标位置，这样就只会在一个方向上移动鼠标。
+   pyautogui.move(0, 60, 1)  # 按照相对当前的位置移动鼠标
+   #拖动，按住一个键的情况下移动鼠标
    pyautogui.dragTo(800, 800, 1, button="left")  # 左键拖动，绝对位置
    pyautogui.drag(0, 200, 1, button="right")  # 右键拖动，相对位置
-   
-   pyautogui.click(100, 100, duration=1, clicks=2, interval=0.8, button="right") # 鼠标会先移动到指定位置，时间为1秒，然后右键点击2次，间隔为0.8秒。如果没有给定任何参数，则会当前位置左键单击一次
-   
+   #点击鼠标,如果没有给定任何参数，则会当前位置左键单击一次。
+   pyautogui.click(100, 100, duration=1, clicks=2, interval=0.8, button="right") # 鼠标会先移动到指定位置，用时为1秒，然后右键点击2次，间隔为0.8秒。button可以取值为left,middle,或right。
+   #如下函数都是对click的包装
+   pyautogui.rightClick()
+   pyautogui.middleClick()
    pyautogui.doubleClick()  # 左键双击，比自己设定click的interval更好
    pyautogui.tripleClick()  # 左键三击
-   
-   pyautogui.mouseDown()  # 保持按下鼠标的状态，拖动的底层就是按住，移动鼠标，再松开
+   #如下2个是click的拆分，拖动的底层就是按住，移动鼠标，再松开
+   pyautogui.mouseDown()  # 保持按下鼠标的状态
    pyautogui.mouseUp()  # 保持松开鼠标
-   pyautogui.scroll(1000)  # 滚动鼠标滚轮，并非是按照鼠标滚轮上的一段一段开滚动的。正数表示向上滚动滚轮，屏幕一般会向下移动，但是也可以设置向上移动。
+   #
+   pyautogui.scroll(1000)  # 滚动鼠标滚轮，并非是按照鼠标滚轮上的一段一段滚动的。正数表示向上滚动滚轮，屏幕一般会向下移动，但是也可以设置向上移动。
+   #在OS X和Linux平台上，还可以调用hscroll()函数执行水平滚动。起始scroll是vscroll的包装。
    ```
 
-5. 默认情况下，duration都是0，表示立即完成该动作。如果比`pyautogui.MINIMUM_DURATION`小，则会立即完成，该值默认是0.1秒。
+8. 默认情况下，duration都是0，表示立即完成该动作。如果比`pyautogui.MINIMUM_DURATION`小，则会立即完成，该值默认是0.1秒。
 
-6. 通常情况下，鼠标会沿直线匀速运动。pyautogui还支持定制移动功能，这可以在move的第4个参数tween中设置，该参数接受一个函数，该函数接受一个0到1的参数，返回一个0到1的参数，输入表示时间比例，输出表示位置比例，默认为linear，也就是输入=输出。官方自带了一下几种模式：
+9. 通常情况下，鼠标会沿直线匀速运动。pyautogui还支持定制移动功能，这可以在move的第4个参数tween中设置，该参数接受一个函数，该函数接受一个0到1的参数，返回一个0到1的参数，输入表示时间比例，输出表示位置比例，默认为linear，也就是输入=输出。官方自带了一下几种模式：
 
    ```python
+   #只有在duration参数不为0时才会生效。
    pyautogui.easeInQuad     # start slow, end fast
    pyautogui.easeOutQuad    # start fast, end slow
    pyautogui.easeInOutQuad  # start and end fast, slow in middle
    pyautogui.easeInBounce   # bounce at the end
-   pyautogui.easeInElastic  # rubber band at the end
+   pyautogui.easeInElastic  # rubber band at the end，移动到终点后，在终点晃动
+   #tween为补间动画的意思，easing为缓动的意思。更复杂的功能可以使用pytweening库实现。
    ```
 
-7. 只有在duration参数不为0时才会生效。
+10. drag和dragRel，move和moveRel，write和typewrite都是一样的，前者是pyautogui 1.0后推荐使用的。
 
-8. tween 为补间动画的意思，easing为缓动的意思。更复杂的功能可以使用pytweening库实现。
-
-9. drag和dragRel，move和moveRel，write和typewrite都是一样的，前者是pyautogui 1.0后推荐使用的。
-
-10. 按键button参数可以取值为`"left","right","middle"`。中键和右键单击都有对应的函数`pyautogui.rightClick, pyautogui.middleClick`。
-
-11. 在Linux和OS X上，可以调用hscroll来进行水平滚动。
-
-12. 键盘功能：
+11. 键盘功能，按键会转到函数调用时光标所在的位置：
 
     ```python
-    pyautogui.write("hello world", interval=0.2)  # 依次键入字符串中的每个按键，间隔为0.2秒。无法使用功能键。
+    #适用于输入一串内容
+    pyautogui.write('Hello world!\n', interval=0.2) # 依次键入字符串中的每个按键，间隔为0.2秒，最后会添加一个回车键。这里只能输入单字符键，无法使用功能键。
+    #适用于键入功能键来控制
     pyautogui.press("enter")  # 按下然后抬起一个按键，一般用于按下功能键而非输入文字，大写字母也有效。
-    pyautogui.press(["A", "B"])  # 可以传入一个可迭代对象，这样会依次按下对应的键
-    pyautogui.press('left', presses=3, interval=0.2) #连续按3下该键
+    pyautogui.press(["A", "B"], interval=0.2)  # 可以传入一个可迭代对象，这样会依次按下对应的键，注意这里不是热键方式，抬起前一个后，才会按下下一个键。
+    pyautogui.press('left', presses=3, interval=0.2) #连续按3下该键，等价于pyautogui.press(['left', 'left', 'left'], interval=0.2)
+    #最基本的按键事件
     pyautogui.keyDown("F1")  # 按下按键并保持
     pyautogui.keyUp("F1")  # 释放按键
+    #热键的输入方式
     pyautogui.hotkey("ctrl", "v", interval=0.2)  # 依次按下这些键，然后按照相反的顺序依次释放。相当于2个keyDown和2个keyUp
     ```
 
-13. 可以使用hold上下文管理器来进行组合按键：
+12. 可以使用hold上下文管理器来进行组合按键：
 
     ```python
     with pyautogui.hold('shift'):
             pyautogui.press(['left', 'left', 'left']) #等价于按住shift，然后连按3下left，再松开shift。
+    #等价于如下按键组合
+    pyautogui.keyDown('shift')
+    pyautogui.press('left')
+    pyautogui.press('left')
+    pyautogui.press('left')
+    pyautogui.keyUp('shift')
     ```
 
-14. 所有支持的按键名称可以通过`pyautogui.KEYBOARD_KEYS`获得：
+13. 所有支持的按键名称可以通过`pyautogui.KEYBOARD_KEYS`获得：
 
     ```python
     ['\t', '\n', '\r', ' ', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '.', '/', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '_', '`', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 
@@ -4147,7 +4310,7 @@
     # apps就是右侧的win键右侧的那个键，相当于鼠标右键
     ```
 
-15. 显示提示框和用户交互：
+14. 显示提示框和用户交互：
 
     ```python
     pyautogui.alert(text='This is text', title='This is title', button='OK') #显示一个提示框，只有一个确定按钮，总是返回button的字符串。
@@ -4156,88 +4319,46 @@
     pyautogui.password(text='', title='', default='', mask='*') #功能和prompt类似，不同的是，输入的字符会被mask替换，用于输入密码。
     ```
 
-16. pyautogui使用PyScreeze（基于pillow库）来处理图像相关的工作。
+15. pyautogui使用PyScreeze和Pillow/PIL库来处理图像相关的工作。在Linux上，还需要安装scrot库来进行开启截图功能，OS X使用操作系统自带的`screencapture`命令。
 
     ```python
-    # 截图，区域的左上角为100,100，尺寸为500x500。当未指定区域时，截取整个屏幕。
-    image1 = pyautogui.screenshot("b.png", region=(100, 100, 500, 500))  # 返回值为一个pillow图像对象，也可以不指定文件地址，来直接使用图像对象。
+    # 截图，区域的左上角为100,100，尺寸为500x500。当未指定区域时，截取整个屏幕。指定路径时，会保存截图文件。
+    image1 = pyautogui.screenshot("b.png", region=(100, 100, 500, 500))  # 返回值为一个<PIL.Image.Image image mode=RGB size=1920x1080 at 0x24C3EF0>图像对象，也可以不指定文件地址，来直接使用图像对象。region的格式是(x,y,dx,dy)。
     
-    image1.getpixel((100, 100)) # 获取图像中位置为100,100的像素的颜色，会根据颜色格式来返回不同的结果，RGB时返回一个三元组，灰度时返回一个数值。
-    pyautogui.pixel(100, 100)  # 返回屏幕上位置100,100的像素的RGB三元组。
-    pyautogui.pixelMatchesColor(100, 100, (255, 255, 255), tolerance=10) # 对100,100位置的像素进行颜色对比，目标颜色为(255,255,255)，容差为10。
-    
-    imagebox = pyautogui.locateOnScreen("b.png") # 在屏幕上查找和图片内容相同的区域的第一个，找到时返回(left, top, width, height)。找不到时返回None。可以使用region参数来设定搜索区域的范围，或设定grayscale=True开启灰度匹配，这样可以提高比对速度，大约30%，也能一定程度模糊颜色区别或者产生假阳性结果（即将不匹配的认定为匹配）。
-    pyautogui.locateAllOnScreen #会在屏幕上找到所有相同的区域，返回一个生成器，能够生成位置大小的4元组。
+    imagebox = pyautogui.locateOnScreen("b.png", region=(100, 100, 500, 500), grayscale=True) # 在屏幕上查找和图片b.png内容相同的区域的第一个，找到时返回(left, top, width, height)。从0.9.41开始，找不到时会报ImageNotFoundException异常，而非返回None。region参数用来设定在屏幕上截取和搜索的范围，开启灰度匹配，这样可以提高比对速度，大约30%，也能一定程度模糊颜色区别或者产生假阳性结果（即将不匹配的认定为匹配）。
+    pyautogui.locateAllOnScreen #会在屏幕上找到所有相同的区域，返回一个生成器，能够生成位置大小的4元组。查找顺序是从左上角，逐行查找到右下角。可以用for in迭代，或者适用list()承接。
     centerpoint = pyautogui.center(imagebox)  # 根据box返回其中心点对象，可以使用x，y属性来获取值。也可以使用pyautogui.locateCenterOnScreen来直接返回中心点的坐标。
     pyautogui.locateCenterOnScreen("b.png") #等价于locateOnScreen和center。
-    
-    pyautogui.locate(needleImage, haystackImage, grayscale=False) #在一系列图像对象中寻找，返回第一个。
-    locateAll(needleImage, haystackImage, grayscale=False) #在一系列图像对象中找到所有。
-    
     pyautogui.click("a.png")  # 在当前屏幕上搜索图片的像素，然后单击其中心。
+    #搜索定位的底层操作
+    image1.getpixel((100, 100)) # 获取图像中位置为100,100的像素的颜色，会根据颜色格式mode来返回不同的结果，RGB时返回一个三元组，灰度时返回一个数值。
+    pyautogui.pixel(100, 100)  # 直接返回屏幕上位置100,100的像素的RGB三元组。
+    pyautogui.pixelMatchesColor(100, 100, (255, 255, 255), tolerance=10) # 对100,100位置的像素进行颜色对比，目标颜色为(255,255,255)，每个通道的容差为10。
+    pyautogui.locate(needleImage, haystackImage, grayscale=False) #在一系列图像Pillow图像对象中寻找，返回第一个。
+    pyautogui.locateAll(needleImage, haystackImage, grayscale=False) #在一系列Pillow图像对象中找到所有。
     ```
 
-17. 在一个1920x1080的屏幕上，截图大概消耗100ms时间，查找大概消耗1到2秒。所有的查找都是从左上角依次到右下角。
+16. 在一个1920x1080的屏幕上，截图大概消耗100ms时间，查找大概消耗1到2秒。建议将识别位置的代码放在循环外，一次识别，多次点击。同时尽量少地对全屏截图，全屏搜索，多使用region参数。
 
-18. 从0.9.41开始，当查找失败时，会报`ImageNotFoundException`异常，而非返回None。
+17. 可以为locate系列函数定义`confidence=0.9`来设置置信度。不过这需要安装OpenCV才可以。
 
-19. 可以为locate系列函数定义`confidence=0.9`来设置置信度。不过这需要安装OpenCV才可以。
-
-20. 对于生成器，可以使用for in循环依次读取，也可以使用list构造列表。
-
-21. 打印pdf的例子：
-
-    ```python
-    import keyboard
-    import pyautogui
-    import time
-    pyautogui.PAUSE = 0.5
-    pyautogui.FAILSAFE = True
-    
-    def printNotes():
-        while True:
-            pyautogui.press("tab")
-            pyautogui.press("apps")
-            pyautogui.press("down")
-            pyautogui.press("enter")
-            pyautogui.hotkey("ctrl", "tab")
-            time.sleep(3)
-            pyautogui.press("enter")
-            pyautogui.press("enter")
-            time.sleep(1)
-            pyautogui.hotkey("ctrl", "w")
-            time.sleep(1)
-    
-    keyboard.add_hotkey('F2', printNotes)
-    keyboard.wait("F2")
-    ```
-
+18. 对于查找返回的生成器，可以使用for in循环依次读取，也可以使用list构造列表。
 
 # keyboard
 
-1. 可以使用keyboard库来hook全局事件，注册热键和模拟按键，它是纯python实现的，没有任何依赖库。该库利用了Windows钩子函数。功能如下：
+1. 可以使用keyboard库来hook全局事件，注册热键和模拟按键，它是纯python实现的，没有任何依赖库。该库利用了Windows钩子函数。事件在单独的线程中自动捕获，不阻塞主程序。
+
+2. 注意，使用pyautogui.press施加的按键，不会触发keyboard登记的热键。
+
+3. 功能如下：
 
    ```python
    import keyboard #注意不是pykeyboard
    keyboard.press_and_release('shift+s, space') #
    
    keyboard.write('abc') #依次按下abc三个键
-   keyboard.add_hotkey('ctrl+shift+a', print, args=('triggered', 'hotkey')) #为热键绑定一个钩子函数，当按下ctrl+alt+a时，会调用print函数，并传递参数args，要求args是一个元素，即使只有一个元素。默认是在按键按下时触发，可以设置trigger_on_release=True来改变为抬起时触发。
-   
-   # Press PAGE UP then PAGE DOWN to type "foobar".
-   keyboard.add_hotkey('page up, page down', lambda: keyboard.write('foobar')) #按一次PAGE UP，然后再按依次PAGE DOWN会调用函数，这里使用lambda表达式来代替函数。
-   
    
    keyboard.add_abbreviation('@@', 'my.long.email@example.com') #输入@@然后按空格，就会将其替换为后面的字符串。
-   
-   keyboard.wait() #阻塞当前线程，类似于while True，但是while True会使CPU空转，这个不会。
-   keyboard.wait('esc') #阻塞，直到按下esc键时继续往下执行，也就是退出while循环。这个适用于只响应1次的情况。
-   
-   keyboard.remove_hotkey(event_data, element_data) #移除一个热键。
-   
-   keyboard.get_hotkey_status(event_data) #返回一个布尔值，表示热键事件的状态。
-   keyboard.get_hotkey_count() #返回一个整数，表示当前活动的热键数量。
-   keyboard.get_all_hotkey_status() #返回一个字典，其中键是键盘按键事件的类型，值是对应的状态。
    
    keyboard.get_current_time() #返回当前时间戳（以秒为单位）。
    keyboard.get_last_time() #返回上次调用 keyboard.wait() 或 keyboard.wait(timeout) 时的时间戳（以秒为单位）。
@@ -4248,43 +4369,45 @@
    keyboard.get_key_description(event_data) #返回一个字符串，其中键是键盘按键事件的类型，值是对应的按键描述（如 "Key A"、"Key B" 等）。
    ```
 
-2. 事件在单独的线程中自动捕获，不阻塞主程序。
-
-3. 注册一个多次使用的热键：
+4. 注册一个多次使用的热键：
 
    ```python
-   keyboard.add_hotkey('space', lambda: print('space was pressed!')) #为该热键注册一个函数
-   keyboard.wait() #阻塞当前线程，类似于while True，但是while True会使CPU空转，这个不会。
+   keyboard.add_hotkey('ctrl+shift+a', print, args=('triggered', 'hotkey')) #为该热键注册一个函数，当按下ctrl+alt+a时，会调用print函数，并传递参数args，要求args是一个元组，即使只有一个元素。默认是在按键按下时触发，可以设置trigger_on_release=True来改变为抬起时触发。
+   keyboard.add_hotkey('page up, page down', lambda: keyboard.write('foobar')) #按一次PAGE UP，然后再按依次PAGE DOWN会调用函数，这里使用lambda表达式来代替函数。
+   keyboard.wait() #永远阻塞当前线程，因为没有指定任何热键，类似于while True，但是while True会使CPU空转，这个不会。
+   keyboard.remove_hotkey(event_data, element_data) #移除一个热键。
+   keyboard.get_hotkey_status(event_data) #返回一个布尔值，表示热键事件的状态。
+   keyboard.get_hotkey_count() #返回一个整数，表示当前活动的热键数量。
+   keyboard.get_all_hotkey_status() #返回一个字典，其中键是键盘按键事件的类型，值是对应的状态。
    ```
 
-4. 注册一个只使用1次的热键：
+5. 注册一个只使用1次的热键：
 
    ```python
    keyboard.wait('space') #阻塞当前线程，直到按下空格键，才会继续执行下面的代码，也就是退出while循环。
    print('space was pressed, continuing...')
    ```
 
-5. 录制按键动作，保存，执行：
+6. 录制按键动作，保存，执行：
 
    ```python
    recorded = keyboard.record(until='esc') #录制按键序列，直到按下esc键时停止。
    keyboard.play(recorded, speed_factor=3) #以原来3倍的速度执行之前录制的按键
    ```
 
-6. 热键可以是扫描码（数字57代表空格），单个按键（"space"），多个按键（"enter"），多步按键（"alt+F4, enter"）等。
+7. 热键可以是扫描码（数字57代表空格），单个按键（"space"），多个按键（"enter"），多步按键（"alt+F4, enter"）等。
 
-7. 发送一个操作系统事件，来执行热键：
+8. 可以发送一个操作系统事件，来执行热键，相当于用于手动按下或抬起热键：
 
    ```python
-   keyboard.send(hotkey, do_press=True, do_release=True) #
-   # do_press和do_release表示是否发送对应的按下或抬起事件
+   keyboard.send(hotkey, do_press=True, do_release=True) #do_press和do_release表示是否发送对应的按下或抬起事件。
    #该功能的底层是由按下和抬起两个事件组成的
    keyboard.press(hotkey)
    keyboard.release(hotkey)
    keyboard.is_pressed(hotkey) #判断是否处于按下状态
    ```
 
-8. 修饰键就是功能按键，分为sided_modifiers和all_modifiers：
+9. 修饰键就是功能按键，分为sided_modifiers和all_modifiers：
 
    ```py
    sided_modifiers = {'ctrl', 'alt', 'shift', 'windows'} #在键盘的左右各有一个
@@ -4307,13 +4430,13 @@
    left windows (57435, 91)
    ```
 
-9. 延迟调用：
+10. 延迟调用：
 
    ```python
    keyboard.call_later(fn, args=(), delay=0.001) #延迟1ms后再在一个新的线程中调用函数fn。这可以让系统有足够的事件来处理之前的事件，同时也不阻塞当前的线程。
    ```
 
-10. 按键钩子函数：
+11. 按键钩子函数：
 
     ```python
     keyboard.hook(callback, suppress=False, on_remove=<lambda>) #注册一个按键监听器，按下或抬起任何键都会调用callback，参数为keyboard.KeyboardEvent类型的一个对象。返回创建的event handler，后续可以使用这个对象来卸载监听器。该对象具有如下属性：
