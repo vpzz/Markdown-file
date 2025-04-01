@@ -4075,15 +4075,16 @@
    3. 手动安装：将 jieba 目录放置于当前目录或者 site-packages 目录
    4. 通过 `import jieba` 来引用
 
-8. 安装了anaconda后有些包如果conda中不存在，需要使用pip进行安装，此时应该先运行activate base，进入base环境后，再执行pip命令，否则会出现连接错误。
-9. PEP8是Python的一个代码规范，比较严格。可以使用autopep8插件进行自动格式化。
-10. 有时候，安装完python后，在scripts文件夹中找不到pip，可以执行以下命令：
+8. Linux和MAC下pip表示python2，pip3表示python3，Windows下都是pip。
+9. 安装了anaconda后有些包如果conda中不存在，需要使用pip进行安装，此时应该先运行activate base，进入base环境后，再执行pip命令，否则会出现连接错误。
+10. PEP8是Python的一个代码规范，比较严格。可以使用autopep8插件进行自动格式化。
+11. 有时候，安装完python后，在scripts文件夹中找不到pip，可以执行以下命令：
 
     ```shell
     python -m ensurepip #这一步会产生pip3.exe，如果用的不习惯，可以重命名为pip.exe
     ```
 
-11. 有时更新pip时，会出现ValueError: check_hostname requires server_hostname，此时关掉梯子即可。
+12. 有时更新pip时，会出现ValueError: check_hostname requires server_hostname，此时关掉梯子即可。
 
 # 第三方库
 

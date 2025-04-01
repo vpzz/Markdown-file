@@ -1555,7 +1555,15 @@
 
 1. 元素的id，type，value等属性都可以使用.来获取，但是class属性不可以，因为class时js的关键字，需要使用className来读取。优先使用ID，其次是className，最后才是标签类型。
 
-2. 推荐使用CSS选择器来选择元素：
+2. 新的方法推荐使用XPath，因为id，class等有可能会在刷新网页后变化，而XPath产生的是DOM的位置关系，这个是比较稳定的。
+
+   ```javascript
+   snaplist =  document.evaluate('/html/body/div[1]/div/div[2]/div[1]/div[1]/div[3]/div[2]/div[2]', document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null); //第一个参数为XPath字符串，第二个为上下文节点，第三个为命名空间，XML用的多，第四个为类型，第五个为inResult。
+   snaplist.snapshotLength //输出快照中的元素个数
+   snaplist.snapshotItem(0) //获取第0个找到的元素
+   ```
+
+3. 推荐使用CSS选择器来选择元素：
 
    ```js
    // 参数为字符串，包含一个或多个有效的css选择器，选择器之间是且的关系，而非递进。
@@ -1572,7 +1580,7 @@
    "[role=main]" //选择具有role属性，且值为main的元素
    ```
 
-3. 通过document对象，获取它的子元素节点。
+4. 通过document对象，获取它的子元素节点。
 
    ```javascript
    getElementById()         //通过id属性来获取一个元素节点对象
@@ -1580,11 +1588,11 @@
    getElementsByName()      //通过name属性获取一组元素节点对象
    ```
 
-4. 元素的ID是唯一的。即使根据TagName或Name查询到的对象只有一个，也会封装到数组中。
+5. 元素的ID是唯一的。即使根据TagName或Name查询到的对象只有一个，也会封装到数组中。
 
-5. jQuery就是用来简化DOM查询的。
+6. jQuery就是用来简化DOM查询的。
 
-6. 通过具体元素来获取其他元素。
+7. 通过具体元素来获取其他元素。
 
    ```js
    btn.getElementsByTagName(); //方法，在btn节点的子孙中查询
@@ -1594,7 +1602,7 @@
    btn.lastChild;  //最后一个子节点
    ```
 
-7. childNodes，firstChild，并非只获得元素节点，标签间的文本也会被当做文本节点（IE8及以下不会考虑空白文本节点）。children，firstElementChild只返回子元素节点，例如：
+8. childNodes，firstChild，并非只获得元素节点，标签间的文本也会被当做文本节点（IE8及以下不会考虑空白文本节点）。children，firstElementChild只返回子元素节点，例如：
 
    ```html
    <ul id="city">
@@ -1610,7 +1618,7 @@
    </script>
    ```
 
-8. 获取父节点和兄弟节点：
+9. 获取父节点和兄弟节点：
 
    ```js
    btn.parentNode; //btn节点的父节点
@@ -1618,11 +1626,11 @@
    btn.nextSibling; //下一个兄弟节点
    ```
 
-9. 父节点肯定是元素，因为文本没有子节点。但是兄弟节点可能是标签间的文本。而previousElementSibling之类的就可以忽略标签之间的空白文本，不过IE8及以下不支持。
+10. 父节点肯定是元素，因为文本没有子节点。但是兄弟节点可能是标签间的文本。而previousElementSibling之类的就可以忽略标签之间的空白文本，不过IE8及以下不支持。
 
-10. 如果是用在移动端的网页，则不用考虑兼容IE8。
+11. 如果是用在移动端的网页，则不用考虑兼容IE8。
 
-11. 如下代码，要获取标签内的北京这个字符串，如下三种方法可以：
+12. 如下代码，要获取标签内的北京这个字符串，如下三种方法可以：
 
     ```html
     <li id="bj">北京</li>
@@ -1633,7 +1641,7 @@
     </script>
     ```
 
-12. DOM树的增删改操作：
+13. DOM树的增删改操作：
 
     ```js
     appendChild();  //添加子节点
@@ -2061,6 +2069,80 @@
    2. 解析该文件，构建DOM树。
    3. 构建DOM树时，如果遇到CSS，图片和JS文件，会同时发送请求。
    4. CSS和图片不会阻塞DOM树的构建，而JS可能会改变DOM树，因此会等待JS下载，执行完成JS后再继续解析HTML，构建DOM树。因此JS代码的位置十分重要。
+
+8. 某些页面元素会在光标移动到某个元素上时才出现，光标移走后就消失了，此时可以使用debugger来冻结页面，方便在DOM中查找具体对象。建议使用如下方式执行debugger：
+
+   ```javascript
+   setTimeout(function(){debugger},5000) //设置5秒后再冻结窗口，期间可以将鼠标移动过去
+   ```
+
+9. 如果要通过JS来操作光标移动的行为，可以主动派发事件，同时此时可以手动调用debugger来单步执行程序。
+
+   ```javascript
+   var evt = document.createEvent('Event');  //创建事件对象
+   evt.initEvent('mouseover',true,true); //后两个是事件的属性，bubbles和cancelable。
+   xxx.dispatchEvent(evt); //给xxx元素派发事件
+   ```
+
+10. 下载由canvas绘制产生的图片，例如网页的二维码：
+
+    ```javascript
+    var canvas = document.querySelector("body > div.ds-floating-position-wrapper.ds-theme > div > div.b2b9a841 > div > canvas"); //获取canvas对象
+    var dataURL = canvas.toDataURL('image/png'); //将画布内容转换为base64编码的图片格式，也可以选择'image/jpeg'并设置质量参数
+    var link = document.createElement('a');
+    link.href = dataURL;
+    link.download = 'canvas_image.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    ```
+
+11. 使用promise来实现等待元素出现后，再返回查找结果。
+
+    ```javascript
+    function waitForElement(selector) {
+        return new Promise((resolve) => {
+            const observer = new MutationObserver((mutations, obs) => {
+                const element = document.querySelector(selector); //也可以换成使用xpath的evaluate
+                if (element) {
+                    obs.disconnect();
+                    resolve(element);
+                }
+            });
+    
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+    
+            // 初始检查，避免元素已经存在但未触发 MutationObserver
+            const element = document.querySelector(selector);
+            if (element) {
+                observer.disconnect();
+                resolve(element);
+            }
+        });
+    }
+    
+    // 构造promise来等待元素的出现，then接受一个函数，参数就是查找到的对象。
+    waitForElement("#root > div > div.c3ecdb44 > div.dc04ec1d > div.b8812f16.a2f3d50e > div.c7f51894 > div.a1e75851").then((element) => {
+        var evt = document.createEvent('Event');  //创建事件对象
+        evt.initEvent('mouseover',true,true); //后两个是事件的属性，bubbles和cancelable。
+        element.dispatchEvent(evt); //派发事件
+    });
+    
+    waitForElement("body > div.ds-floating-position-wrapper.ds-theme > div > div.b2b9a841 > div > canvas").then((canvas) => {
+        var dataURL = canvas.toDataURL('image/png'); //将画布内容转换为base64编码的图片格式，也可以选择'image/jpeg'并设置质量参数
+        var link = document.createElement('a');
+        link.href = dataURL;
+        link.download = 'canvas_image.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+    ```
+    
+    
 
 # 油猴脚本
 

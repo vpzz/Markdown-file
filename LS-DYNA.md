@@ -120,6 +120,8 @@
 
 43. DYNA支持通过命令行选项pgpkey对K文件使用pgp密钥进行加密，密钥会输出到lstc_pgpkey.asc。
 
+44. 某些时候接触力可能会波动很大，这是因为模拟默认是没有滤波的，而实验中采集结果是受到采样频率限制的。
+
 
 # 数值方法
 
@@ -1610,19 +1612,33 @@
 
 10. History→R-Nodal可以输出两个节点的特定变量的插值，例如接触面上相对应的2个点的坐标差值，这个也可以用曲线操作来实现。
 
-11. 在Legend上右键可以直接修改其样式。
+11. History→Scalar可以输出当前显示的云图的量的曲线。
 
-12. 可以在Measure中测量两点间的距离，也可以将它随时间变化的情况，绘制出来。
+12. 云图可以绘制应变率的情况，在Post→Fringe，单击一个下的按钮可以展开，其中可以找到S.Rate。
 
-13. 可以使用Post→Trace来追踪特定节点的运动。使用Post→Follow来保持特定点不动，也就是相对运动。
+13. ASCII→Load后，如果是elout，还会分类为stress，strain等，这个需要在All所在一列最下面选择。
 
-14. AMMG中的历史变量输出信息会出现在message文件中
+14. 在Legend上右键可以直接修改其样式。
+
+15. 可以在Measure中测量两点间的距离，也可以将它随时间变化的情况，绘制出来。
+
+16. 可以使用Post→Trace来追踪特定节点的运动。使用Post→Follow来保持特定点不动，也就是相对运动。
+
+17. AMMG中的历史变量输出信息会出现在message文件中
 
     ```
      *** Note history variables in lsprepost --> Fcomp -->misc
          history variable        1 to        3 belongs to AMMG        1
          history variable        4 to       14 belongs to AMMG        2
     ```
+
+18. Prepost自带的曲线filter功能可以滤波，支持SAE和Butterworth等滤波器。SAE是美国汽车工程师学会的简称，它出台了一系列标准，旨在确保产品设计、制造和测试的一致性、安全性和可靠性。与车辆碰撞测试相关的标准为SAE J211，它规定了数据滤波的要求，最小采样频率，数据精度和单位，测试设备校准。
+
+19. 常见的滤波器等级包括CFC 60、CFC 180、CFC 1000等，其中CFC（Channel Frequency Class）表示通道频率等级。例如，CFC 60的截止频率为100 Hz，CFC 1000的截止频率为1650 Hz。CFC滤波器通常基于Butterworth低通滤波器设计。
+
+20. 
+
+21. 
 
 # 二次开发
 
