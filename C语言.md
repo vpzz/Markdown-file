@@ -2954,10 +2954,14 @@
 
 4. 如果源码文件中有一部分不希望被格式化，可以使用如下特定注释包含起来：
 
-   ```c#
+   ```c
    some code
    // clang-format off
    不希望被格式化的代码
    // clang-format on
    some code
    ```
+
+5. 也可以使用`clang-format -i *.c`来就地对所有.c文件进行格式化。
+
+6. 

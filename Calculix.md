@@ -1,44 +1,66 @@
 # 编译记录
 
-1. 下载Calculix.tar.gz文件，解压后会出现CCX目录，内部含有SPOOLES2.2，ARAPCK和Calculix三个文件夹。
+1. 下载CalculiX.tar.gz文件，解压后会出现CCX目录，内部含有SPOOLES2.2，ARAPCK和CalculiX三个文件夹。
 
-2. 先构建SPOOLES2.2和ARAPCK，最后构建Calculix。三个文件夹放在同一级目录中，但不要求都放在用户家目录中，因为makefile中大多数为相对路径。
+2. 先构建SPOOLES.2.2和ARAPCK，最后构建CalculiX。三个文件夹放在同一级目录中，但不要求都放在用户家目录中，因为makefile中大多数为相对路径。
 
 3. SPOOLES2.2的Tree/src/makeGlobalLib文件中包含了一个错误的引用应该将drawTree.c 改成draw.c，因为drawTree.c不存在。
 
-4. 进入SPOOLES.2.2中执行 make CC=gcc lib。如果不加CC=gcc会报错:/usr/lang-4.0/bin/cc: No such file or directory。
+4. 进入SPOOLES.2.2中执行`make CC=gcc lib`。如果不加CC=gcc会报错:/usr/lang-4.0/bin/cc: No such file or directory。或者修改Make.inc文件，注释掉`CC = /usr/lang-4.0/bin/cc`，取消注释`CC = gcc`。
 
 5. 进入ARPACK文件夹，先根据README修改ARmake.inc文件。
-   1. 修改home为ARPACK文件夹路径
-   2. 修改PLAT = INTEL
-   3. 修改`FFLAGS = -O -fallow-argument-mismatch`。这里去除了-cg89的选项，增加了-fallow-argument-mismatch
-   4. 修改UTIL/second.f，在EXTERNAL   ETIME的最开头添加*注释
-   5. 最后运行make lib即可
+   1. 修改home为ARPACK文件夹路径。
+   2. 修改PLAT = INTEL。
+   3. 修改`FFLAGS = -O -fallow-argument-mismatch`。这里去除了-cg89的选项，增加了`-fallow-argument-mismatch`。将`-cg89`改为`-std=legacy`即可。
+   4. 修改UTIL/second.f，在EXTERNAL   ETIME的最开头添加*注释。
+   5. 最后运行make lib即可。
    6. 在Makefile的cleanlib目标下添加`rm -f libarpack*.a`，方便后续make clean清理编译结果。
 
-6. 在Calculix/ccx_2.20/src中执行make。如果遇到 Interface mismatch in dummy procedure ‘f’ at (1): ‘fun’ is not a function的错误。单独编译该文件，应该加上 --std=legacy的选项。
+6. 修改CalculiX/ccx_2.22/src的Makefile，在FFLAGS中添加`-std=legacy`和`-fmax-stack-var-size=1000000`，后者是因为fminsirefine.f文件中有数组尺寸太大，超过了gfortran默认的栈变量大小限制。编译器会自动将其改为静态存储，但这会导致递归调用或多线程并发时出现问题，使用这个选项可以提高栈空间。
 
-7. 执行`./ccx_2.20 ../test/beamp`，检查是否出现beamp.dat文件，可以beamp.dat.ref校对检验软件是否成功编译。
+7. 删除hybsvd.f中SUBROUTINE MGNSVD末尾的MGN 20，这些内容超过了72列，没啥用，又会报warning。
 
-8. 也可以调用test/compare脚本来检验软件是否成功编译。这一步会计算test中的所有inp文件并比较。
+8. 在hybsvd.f的SUBROUTINE MGNSVD的开头的`REAL*8 DFLOAT`，修改为`REAL*8 DFLOAT,T`。
 
-9. 整个工程的Makefile，位置和ARPACK文件夹平级，推荐使用：
+9. 将hybsvd.f的开头声明的`REAL*8 W(1), U(NU,1)`修改为`REAL*8 W(N), U(NU,N)`。
 
-   ```makefile
-   all: ARPACK SPOOLES.2.2 CalculiX
-   	cd ARPACK; make lib #不能使用-j并行,会报错
-   	cd SPOOLES.2.2; make CC=gcc -j lib
-   	cd CalculiX/ccx_2.20/src; make -j
-   install:
-   	sudo ln -sf /home/zj/CCX/CalculiX/ccx_2.20/src/ccx_2.20 /usr/bin/ccx
-   clean:
-   	cd ARPACK; make clean
-   	cd SPOOLES.2.2; make clean
-   	cd CalculiX/ccx_2.20/src; make clean
-   	cd CalculiX/ccx_2.20/test; make clean
-   ```
+10. 在isortiddc.f开头将ttx2和tx2修改为integer类型。
 
-10. cubtri.f：
+11. 将maxdesvardisp.f中的`real*4 actmove`修改为`real*8 actmove`。
+
+12. 将objective_stress.f中的制表符替换成三个空格。
+
+13. 将twoint.f中的NX，NY，INPY的等式右侧都用`INT()`包裹起来，手动转化为整数。
+
+14. 将vortex.f中的t_chang类型修改为real *8。
+
+15. 为frdheader.c的37行，`for(i=10;i<70;i++)text[i]=' ';text[70]='\0';`，添加换行，注意这里不能添加大括号。
+
+16. 为arpack.c的442行`if(*ithermal>1)SFREE(qfx);SFREE(inum);`添加上大括号。
+
+17. 在CalculiX/ccx_2.22/src中执行make。如果遇到 Interface mismatch in dummy procedure ‘f’ at (1): ‘fun’ is not a function的错误。单独编译该文件，应该加上`-std=legacy`的选项。
+
+18. 执行`./ccx_2.22 ../test/beamp`，检查是否出现beamp.dat文件，可以beamp.dat.ref校对检验软件是否成功编译。
+
+19. 也可以调用test/compare脚本来检验软件是否成功编译。这一步会计算test中的所有inp文件并比较。
+
+20. 整个工程的Makefile，位置和ARPACK文件夹平级，推荐使用：
+
+    ```makefile
+    all: ARPACK SPOOLES.2.2 CalculiX
+    	cd ARPACK; make -j lib
+    	cd SPOOLES.2.2; make -j lib
+    	cd CalculiX/ccx_2.22/src; make -j
+    install:
+    	sudo ln -sf /home/zj/CCX/CalculiX/ccx_2.22/src/ccx_2.22 /usr/bin/ccx
+    clean:
+    	cd ARPACK; make clean
+    	cd SPOOLES.2.2; make clean
+    	cd CalculiX/ccx_2.22/src; make clean
+    	cd CalculiX/ccx_2.22/test; make clean
+    ```
+
+21. cubtri.f：
 
     ```fortran
     !将SUBROUTINE CUBRUL中的
@@ -50,11 +72,321 @@
           EXTERNAL F
     ```
 
-   11. 使用正则表达式在VSCODE中搜索中文，`.*[\u4E00-\u9FA5]+`。
+   22. dlz.f：
+
+       ```fortran
+             IF (DREAL(DEN).EQ.0.D0 .AND. DIMAG(DEN).EQ.0.D0) DEN =
+            * CMPLX(EPSA,0.D0) !EPSA是REAL*8的，DEN是COMPLEX*16的，而CMPLX返回COMPLEX*8，会报warning：Conversion from REAL(8) to default-kind COMPLEX(4) at (1) might lose precision, consider using the KIND argument [-Werror=conversion] 。修改为DCMPLX即可。 
+       ```
+
+   23. drfftf.f：
+
+       ```fortran
+             SUBROUTINE RADF2 (IDO,L1,CC,CH,WA1)
+             implicit real*8(a-h,o-z)
+             DIMENSION       CH(IDO,2,L1)           ,CC(IDO,L1,2)           ,
+            1                WA1(1) !将WA1(1)修改为WA1(IDO-1)，还有其他的WA数组。提示数组访问越界，Array reference at (1) out of bounds (2 > 1) in loop beginning at (2)
+       ```
+
+   24. 使用正则表达式在VSCODE中搜索中文，`.*[\u4E00-\u9FA5]+`。
+
+# ARPACK
+
+   1. ARmake.inc文件：
+
+      ```makefile
+      ###########################################################################
+      #
+      #  Program:         ARPACK
+      #
+      #  Module:          ARmake.inc
+      #
+      #  Purpose:         Top-level Definitions
+      #
+      #  Creation date:   February 22, 1996
+      #
+      #  Modified:
+      #
+      #  Send bug reports, comments or suggestions to arpack@caam.rice.edu
+      #
+      ############################################################################
+      #
+      # %---------------------------------%
+      # |  SECTION 1: PATHS AND LIBRARIES |
+      # %---------------------------------%
+      #
+      # %--------------------------------------%
+      # | You should change the definition of  |
+      # | home if ARPACK is built some place   | 
+      # | other than your home directory.      |
+      # %--------------------------------------%
+      # 项目的根目录
+      home = /home/zj/CCX/ARPACK
+      #
+      #  %--------------------------------------%
+      #  | The platform identifier to suffix to |
+      #  | the end of library names             |
+      #  %--------------------------------------%
+      #
+      PLAT = INTEL
+      #
+      #  %------------------------------------------------------%
+      #  | The directories to find the various pieces of ARPACK |
+      #  %------------------------------------------------------%
+      #
+      BLASdir      = $(home)/BLAS
+      LAPACKdir    = $(home)/LAPACK
+      UTILdir      = $(home)/UTIL
+      SRCdir       = $(home)/SRC
+      #
+      DIRS        = $(BLASdir) $(LAPACKdir) $(UTILdir) $(SRCdir)
+      #
+      # %-------------------------------------------------------------------%
+      # | Comment out the previous line and uncomment the following         |
+      # | if you already have the BLAS and LAPACK installed on your system. |
+      # | NOTE: ARPACK assumes the use of LAPACK version 2 codes.           |
+      # %-------------------------------------------------------------------%
+      #
+      #DIRS         = $(UTILdir) $(SRCdir)
+      #
+      # %---------------------------------------------------%
+      # | The name of the libraries to be created/linked to |
+      # %---------------------------------------------------%
+      #
+      ARPACKLIB  = $(home)/libarpack_$(PLAT).a
+      LAPACKLIB = 
+      BLASLIB = 
+      #
+      ALIBS =  $(ARPACKLIB) $(LAPACKLIB) $(BLASLIB) 
+      #
+      # 
+      # %---------------------------------------------------------%
+      # |                  SECTION 2: COMPILERS                   |
+      # |                                                         |
+      # | The following macros specify compilers, linker/loaders, |
+      # | the archiver, and their options.  You need to make sure |
+      # | these are correct for your system.                      |
+      # %---------------------------------------------------------%
+      #
+      # %------------------------------%
+      # | Make our own suffixes' list. |
+      # %------------------------------%
+      #
+      # %------------------%
+      # | Default command. |
+      # %------------------%
+      #
+      .DEFAULT:
+      	@$(ECHO) "Unknown target $@, try:  make help"
+      #
+      # %-------------------------------------------%
+      # |  Command to build .o files from .f files. |
+      # %-------------------------------------------%
+      #
+      %o : %f
+      	@$(ECHO) Making $@ from $<
+      	@$(FC) -c $(FFLAGS) $<
+      #
+      # %-----------------------------------------%
+      # | Various compilation programs and flags. |
+      # | You need to make sure these are correct |
+      # | for your system.                        |
+      # %-----------------------------------------%
+      #
+      FC      = gfortran
+      FFLAGS	= -O -std=legacy
+      
+      LDFLAGS = 
+      CD      = cd
+      
+      ECHO    = echo
+      
+      LN      = ln
+      LNFLAGS = -s
+      
+      MAKE    = make
+      
+      RM      = rm
+      RMFLAGS = -f
+      
+      SHELL   = /bin/sh
+      #
+      #  %----------------------------------------------------------------%
+      #  | The archiver and the flag(s) to use when building an archive   |
+      #  | (library).  Also the ranlib routine.  If your system has no    |
+      #  | ranlib, set RANLIB = touch.                                    |
+      #  %----------------------------------------------------------------%
+      #
+      AR = ar 
+      ARFLAGS = rv
+      #RANLIB  = touch
+      RANLIB   = ranlib
+      #为了避免多线程构建时，同时对libarpack_INTEL.a更新造成冲突。
+      .NOTPARALLEL: $(ARPACKLIB)
+      #
+      # %----------------------------------%
+      # | This is the general help target. |
+      # %----------------------------------%
+      #
+      help:
+      	@$(ECHO) "usage: make ?"
+      ```
+
+   2. Makefile文件：
+
+      ```makefile
+      ############################################################################
+      #
+      #  Program:         ARPACK
+      #
+      #  Module:          Makefile
+      #
+      #  Purpose:         Top-level Makefile
+      #
+      #  Creation date:   February 22, 1996
+      #
+      #  Modified:
+      #
+      #  Send bug reports, comments or suggestions to arpack@caam.rice.edu
+      #
+      ############################################################################
+      
+      include ARmake.inc
+      PRECISIONS = single double complex complex16
+      #  If LAPACK and BLAS are not installed on you system, and you are going 
+      #  to use the driver programs in the EXAMPLES directory,  you need to add 
+      #  sdrv(for single precision), ddrv(for double precision), 
+      #  cdrv(for single precision complex), or zdrv(for double precision complex) 
+      #  to the definition of PRECISION.
+      
+      ############################################################################
+      #
+      #  The library can be set up to include routines for any combination of the
+      #  four PRECISIONS.  First, modify the definitions in ARmake.inc to match 
+      #  your library archiver, compiler, and the options to be used.
+      #
+      #  Sample ARmake.inc's can be found in the directory ARMAKES
+      #  
+      #  Then to create or add to the library, enter make lib after having
+      #  modified the environment variable PRECISIONS defined in this Makefile.
+      #
+      #       make lib
+      #  creates the library for serial ARPACK,
+      #
+      #  The name of the libraries are defined in the file called ARmake.inc and
+      #  are created at this directory level.
+      #
+      #  To remove the object files after the libraries and testing executables
+      #  are created, enter
+      #       make clean
+      #
+      ############################################################################
+      
+      all: lib
+      
+      lib: arpacklib
+      
+      clean: cleanlib
+      
+      arpacklib:
+      	@( \
+      	for f in $(DIRS); \
+      	do \
+      		$(CD) $$f; \
+      		$(ECHO) Making lib in $$f; \
+      		$(MAKE) $(PRECISIONS); \
+      		$(CD) ..; \
+      	done );
+      	$(RANLIB) $(ARPACKLIB)
+      
+      cleantest:
+      
+      cleanlib:
+      	( cd $(BLASdir); $(MAKE) clean )
+      	( cd $(LAPACKdir); $(MAKE) clean )
+      	( cd $(UTILdir); $(MAKE) clean )
+      	( cd $(SRCdir); $(MAKE) clean )
+      	rm -rf libarpack*.a
+      
+      help:
+          @$(ECHO) "usage: make ?"
+      ```
+
+
+# SPOOLES
+
+   1. SPOOLES（SParse Object Oriented Linear Equation Solver）使用C语言编写，因此不直接支持面向对象，但是通过构造技巧，可以使得用户用起来像是面向对象的程序。
+
+   2. 几乎每个文件夹内都定义了一个对象，包含如下内容：
+
+      ```shell
+      A2.h      #头文件，包含函数的声明
+      makefile  #编译用
+      doc/      #说明文档
+      src/      #源文件
+      drivers/  #测试程序源文件
+      ```
+
+   3. `LinSol`和`Eigen`文件夹中包含了一些包装方法，来使得SPOOLES可以求解线性方程组和求解特征值问题。
+
+   4. `Matrices`文件夹中包含了一些测试时要用到的矩阵数据。
+
+   5. 可以修改`Make.inc`文件中的变量，来改变编译链接的行为，因为所有的makefile都包含了该文件。
+
+6. 一般需要先安装perl环境，因为会使用Perl运行脚本来生成临时的makefile。如果没有安装perl环境，可以执行`make global`来代替`make lib`，前者会使用硬编码的makefile。
+
+7. SPOOLES有3个版本，串行（serial），多线性（multithread），MPI。MT文件夹包含了多线程的源代码和测试程序，MPI文件包含了MPI的源代码和测试程序。其余文件中包含的都是串行的代码。编译链接会分别产生三个库文件：`spooles.a`，`spoolesMT.a`，`spoolesMPI.a`。如果只想得到串行版本，则应该修改`Lock/Lock.h`文件（该文件详细定义了线程库所使用的互斥锁的底层代码）。
+
+   ```c
+   #define THREAD_TYPE TT_POSIX  //默认是POSIX线程，可以将其修改为TT_NONE，即仅在串行模型下工作。
+   ```
+
+   8. 直接在根目录运行`make lib`即可编译链接得到串行库`spooles.a`。
+
+   9. 并行或MPI版本有两种方式得到：
+
+         1. 单独产生一个`spoolesMT.a`或`spoolesMPI.a`，在根目录执行`make spoolesMT.a`或`make spoolesMPI.a`即可。
+
+         2. 将并行或MPI版本合并为串行版本，只产生一个`spooles.a`，在根目录执行`make makeLib`即可。这种版本也可以通过修改根目录的makefile中lib目标最后的，取消对MT或MPI的注释，然后执行make lib得到。
+
+   10. 可以使用`make clean`来删除临时文件，恢复目录，不过更推荐使用`dotar`脚本来进行打包，避免`make clean`删不干净。
+
+   11. 编译链接完成后，可以对该库执行测试，以检验结果中是否正确。可以运行`make drivers`来编译链接生成所有的测试程序可执行文件。然后可以进入每个文件夹的drivers子目录执行do开头的各种可执行程序。也可以单独进入到某些文件夹的drivers目录，执行`make drivers`，然后执行对应的do脚本。
+
+   12. 大部分测试程序所需的输入数据都通过给定一个seed来产生随机数矩阵得到，部分需要读取`Matrices`文件中存储的矩阵。
+
+       ```shell
+       #A2/drivers目录下的文件
+       -rwxr-xr-x 1 zj zj  256  6月  3  1998 do_norms #脚本，执行该脚本会调用test_norms可执行文件
+       -rwxr-xr-x 1 zj zj  313  1月  3  1999 do_QR
+       -rw-r--r-- 1 zj zj  411  1月 26  1999 makefile
+       -rw-r--r-- 1 zj zj 4.6K  6月  3  1998 test_norms.c #编译后会申城test_norms可执行文件
+       -rw-r--r-- 1 zj zj 6.5K  1月  3  1999 testQR.c
+       ```
+
+   13. 测试脚本文件内容：
+
+       ```shell
+       #! /bin/csh -f
+       #
+       set msglvl  = 2       #设置为1时，只输出运行消耗的时间，设置为2时，还会输出Matlab形式的代码，这些代码可以拷贝到matlab中执行，来验证验证程序是否正确。
+       set msgFile = stdout  #结果的输出文件，可以设置成某个.m文件。
+       #type到inc2都是矩阵的形状和内存索引参数
+       set type    = 2
+       set nrow    = 10
+       set ncol    = 20
+       set inc1    = $ncol
+       set inc1    = 1
+       set inc2    = 1
+       set inc2    = $nrow
+       #随机数种子
+       set seed    = 1
+       test_norms $msglvl $msgFile $type $nrow $ncol $inc1 $inc2 $seed #test_norm程序会读取命令行参数，通常需要在test_norm前加上./，这样执行时才不会报错。
+       ```
 
 # 缺少libgfortran.so.4
 
-1. 官方发布的Calculix2.20可执行文件`ccx_2.20`是动态连接的，需要libgfortran.so.4，而ubuntu22.04后，默认使用gcc-11，默认仓库也不再提供libgfortran.so.4。使用ldd命令来查看可执行文件需要的动态库，参数需要是完整路径名。=>表示在本机匹配到的具体路径名。
+1. 官方发布的CalculiX2.22可执行文件`ccx_2.22`是动态连接的，需要libgfortran.so.4，而ubuntu22.04后，默认使用gcc-11，默认仓库也不再提供libgfortran.so.4。使用ldd命令来查看可执行文件需要的动态库，参数需要是完整路径名。=>表示在本机匹配到的具体路径名。
 
    ```shell
    zj@zj-virtual-machine:~$ ldd /usr/local/bin/ccx
@@ -77,10 +409,10 @@
    deb [arch=amd64] http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal main universe
    ```
 
-3. 用户自己的编译链接的ccx_2.20，可以发现比官方发布的少了libpthread，libgomp。同时使用了更新的libgfortran。
+3. 用户自己的编译链接的ccx_2.22，可以发现比官方发布的少了libpthread，libgomp。同时使用了更新的libgfortran。
 
    ```shell
-   zj@zj-hit:~/CCX/CalculiX/ccx_2.20/test$ ldd ccx_2.20
+   zj@zj-hit:~/CCX/CalculiX/ccx_2.22/test$ ldd ccx_2.22
            linux-vdso.so.1 (0x00007fff637fe000)
            libgfortran.so.5 => /lib/x86_64-linux-gnu/libgfortran.so.5 (0x000074d731400000)
            libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x000074d7321e7000)
@@ -118,21 +450,28 @@
 
 9. 程序内有Bug，如果修改SFREE的宏，使得其每次释放内存后，都将指针置为NULL，则运行时会报错，卡住在extraploate.f90，ielorien指针在这里已经是NULL了，结果这里还使用了它。当然也不排除是因为修改了太多的源代码导致的。
 
-10. dyna.c文件中出现如下笔误：
+10. 程序内定义了一些宏，来控制是否调试输出某些量：
 
-   ```c
-   SFREE(xboundiff), SFREE(xbodydiff); //如果SFREE不包含将指针置为NULL的动作，则不会有问题，反之则会报错。
-   ```
+    ```c
+    #define TEST     0  //在readfrd.c中
+    #define DEBUG_LVL	0 //在spooles.h中，设置调试级别，在spooles.c中起作用
+    ```
 
-11. 源文件目录中
+11. dyna.c文件中出现如下笔误：
+
+    ```c
+    SFREE(xboundiff), SFREE(xbodydiff); //如果SFREE不包含将指针置为NULL的动作，则不会有问题，反之则会报错。
+    ```
+
+12. 源文件目录中
 
     1. 一共有942个.f90文件，但是gauss.f90和xlocal.f90只是被include到其他文件中，并不会单独编译，因此Makifile.inc中SCCXF一共包含940个.f90文件。
-    2. 一共有176个.c源文件，而主文件ccx_2.20.c需要单独编译，因此Makefile.inc中SCCXC只包含175个.c文件。
+    2. 一共有176个.c源文件，而主文件ccx_2.22.c需要单独编译，因此Makefile.inc中SCCXC只包含175个.c文件。
 
-12. 使用代码统计工具cloc统计文件数，空白行，注释行，代码行的总数：
+13. 使用代码统计工具cloc统计文件数，空白行，注释行，代码行的总数：
 
     ```shell
-    zj@zj-hit:~/CCX/CalculiX/ccx_2.20/src$ cloc *.f90 *.c *.h
+    zj@zj-hit:~/CCX/CalculiX/ccx_2.22/src$ cloc *.f90 *.c *.h
         1127 text files.
         1127 unique files.
            0 files ignored.
@@ -149,7 +488,7 @@
     -------------------------------------------------------------------------------
     ```
 
-13. 经过统计，代码行比较多的文件如下：
+14. 经过统计，代码行比较多的文件如下：
 
     ```shell
     cloc *.f90 *.c *.h --by-file -out stat.cloc
@@ -174,8 +513,8 @@
     complexfreq.c                                    304            169           1899
     readfrd.c                                        105            145           1780
     electromagnetics.c                               308            209           1587
-    ccx_2.20.c                                        10            171           1553
-    ccx_2.20step.c                                     1            238           1535
+    ccx_2.22.c                                        10            171           1553
+    ccx_2.22step.c                                     1            238           1535
     e_c3d_se.f90                                       0            219           1495
     e_c3d.f90                                          0            159           1428
     e_c3d_duds.f90                                     0            215           1413
@@ -193,77 +532,89 @@
     us3_sub.f90                                        6            459           1009
     ```
 
-14. Makefile的实际执行顺序为：
+15. Makefile的实际执行顺序为：
 
     ```shell
-    #1.编译ccx_2.20.c主文件
-    gcc -O2  -I ../../../SPOOLES.2.2 -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DNETWORKOUT -g   -c -o ccx_2.20.o ccx_2.20.c
+    #1.编译ccx_2.22.c主文件
+    gcc -O2  -I ../../../SPOOLES.2.2 -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DNETWORKOUT -g   -c -o ccx_2.22.o ccx_2.22.c
     #2.编译SCCXF中的940个.f90文件
     ...
-    gfortran -O2 --std=legacy  -c str2mat.f90
+    gfortran -O2 -std=legacy  -c str2mat.f90
     ...
     #3.编译SCCXC中的175个.c文件
     ...
     gcc -O2  -I ../../../SPOOLES.2.2 -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DNETWORKOUT -g   -c -o writeoldmesh.o writeoldmesh.c
     ...
     #4.打包所有的目标文件到静态库文件
-    ar vr ccx_2.20.a absolute_relative.o ...
+    ar vr ccx_2.22.a absolute_relative.o ...
     #5.修改三个重要文件中的时间标志
     ./date.pl;
-    #6.重新编译ccx_2.20.c，不过前面修改了三个文件，这里只重新编译了一个。
-    gcc -O2  -I ../../../SPOOLES.2.2 -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DNETWORKOUT -g -c ccx_2.20.c;
-    #使用gfortran链接所有的文件，生成可执行文件ccx_2.20
-    gfortran  -Wall -O2 -o ccx_2.20 ccx_2.20.o ccx_2.20.a ../../../SPOOLES.2.2/spooles.a ../../../ARPACK/libarpack_INTEL.a -lpthread -lm -lc -fopenmp
+    #6.重新编译ccx_2.22.c，不过前面修改了三个文件，这里只重新编译了一个。
+    gcc -O2  -I ../../../SPOOLES.2.2 -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DNETWORKOUT -g -c ccx_2.22.c;
+    #使用gfortran链接所有的文件，生成可执行文件ccx_2.22
+    gfortran  -Wall -O2 -o ccx_2.22 ccx_2.22.o ccx_2.22.a ../../../SPOOLES.2.2/spooles.a ../../../ARPACK/libarpack_INTEL.a -lpthread -lm -lc -fopenmp
     ```
 
-15. Makefile：
+16. Makefile：
 
     ```makefile
-    CFLAGS = -g -Wall -Wno-unused-function -Wno-unused-but-set-variable -Wno-unused-variable -Wno-maybe-uninitialized -I ../../../SPOOLES.2.2 -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DNETWORKOUT #指定SPOOLES头文件的目录，定义宏SPOOLES和ARPACK表示使用这两个库，-g调试。
-    FFLAGS = -g -Wall -Wno-unused-label -Wno-maybe-uninitialized -Wno-unused-dummy-argument -Wno-unused-variable --std=legacy #设置--std=legacy会使得gfortran8及以上的编译器在编译老代码中不再被支持的特性时，不会报错。
+    CFLAGS = -Wall -O2 -Wno-unused-function -Wno-unused-but-set-variable -Wno-unused-variable -Wno-maybe-uninitialized -I ../../../SPOOLES.2.2 -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DNETWORKOUT #指定SPOOLES头文件的目录，定义宏SPOOLES和ARPACK表示使用这两个库，-g调试。
+    FFLAGS = -Wall -O2 -Wno-unused-label -Wno-maybe-uninitialized -Wno-unused-dummy-argument -Wno-unused-variable -std=legacy #设置-std=legacy会使得gfortran8及以上的编译器在编译老代码中不再被支持的特性时，不会报错。
+    
     CC=gcc
     FC=gfortran
+    
+    CC=gcc
+    FC=gfortran
+    
     %o : %c
     	$(CC) $(CFLAGS) -c $<
     %o : %f90
     	$(FC) $(FFLAGS) -c $<
+    
     include Makefile.inc #其中定义了三个变量，分别为一堆文件名SCCXF包含940个.f90源文件，SCCXC包含176个.c源文件，SCCXCXX包含一个umat_dl.cpp文件。第一个字母表示source，中间的CCX表示Calculi下，最后一个F表示Fortran
-    SCCXMAIN = ccx_2.20.c #主文件，main函数所在位置
+    
+    SCCXMAIN = ccx_2.22.c #主文件，main函数所在位置
+    
     #分别进行后缀名替换，创建对应的目标文件集合的变量名
     OCCXF = $(SCCXF:.f90=.o)
     OCCXC = $(SCCXC:.c=.o)
     OCCXMAIN = $(SCCXMAIN:.c=.o)
+    
     DIR=../../../SPOOLES.2.2
+    
     #设置要链接的库名和位置
-    LIBS = $(DIR)/spooles.a \
-    	../../../ARPACK/libarpack_INTEL.a \
-        -lpthread -lm -lc
-    ccx_2.20: $(OCCXMAIN) ccx_2.20.a  $(LIBS)
+    LIBS = $(DIR)/spooles.a ../../../ARPACK/libarpack_INTEL.a -lpthread -lm -lc
+    
+    ccx_2.22: $(OCCXMAIN) ccx_2.22.a  $(LIBS)
     	#./date.pl; #修改三个重要文件中的时间标志，可以定期单独在shell中执行该命令
-    	$(CC) $(CFLAGS) -c ccx_2.20.c; #单独编译主文件
-    	$(FC) $(FFLAGS) -o $@ $(OCCXMAIN) ccx_2.20.a $(LIBS) -fopenmp #使用gfortran进行链接。
+    	$(CC) $(CFLAGS) -c ccx_2.22.c; #单独编译主文件
+    	$(FC) $(FFLAGS) -o $@ $(OCCXMAIN) ccx_2.22.a $(LIBS) -fopenmp #使用gfortran进行链接。
     #打包所有的目标文件到静态库文件
-    ccx_2.20.a: $(OCCXF) $(OCCXC)
+    
+    ccx_2.22.a: $(OCCXF) $(OCCXC)
     	ar vr $@ $?
+    
     clean:
-    	rm -f *.o *.a ccx_2.20
+    	rm -f *.o *.a ccx_2.22
     	rm -f *.expand *.png *.pdf callgrind.out.*
     	rm -f input.* spooles.out #并不需要了，因为已经添加了修改工作目录的代码
     	rm -f .vscode-ctags .ctags tags
+    
     test:
     	rm -f callgrind.out.*
-    	valgrind --tool=callgrind --compress-strings=no --compress-pos=no --collect-jumps=yes ./ccx_2.20 -i ../test/beamp
+    	valgrind --tool=callgrind --compress-strings=no --compress-pos=no --collect-jumps=yes ./ccx_2.22 -i ../test/beamp
     	kcachegrind callgrind.out.*
     ```
 
-16. date.pl，功能是在ccx_2.20.c，frd.c中插入当前编译的时间，方便编译调试：
+17. date.pl，功能是在ccx_2.22.c，frd.c中插入当前编译的时间，方便编译调试：
 
     ```perl
     #!/usr/bin/env perl
     chomp($date=`date -R`); #执行shell命令date，获取日期时间，存储到date变量中，chomp表示去掉结尾的换行符。使用-R选项，使之始终输出英文格式，如果在程序开始时修改LC_TIME环境变量，则会默认输出美国时区。
-    # update the date in ccx_2.20.c
-    @ARGV="ccx_2.20.c";
-    $^I=".old"; #先将ccx_2.20.c打开，并另存为ccx_2.20.c.old，然后再ccx_2.20.c上修改
+    # update the date in ccx_2.22.c
+    @ARGV="ccx_2.22.c";
+    $^I=".old"; #先将ccx_2.22.c打开，并另存为ccx_2.22.c.old，然后再ccx_2.22.c上修改
     while(<>){ #<>表示从@ARGV中读取内容
         s/You are using an executable made on.*/You are using an executable made on $date\\n");/g; #正则表达式，搜索然后替换
         print;
@@ -276,17 +627,17 @@
         s/COMPILETIME.*/COMPILETIME       $date\\n", p1);/g;
         print;
     }
-    system "rm -f ccx_2.20.c.old"; #删除掉备份的旧文件，保留修改后的文件
-    system "rm -f ccx_2.20step.c.old";
+    system "rm -f ccx_2.22.c.old"; #删除掉备份的旧文件，保留修改后的文件
+    system "rm -f ccx_2.22step.c.old";
     system "rm -f frd.c.old";
     ```
 
-17. cleanupcode，功能和make clean不同，此处是用来清理无关的源文件的，例如想把ccx中和流体网络相关的功能都删除，可以在Makefile.inc中删除对应行，然后运行此文件即可删除对应文件：
+18. cleanupcode，功能和make clean不同，此处是用来清理无关的源文件的，例如想把ccx中和流体网络相关的功能都删除，可以在Makefile.inc中删除对应行，然后运行此文件即可删除对应文件：
 
     ```shell
     #!/bin/sh
     for x in *.f90 *.c; do #遍历所有的.f90和.c文件文件
-        if [ "$x" = "ccx_2.20.c" ]; then
+        if [ "$x" = "ccx_2.22.c" ]; then
             #echo $x "is kept"
             continue
         fi
@@ -310,7 +661,7 @@
     
     ```
 
-18. hwloc可以显示CPU拓扑，比较方面地查看CPU各级缓存以及各个核、物理CPU之间，可以共享哪一级别的CPU cache。
+19. hwloc可以显示CPU拓扑，比较方面地查看CPU各级缓存以及各个核、物理CPU之间，可以共享哪一级别的CPU cache。
 
     ```shell
     zj@zj-hit:~/CCX/ARPACK$ hwloc-ls
@@ -331,9 +682,9 @@
           PCI 02:03.0 (SATA)
     ```
 
-# Calculix.h文件
+# CalculiX.h文件
 
-1. 在ccx_2.20.c中包含了，主要是定义了有些简短的宏，用来简化函数调用：
+1. 在ccx_2.22.c中包含了，主要是定义了有些简短的宏，用来简化函数调用：
 
    ```c
    //所有的Fortran函数都用Fortran(A,B)宏包装，编译参数中定义了-DARCH="Linux"，因此
@@ -478,7 +829,7 @@
 
    ```c
    #include <time.h>
-   struct timespec totalCalculixTimeStart, totalCalculixTimeEnd; //用来记录运行时间的结构体
+   struct timespec totalCalculiXTimeStart, totalCalculiXTimeEnd; //用来记录运行时间的结构体
    /*
    struct timespec {
    	time_t tv_sec; // 秒
@@ -486,14 +837,14 @@
    };
    */
    int main(int argc, char* argv[]) {
-       double totalCalculixTime; //用来保存消耗的秒数
-       clock_gettime(CLOCK_MONOTONIC, &totalCalculixTimeStart); //获取开始的时刻,CLOCK_MONOTONIC表示从系统启动这一刻起开始计时,不受系统时间被用户改变的影响
+       double totalCalculiXTime; //用来保存消耗的秒数
+       clock_gettime(CLOCK_MONOTONIC, &totalCalculiXTimeStart); //获取开始的时刻,CLOCK_MONOTONIC表示从系统启动这一刻起开始计时,不受系统时间被用户改变的影响
        //...计算消耗
-       clock_gettime(CLOCK_MONOTONIC, &totalCalculixTimeEnd);//获取结束的时刻
-       totalCalculixTime = (totalCalculixTimeEnd.tv_sec - totalCalculixTimeStart.tv_sec) * 1e9;//转换成纳秒
-       totalCalculixTime = (totalCalculixTime + (totalCalculixTimeEnd.tv_nsec - totalCalculixTimeStart.tv_nsec)) * 1e-9; //再转换成秒
+       clock_gettime(CLOCK_MONOTONIC, &totalCalculiXTimeEnd);//获取结束的时刻
+       totalCalculiXTime = (totalCalculiXTimeEnd.tv_sec - totalCalculiXTimeStart.tv_sec) * 1e9;//转换成纳秒
+       totalCalculiXTime = (totalCalculiXTime + (totalCalculiXTimeEnd.tv_nsec - totalCalculiXTimeStart.tv_nsec)) * 1e-9; //再转换成秒
        printf("________________________________________\n\n");
-       printf("Total CalculiX Time: %lf\n", totalCalculixTime);
+       printf("Total CalculiX Time: %lf\n", totalCalculiXTime);
        printf("________________________________________\n");
        return 0;
    }
@@ -516,7 +867,7 @@
            break;
          }
          if (strcmp1(argv[i], "-v") == 0) {
-           printf("\nThis is Version 2.20\n\n");
+           printf("\nThis is Version 2.22\n\n");
            FORTRAN(stop, ());
          }
        }
@@ -704,7 +1055,7 @@
    50     jobname.rhs #trilinos的右侧
    50     jobname.rig #trilinos的刚体模式
    88     jobname.wb  #
-          spooles.out #spooles的输出
+          spooles.out #spooles的输出，会输出使用了多少个线程，如果是单线程，则该文件为空白。
           jobname.eig #特征值和质量矩阵
           jobname.stm #刚度矩阵
           jobname.dof #自由度
@@ -902,7 +1253,7 @@
 2. 回到上级目录，执行如下命令打包并压缩：
 
    ```shell
-   tar -czvf CalculiX-`date +%F`.tar.gz --exclude=CCX/CalculiX/ccx_2.20/test/*.inp --exclude=CCX/CalculiX/ccx_2.20/test/*.ref CCX #会生成一个类似CalculiX-2024-03-05.tar.gz的文件。--exclude=PATTERN 排除以 PATTERN 指定的文件。
+   tar -czvf CalculiX-`date +%F`.tar.gz --exclude=CCX/CalculiX/ccx_2.22/test --exclude=CCX/.git CCX #会生成一个类似CalculiX-2024-03-05.tar.gz的文件。--exclude=PATTERN 排除以 PATTERN 指定的文件。
    # 只保留test文件下的除了.inp和.ref以外的文件，也就是datacheck.pl，frdcheck.pl，compare，Makefile。
    ```
 
@@ -914,7 +1265,7 @@
 
 # CalculiXstep
 
-1. 这个文件允许将ccx作为一个库，被其他函数调用，他就是将ccx_2.20.c做了封装，一般用不上，这里就删除了。
+1. 这个文件允许将ccx作为一个库，被其他函数调用，他就是将ccx_2.22.c做了封装，一般用不上，这里就删除了。
 
 2. 该函数的说明：
 
@@ -1046,43 +1397,44 @@
 
    ```shell
    #!/bin/sh
+   make clean #先清理之前运行产生的文件
    export OMP_NUM_THREADS=1
    rm -f error.*      #删除掉之前生成的错误文件
-   tempfile=temp.$$   #$$表示当前进程的PID，一般用于生成唯一的文件名
+   tmpfile=tmp.$$   #$$表示当前进程的PID，一般用于生成唯一的文件名
    errorfile=error.$$
    #逐个对每个.inp文件进行处理
    for i in *.inp; do
-   # 不处理以下.inp文件，因为它们是通过运行其他例子产生的
-   	if [ $i = circ10pcent.rfn.inp ]
+   ### 不处理以下.inp文件，因为它们是通过运行其他例子产生的
+   	if [ $i = beam10psmooth.rfn.inp ] || [ $i = circ10pcent.rfn.inp ] || [ $i = circ10p.rfn.inp ] || [ $i = segmentsmooth.rfn.inp ] || [ $i = segmentsmooth2.rfn.inp ]
    	then
    	    continue
    	fi
-   	
-   	if [ $i = circ10p.rfn.inp ]
+   ### 不处理以下文件，因为它们涉及重启动问题，有的需要修改inp文件或调整运行顺序
+   	if [ $i = axrad2.inp ] || [ $i = beamhtfc2.inp ] || [ $i = beamread.inp ] || [ $i = beamread2.inp ] || [ $i = beamread3.inp ] || [ $i = beamread4.inp ] || [ $i = crackIIinta.inp ]
    	then
    	    continue
    	fi
-   	
-   	if [ $i = segmentsmooth.rfn.inp ]
+   ### 这几个文件的时间太长了，可以不测试，去除之前耗时6分钟，之后耗时3分钟。
+   	if [ $i = anipla_nl_dy_exp.inp ] || [ $i = channelcbs.inp ] || [ $i = coucylcentcomp.inp ] || [ $i = couette2.inp ] || [ $i = couseg3.inp ] || [ $i = furnace.inp ] || [ $i = hueeber1.inp ] || [ $i = hueeber2.inp ] || [ $i = induction2.inp ] || [ $i = induction3.inp ] || [ $i = moehring.inp ] || [ $i = rotor3.inp ] || [ $i = slant.inp ] || [ $i = thermomech.inp ] || [ $i = hueeber1_mortar.inp ] || [ $i = hueeber2_mortar.inp ]
    	then
    	    continue
    	fi
-   	
-   	if [ $i = segmentsmooth2.rfn.inp ]
+   ### 这是ccx输出的调试文件
+   	if [ $i = input.inp ]
    	then
    	    continue
    	fi
-   
-   	if [ $i = input.inp ] #这是ccx输出的调试文件
-   	then
-   	    continue
-   	fi
-   	echo "example ${i%.inp}"
+   	echo -n "Run example ${i%.inp}    "
    # 删除掉之前运行产生的对应的.dat和.frd文件
    	rm -f ${i%.inp}.dat  #${i%.inp}表示从变量i的末尾去掉.inp，这句话要删除的是xx.inp对应的xx.dat。
    	rm -f ${i%.inp}.frd
-   # 执行Calculix，生成.dat和.frd文件，将命令行输出保存到tempfile文件。需要的话可以修改可执行文件的路径
-       ccx -i ${i%.inp} >> $tempfile 2>&1
+   # 执行CalculiX，生成.dat和.frd文件，将命令行输出保存到tmpfile文件。需要的话可以修改可执行文件的路径
+       start=$(date +%s.%N)
+       ccx -i ${i%.inp} > /dev/null 2>&1
+       #../src/ccx_2.22-official -i ${i%.inp} > /dev/null 2>&1
+       end=$(date +%s.%N)
+       runtime=$(echo "$end - $start" | bc)
+       echo "消耗时间: $runtime 秒"
    # 检查是否生成了对应的.dat和自带的.dat.ref文件是否存在
    	if [ ! -f ${i%.inp}.dat ]; then
    	   echo "${i%.inp}.dat does not exist" >> $errorfile #将错误输出到errorfile中
@@ -1109,7 +1461,7 @@
    # 检查.dat和.dat.ref文件中数字的偏差是否在允许范围内，具体由datcheck.pl负责
    	./datcheck.pl ${i%.inp} >> $errorfile
    # 检查.frd和.frd.ref文件是否存在
-   	if grep "^ -5" ${i%.inp}.frd >| abc  ||[ -f ${i%.inp}.frd.ref ] ; then
+   	if grep "^ -5" ${i%.inp}.frd >| abc  || [ -f ${i%.inp}.frd.ref ] ; then
    		if [ ! -f ${i%.inp}.frd ]; then
    			echo "${i%.inp}.frd does not exist" >> $errorfile
    			continue
@@ -1130,8 +1482,9 @@
    	    ./frdcheck.pl ${i%.inp} >> $errorfile
            fi
    done
-   rm -f *.rfn.inp #删除掉生成的中间文件
-   rm -f $tempfile #删除掉生成的命令行输出文件
+   #删除掉生成的中间文件，但是保留自带的5个文件。
+   find . -name "*.rfn.inp" -not -name "beam10psmooth.rfn.inp" -not -name "circ10pcent.rfn.inp" -not -name "circ10p.rfn.inp" -not -name "segmentsmooth.rfn.inp" -not -name "segmentsmooth2.rfn.inp" -exec rm -f {} +
+   rm -rf $tmpfile #删除掉生成的命令行输出文件
    if [ ! -s $errorfile ] #由于前面的命令行，会导致无论是否检出错误，都会生成errorfile。如果错误文件为空，则删除它。
    then
    	rm -f $errorfile
@@ -1141,13 +1494,24 @@
    	echo "Check the errorfile of file $errorfile"
    fi
    ```
-   
-2. 为test文件夹添加一个Makefile，来清理运行过程中产生的文件：
 
-   ```makefile
-   clean:
-   	rm -f input.* spooles.out error.*
-   	rm -f *.12d *.cvg *.dat *.frd *.sta
+2. 经过测试运行时间较长的文件有，已经在compare文件中将这些文件去除，这样可以所见分析时间。
+
+   ```
+   anipla_nl_dy_exp
+   channelcbs
+   coucylcentcomp
+   couette2
+   couseg3
+   furnace
+   hueeber1
+   hueeber2
+   induction2
+   induction3
+   moehring
+   rotor3
+   slant
+   thermomech
    ```
 
 
@@ -1178,153 +1542,109 @@
         &        iorien,pgauss,orab,nmethod,pnewdt)
    ```
 
-3. 
-
 
 # 变量
 
-1. ccx_2.20.c文件开头的部分：
+1. ccx_2.22.c文件开头的部分：
 
    ```c
-   FILE *f1 = NULL; //公用的一个文件流指针
-   char *sideload = NULL,
-        *set = NULL,
-        *matname = NULL,
-        *orname = NULL,
-        *amname = NULL,
-        *filab = NULL,
-        *lakon = NULL,
-        *labmpc = NULL,
-        *prlab = NULL,
-        *prset = NULL,
-         jobnamec[792] = "", //132*6个字符，直接拷贝完-i的参数，后续的都是\0，是C风格的字符串。
-         jobnamef[132] = "", //同样拷贝-i的参数，不够132个字符的部分都会被填充成空格
-         tmpjobname[132] = "",
-         output[5] = "",
-        *typeboun = NULL,
-        *inpc = NULL, //包含简化后的inp文件的内容，去掉了换行，通过
-        *tieset = NULL,
-        *cbody = NULL,
-         fneig[132] = "",
-        *sideloadtemp = NULL,
-         kind1[2] = "",
-         kind2[2] = "",
-        *heading = NULL,
-        *objectset = NULL;
-   
-   ITG *kon = NULL,
-       *nodeboun = NULL,
-       *ndirboun = NULL,
-       *ipompc = NULL,
-       *nodempc = NULL,
-       *nodeforc = NULL,
-       *ndirforc = NULL,
-       *nelemload = NULL,
-        im = 0,
-       *inodesd = NULL,
-        nload1 = 0,
-       *idefforc = NULL,
-       *nactdof = NULL,
-       *icol = NULL,
-       *ics = NULL,
-        itempuser[3] = {0},
-       *jq = NULL,
-       *mast1 = NULL,
-       *irow = NULL,
-       *rig = NULL,
-       *idefbody = NULL,
-       *ikmpc = NULL,
-       *ilmpc = NULL,
-       *ikboun = NULL,
-       *ilboun = NULL,
-       *nreorder = NULL,
-       *ipointer = NULL,
-       *idefload = NULL,
-       *istartset = NULL,
-       *iendset = NULL,
-       *ialset = NULL,
-       *ielmat = NULL,
-       *ielorien = NULL,
-       *nrhcon = NULL,
-       *nodebounold = NULL,
-       *ndirbounold = NULL,
-       *nelcon = NULL,
-       *nalcon = NULL,
-       *iamforc = NULL,
-       *iamload = NULL,
-       *iamt1 = NULL,
-       *namta = NULL,
-       *ipkon = NULL,
-       *iamboun = NULL,
-       *nplicon = NULL,
-       *nplkcon = NULL,
-       *inotr = NULL,
-       *iponor = NULL,
-       *knor = NULL,
-       *ikforc = NULL,
-       *ilforc = NULL,
-       *iponoel = NULL,
-       *inoel = NULL,
-       *nshcon = NULL,
-       *ncocon = NULL,
-       *ibody = NULL,
-       *ielprop = NULL,
-       *islavsurf = NULL,
-       *ipoinpc = NULL, //整数数组，nline个元素，存储着inp文件中的每一行的开头在inpc字符数组中的下标。
-        mt = 0,
-        nxstate = 0,
-        nload0 = 0,
-        iload = 0,
-       *iuel = NULL,
-       *ne2boun = NULL,
-       *irandomtype = NULL,
-        irobustdesign[3] = {0},
-       *iparentel = NULL,
-        ifreebody = 0,
-       *ipobody = NULL,
-        inewton = 0,
-       *iprfn = NULL,
-       *konrfn = NULL;
-   ITG  nk = 0,
-        ne = 0,
-        nboun = 0, //约束的自由度总数，整型
-        nmpc = 0,
-        nforc = 0,
-        nload = 0,
-        nprint = 0,
-        nset = 0,
-        nalset = 0,
-        nentries = 18, //需要按照顺序解析的关键字组
-        nmethod = 0,
-        neq[3] = {0},
-        i = 0,
-        mpcfree = 0,
-        mei[4] = {0},
-        j = 0,
-        nzl = 0,
-        nam = 0,
-        nbounold = 0,
-        nforcold = 0,
-        nloadold = 0,
-        nbody = 0,
-        nbody_ = 0,
-        nbodyold = 0,
-        network = 0,
-        nheading_ = 0,
-        k = 0,
-        nzs[3] = {0},
-        nmpc_ = 0,
-        nload_ = 0,
-        nforc_ = 0,
-        istep = 0,
-        istat = 0,
-        nboun_ = 0,
-        nintpoint = 0,
-        iperturb[2] = {0},
-        nmat = 0,
-        ntmat_ = 0,
-        norien = 0,
-        ithermal[2] = {0}, //热力耦合的情况，这个参数不是从属于某个特定的分析步，而是整个分析的，而且它的取值和关键字出现的顺序有关。
+   FILE *f1 //公用的一个文件流指针
+   /****************************** char* 类型 *****************************/
+   sideload //20 * nload_，面分布荷载的标签，指示单元的哪个局部face被加载了
+   set //81 * nset_，
+   matname //80 * nmat，
+   orname //80 * norien
+   amname //80 * nam_
+   filab //87 * nlabel
+   lakon //8 * ne_
+   labmpc //20 * nmpc + 1，
+   prlab //6 * nprint_
+   prset //81 * nprint_
+   jobnamec[792] //132*6个字符，直接拷贝完-i的参数，后续的都是\0，是C风格的字符串。
+   jobnamef[132] //同样拷贝-i的参数，不够132个字符的部分都会被填充成空格
+   tmpjobname[132] //
+   output[5] //
+   typeboun //nboun_ + 1，
+   inpc //包含简化后的inp文件的内容，去掉了换行，通过
+   tieset //243 * ntie_
+   cbody //81 * nbody_
+   fneig[132] //
+   sideloadtemp //20 * nload
+   kind1[2] //
+   kind2[2] //
+   heading //66 * nheading_
+   objectset //405 * nobject_
+   /****************************** ITG* 类型 *****************************/
+   kon //nkon_
+   nodeboun //nboun_
+   ndirboun //nboun_
+   ipompc //nmpc_
+   nodempc //3 * memmpc_
+   nodeforc //2 * nforc
+   ndirforc //nforc
+   nelemload //2 * nload_
+   inodesd //nk
+   idefforc //nforc_
+   nactdof //mt * nk
+   icol //mt * nk
+   ics //2 * npt_
+   itempuser[3] = {0},
+   jq //mt * nk + 1
+   mast1 //nzs[1]
+   irow //nzs[2]
+   rig //nk_
+   idefbody //nbody_
+   ikmpc //nmpc_
+   ilmpc //nmpc_
+   ikboun //nboun_
+   ilboun //nboun_
+   nreorder //nboun
+   ipointer //mt * nk
+   idefload //nload_
+   istartset //nset
+   iendset //nset
+   ialset //nalset
+   ielmat //mi[2] * ne_
+   ielorien //mi[2] * ne_
+   nrhcon //nmat
+   nodebounold //nboun_
+   ndirbounold //nboun
+   nelcon //2 * nmat
+   nalcon //2 * nmat
+   iamforc //nforc_
+   iamload //2 * nload_
+   iamt1 //nk_
+   namta //3 * nam_
+   ipkon //ne_
+   iamboun //nboun_
+   nplicon //(ntmat_ + 1) * nmat
+   nplkcon //(ntmat_ + 1) * nmat
+   inotr //2 * nk_
+   iponor //2 * nkon_
+   knor //infree[1]
+   ikforc //nforc_
+   ilforc //nforc_
+   iponoel //nk_
+   inoel //3 * (infree[2] - 1)
+   nshcon //nmat
+   ncocon //2 * nmat
+   ibody //3 * nbody_
+   ielprop //ne_
+   islavsurf //2 * ifacecount + 2
+   ipoinpc //整数数组，nline个元素，存储着inp文件中的每一行的开头在inpc字符数组中的下标。
+   iuel //4 * nuel_
+   ne2boun //2 * nk_
+   irandomtype //nk_
+   irobustdesign[3] = {0},
+   iparentel //
+   ipobody //2 * ifreebody * nbody
+   iprfn //
+   konrfn //
+   neq[3] //
+   mei[4] //
+   nzs[3] //
+   iperturb[2] //
+   ithermal[2] //热力耦合的情况，这个参数不是从属于某个特定的分析步，而是整个分析的，而且它的取值和关键字出现的顺序有关。
    // 如果只有这3个力学分析步的关键字（*STATIC，*VISCO或*DYNAMIC），则ithermal[1]为0或1(如果*INITIALCONDITIONS包含TYPE=TEMPERATURE参数)。
    // 如果只有*HEATTRANSFER关键字，则ithermal[1]=2。
    //如果先是力学分析步关键字，后是热传导关键字，则ithermal[1]=2或3(如果*INITIALCONDITIONS包含TYPE=TEMPERATURE参数)。
@@ -1332,181 +1652,1287 @@
    // 如果包含*COUPLEDTEMPERATURE-DISPLACEMENT，则ithermal[1]=3。
    // 如果包含*UNCOUPLEDTEMPERATURE-DISPLACEMENT，则ithermal[1]=3。
    // 如果包含*ELECTROMAGNETICS，则ithermal[1]=3。
-        nmpcold = 0,
-        iprestr = 0,
-        kode = 0,
-        isolver = 0,
-        nslavs = 0,
-        nkon_ = 0,
-        ne0 = 0,
-        nkon0 = 0,
-        mortar = 0,
-        jout[2] = {0},
-        nlabel = 0,
-        nkon = 0,
-        idrct = 0,
-        jmax[2] = {0},
-        iexpl = 0,
-        nevtot = 0,
-        ifacecount = 0,
-        iplas = 0,
-        npmat_ = 0,
-        mi[3] = {0}, //mi(1)为单元的积分点个数，mi(2)为每个节点的自由度个数，mi(3)为单元的层数，复合材料中使用。
-        ntrans = 0,
-        mpcend = 0,
-        namtot_ = 0,
-        iumat = 0,
-        iheading = 0,
-        icascade = 0,
-        maxlenmpc = 0,
-        mpcinfo[4] = {0},
-        ne1d = 0,
-        ne2d = 0,
-        infree[4] = {0},
-        callfrommain = 0,
-        nflow = 0,
-        jin = 0, //记录命令行参数中-i的个数，处理完命令行会检测，如果为0，则表示没有-i参数，会将第1个参数当作jobname。
-        irstrt[2] = {0},
-        nener = 0,
-        jrstrt = 0,
-        nenerold = 0,
-        nline = 0, //整个inp文件经过简化后的总行数。
-       *ipoinp = NULL,//2*nentries个元素的数组，可以认为是nentries行，2列的数组，每一行的第0列表示在该类在inp数组中的起始行号，第1列表示该类在inp数组中的结束行号。
-       *inp = NULL, //存储inp_size个元素，可以当作inp_size/3行，3列的数组，存储一个链状数据，同类的行都在同一个链上。
-        ntie = 0,
-        ntie_ = 0,
-        mcs = 0,
-        nprop_ = 0,
-        nprop = 0, //属性的个数，整型
-        itpamp = 0,
-        iviewfile = 0,
-        nkold = 0,
-        nevdamp_ = 0,
-        npt_ = 0,
-        cyclicsymmetry = 0,
-        nmethodl = 0,
-        iaxial = 0,
-        inext = 0,
-        icontact = 0,
-        nobject = 0,
-        nobject_ = 0,
-        iit = 0,
-        nzsprevstep[3] = {0},
-        memmpcref_ = 0,
-        mpcfreeref = 0,
-        maxlenmpcref = 0,
-       *nodempcref = NULL,
-       *ikmpcref = NULL,
-        isens = 0,
-        namtot = 0, //amplitude的总数据点个数。*AMPLITUDE的一个数据行最多4个数据点。
-        nstam = 0,
-        ndamp = 0,
-        nef = 0,
-        inp_size = 0, //存储inp数组的元素个数
-       *ipoinp_sav = NULL, //ipoinp数组的备份
-       *inp_sav = NULL, //inp数组的备份
-        irefineloop = 0,
-        icoordinate = 0,
-       *nodedesi = NULL,
-        ndesi = 0,
-        nobjectstart = 0,
-        nfc_ = 0,
-        ndc_ = 0,
-        nfc = 0,
-        ndc,
-       *ikdc = NULL;
+   jout[2] //
+   jmax[2] //
+   mi[3] //mi(1)为单元的积分点个数，mi(2)为每个节点的自由度个数，mi(3)为单元的层数，复合材料中使用。
+   mpcinfo[4] //
+   infree[4] //
+   irstrt[2] //
+   ipoinp //2*nentries个元素的数组，可以认为是nentries行，2列的数组，每一行的第0列表示在该类在inp数组中的起始行号，第1列表示该类在inp数组中的结束行号。
+   inp //存储inp_size个元素，可以当作inp_size/3行，3列的数组，存储一个链状数据，同类的行都在同一个链上。
+   nzsprevstep[3] //
+   nodempcref //3 * memmpc_
+   ikmpcref //nmpc
+   ipoinp_sav //2 * nentries，ipoinp数组的备份
+   inp_sav //inp_size，inp数组的备份
+   nodedesi //nk_
+   ikdc //ndc_
+   meminset //nset_，存储着set数组中对应的集合中的元素个数，整型数组。meminset(i)表示第i个set中元素的个数。
+   rmeminset //nset_，缩减的元素个数，使用了generate的造成的，整型数组。
    
+   /****************************** ITG 类型 *****************************/
+   im //
+   nload1 //
+   mt //
+   nxstate //
+   nload0 //
+   iload //
+   ifreebody //
+   inewton //
+   nk //
+   ne //
+   nboun //约束的自由度总数，整型
+   nmpc //
+   nforc //
+   nload //
+   nprint //
+   nset //
+   nalset //
+   nentries = 18 //需要按照顺序解析的关键字组
+   nmethod //
+   i //
+   mpcfree //
+   j //
+   nzl //
+   nam //
+   nbounold //
+   nforcold //
+   nloadold //
+   nbody //
+   nbody_ //
+   nbodyold //
+   network //
+   nheading_ //
+   k //
+   nmpc_ //
+   nload_ //
+   nforc_ //
+   istep //
+   istat //
+   nboun_ //
+   nintpoint //
+   nmat //
+   ntmat_ //
+   norien //
+   nmpcold //
+   iprestr //
+   kode //
+   isolver //
+   nslavs //
+   nkon_ //
+   ne0 //
+   nkon0 //
+   mortar //
+   nlabel //
+   nkon //
+   idrct //
+   iexpl //
+   nevtot //
+   ifacecount //
+   iplas //
+   npmat_ //
+   ntrans //
+   mpcend //
+   namtot_ //
+   iumat //
+   iheading //
+   icascade //
+   maxlenmpc //
+   ne1d //
+   ne2d //
+   callfrommain //
+   nflow //
+   jin //记录命令行参数中-i的个数，处理完命令行会检测，如果为0，则表示没有-i参数，会将第1个参数当作jobname。
+   nener //
+   jrstrt //
+   nenerold //
+   nline //整个inp文件经过简化后的总行数。
+   ntie //
+   ntie_ //
+   mcs //
+   nprop_ //
+   nprop //属性的个数，整型
+   itpamp //
+   iviewfile //
+   nkold //
+   nevdamp_ //
+   npt_ //
+   cyclicsymmetry //
+   nmethodl //
+   iaxial //
+   inext //
+   icontact //
+   nobject //
+   nobject_ //
+   iit //
+   memmpcref_ //
+   mpcfreeref //
+   maxlenmpcref //
+   isens //
+   namtot //amplitude的总数据点个数。*AMPLITUDE的一个数据行最多4个数据点。
+   nstam //
+   ndamp //
+   nef //
+   inp_size //存储inp数组的元素个数
+   irefineloop //
+   icoordinate //
+   ndesi //
+   nobjectstart //
+   nfc_ //
+   ndc_ //
+   nfc //
+   ndc //
+   nzs_ //
+   nk_ //
+   ne_ //
+   nset_ //逐行解析inp文件得到的set的数量，包括*ELEMENT，*ELSET，*NODE，*NSET，*SURFACE，*SUBMODEL关键字，其中1个*SUBMODEL关键字会增加2个set。
+   nalset_ //
+   nmat_ //
+   norien_ //
+   nam_ //amplitude的计数
+   ntrans_ //
+   ncs_ //
+   nstate_ //
+   ncmat_ //
+   memmpc_ //
+   nprint_ //
+   nuel_ //用户自定义单元的种类，也就是*USERELEMENT关键字的出现次数。
    
-   ITG *meminset = NULL, //存储着set数组中对应的集合中的元素个数，整型数组。meminset(i)表示第i个set中元素的个数。
-       *rmeminset = NULL; //缩减的元素个数，使用了generate的造成的，整型数组。
-   ITG  nzs_ = 0,
-        nk_ = 0,
-        ne_ = 0,
-        nset_ = 0, //逐行解析inp文件得到的set的数量，包括*ELEMENT，*ELSET，*NODE，*NSET，*SURFACE，*SUBMODEL关键字，其中1个*SUBMODEL关键字会增加2个set。
-        nalset_ = 0,
-        nmat_ = 0,
-        norien_ = 0,
-        nam_ = 0, //!amplitude的计数
-        ntrans_ = 0,
-        ncs_ = 0,
-        nstate_ = 0,
-        ncmat_ = 0,
-        memmpc_ = 0,
-        nprint_ = 0,
-        nuel_ = 0; //用户自定义单元的种类，也就是*USERELEMENT关键字的出现次数。
-   
-   double *co = NULL,
-          *xboun = NULL,
-          *coefmpc = NULL,
-          *xforc = NULL,
-          *clearini = NULL,
-          *xload = NULL,
-          *xbounold = NULL,
-          *xforcold = NULL,
-          *randomval = NULL,
-          *vold = NULL,
-          *sti = NULL,
-          *xloadold = NULL,
-          *xnor = NULL,
-          *reorder = NULL,
-          *dcs = NULL,
-          *thickn = NULL,
-          *thicke = NULL,
-          *offset = NULL,
-          *elcon = NULL,
-          *rhcon = NULL,
-          *alcon = NULL,
-          *alzero = NULL,
-          *t0 = NULL,
-          *t1 = NULL,
-          *prestr = NULL,
-          *orab = NULL,
-          *amta = NULL,
-          *veold = NULL,
-          *accold = NULL,
-          *t1old = NULL,
-          *eme = NULL,
-          *plicon = NULL,
-          *pslavsurf = NULL,
-          *plkcon = NULL,
-          *xstate = NULL,
-          *trab = NULL,
-          *ener = NULL,
-          *shcon = NULL,
-          *cocon = NULL,
-          *cs = NULL,
-          *tietol = NULL,
-          *fmpc = NULL,
-          *prop = NULL,
-          *t0g = NULL,
-          *t1g = NULL,
-          *xbody = NULL,
-          *xbodyold = NULL,
-          *coefmpcref = NULL,
-          *dacon = NULL,
-          *vel = NULL,
-          *velo = NULL,
-          *veloo = NULL,
-          energy[5] = {0},
-          *ratiorfn = NULL,
-          *dgdxglob = NULL,
-          *g0 = NULL,
-          *xdesi = NULL,
-          *coeffc = NULL,
-          *edc = NULL;
-   
-   double ctrl[57] = {0};
-   double fei[3] = {0},
-         *xmodal = NULL,
-          timepar[5] = {0},
-          alpha[2] = {0},
-          ttime,
-          qaold[2] = {0},
-          physcon[14] = {0};
-   double totalCalculixTime = 0.0; //
+   /****************************** double* 类型 *****************************/
+   co //3 * nk_
+   xboun //nboun_
+   coefmpc //memmpc_
+   xforc //nforc_
+   clearini //3 * 9 * ifacecount
+   xload //2 * nload_
+   xbounold //nboun_
+   xforcold //nforc_
+   randomval //2 * nk_
+   vold //mt *nk_
+   sti //6 * mi[0] * ne
+   xloadold //2 * nload_
+   xnor //36 * ne1d + 24 * ne2d
+   reorder //nboun
+   dcs //npt_
+   thickn //2 * nk_
+   thicke //mi[2] * nkon_
+   offset //2 * ne_
+   elcon //(ncmat_ + 1) * ntmat_ * nmat
+   rhcon //2 * ntmat_ * nmat
+   alcon //7 * ntmat_ * nmat
+   alzero //nmat
+   t0 //nk_
+   t1 //nk_
+   prestr //6 * mi[0] * ne_
+   orab //7 * norien
+   amta //2 * namtot_
+   veold //mt *nk_
+   accold //mt *nk
+   t1old //nk_
+   eme //6 * mi[0] * ne
+   plicon //(2 * npmat_ + 1) * ntmat_ * nmat
+   pslavsurf //3 * nintpoint
+   plkcon //(2 * npmat_ + 1) * ntmat_ * nmat
+   xstate //nstate_ *mi[0] * (ne + nslavs)
+   trab //7 * ntrans
+   ener //2 * mi[0] * ne
+   shcon //4 * ntmat_ * nmat
+   cocon //7 * ntmat_ * nmat
+   cs //17 * ntie_ * maxsectors_
+   tietol //4 * ntie_
+   fmpc //nmpc_
+   prop //nprop_
+   t0g //2 * nk_
+   t1g //2 * nk_
+   xbody //7 * nbody_
+   xbodyold //7 * nbody_
+   coefmpcref //memmpc_
+   dacon //nmat
+   vel //8 * nef
+   velo //8 * nef
+   veloo //8 * nef
+   energy[5] //
+   ratiorfn //
+   dgdxglob //nobject_ * 2 * nk_
+   g0 //nobject_
+   xdesi //3 * nk_
+   coeffc //7 * nfc_
+   edc //12 * ndc_
+   ctrl[57] //
+   fei[3] //
+   xmodal //11 + nevdamp_
+   timepar[5] //
+   alpha[2] //
+   qaold[2] //
+   physcon[14] //
+   /****************************** double 类型 *****************************/
+   totalCalculiXTime //
+   ttime //
    ```
 
-2. 
+2. ccx_2.22.c结构：
+
+   ```c
+   int main(int argc, char *argv[]) {
+     FORTRAN(openfile, ());
+     NNEW(ipoinp, ITG, 2 * nentries);
+     readinput();/* 待分配的域的保守估计 */
+     /* 保存原始的输入文件读取指针 */
+     NNEW(ipoinp_sav, ITG, 2 * nentries);
+     memcpy(ipoinp_sav, ipoinp, sizeof(ITG) * 2 * nentries);
+     NNEW(inp_sav, ITG, inp_size);
+     memcpy(inp_sav, inp, sizeof(ITG) * inp_size);
+     ini_cal();/* 变量初始化 */
+     NNEW(set, char, 81 * nset_);
+     NNEW(meminset, ITG, nset_);
+     NNEW(rmeminset, ITG, nset_);
+     NNEW(iuel, ITG, 4 * nuel_);
+     FORTRAN(allocation, ());
+     SFREE(meminset);
+     SFREE(rmeminset);
+     mt = mi[1] + 1;
+     NNEW(heading, char, 66 * nheading_);
+     while (istat >= 0) {
+     /* 为了减少要传输到子程序的变量数量，最大字段大小（对于大多数字段）被复制到实际大小中*/
+       nzs[1] = nzs_;
+       if ((istep == 0) || (irstrt[0] < 0)) {
+         ne = ne_;
+         nset = nset_;
+         nalset = nalset_;
+         nmat = nmat_;
+         norien = norien_;
+         ntrans = ntrans_;
+         ntie = ntie_;
+         /* 在第一个分析步之前分配空间 */
+         /* 坐标和拓扑 */
+         NNEW(co, double, 3 * nk_);
+         NNEW(kon, ITG, nkon_);
+         NNEW(ipkon, ITG, ne_);
+         NNEW(lakon, char, 8 * ne_);
+         /* 属性卡片 */
+         if (nprop_ > 0) {
+           NNEW(ielprop, ITG, ne_);
+           for (i = 0; i < ne_; i++) ielprop[i] = -1;
+           NNEW(prop, double, nprop_);
+         }
+         /* 1D和2D单元的域 */
+         if ((ne1d != 0) || (ne2d != 0)) {
+           NNEW(iponor, ITG, 2 * nkon_);
+           for (i = 0; i < 2 * nkon_; i++) iponor[i] = -1;
+           NNEW(xnor, double, 36 * ne1d + 24 * ne2d);
+           NNEW(knor, ITG, 24 * (ne1d + ne2d) * (mi[2] + 1));
+           NNEW(thickn, double, 2 * nk_);
+           NNEW(thicke, double, mi[2] * nkon_);
+           NNEW(offset, double, 2 * ne_);
+           NNEW(iponoel, ITG, nk_);
+           NNEW(inoel, ITG, 9 * ne1d + 24 * ne2d);
+           NNEW(rig, ITG, nk_);
+           NNEW(ne2boun, ITG, 2 * nk_);
+           if (infree[2] == 0) infree[2] = 1;
+         }
+         /* SPC */
+         NNEW(nodeboun, ITG, nboun_);
+         NNEW(ndirboun, ITG, nboun_);
+         NNEW(typeboun, char, nboun_ + 1);
+         if ((istep == 0) || ((irstrt[0] < 0) && (nam_ > 0)))
+           NNEW(iamboun, ITG, nboun_);
+         NNEW(xboun, double, nboun_);
+         NNEW(ikboun, ITG, nboun_);
+         NNEW(ilboun, ITG, nboun_);
+         /* MPC */
+         NNEW(ipompc, ITG, nmpc_);
+         NNEW(nodempc, ITG, 3 * memmpc_);
+         for (i = 0; i < 3 * memmpc_; i += 3) {
+           nodempc[i + 2] = i / 3 + 2;
+         }
+         nodempc[3 * memmpc_ - 1] = 0;
+         NNEW(coefmpc, double, memmpc_);
+         NNEW(labmpc, char, 20 * nmpc_ + 1);
+         NNEW(ikmpc, ITG, nmpc_);
+         NNEW(ilmpc, ITG, nmpc_);
+         NNEW(fmpc, double, nmpc_);
+         /* 耦合，分布式 */
+         if (nfc_ > 0) {
+           NNEW(coeffc, double, 7 * nfc_);
+           NNEW(ikdc, ITG, ndc_);
+           NNEW(edc, double, 12 * ndc_);
+         }
+         /* 节点荷载 */
+         NNEW(nodeforc, ITG, 2 * nforc_);
+         NNEW(ndirforc, ITG, nforc_);
+         if ((istep == 0) || ((irstrt[0] < 0) && (nam_ > 0)))
+           NNEW(iamforc, ITG, nforc_);
+         NNEW(idefforc, ITG, nforc_);
+         NNEW(xforc, double, nforc_);
+         NNEW(ikforc, ITG, nforc_);
+         NNEW(ilforc, ITG, nforc_);
+         /* 分布面荷载 */
+         NNEW(nelemload, ITG, 2 * nload_);
+         if ((istep == 0) || ((irstrt[0] < 0) && (nam_ > 0)))
+           NNEW(iamload, ITG, 2 * nload_);
+         NNEW(idefload, ITG, nload_);
+         NNEW(sideload, char, 20 * nload_);
+         NNEW(xload, double, 2 * nload_);
+         /* 分布体积荷载 */
+         NNEW(cbody, char, 81 * nbody_);
+         NNEW(idefbody, ITG, nbody_);
+         NNEW(ibody, ITG, 3 * nbody_);
+         NNEW(xbody, double, 7 * nbody_);
+         NNEW(xbodyold, double, 7 * nbody_);
+         /* 输出 */
+         NNEW(prlab, char, 6 * nprint_);
+         NNEW(prset, char, 81 * nprint_);
+         /* set */
+         RENEW(set, char, 81 * nset);
+         NNEW(istartset, ITG, nset);
+         DMEMSET(istartset, 0, nset, 1);
+         NNEW(iendset, ITG, nset);
+         NNEW(ialset, ITG, nalset);
+         /* （超）弹性常数 */
+         NNEW(elcon, double, (ncmat_ + 1) * ntmat_ * nmat);
+         NNEW(nelcon, ITG, 2 * nmat);
+         /* 密度 */
+         NNEW(rhcon, double, 2 * ntmat_ * nmat);
+         NNEW(nrhcon, ITG, nmat);
+         /* 阻尼 */
+         if (ndamp > 0) {
+           NNEW(dacon, double, nmat);
+         }
+         /* 比热 */
+         NNEW(shcon, double, 4 * ntmat_ * nmat);
+         NNEW(nshcon, ITG, nmat);
+         /* 热膨胀系数 */
+         NNEW(alcon, double, 7 * ntmat_ * nmat);
+         NNEW(nalcon, ITG, 2 * nmat);
+         NNEW(alzero, double, nmat);
+         /* 导热 */
+         NNEW(cocon, double, 7 * ntmat_ * nmat);
+         NNEW(ncocon, ITG, 2 * nmat);
+         /* 各向，运动同性系数 */
+         if (npmat_ > 0) {
+           NNEW(plicon, double, (2 * npmat_ + 1) * ntmat_ * nmat);
+           NNEW(nplicon, ITG, (ntmat_ + 1) * nmat);
+           NNEW(plkcon, double, (2 * npmat_ + 1) * ntmat_ * nmat);
+           NNEW(nplkcon, ITG, (ntmat_ + 1) * nmat);
+         }
+         /* 线性动力属性 */
+         NNEW(xmodal, double, 11 + nevdamp_);
+         xmodal[10] = nevdamp_ + 0.5;
+         /* 内部状态变量 (重启动计算需要nslavs) */
+         if (mortar != 1) {
+           NNEW(xstate, double, nstate_ *mi[0] * (ne + nslavs));
+           nxstate = nstate_ * mi[0] * (ne + nslavs);
+         } else if (mortar == 1) {
+           NNEW(xstate, double, nstate_ *mi[0] * (ne + nintpoint));
+           nxstate = nstate_ * mi[0] * (ne + nintpoint);
+         }
+         /* 材料方向 */
+         if ((istep == 0) || ((irstrt[0] < 0) && (norien > 0))) {
+           NNEW(orname, char, 80 * norien);
+           NNEW(orab, double, 7 * norien);
+           NNEW(ielorien, ITG, mi[2] * ne_);
+         }
+         /* 坐标变换 */
+         if ((istep == 0) || ((irstrt[0] < 0) && (ntrans > 0))) {
+           NNEW(trab, double, 7 * ntrans);
+           NNEW(inotr, ITG, 2 * nk_);
+         }
+         /* 幅值定义 */
+         if ((istep == 0) || ((irstrt[0] < 0) && (nam_ > 0))) {
+           NNEW(amname, char, 80 * nam_);
+           NNEW(amta, double, 2 * namtot_);
+           NNEW(namta, ITG, 3 * nam_);
+         }
+         if ((istep == 0) || ((irstrt[0] < 0) && (ithermal[0] > 0))) {
+           NNEW(t0, double, nk_);
+           NNEW(t1, double, nk_);
+           if ((ne1d != 0) || (ne2d != 0) || (nuel_ != 0)) {
+             NNEW(t0g, double, 2 * nk_);
+             NNEW(t1g, double, 2 * nk_);
+           }
+         }
+         /* 下一行中的数字不是1.2357111317->指向用户输入；相反，它是一个通用的非零初始化 */
+         if (istep == 0) {
+           DMEMSET(t0, 0, nk_, 1.2357111319);
+           DMEMSET(t1, 0, nk_, 1.2357111319);
+         }
+         if ((istep == 0) || ((irstrt[0] < 0) && (ithermal[0] > 0) && (nam_ > 0)))
+           NNEW(iamt1, ITG, nk_);
+         if ((istep == 0) || ((irstrt[0] < 0) && (iprestr > 0)))
+           NNEW(prestr, double, 6 * mi[0] * ne_);
+         NNEW(vold, double, mt *nk_);
+         NNEW(veold, double, mt *nk_);
+         /* CFD结果 */
+         NNEW(vel, double, 8 * nef);
+         NNEW(velo, double, 8 * nef);
+         NNEW(veloo, double, 8 * nef);
+         NNEW(ielmat, ITG, mi[2] * ne_);
+         NNEW(matname, char, 80 * nmat);
+         NNEW(filab, char, 87 * nlabel);
+         /* tied约束 */
+         if (ntie_ > 0) {
+           NNEW(tieset, char, 243 * ntie_);
+           NNEW(tietol, double, 4 * ntie_);
+           NNEW(cs, double, 17 * ntie_ * maxsectors_);
+         }
+         /* 灵敏度分析中的目标 */
+         if (nobject_ > 0) {
+           NNEW(nodedesi, ITG, nk_);
+           NNEW(dgdxglob, double, nobject_ * 2 * nk_);
+           NNEW(g0, double, nobject_);
+           NNEW(xdesi, double, 3 * nk_);
+           NNEW(objectset, char, 405 * nobject_);
+           for (i = 0; i < 405 * nobject_; i++) {
+             objectset[i] = ' ';
+           }
+           NNEW(coini, double, 3 * nk_);
+         }
+         /* 循环对称分析中的临时域 */
+         if ((ncs_ > 0) || (npt_ > 0)) {
+           if (2 * npt_ > 24 * ncs_) {
+             NNEW(ics, ITG, 2 * npt_);
+           } else {
+             NNEW(ics, ITG, 24 * ncs_);
+           }
+           if (npt_ > 30 * ncs_) {
+             NNEW(dcs, double, npt_);
+           } else {
+             NNEW(dcs, double, 30 * ncs_);
+           }
+         }
+         /* slave面 */
+         NNEW(islavsurf, ITG, 2 * ifacecount + 2);
+         /* 鲁棒性设计分析 */
+         if (irobustdesign[0] > 0) {
+           NNEW(irandomtype, ITG, nk_);
+           NNEW(randomval, double, 2 * nk_);
+         }
+       } else {
+         /* 为后续分析步进行分配和重分配 */
+         if ((nmethod != 4) && (nmethod != 5) && (nmethod != 8) &&
+             (nmethod != 9) && ((abs(nmethod) != 1) || (iperturb[0] < 2))) {
+           NNEW(veold, double, mt *nk_);
+         } else {
+           RENEW(veold, double, mt *nk_);
+           DMEMSET(veold, mt * nk, mt * nk_, 0.);
+         }
+         RENEW(vold, double, mt *nk_);
+         DMEMSET(vold, mt * nk, mt * nk_, 0.);
+         RENEW(nodeboun, ITG, nboun_);
+         RENEW(ndirboun, ITG, nboun_);
+         RENEW(typeboun, char, nboun_ + 1);
+         RENEW(xboun, double, nboun_);
+         RENEW(ikboun, ITG, nboun_);
+         RENEW(ilboun, ITG, nboun_);
+         RENEW(nodeforc, ITG, 2 * nforc_);
+         RENEW(ndirforc, ITG, nforc_);
+         NNEW(idefforc, ITG, nforc_);
+         RENEW(xforc, double, nforc_);
+         RENEW(ikforc, ITG, nforc_);
+         RENEW(ilforc, ITG, nforc_);
+         RENEW(nelemload, ITG, 2 * nload_);
+         NNEW(idefload, ITG, nload_);
+         RENEW(sideload, char, 20 * nload_);
+         RENEW(xload, double, 2 * nload_);
+         RENEW(cbody, char, 81 * nbody_);
+         NNEW(idefbody, ITG, nbody_);
+         RENEW(ibody, ITG, 3 * nbody_);
+         RENEW(xbody, double, 7 * nbody_);
+         RENEW(xbodyold, double, 7 * nbody_);
+         for (i = 7 * nbodyold; i < 7 * nbody_; i++) xbodyold[i] = 0;
+         if (nam > 0) {
+           RENEW(iamforc, ITG, nforc_);
+           RENEW(iamload, ITG, 2 * nload_);
+           RENEW(iamboun, ITG, nboun_);
+           RENEW(amname, char, 80 * nam_);
+           RENEW(amta, double, 2 * namtot_);
+           RENEW(namta, ITG, 3 * nam_);
+         }
+         RENEW(ipompc, ITG, nmpc_);
+         RENEW(labmpc, char, 20 * nmpc_ + 1);
+         RENEW(ikmpc, ITG, nmpc_);
+         RENEW(ilmpc, ITG, nmpc_);
+         RENEW(fmpc, double, nmpc_);
+         if (ntrans > 0) {
+           RENEW(inotr, ITG, 2 * nk_);
+           DMEMSET(inotr, 2 * nk, 2 * nk_, 0);
+         }
+         RENEW(co, double, 3 * nk_);
+         DMEMSET(co, 3 * nk, 3 * nk_, 0.);
+         if (ithermal[0] != 0) {
+           RENEW(t0, double, nk_);
+           DMEMSET(t0, nk, nk_, 0.);
+           RENEW(t1, double, nk_);
+           DMEMSET(t1, nk, nk_, 0.);
+           if ((ne1d != 0) || (ne2d != 0) || (nuel_ != 0)) {
+             RENEW(t0g, double, 2 * nk_);
+             DMEMSET(t0g, 2 * nk, 2 * nk_, 0.);
+             RENEW(t1g, double, 2 * nk_);
+             DMEMSET(t1g, 2 * nk, 2 * nk_, 0.);
+           }
+           if (nam > 0) {
+             RENEW(iamt1, ITG, nk_);
+           }
+         }
+       }
+       /* 分配重启动文件中的域 */
+       if (irstrt[0] < 0) {
+         NNEW(nodebounold, ITG, nboun_);
+         NNEW(ndirbounold, ITG, nboun_);
+         NNEW(xbounold, double, nboun_);
+         NNEW(xforcold, double, nforc_);
+         NNEW(xloadold, double, 2 * nload_);
+         if (ithermal[0] != 0) NNEW(t1old, double, nk_);
+         NNEW(sti, double, 6 * mi[0] * ne);
+         NNEW(eme, double, 6 * mi[0] * ne);
+         if (nener == 1) NNEW(ener, double, 2 * mi[0] * ne);
+         if (mcs > ntie_) RENEW(cs, double, 17 * mcs);
+         if (mortar == 1) {
+           NNEW(pslavsurf, double, 3 * nintpoint);
+           NNEW(clearini, double, 3 * 9 * ifacecount);
+         }
+       }
+       nenerold = nener;
+       nkold = nk;
+       /* 打开eig文件，检查循环对称 */
+       strcpy2(fneig, jobnamec, 132);
+       strcat(fneig, ".eig");
+       cyclicsymmetry = 0;
+       if ((f1 = fopen(fneig, "rb")) != NULL) {
+         if (fread(&cyclicsymmetry, sizeof(ITG), 1, f1) != 1) {
+           printf(
+               " *ERROR reading the information whether cyclic symmetry is "
+               "involved in the eigenvalue file");
+           exit(0);
+         }
+         fclose(f1);
+       }
+       nmpcold = nmpc;
+       /* 读取输入文件 */
+       FORTRAN(calinput, ());
+       SFREE(idefforc);
+       SFREE(idefload);
+       SFREE(idefbody);
+       if (istat < 0) break;
+       /* 将体积力赋予给单元 */
+       if (nbody > 0) {
+         ifreebody = ne + 1;
+         NNEW(ipobody, ITG, 2 * ifreebody * nbody);
+         for (k = 1; k <= nbody; k++) {
+           FORTRAN(bodyforce, ());
+           RENEW(ipobody, ITG, 2 * (ne + ifreebody));
+         }
+         RENEW(ipobody, ITG, 2 * (ifreebody - 1));
+       }
+       if (irefineloop == 1) {
+         /* 在上一分析步中，网格进行了细化，新的网格需要被读取 */
+         readnewmesh();
+       }
+       nload0 = nload;
+       if (iheading == 0) {
+         writeheading(jobnamec, heading, &nheading_);
+         iheading = 1;
+       }
+       if ((abs(nmethod) != 1) || (iperturb[0] < 2)) icascade = 0;
+       //    FORTRAN(writeboun,(nodeboun,ndirboun,xboun,typeboun,&nboun));
+       if (istep == 1) {
+         SFREE(iuel);
+         /* tied 接触约束，生成合适的MPC */
+         tiedcontact();
+         /* 在第一分析步中重新分配空间 */
+         /* 分配和初始化指向前一个分析步中的域 */
+         RENEW(vold, double, mt *nk);
+         NNEW(sti, double, 6 * mi[0] * ne);
+         /* 应变 */
+         NNEW(eme, double, 6 * mi[0] * ne);
+         /* 残余应力/应变 */
+         if (iprestr == 1) {
+           RENEW(prestr, double, 6 * mi[0] * ne);
+           for (i = 0; i < ne; i++) {
+             for (j = 0; j < mi[0]; j++) {
+               for (k = 0; k < 6; k++) {
+                 sti[6 * mi[0] * i + 6 * j + k] =
+                     prestr[6 * mi[0] * i + 6 * j + k];
+               }
+             }
+           }
+         } else if (iprestr == 2) {
+           RENEW(prestr, double, 6 * mi[0] * ne);
+           for (i = 0; i < ne; i++) {
+             for (j = 0; j < mi[0]; j++) {
+               for (k = 0; k < 6; k++) {
+                 eme[6 * mi[0] * i + 6 * j + k] =
+                     prestr[6 * mi[0] * i + 6 * j + k];
+               }
+             }
+           }
+         } else {
+           SFREE(prestr);
+         }
+         NNEW(nodebounold, ITG, nboun);
+         NNEW(ndirbounold, ITG, nboun);
+         NNEW(xbounold, double, nboun);
+         NNEW(xforcold, double, nforc);
+         NNEW(xloadold, double, 2 * nload);
+         /* 初始温度，存储在old边界条件 */
+         if (ithermal[0] > 1) {
+           for (i = 0; i < nboun; i++) {
+             if (strcmp1(&typeboun[i], "F") == 0) continue;
+             if (ndirboun[i] == 0) {
+               xbounold[i] = vold[mt * (nodeboun[i] - 1)];
+             }
+           }
+         }
+         /* 初始温度，存储在old温度场中 */
+         if (ithermal[0] != 0) {
+           NNEW(t1old, double, nk);
+           for (i = 0; i < nk; i++) t1old[i] = t0[i];
+         }
+         /* 单元定义 */
+         RENEW(kon, ITG, nkon);
+         RENEW(ipkon, ITG, ne);
+         RENEW(lakon, char, 8 * ne);
+         /* 属性卡片 */
+         if (nprop_ > 0) {
+           RENEW(ielprop, ITG, ne);
+           RENEW(prop, double, nprop);
+         } else {
+           SFREE(ielprop);
+           SFREE(prop);
+         }
+         /* 耦合，分布 */
+         if (nfc > 0) {
+           RENEW(coeffc, double, 7 * nfc);
+           RENEW(ikdc, ITG, ndc);
+           RENEW(edc, double, 12 * ndc);
+         } else {
+           SFREE(coeffc);
+           SFREE(ikdc);
+           SFREE(edc);
+         }
+         /* 1D和2D单元的域 */
+         if ((ne1d != 0) || (ne2d != 0)) {
+           RENEW(iponor, ITG, 2 * nkon);
+           RENEW(xnor, double, infree[0]);
+           RENEW(knor, ITG, infree[1]);
+           SFREE(thickn);
+           RENEW(thicke, double, mi[2] * nkon);
+           RENEW(offset, double, 2 * ne);
+           RENEW(inoel, ITG, 3 * (infree[2] - 1));
+           RENEW(iponoel, ITG, infree[3]);
+           RENEW(rig, ITG, infree[3]);
+           RENEW(ne2boun, ITG, 2 * infree[3]);
+         }
+         /* set定义 */
+         RENEW(set, char, 81 * nset);
+         RENEW(istartset, ITG, nset);
+         RENEW(iendset, ITG, nset);
+         RENEW(ialset, ITG, nalset);
+         /* 材料属性 */
+         RENEW(elcon, double, (ncmat_ + 1) * ntmat_ * nmat);
+         RENEW(nelcon, ITG, 2 * nmat);
+         RENEW(rhcon, double, 2 * ntmat_ * nmat);
+         RENEW(nrhcon, ITG, nmat);
+         if (ndamp > 0) {
+           RENEW(dacon, double, nmat);
+         }
+         RENEW(shcon, double, 4 * ntmat_ * nmat);
+         RENEW(nshcon, ITG, nmat);
+         RENEW(cocon, double, 7 * ntmat_ * nmat);
+         RENEW(ncocon, ITG, 2 * nmat);
+         RENEW(alcon, double, 7 * ntmat_ * nmat);
+         RENEW(nalcon, ITG, 2 * nmat);
+         RENEW(alzero, double, nmat);
+         RENEW(matname, char, 80 * nmat);
+         RENEW(ielmat, ITG, mi[2] * ne);
+         /* 为状态变量分配空间 */
+         if (mortar != 1) {
+           RENEW(xstate, double, nstate_ *mi[0] * (ne + nslavs));
+           for (i = nxstate; i < nstate_ * mi[0] * (ne + nslavs); i++) {
+             xstate[i] = 0.;
+           }
+         } else if (mortar == 1) {
+           RENEW(xstate, double, nstate_ *mi[0] * (ne + nintpoint));
+           for (i = nxstate; i < nstate_ * mi[0] * (ne + nintpoint); i++) {
+             xstate[i] = 0.;
+           }
+         }
+         /* 塑性材料和非线性弹簧的下一个声明 */
+         if (npmat_ > 0) {
+           RENEW(plicon, double, (2 * npmat_ + 1) * ntmat_ * nmat);
+           RENEW(nplicon, ITG, (ntmat_ + 1) * nmat);
+           RENEW(plkcon, double, (2 * npmat_ + 1) * ntmat_ * nmat);
+           RENEW(nplkcon, ITG, (ntmat_ + 1) * nmat);
+         }
+         /* 材料方向 */
+         if (norien > 0) {
+           RENEW(orname, char, 80 * norien);
+           RENEW(ielorien, ITG, mi[2] * ne);
+           RENEW(orab, double, 7 * norien);
+         } else {
+           SFREE(orname);
+           SFREE(ielorien);
+           SFREE(orab);
+         }
+         /* 幅值定义 */
+         if (nam > 0) {
+           RENEW(amname, char, 80 * nam);
+           RENEW(namta, ITG, 3 * nam);
+           RENEW(amta, double, 2 * namta[3 * nam - 2]);
+         } else {
+           SFREE(amname);
+           SFREE(amta);
+           SFREE(namta);
+           SFREE(iamforc);
+           SFREE(iamload);
+           SFREE(iamboun);
+         }
+         if (ntrans > 0) {
+           RENEW(trab, double, 7 * ntrans);
+         } else {
+           SFREE(trab);
+           SFREE(inotr);
+         }
+         if (ithermal[0] == 0) {
+           SFREE(t0);
+           SFREE(t1);
+           if ((ne1d != 0) || (ne2d != 0) || (nuel_ != 0)) {
+             SFREE(t0g);
+             SFREE(t1g);
+           }
+         }
+         if ((ithermal[0] == 0) || (nam <= 0)) {
+           SFREE(iamt1);
+         }
+         if (ncs_ > 0) {
+           RENEW(ics, ITG, ncs_);
+         } else if (npt_ > 0) {
+           SFREE(ics);
+         }
+         if ((ncs_ > 0) || (npt_ > 0)) {
+           SFREE(dcs);
+         }
+         if (mcs > 0) {
+           RENEW(cs, double, 17 * mcs);
+         } else {
+           SFREE(cs);
+         }
+         /* 检查设计变量 */
+         for (i = 0; i < ntie; i++) {
+           if (strcmp1(&tieset[i * 243 + 80], "D") == 0) {
+             if (strcmp1(&tieset[i * 243], "COORDINATE") == 0) {
+               icoordinate = 1;
+             }
+           }
+         }
+       } else {
+         /* 在>1的分析步中重新分配空间 */
+         RENEW(vold, double, mt *nk);
+         /* 如果在当前分析步中更改了SPC边界条件，则必须将其与上一分析中的边界条件重新匹配。删除的SPC边界条件将不再出现（这与力和载荷不同，在力和载荷中，删除的力或载荷只需重置为零即可；删除的SPC约束不再有数值，而非设置为零。 */
+         NNEW(reorder, double, nboun);
+         NNEW(nreorder, ITG, nboun);
+         if (nbounold < nboun) {
+           RENEW(xbounold, double, nboun);
+           RENEW(nodebounold, ITG, nboun);
+           RENEW(ndirbounold, ITG, nboun);
+         }
+         FORTRAN(spcmatch, ());
+         RENEW(xbounold, double, nboun);
+         RENEW(nodebounold, ITG, nboun);
+         RENEW(ndirbounold, ITG, nboun);
+         SFREE(reorder);
+         SFREE(nreorder);
+         /* 对于本分析步中的附加力或载荷，初始化前一分析步的力和载荷场中的相应位置 */
+         RENEW(xforcold, double, nforc);
+         for (i = nforcold; i < nforc; i++) xforcold[i] = 0;
+         RENEW(xloadold, double, 2 * nload);
+         for (i = 2 * nloadold; i < 2 * nload; i++) xloadold[i] = 0;
+         if (ithermal[0] != 0) {
+           RENEW(t1old, double, nk);
+         }
+         if (nam > 0) {
+           RENEW(amname, char, 80 * nam);
+           RENEW(namta, ITG, 3 * nam);
+           RENEW(amta, double, 2 * namta[3 * nam - 2]);
+         }
+       }
+       /* 在所有(>=1)分析步中重新分配 */
+       RENEW(co, double, 3 * nk);
+       RENEW(nodeboun, ITG, nboun);
+       RENEW(ndirboun, ITG, nboun);
+       RENEW(typeboun, char, nboun + 1);
+       RENEW(xboun, double, nboun);
+       RENEW(ikboun, ITG, nboun);
+       RENEW(ilboun, ITG, nboun);
+       RENEW(nodeforc, ITG, 2 * nforc);
+       RENEW(ndirforc, ITG, nforc);
+       RENEW(xforc, double, nforc);
+       RENEW(ikforc, ITG, nforc);
+       RENEW(ilforc, ITG, nforc);
+       /* 温度载荷 */
+       if (ithermal[0] != 0) {
+         RENEW(t0, double, nk);
+         RENEW(t1, double, nk);
+         if ((ne1d != 0) || (ne2d != 0) || (nuel_ != 0)) {
+           RENEW(t0g, double, 2 * nk);
+           RENEW(t1g, double, 2 * nk);
+         }
+         if (nam > 0) {
+           RENEW(iamt1, ITG, nk);
+         }
+       }
+       RENEW(nelemload, ITG, 2 * nload);
+       RENEW(sideload, char, 20 * nload);
+       RENEW(xload, double, 2 * nload);
+       RENEW(cbody, char, 81 * nbody);
+       RENEW(ibody, ITG, 3 * nbody);
+       RENEW(xbody, double, 7 * nbody);
+       RENEW(xbodyold, double, 7 * nbody);
+       RENEW(ipompc, ITG, nmpc);
+       RENEW(labmpc, char, 20 * nmpc + 1);
+       RENEW(ikmpc, ITG, nmpc);
+       RENEW(ilmpc, ITG, nmpc);
+       RENEW(fmpc, double, nmpc);
+       /* 能量 */
+       if ((nener == 1) && (nenerold == 0)) {
+         NNEW(ener, double, 2 * mi[0] * ne);
+         if ((istep > 1) && (iperturb[0] > 1)) {
+           printf(" *ERROR in CalculiX: in nonlinear calculations\n");
+           printf("        energy output requests, if any,\n");
+           printf("        must be specified in the first step\n\n");
+           FORTRAN(stop, ());
+         }
+       }
+       /* 初始速度和加速度 */
+       if ((nmethod == 4) || (nmethod == 5) || (nmethod == 8) || (nmethod == 9) ||
+           ((abs(nmethod) == 1) && (iperturb[0] >= 2))) {
+         RENEW(veold, double, mt *nk);
+       } else {
+         SFREE(veold);
+       }
+       if ((nmethod == 4) && (iperturb[0] > 1)) {
+         NNEW(accold, double, mt *nk);
+       }
+       if (nam > 0) {
+         RENEW(iamforc, ITG, nforc);
+         RENEW(iamload, ITG, 2 * nload);
+         RENEW(iamboun, ITG, nboun);
+       }
+       /* 生成强制对流单元 */
+       if (network > 0) {
+         ne1 = ne;
+         nkon0 = nkon;
+         nload1 = nload;
+         RENEW(ipkon, ITG, ne + nload);
+         RENEW(ielmat, ITG, mi[2] * (ne + nload));
+         for (i = mi[2] * ne; i < mi[2] * (ne + nload); i++) ielmat[i] = 0;
+         if (norien > 0) {
+           RENEW(ielorien, ITG, mi[2] * (ne + nload));
+           for (i = mi[2] * ne; i < mi[2] * (ne + nload); i++) ielorien[i] = 0;
+         }
+         RENEW(lakon, char, 8 * (ne + nload));
+         RENEW(kon, ITG, nkon + 9 * nload);
+         NNEW(inodesd, ITG, nk);
+         RENEW(nelemload, ITG, 4 * nload);
+         RENEW(sideload, char, 40 * nload);
+         FORTRAN(genadvecelem, ());
+         SFREE(inodesd);
+         RENEW(ipkon, ITG, ne);
+         RENEW(lakon, char, 8 * ne);
+         RENEW(kon, ITG, nkon);
+         RENEW(sti, double, 6 * mi[0] * ne);
+         RENEW(eme, double, 6 * mi[0] * ne);
+         if (iprestr > 0) RENEW(prestr, double, 6 * mi[0] * ne);
+         if (nprop > 0) RENEW(ielprop, ITG, ne);
+         if ((ne1d != 0) || (ne2d != 0)) RENEW(offset, double, 2 * ne);
+         RENEW(nelemload, ITG, 2 * nload);
+         RENEW(sideload, char, 20 * nload);
+         RENEW(xload, double, 2 * nload);
+         RENEW(xloadold, double, 2 * nload);
+         if (nam > 0) {
+           RENEW(iamload, ITG, 2 * nload);
+           for (i = 2 * nload1; i < 2 * nload; i++) iamload[i] = 0;
+         }
+         if (nener == 1) RENEW(ener, double, 2 * mi[0] * ne);
+         /* 通过（ne-ne1）单元块向前移动接触状态变量（因为平流单元） */
+         if (mortar != 1) {
+           RENEW(xstate, double, nstate_ *mi[0] * (ne + nslavs));
+           for (i = nstate_ * mi[0] * (ne + nslavs) - 1; i >= nstate_ * mi[0] * ne;i--) {
+             xstate[i] = xstate[i - nstate_ * mi[0] * (ne - ne1)];
+           }
+         } else if (mortar == 1) {
+           RENEW(xstate, double, nstate_ *mi[0] * (ne + nintpoint));
+           for (i = nstate_ * mi[0] * (ne + nintpoint) - 1;i >= nstate_ * mi[0] * ne; i--) {
+             xstate[i] = xstate[i - nstate_ * mi[0] * (ne - ne1)];
+           }
+         }
+         if (norien > 0) RENEW(ielorien, ITG, mi[2] * ne);
+         RENEW(ielmat, ITG, mi[2] * ne);
+         for (i = mi[2] * ne1; i < mi[2] * ne; i++) ielmat[i] = 1;
+       }
+       if (ntrans > 0) {
+         RENEW(inotr, ITG, 2 * nk);
+       }
+       /* 调用用户子程序ufaceload（可能为空） */
+       if (ithermal[1] >= 2) {
+         NNEW(sideloadtemp, char, 20 * nload);
+         for (i = 0; i < nload; i++) {
+           strcpy1(&sideloadtemp[20 * i], &sideload[20 * i], 20);
+           if ((strcmp1(&sideload[20 * i], " ") == 0) &&
+               (strcmp1(&sideload[20 * i + 1], " ") != 0)) {
+             strcpy1(&sideloadtemp[20 * i], "F", 1);
+           }
+         }
+         FORTRAN(ufaceload, ());
+         SFREE(sideloadtemp);
+       }
+       /* 存储为展开的MPC，如果需要（由mpcfreeref=-1触发）
+          1) 在第一个分析步总是执行
+          2) 由用户在输入文件中更改了MPC的任何后续步骤中也执行 */
+       if (mpcfreeref == -1) {
+         if (istep > 1) {
+           SFREE(nodempcref);
+           SFREE(coefmpcref);
+           SFREE(ikmpcref);
+         }
+         memmpcref_ = memmpc_;
+         mpcfreeref = mpcfree;
+         maxlenmpcref = maxlenmpc;
+         NNEW(nodempcref, ITG, 3 * memmpc_);
+         memcpy(nodempcref, nodempc, sizeof(ITG) * 3 * memmpc_);
+         NNEW(coefmpcref, double, memmpc_);
+         memcpy(coefmpcref, coefmpc, sizeof(double) * memmpc_);
+         NNEW(ikmpcref, ITG, nmpc);
+         memcpy(ikmpcref, ikmpc, sizeof(ITG) * nmpc);
+       }
+       /* 展开MPC，只有当MPC改变时 */
+       if (((istep == 1) || (ntrans > 0) || (mpcend < 0) || (nk != nkold) ||
+            (nmpc != nmpcold)) &&
+           (icascade == 0)) {
+         /* 展开MPC */
+         printf(" Decascading the MPC's\n\n");
+         callfrommain = 1;
+         cascade();
+       }
+       /* 确定矩阵结构，改变如果MPC改变的话 */
+       if ((icascade == 0) && (nmethod < 8))
+         printf(" Determining the structure of the matrix:\n");
+       NNEW(nactdof, ITG, mt * nk);
+       NNEW(mast1, ITG, nzs[1]);
+       NNEW(irow, ITG, 1);
+       if ((mcs == 0) || (cs[1] < 0)) {
+         NNEW(icol, ITG, mt * nk);
+         NNEW(jq, ITG, mt * nk + 1);
+         NNEW(ipointer, ITG, mt * nk);
+         if ((icascade == 0) && ((nmethod < 8) || (nmethod > 10))) {
+           if ((nmethod == 11) || (nmethod == 13)) {
+             nmethodl = 2;
+           } else {
+             nmethodl = nmethod;
+           }
+           mastruct();
+         } else {
+           neq[0] = 1;
+           neq[1] = 1;
+           neq[2] = 1;
+         }
+       } else {
+         NNEW(icol, ITG, 8 * nk);
+         NNEW(jq, ITG, 8 * nk + 1);
+         NNEW(ipointer, ITG, 8 * nk);
+         if (nmethod == 13) {
+           nmethodl = 2;
+         } else {
+           nmethodl = nmethod;
+         }
+         mastructcs();
+       }
+       SFREE(ipointer);
+       SFREE(mast1);
+       if ((icascade == 0) && (nmethod < 8)) RENEW(irow, ITG, nzs[2]);
+       if ((nmethod <= 1) || (nmethod == 11) ||
+           ((iperturb[0] > 1) && (nmethod < 8))) {
+         if (iperturb[0] < 2) {
+           mpcinfo[0] = memmpc_;
+           mpcinfo[1] = mpcfree;
+           mpcinfo[2] = icascade;
+           mpcinfo[3] = maxlenmpc;
+           if (icascade != 0) {
+             printf(" *ERROR in CalculiX: the matrix structure may");
+             printf("        change due to nonlinear equations;");
+             printf("        a purely linear calculation is not");
+             printf("        feasible; use NLGEOM on the *STEP card.");
+             FORTRAN(stop, ());
+           }
+           linstatic();
+           for (i = 0; i < 3; i++) {
+             nzsprevstep[i] = nzs[i];
+           }
+           memmpc_ = mpcinfo[0];
+           mpcfree = mpcinfo[1];
+           icascade = mpcinfo[2];
+           maxlenmpc = mpcinfo[3];
+         }
+         else {
+           mpcinfo[0] = memmpc_;
+           mpcinfo[1] = mpcfree;
+           mpcinfo[2] = icascade;
+           mpcinfo[3] = maxlenmpc;
+           nonlingeo();
+           memmpc_ = mpcinfo[0];
+           mpcfree = mpcinfo[1];
+           icascade = mpcinfo[2];
+           maxlenmpc = mpcinfo[3];
+           for (i = 0; i < 3; i++) {
+             nzsprevstep[i] = nzs[i];
+           }
+         }
+       } else if ((nmethod == 2) || (nmethod == 13)) {
+         if ((mcs == 0) || (cs[1] < 0)) {
+           mpcinfo[0] = memmpc_;
+           mpcinfo[1] = mpcfree;
+           mpcinfo[2] = icascade;
+           mpcinfo[3] = maxlenmpc;
+           arpack();
+           memmpc_ = mpcinfo[0];
+           mpcfree = mpcinfo[1];
+           icascade = mpcinfo[2];
+           maxlenmpc = mpcinfo[3];
+           for (i = 0; i < 3; i++) {
+             nzsprevstep[i] = nzs[i];
+           }
+         } else {
+           mpcinfo[0] = memmpc_;
+           mpcinfo[1] = mpcfree;
+           mpcinfo[2] = icascade;
+           mpcinfo[3] = maxlenmpc;
+           arpackcs();
+           memmpc_ = mpcinfo[0];
+           mpcfree = mpcinfo[1];
+           icascade = mpcinfo[2];
+           maxlenmpc = mpcinfo[3];
+           for (i = 0; i < 3; i++) {
+             nzsprevstep[i] = nzs[i];
+           }
+         }
+       } else if (nmethod == 3) {
+         arpackbu();
+       } else if (nmethod == 4) {
+         if ((ne1d != 0) || (ne2d != 0)) {
+           printf(" *WARNING: 1-D or 2-D elements may cause problems in modal dynamic calculations\n");
+           printf("ensure that point loads defined in a *MODAL DYNAMIC step\n");
+           printf("and applied to nodes belonging to 1-D or 2-D elements have been\n");
+           printf("applied to the same nodes in the preceding FREQUENCY step with\n");
+           printf("magnitude zero; look at example shellf.inp for a guideline.\n\n");
+         }
+         printf("Composing the dynamic response from the eigenmodes\n\n");
+         dyna();
+       } else if (nmethod == 5) {
+         if ((ne1d != 0) || (ne2d != 0)) {
+           printf("*WARNING: 1-D or 2-D elements may cause problems in steady state calculations\n");
+           printf("ensure that point loads defined in a *STEADY STATE DYNAMICS step\n");
+           printf("and applied to nodes belonging to 1-D or 2-D elements have been\n");
+           printf("applied to the same nodes in the preceding FREQUENCY step with\n");
+           printf("magnitude zero; look at example shellf.inp for a guideline.\n\n");
+         }
+         printf("Composing the steady state response from the eigenmodes\n\n");
+         steadystate();
+       } else if ((nmethod == 6) || (nmethod == 7)) {
+         printf(" Composing the complex eigenmodes from the real eigenmodes\n\n");
+         complexfreq();
+       } else if ((nmethod > 7) && (nmethod < 12)) {
+         mpcinfo[0] = memmpc_;
+         mpcinfo[1] = mpcfree;
+         mpcinfo[2] = icascade;
+         mpcinfo[3] = maxlenmpc;
+         electromagnetics();
+         memmpc_ = mpcinfo[0];
+         mpcfree = mpcinfo[1];
+         icascade = mpcinfo[2];
+         maxlenmpc = mpcinfo[3];
+       }
+       else if (nmethod == 12) {
+         if (icoordinate == 1) {
+           sensi_coor();
+         } else {
+           sensi_orien();
+         }
+       }
+       else if (nmethod == 14) {
+         robustdesign();
+       }
+       else if (nmethod == 15) {
+         crackpropagation();
+       }
+       else if (nmethod == 16) {
+         feasibledirection();
+       }
+       SFREE(nactdof);
+       SFREE(icol);
+       SFREE(jq);
+       SFREE(irow);
+       SFREE(ipobody);
+       /* 检查细分是否激活 */
+       //          if(irefineloop==20){
+       if (strcmp1(&filab[4089], "RM") == 0) {
+         irefineloop++;
+         if (irefineloop == 1) {
+           /* 在刚刚完成的分析步中请求细化，并创建和存储了一个细化的网格。必须使用此新网格从头开始计算 */
+           memcpy(ipoinp, ipoinp_sav, sizeof(ITG) * 2 * nentries);
+           memcpy(inp, inp_sav, sizeof(ITG) * inp_size);
+           /* 释放域 */
+           dealloc_cal();
+           /* 关闭和重新打开输出文件 */
+           FORTRAN(openfile, ());
+           /* 变量初始化 */
+           ini_cal();
+           NNEW(set, char, 81 * nset_);
+           NNEW(meminset, ITG, nset_);
+           NNEW(rmeminset, ITG, nset_);
+           NNEW(iuel, ITG, 4 * nuel_);
+           FORTRAN(allocation, ());
+           SFREE(meminset);
+           SFREE(rmeminset);
+           mt = mi[1] + 1;
+           NNEW(heading, char, 66 * nheading_);
+           continue;
+         }
+       }
+       /* 重新设置 tempuserflag */
+       itempuser[0] = 0;
+       /* 删除摄动荷载和温度 */
+       if ((iperturb[0] == 1) && (nmethod == 3)) {
+         nforc = 0;
+         nload = 0;
+         nbody = 0;
+         if (ithermal[0] == 1) {
+           for (k = 0; k < nk; ++k) {
+             t1[k] = t0[k];
+           }
+         }
+       } else {
+         nbounold = nboun;
+         for (i = 0; i < nboun; i++) {
+           nodebounold[i] = nodeboun[i];
+           ndirbounold[i] = ndirboun[i];
+         }
+         nforcold = nforc;
+         nloadold = nload;
+         nbodyold = nbody;
+   /* 重新设置幅值为none，除非事件类型为total time */
+         if (nam > 0) {
+           for (i = 0; i < nboun; i++) {
+             if (iamboun[i] > 0) {
+               if (namta[3 * iamboun[i] - 1] > 0) {
+                 iamboun[i] = 0;
+                 xboun[i] = xbounold[i];
+               }
+             }
+           }
+           for (i = 0; i < nforc; i++) {
+             if (iamforc[i] > 0) {
+               if (namta[3 * iamforc[i] - 1] > 0) {
+                 iamforc[i] = 0;
+                 xforc[i] = xforcold[i];
+               }
+             }
+           }
+           for (i = 0; i < 2 * nload; i++) {
+             if (iamload[i] > 0) {
+               if (namta[3 * iamload[i] - 1] > 0) {
+                 iamload[i] = 0;
+                 xload[i] = xloadold[i];
+               }
+             }
+           }
+           for (i = 1; i < 3 * nbody; i = i + 3) {
+             if (ibody[i] > 0) {
+               if (namta[3 * ibody[i] - 1] > 0) {
+                 ibody[i] = 0;
+                 xbody[7 * (i - 1) / 3] = xbodyold[7 * (i - 1) / 3];
+               }
+             }
+           }
+           if (ithermal[0] == 1) {
+             if (iamt1[i] > 0) {
+               if (namta[3 * iamt1[i] - 1] > 0) {
+                 iamt1[i] = 0;
+                 t1[i] = t1old[i];
+               }
+             }
+           }
+         }
+       }
+       /* 删除对流单元，如果有的话 */
+       if (network > 0) {
+         RENEW(ipkon, ITG, ne1);
+         RENEW(lakon, char, 8 * ne1);
+         RENEW(kon, ITG, nkon0);
+         RENEW(sti, double, 6 * mi[0] * ne1);
+         RENEW(eme, double, 6 * mi[0] * ne1);
+         if (iprestr > 0) RENEW(prestr, double, 6 * mi[0] * ne1);
+         if (nprop > 0) RENEW(ielprop, ITG, ne1);
+         if ((ne1d != 0) || (ne2d != 0)) RENEW(offset, double, 2 * ne1);
+         if (nener == 1) RENEW(ener, double, 2 * mi[0] * ne1);
+   /*移动回来接触状态变量，通过ne-ne1单元块 */
+         if (mortar != 1) {
+           for (i = nstate_ * mi[0] * ne1; i < nstate_ * mi[0] * (ne1 + nslavs);
+                i++) {
+             xstate[i] = xstate[i + nstate_ * mi[0] * (ne - ne1)];
+           }
+           RENEW(xstate, double, nstate_ *mi[0] * (ne1 + nslavs));
+         } else if (mortar == 1) {
+           for (i = nstate_ * mi[0] * ne1; i < nstate_ * mi[0] * (ne1 + nintpoint);
+                i++) {
+             xstate[i] = xstate[i + nstate_ * mi[0] * (ne - ne1)];
+           }
+           RENEW(xstate, double, nstate_ *mi[0] * (ne1 + nintpoint));
+         }
+         if (norien > 0) RENEW(ielorien, ITG, mi[2] * ne1);
+         RENEW(ielmat, ITG, mi[2] * ne1);
+         /* 重新激活原始荷载标签 */
+         for (i = nload - 1; i >= nload0; i--) {
+           if (strcmp2(&sideload[20 * i], "                    ", 20) == 0) {
+             iload = nelemload[2 * i + 1];
+             strcpy1(&sideload[20 * (iload - 1)], "F", 1);
+           }
+         }
+         ne = ne1;
+         nkon = nkon0;
+       }
+       nload = nload0;
+       if ((nmethod == 4) && (iperturb[0] > 1)) SFREE(accold);
+       if (irstrt[0] > 0) {
+         jrstrt++;
+         if (jrstrt >= irstrt[0]) {
+           jrstrt = 0;
+           FORTRAN(restartwrite, ());
+         }
+       }
+     }
+     FORTRAN(closefile, ());
+     strcpy2(fneig, jobnamec, 132);
+     strcat(fneig, ".frd");
+     if ((f1 = fopen(fneig, "ab")) == NULL) {
+       printf(" *ERROR in frd: cannot open frd file for writing...");
+       exit(0);
+     }
+     fprintf(f1, " 9999\n");
+     fclose(f1);
+     /* 释放域，这节在离开calinput之后立刻处理 */
+     SFREE(ipoinpc);
+     SFREE(inpc);
+     SFREE(inp);
+     SFREE(ipoinp);
+     SFREE(inp_sav);
+     SFREE(ipoinp_sav);
+     dealloc_cal();
+     return 0;
+   }
+   ```
+   
+3. 
+
 
 
 # test
@@ -1520,13 +2946,15 @@
    achtelc.inp
    ```
 
-2. 对应的Makefile：
+2. 对应的Makefile，保留文件中自带的几个frd文件。
 
    ```makefile
    clean:
-   	rm -f *.sta *.frd *.out *.12d *.cvg *.dat
-   	rm -f *.eig *.nam input*  abc temp* error*
+   	rm -f *.sta *.out *.12d *.cvg *.dat *.fcv
+   	rm -f *.eig *.nam input*  abc tmp* error*
    	rm -f *.equ *.rout *.net *.fbd *.stm *.mtx
+   	rm -f *.dof *.sti *.rin *.vwf *.str *.mas
+   	find . -name "*.frd" -not -name "beamfrdwrite.frd" -not -name "masterhcf.frd" -not -name "masterII.frd" -not -name "twobeam.frd" -exec rm -f {} +
    ```
 
 # BUG记录
@@ -1584,69 +3012,73 @@
 
 2. 处理所有关键字的函数应该都放到前处理文件夹中。
 
-3. 分析ccx_2.20.c的架构。
+3. 分析ccx_2.22.c的架构。
 
 4. 工具函数分为：
 
    ```shell
-   # 系统功能
-   getSystemCPUs,stop,exit,stopwithout201,closefile,openfile,getversion,u_free,u_calloc,u_realloc,u_malloc,dattime
+   #大功能分类
+   flux,crackpropagation,sensi_coor,sensi_orien,feasibledirection,robustdesign,electromagnetics,refinemesh,readnewmesh,compfluidfem,calinput,radflowload,complexfreq,arpack,arpackcs,arpackbu,steadystate,
+   #系统功能
+   getSystemCPUs,stop,exit,stopwithout201,closefile,openfile,getversion,u_free,u_calloc,u_realloc,u_malloc,dattime,
    #输入
    getnewline,inputwarning,inputerror,inputinfo,strcpy1,strcmp1,strcmp2,stoi,stof,stos,splitline,compare,strsplt,frecord,
    #输出
-   writeturdir,writemaccs,writemac,writeheading,writeevcscomplex,writeevcomplex,writeev,writeview,writestadiv,writesta,writeim,writeboun,writebv,writepf,writeevcs,writeturdircs,writeelem,writeinput,writematrix,writempc,writevector,writere,writehe,frdheader
+   writeturdir,writemaccs,writemac,writeheading,writeevcscomplex,writeevcomplex,writeev,writeview,writestadiv,writesta,writeim,writeboun,writebv,writepf,writeevcs,writeturdircs,writeelem,writeinput,writematrix,writempc,writevector,writere,writehe,frdheader,
    #查找位置插入
    cident81,nidentk,nidentll,ident2,identamta,nident2,ident,nident,
    #排序
    dsort,bsort,dsort,insertsortd,insertsorti,isortic,isortiddc,isortid,isorti,isortiiddc,isortiid,isortii,isortiii,qsorti,
    #形函数，特点是不会调用其他函数，但是会被其他函数大量调用
-   shape10tet,shape15w,shape20h_ax,shape20h,shape20h_pl,shape2l,shape3l,shape3tri,shape4q,shape4tet,shape6tri,shape6tritilde,shape6tritilde_lin,shape6w,shape7tri,shape8h,shape8hr,shape8hu,shape8humass,shape8q,shape8qtilde,shape8qtilde_lin,shape9q,evalshapefunc,dualshape3tri,dualshape4q,dualshape6tritilde,dualshape6tritilde_lin,dualshape8qtilde,dualshape8qtilde_lin,
+   shape10tet,shape15w,shape20h_ax,shape20h,shape20h_pl,shape2l,shape3l,shape3tri,shape4q,shape4tet,shape6tri,shape6tritilde,shape6tritilde_lin,shape6w,shape8h,shape8hr,shape8hu,shape8humass,shape8q,shape8qtilde,shape8qtilde_lin,evalshapefunc,dualshape3tri,dualshape4q,dualshape6tritilde,dualshape6tritilde_lin,dualshape8qtilde,dualshape8qtilde_lin,
    #几何操作
-   near2d,near3d,attach_1d,attach_2d,attach_3d,attachline,straighteq3d,straighteq3dpen,straighteq2d,approxplane,neartriangle,plane_eq,planeeq,getlocno,getnumberofnodes,eplane,
+   near2d,near3d,attach_1d,attach_2d,attach_3d,attachline,straighteq3d,straighteq3dpen,straighteq2d,approxplane,neartriangle,plane_eq,planeeq,getlocno,getnumberofnodes,eplane,deltri,sutherland_hodgman,angsum,
    #外部库中的矩阵计算
    ddot,dscal,dswap,dgesv,ddebdf,ddeabm,dgmres,dgmres1,drfftf,dlzhes,dlzit,dsptrf,dsptri,dgetrs,drffti,cubtri,daxpy,dcopy,xermsg,hybsvd,rs,cgsolver,
    #作者编写的矩阵计算，坐标变换
-   op,opas,op_corio,opnonsymt,opnonsym,transformatrix,addimd,modf,add_rect,mult,multvec,multi_rect,multi_rectv,mulmatvec_asym,machpi,matvec,insert,transpose,insertas_ws,insertas,calceigenvalues,matrixsort
-   #CFD相关
-   topocfdfem,rearrangecfd,flux,orifice,moehring,ts_calc,initialchannel,initialnet,resultnet,flowoutput,gapcon,
+   op,opas,op_corio,opnonsymt,opnonsym,transformatrix,addimd,modf,add_rect,mult,multvec,multi_rect,multi_rectv,mulmatvec_asym,machpi,matvec,insert,transpose,insertas_ws,insertas,calceigenvalues,matrixsort,mulmatvec_asymmain,
+   #CFD
+   film,topocfdfem,rearrangecfd,flux,orifice,moehring,ts_calc,initialchannel,initialnet,resultnet,flowoutput,gapcon,
    #重要的函数入口，后续会调用一堆函数，omit这些只是为了减少调用图的复杂度
-   umat_main,e_c3d_u,extrapolate_u,resultsmech_u,calinput
+   umat_main,e_c3d_u,extrapolate_u,resultsmech_u
    ```
 
-5. 还需要对循环对称，1d/2d扩展为3d进行单独处理。
+6. 还需要对循环对称，1d/2d扩展为3d进行单独处理。
 
-6. 和传热有关的都保留，例如辐射，但是和流动有关的都删除，例如孔口，渠道，CFD。
+7. 和传热有关的都保留，例如辐射，但是和流动有关的都删除，例如孔口，渠道，CFD。
 
-7. 应该将请求的结果存储在一个结构化的数据对象中，然后输出成文本或二进制文件。
+8. 应该将请求的结果存储在一个结构化的数据对象中，然后输出成文本或二进制文件。
 
-8. arpack有三个变体，arpack，arpackbu（屈曲），arpackcs（循环对称）
+9. arpack有三个变体，arpack，arpackbu（屈曲），arpackcs（循环对称）。
 
-9. 使用Egypt对源码目录处理：
+10. 所有以`_rfn`名称结尾的文件，都是refine版本，比常规版本的体积小很多。
 
-   ```shell
-   # -callees main 选项能够只显示从main调用的文件。忽略一些工具函数等。
-   egypt *.expand -callees main --omit  getSystemCPUs,stop,exit,stopwithout201,closefile,openfile,getversion,u_free,u_calloc,u_realloc,u_malloc,dattime,getnewline,inputwarning,inputerror,inputinfo,strcpy1,strcmp1,strcmp2,stoi,stof,stos,splitline,compare,strsplt,writeturdir,writemaccs,writemac,writeheading,writeevcscomplex,writeevcomplex,writeev,writeview,writestadiv,writesta,writeim,writeboun,writebv,writepf,writeevcs,writeturdircs,writeelem,writeinput,writematrix,writempc,writevector,writere,writehe,frdheader,cident81,nidentk,nidentll,ident2,identamta,nident2,ident,nident,dsort,bsort,dsort,insertsortd,insertsorti,isortic,isortiddc,isortid,isorti,isortiiddc,isortiid,isortii,isortiii,qsorti,shape10tet,shape15w,shape20h_ax,shape20h,shape20h_pl,shape2l,shape3l,shape3tri,shape4q,shape4tet,shape6tri,shape6tritilde,shape6tritilde_lin,shape6w,shape7tri,shape8h,shape8hr,shape8hu,shape8humass,shape8q,shape8qtilde,shape8qtilde_lin,shape9q,evalshapefunc,dualshape3tri,dualshape4q,dualshape6tritilde,dualshape6tritilde_lin,dualshape8qtilde,dualshape8qtilde_lin,near2d,near3d,attach_1d,attach_2d,attach_3d,attachline,straighteq3d,straighteq3dpen,straighteq2d,approxplane,neartriangle,plane_eq,planeeq,getlocno,getnumberofnodes,eplane,ddot,dscal,dswap,dgesv,ddebdf,ddeabm,dgmres,dgmres1,drfftf,dlzhes,dlzit,dsptrf,dsptri,dgetrs,drffti,cubtri,daxpy,dcopy,xermsg,hybsvd,rs,cgsolver,op,opas,op_corio,opnonsymt,opnonsym,transformatrix,addimd,modf,add_rect,mult,multvec,multi_rect,multi_rectv,mulmatvec_asym,machpi,matvec,insert,transpose,insertas_ws,insertas,calceigenvalues,matrixsort,topocfdfem,rearrangecfd,flux,orifice,moehring,ts_calc,initialchannel,initialnet,resultnet,flowoutput,gapcon,umat_main,e_c3d_u,extrapolate_u,resultsmech_u,calinput | dot -Gsize=8.5,11 -Grankdir=LR -Tpdf -o callgraph.pdf
-   
-   #删除如下文件，确认为非必须文件
-   rm crackpropagation.c.245r.expand
-   rm robustdesign.c.245r.expand
-   rm refinemesh.c.245r.expand
-   rm readnewmesh.c.245r.expand
-   rm sensi_coor.c.245r.expand
-   rm sensi_orien.c.245r.expand
-   rm feasibledirection.c.245r.expand
-   rm compfluidfem.c.245r.expand
-   rm objectivemain_se.c.245r.expand
-   rm electromagnetics.c.245r.expand
-   rm objective_shapeener_dx.f90.245r.expand
-   rm printoutfluidfem.f90.245r.expand
-   rm mafillnet.f90.245r.expand
-   rm labyrinth.f90.245r.expand
-   rm film.f90.245r.expand
-   rm envtemp.f90.245r.expand
-   ```
+11. 使用Egypt对源码目录处理：
 
-10. 所有的文件：
+    ```shell
+    # -callees main 选项能够只显示从main调用的文件。忽略一些工具函数等。
+    egypt ~/CCX/CalculiX/ccx_2.22/src/*.expand ~/CCX/CalculiX/ccx_2.22/src/*/*.expand --callees main --omit flux,crackpropagation,sensi_coor,sensi_orien,feasibledirection,robustdesign,electromagnetics,refinemesh,readnewmesh,compfluidfem,calinput,radflowload,complexfreq,arpack,arpackcs,arpackbu,steadystate,getSystemCPUs,stop,exit,stopwithout201,closefile,openfile,getversion,u_free,u_calloc,u_realloc,u_malloc,dattime,getnewline,inputwarning,inputerror,inputinfo,strcpy1,strcpy2,strcmp1,strcmp2,stoi,stof,stos,splitline,compare,strsplt,frecord,writeturdir,writemaccs,writemac,writeheading,writeevcscomplex,writeevcomplex,writeev,writeview,writestadiv,writesta,writeim,writeboun,writebv,writepf,writeevcs,writeturdircs,writeelem,writeinput,writematrix,writempc,writevector,writere,writehe,frdheader,cident81,nidentk,nidentll,ident2,identamta,nident2,ident,nident,dsort,bsort,dsort,insertsortd,insertsorti,isortic,isortiddc,isortid,isorti,isortiiddc,isortiid,isortii,isortiii,qsorti,shape10tet,shape15w,shape20h_ax,shape20h,shape20h_pl,shape2l,shape3l,shape3tri,shape4q,shape4tet,shape6tri,shape6tritilde,shape6tritilde_lin,shape6w,shape8h,shape8hr,shape8hu,shape8humass,shape8q,shape8qtilde,shape8qtilde_lin,evalshapefunc,dualshape3tri,dualshape4q,dualshape6tritilde,dualshape6tritilde_lin,dualshape8qtilde,dualshape8qtilde_lin,near2d,near3d,attach_1d,attach_2d,attach_3d,attachline,straighteq3d,straighteq3dpen,straighteq2d,approxplane,neartriangle,plane_eq,planeeq,getlocno,getnumberofnodes,eplane,deltri,sutherland_hodgman,angsum,ddot,dscal,dswap,dgesv,ddebdf,ddeabm,dgmres,dgmres1,drfftf,dlzhes,dlzit,dsptrf,dsptri,dgetrs,drffti,cubtri,daxpy,dcopy,xermsg,hybsvd,rs,cgsolver,op,opas,op_corio,opnonsymt,opnonsym,transformatrix,addimd,modf,add_rect,mult,multvec,multi_rect,multi_rectv,mulmatvec_asym,machpi,matvec,insert,transpose,insertas_ws,insertas,calceigenvalues,matrixsort,mulmatvec_asymmain,film,topocfdfem,rearrangecfd,flux,orifice,moehring,ts_calc,initialchannel,initialnet,resultnet,flowoutput,gapcon | dot -Gsize=8.5,11 -Grankdir=LR -Tpdf -o ~/callgraph/callgraph.pdf
+    
+    #删除如下文件，确认为非必须文件
+    rm crackpropagation.c.245r.expand
+    rm robustdesign.c.245r.expand
+    rm refinemesh.c.245r.expand
+    rm readnewmesh.c.245r.expand
+    rm sensi_coor.c.245r.expand
+    rm sensi_orien.c.245r.expand
+    rm feasibledirection.c.245r.expand
+    rm compfluidfem.c.245r.expand
+    rm objectivemain_se.c.245r.expand
+    rm electromagnetics.c.245r.expand
+    rm objective_shapeener_dx.f90.245r.expand
+    rm printoutfluidfem.f90.245r.expand
+    rm mafillnet.f90.245r.expand
+    rm labyrinth.f90.245r.expand
+    rm film.f90.245r.expand
+    rm envtemp.f90.245r.expand
+    ```
+
+12. 所有的文件：
 
    ```shell
    absolute_relative.f90 #孔口单元
@@ -1685,7 +3117,7 @@
    applybounp.f90 #应用速度边界条件
    approxplane.f90 #计算穿过四边形边缘并平行于向量xn的平面，以及垂直于xn并穿过四边形四角点重心的平面的方程
    arpackbu.c #屈曲程序；仅适用于机械应用
-   arpack.c #调用Arnoldi包（ARPACK），在ccx_2.20.c中调用
+   arpack.c #调用Arnoldi包（ARPACK），在ccx_2.22.c中调用
    arpackcs.c #调用Arnoldi包（ARPACK）进行循环对称计算
    assigndomtonodes.f90 #将节点所属的域分配给此节点，电磁计算用到
    attach_1d.f90 #将节点附着到曲线上，曲线由最多9个节点表示。会找出曲线上距离最近的点的距离和参数坐标，还有所有节点的权重。
@@ -1762,7 +3194,7 @@
    cattri.f90 #同上
    cavityext_refine.f90 #refinemesh会调用
    cavity_refine.f90 #同上
-   ccx_2.20.c #主程序，main函数所在地
+   ccx_2.22.c #主程序，main函数所在地
    cd_bleedtapping.f90 #航空发动机二次空气系统的仿真，orifice中调用
    cd_bragg.f90 #同上
    cd_chamfer.f90 #同上
