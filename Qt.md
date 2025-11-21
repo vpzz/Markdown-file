@@ -2,17 +2,17 @@
 
 1. Qt5.12.9 使用msvc2017套件需要注意以下几项：
    1. 这里使用的是vs2022 IDE，不过下载了vs2017的平台工具集。
-   2. ![image-20221022000406117](Qt.assets/image-20221022000406117.png)
+   2. <img src="Qt.assets/image-20221022000406117.png" alt="image-20221022000406117" />
    3. 按照如下顺序 Kits→Compilers→Add→MSVC→C/C++ 手动添加编译器。
    4. 然后找到vs的配置脚本路径：D:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build。进入Qt Creator配置编译器，需要加上一个选项为-vcvars_ver=14.16。因为vcvarsall.bat默认会使用Microsoft.VCToolsVersion.default.txt文件中的版本。就是14.33，也就是vs2022的平台工具集。
-   5. ![image-20221022000739716](Qt.assets/image-20221022000739716.png)
+   5. <img src="Qt.assets/image-20221022000739716.png" alt="image-20221022000739716" />
    6. 按照上面的步骤，分别设置C和C++编译器。
    7. 虽然vs2022也会下载对应的sdk，由于vs使用的是C:\Windows\System32\vsjitdebugger.exe调试器，而qt只能使用gdb或cdb。因此需要去https://developer.microsoft.com/en-us/windows/downloads/sdk-archive/下载Windows sdk。点击右侧的sdk，用管理员权限打开，然后选择Debugging Tools for Windows安装即可。
    8. 使用winver命令查看操作系统的内部版本。
-   9. ![image-20221112122905525](Qt.assets/image-20221112122905525.png)
+   9. <img src="Qt.assets/image-20221112122905525.png" alt="image-20221112122905525" />
    10. 下载对应的winsdksetup.exe文件，打开应该是如下情况。
-   11. ![image-20221112122838782](Qt.assets/image-20221112122838782.png)
-   12. ![image-20221022001732573](Qt.assets/image-20221022001732573.png)
+   11. <img src="Qt.assets/image-20221112122838782.png" alt="image-20221112122838782" />
+   12. <img src="Qt.assets/image-20221022001732573.png" alt="image-20221022001732573" />
    13. 实际上也可以修改vs2022安装的那个Windows sdk。
    14. 重启Qt Creator，即可自动识别到cdb。
 2. 如果编译时遇到找不到shell32.lib的错误，可以先到C:\Program Files (x86)\Windows Kits\10\Lib\10.0.19041.0\um\x64目录下观察一下是否存在该文件。如果不存在的话，用管理员权限打开Visual Studio Installer，修改，勾选上Windows 通用 C 运行时和Windows通用 CRT SDK。然后安装即可。
@@ -60,7 +60,7 @@
 
 1. 该文件是接受多个参数，平台，kit版本，msvc平台工具集版本。例如：
 
-   ```
+   ```cmd
    vcvarsall.bat x64 -vcvars_ver=14.16
    ```
    
@@ -89,7 +89,7 @@
    ```
 1. 使用RC_ICONS = AppIcon.ico设置完程序图标后，需要重新执行qmake才会生效。可以先clean，再build。
 1. 如果使用shadow构建，就要检查一下源码目录是否有.ui文件对应的.h文件。如果有的话，会优先include这个，而不是通过.ui文件在构建文件夹中生成的.h文件。
-1. ![image-20221119014509132](Qt.assets/image-20221119014509132.png)
+1. <img src="Qt.assets/image-20221119014509132.png" alt="image-20221119014509132" />
 
 # 编码
 

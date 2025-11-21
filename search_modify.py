@@ -56,7 +56,7 @@ for md_file_name in files:
         # !\[.*?\]\(((.*?)/(.*?))\)
         # 同上
 
-        #  <img src="Make.assets/image-20200604012451718.png" alt="image-20200604012451718"  />
+        #  <img src="Make.assets/image-20200604012451718.png" alt="image-20200604012451718" />
         #  ![image-20200604012922240](Make.assets/image-20200604012922240.png)
         #  ![1590760102831](Python.assets/1590760102831.png)
         # 逐行进行正则匹配

@@ -13,7 +13,7 @@
 9. page content是高保真的，位置尺寸精准，颜色准确。确保在任何位置显示和打印结果都一样。
 10. 矢量图形语言由绘制指令组成，详细规定了线段起点，终点，线性，宽度，颜色等。
 11. 注意，annotation也可以包含资源，也就是渲染它所需要的字体，色彩空间等。
-12. <img src="Python处理PDF.assets/无标题.png" alt="无标题" style="zoom: 67%;" />
+12. <img src="Python处理PDF.assets/无标题.png" alt="无标题" />
 
 # 基础
 

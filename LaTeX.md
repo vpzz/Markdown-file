@@ -234,7 +234,7 @@
 
 14. 西文排版中经常会出现连字（ligatures），常见的有`ff   fi   fl   ffi   ffl`。可以在连字中间加入{}来取消。
 
-15. <img src="LaTeX.assets/fb89aba2-499c-4b04-ab86-6c028d545381.png" alt="img" style="zoom:33%;" />
+15. <img src="LaTeX.assets/fb89aba2-499c-4b04-ab86-6c028d545381.png" alt="img" />
 
 16. 点号分为两类，①句内点号：顿号、逗号、分号、冒号②句末点号：句号、问号、叹号。这些点号主要表示语言中种种停顿。标号包括破折号、括号、省略号、书名号、引号、连接号、间隔号、着重号、专名号等，主要标明词语或句子的性质和作用。需要注意的是，问号和叹号也兼属标号：就其表示句末停顿而言，是点号；就其表示句子语气而言，是标号。
 
@@ -1664,7 +1664,7 @@
        \textnormal{normal font} %默认字体  \normalfont
        ```
 
-    3. ![image-20240107164253672](LaTeX.assets/image-20240107164253672.png)
+    3. <img src="LaTeX.assets/image-20240107164253672.png" alt="image-20240107164253672" />
 
 40. 在公式中，直接使用\textbf等命令不会起效，甚至报错。LaTeX 提供了修改数学字母样式的命令，如\mathbf等。
 
@@ -1687,7 +1687,7 @@
    He likes {\LARGE large and {\small small} letters}.
    ```
 
-11. ![image-20240107164530728](LaTeX.assets/image-20240107164530728.png)
+11. <img src="LaTeX.assets/image-20240107164530728.png" alt="image-20240107164530728" />
 
 12. LaTeX还提供了一个基础的命令`\fontsize`用于设定任意大小的字号和对应的行距：
 
@@ -1763,7 +1763,7 @@
    An example of \underline{some long and underlined words.}
    ```
 
-2. ![image-20240108192109757](LaTeX.assets/image-20240108192109757.png)
+2. <img src="LaTeX.assets/image-20240108192109757.png" alt="image-20240108192109757" />
 
 3. 可以使用\emph命令将文字变成斜体以示强调，如果在已强调的文字中嵌套使用\emph，则会还原成直立体。
 
@@ -1771,7 +1771,7 @@
    Some \emph{emphasized words, including \emph{double-emphasized} words}, are shown here.
    ```
 
-4. ![image-20240108192450344](LaTeX.assets/image-20240108192450344.png)
+4. <img src="LaTeX.assets/image-20240108192450344.png" alt="image-20240108192450344" />
 
 5. 如果使用了ulem宏包，\emph命令会变为下划线，嵌套使用，则表示双下划线。
 
@@ -1796,7 +1796,7 @@
    \end{document}
    ```
 
-7. ![image-20240108193004906](LaTeX.assets/image-20240108193004906.png)
+7. <img src="LaTeX.assets/image-20240108193004906.png" alt="image-20240108193004906" />
 
 
 ## 长度
@@ -1907,7 +1907,7 @@
    This\hspace{1.5cm}is a space of 1.5 cm.
    ```
 
-3. ![image-20240109163220981](LaTeX.assets/image-20240109163220981.png)
+3. <img src="LaTeX.assets/image-20240109163220981.png" alt="image-20240109163220981" />
 
 4. 使用\hspace命令生成的水平间距如果位于一行的开头或末尾，则有可能因为断行而被舍弃。可使用`\hspace*`命令代替以得到不会因断行而消失的水平间距。
 
@@ -1918,7 +1918,7 @@
    %命令\fill相当于\stretch{1}。
    ```
 
-6. ![image-20240109163725762](LaTeX.assets/image-20240109163725762.png)
+6. <img src="LaTeX.assets/image-20240109163725762.png" alt="image-20240109163725762" />
 
 7. 在正文中用`\hspace`命令生成水平间距时，往往使用em作为单位，这样生成的间距随字号大小而变。
 
@@ -1935,7 +1935,7 @@
    Another another paragraph.
    ```
 
-10. ![image-20240109164541717](LaTeX.assets/image-20240109164541717.png)
+10. <img src="LaTeX.assets/image-20240109164541717.png" alt="image-20240109164541717" />
 
 11. \vspace命令生成的垂直间距在一页的顶端或底端可能被“吞掉”，这和\hspace一样。因此也有\vspace* 命令产生不会因断页而消失的垂直间距。\vspace也可使用\stretch设置无限延伸的垂直长度。
 
@@ -1947,7 +1947,7 @@
     Or you can use \verb|\\[12pt]| to \\[12pt] add vertical space, but it also breaks the line.
     ```
 
-13. ![image-20240109165806928](LaTeX.assets/image-20240109165806928.png)
+13. <img src="LaTeX.assets/image-20240109165806928.png" alt="image-20240109165806928" />
 
 14. word不支持同一段内的指定两行增加间距，只能统一调整该段内所有行的间距。word内一般不会手动断行。
 
@@ -2100,7 +2100,7 @@
     \renewcommand{\footrulewidth}{2pt}
     ```
 
-11. ![image-20240110210228077](LaTeX.assets/image-20240110210228077.png)
+11. <img src="LaTeX.assets/image-20240110210228077.png" alt="image-20240110210228077" />
 
 12. fancyhdr宏包还支持用\fancypagestyle为自定义的页眉页脚样式命名，或者重新定义已有的样式如plain等：
 
@@ -2150,7 +2150,7 @@
    \end{document}
    ```
 
-5. ![image-20240110224028374](LaTeX.assets/image-20240110224028374.png)
+5. <img src="LaTeX.assets/image-20240110224028374.png" alt="image-20240110224028374" />
 
 6. BIBTEX是最为流行的参考文献数据组织格式之一。它的出现让我们摆脱手写参考文献条目的麻烦。我们还可以通过参考文献样式的支持，让同一份BIBTEX数据库生成不同样式的参考文献列表。BIBTEX数据库以.bib作为扩展名，其内容是若干个文献条目，每个条目的格式为：
 
@@ -2282,11 +2282,11 @@
    {\color{blue} 蓝色}
    ```
 
-3. ![image-20240110235213018](LaTeX.assets/image-20240110235213018.png)
+3. <img src="LaTeX.assets/image-20240110235213018.png" alt="image-20240110235213018" />
 
 4. color宏包仅定义了8 种颜色名称，xcolor补充了一些，总共有19种：
 
-5. ![image-20240111002421167](LaTeX.assets/image-20240111002421167.png)
+5. <img src="LaTeX.assets/image-20240111002421167.png" alt="image-20240111002421167" />
 
 6. 还可以通过命令自定义颜色名称：
 
@@ -2317,7 +2317,7 @@
    \fcolorbox{blue}{yellow}{\textcolor{blue}{蓝色边框+文字，黄色背景}
    ```
 
-9. ![image-20240110235108980](LaTeX.assets/image-20240110235108980.png)
+9. <img src="LaTeX.assets/image-20240110235108980.png" alt="image-20240110235108980" />
 
 
 # 超链接
@@ -2414,7 +2414,7 @@
    \newcommand{\tnss}{The not so Short Introduction to \LaTeXe} %将一段话定义为一个命令。
    This is ``\tnss'' \ldots{} ``\tnss''
    ```
-2. ![image-20240111160716660](LaTeX.assets/image-20240111160716660.png)
+2. <img src="LaTeX.assets/image-20240111160716660.png" alt="image-20240111160716660" />
 3. 带参数的命令：
 
    ```latex
@@ -2425,7 +2425,7 @@
    	\item \txsit{very}
    \end{itemize}
    ```
-4. ![image-20240111161019578](LaTeX.assets/image-20240111161019578.png)
+4. <img src="LaTeX.assets/image-20240111161019578.png" alt="image-20240111161019578" />
 5. LaTeX不允许使用\newcommand定义一个与现有命令重名的命令。如果需要修改命令定义的话，应使用\renewcommand命令。它使用与命令\newcommand相同的语法。
 6. 在某些情况之下，使用\providecommand命令是一种比较理想的方案：即在命令未定义时，它相当于\newcommand；在命令已定义时，什么也不做。
 
@@ -2493,7 +2493,7 @@
    \hello{Alice} %没有可选参数，因此#1为-NoValue-
    \hello[Bob]{Alice}%
    ```
-7. ![image-20240111172617519](LaTeX.assets/image-20240111172617519.png)
+7. <img src="LaTeX.assets/image-20240111172617519.png" alt="image-20240111172617519" />
 8. \BooleanTrue和\BooleanFalse可以用`\IfBooleanTF`等命令来判断，用法和上面的类似。
 
    ```latex
@@ -2501,7 +2501,7 @@
    \hereis{banana} %没有*，因此#1为\BooleanFalse
    \hereis*{apple}
    ```
-9. ![image-20240111172825518](LaTeX.assets/image-20240111172825518.png)
+9. <img src="LaTeX.assets/image-20240111172825518.png" alt="image-20240111172825518" />
 10. 与命令不同，环境在定义时名字里面可以包含`*`，不过这个`*`不表示环境接收带`*`的格式，而只是一个符号而已：
 
     ```latex
@@ -2511,7 +2511,7 @@
     \begin{envstar}
     \end{envstar}
     ```
-11. ![image-20240111173751329](LaTeX.assets/image-20240111173751329.png)
+11. <img src="LaTeX.assets/image-20240111173751329.png" alt="image-20240111173751329" />
 12. xparse宏包也允许在命令或环境已有定义时做出相应的处理：
 
     ```

@@ -184,13 +184,7 @@
 
 58. 支持多物理场耦合，在第三本手册中，下图展示不同求解器之间交互的内容。
 
-59. ![image-20250301094456294](Abaqus.assets/image-20250301094456294.png)
-
-60. 
-
-
-
-
+59. <img src="Abaqus.assets/image-20250301094456294.png" alt="image-20250301094456294" />
 
 # 建模技巧
 
@@ -352,7 +346,7 @@
 3. ABAQUS静力分析的时间不具有真实的意义，只是用来设置载荷的加载比例和划分不同的step。一个step又可以划分为多个增量步（非线性step时），每个增量步可能需要多次迭代才收敛（取决于非线性的强弱和增量步的大小）。动态问题中，时间是具有真实物理意义的。
 4. ABAQUS会自动生成初始的initial step（长度为0），它无法设置载荷，但是可以设置边界条件。所有指定在初始step的边界条件都必须赋值为0，这是ABAQUS的要求。创建一个新的model后，唯一自动生成的就是initial step
 5. 每个step能够进行的分析类型是独立的，但有些step需要先完成特定的step后才可以解锁。后一个step的初始状态是前一个step的结束状态。
-6. <img src="Abaqus.assets/image-20200615211327823.png" alt="image-20200615211327823"  />
+6. <img src="Abaqus.assets/image-20200615211327823.png" alt="image-20200615211327823" />
 7. 每一个step包含一个分析程序。分为两大类：
    1. 一般分析步：静态，隐式动态，显式动态，传质，热传导，热-力学耦合，压电，孔隙分析。
    2. 线性摄动分析步：都是基于特征值分析，例如频率提取，稳态动力学分析，反应谱，随机响应问题，此类step不会累加到时间中，因为长度非常小，可以忽略。
@@ -368,7 +362,7 @@
 17. 也可以suppress某些分析步，这样会直接跳过该分析步。
 18. 几何非线性来自于大位移，预应力，荷载刚度，显式分析默认开启它。它的开销并不大，对于确实发生了几何非线性行为的问题，开启它会更容易收敛。
 19. 边界非线性发生在荷载或边界条件随着结构的变形而改变。分为两种①接触，极度不连续的非线性形式②外力的方向在分析过程中发生改变，例如给气球充气的压力载荷。
-20. <img src="Abaqus.assets/image-20200616104919764.png" alt="image-20200616104919764"  />
+20. <img src="Abaqus.assets/image-20200616104919764.png" alt="image-20200616104919764" />
 21. 一个step包含多个increment，一个increment可能包含多的iteration。如果在迭代规定次数达不到收敛条件，则会缩小increment，继续迭代尝试。一个attempt内会做几次iteration，如果不收敛会新增一个attempt（上一个attempt的数据没有用，完全丢弃），以更小的increment（原来的25%）进行迭代。ABAQUS通过判断力残差和位移修正是否满足要求来判断是否收敛。
 22. <img src="Abaqus.assets/image-20200616151919353.png" alt="image-20200616151919353" />
 23. 自动时间步长会监控迭代次数，如果轻易收敛（两个连续的增量都在4次迭代内收敛），则会增大increment，每次增加50%。
@@ -418,7 +412,7 @@
 56. 预设的位移或速度在边界条件中设置，而非荷载。
 57. 在边界条件中进行位移加载时。设置为0的位移和不设置约束不一样，前者表示固定位置不懂，后者表示可以自由运动。对于垂直下压的刚性面，不仅要设置下压的位移，其他方向的位移要约束住（勾选即可），否则会乱动。
 58. pressure的荷载可以施加在实体的表面，正值表示压力，和面的法线反向。
-59. <img src="Abaqus.assets/image-20241212152256464.png" alt="image-20241212152256464"  />
+59. <img src="Abaqus.assets/image-20241212152256464.png" alt="image-20241212152256464" />
 60. 金属成型中，第一步使用位移控制加载，第二步不应该是将下压轴的位移设置为0，而是deactivate位移约束，让工件自由回弹，或者释放下压轴的位移约束，保持其他轴的约束，避免工件飞走。
 61. 分析步中可以设置如果某个region完全进入塑性阶段，则停止当前分析步。在Edit step→Stop when region xxx is fully plastic。
 
@@ -480,7 +474,7 @@
 3. <img src="Abaqus.assets/image-20200616231613914.png" alt="image-20200616231613914" />
 4. 高斯积分：每个方向布置3个积分点，有6个变量（每个点的位置和权重）可以达到5次多项式的精度。坐标分别为0，8/9，$±\sqrt{\frac{3}{5}}$​（5/9）。缩减积分的每一行或列比完全积分少一个积分点，并非是将最外侧或重心的积分点删除，所有积分点要重排。
 5. 通常说的一阶单元指的是位移分布（也就是形函数）是一阶的，因而应力和应变是常量。二阶单元的位移是平方关系，应变和应力是1阶的，能量是2阶的。
-6. <img src="Abaqus.assets/image-20200616004812087.png" alt="image-20200616004812087"  />
+6. <img src="Abaqus.assets/image-20200616004812087.png" alt="image-20200616004812087" />
 7. 壳单元有三类：通用目的壳，仅适合厚壳，仅适合薄壳 。
 8. ABAQUS的某些单元除了提供标准的数学公式外，还提供了一些可选择的公式。这些单元在名称上一般表现为末尾附加字母。例如混合公式的单元C3D8H，B31H，它们将实体单元的静水压力或梁的轴力处理为一个附加的未知量，这样可以用来处理不可压缩的行为。
 9. 还有一些耦合单元，例如C3D8T的节点具有热学和力学的自由度，可以模拟热-力耦合的问题。
@@ -493,7 +487,6 @@
     1. 平面应变PE，假设出平面应变为0
     2. 平面应力PS，假设出平面应力为0
     3. 轴对称单元
-
 16. 平面应力和平面应变单元可以指定单元的厚度，默认为1。
 17. 广义平面应变单元是对平面应变单元的推广，即出平面应变随着平面的位置发生线性变化，适合厚截面的热应力分析。
 18. 二维实体单元都是三维问题的简化，必须在1-2平面内定义。且单元内节点的序号满足右手定则，否则面积为负值。
@@ -526,11 +519,10 @@
 45. 遇到以下两个问题时，才推荐使用混合单元：
     1. 所有的单元都使用不可压缩材料。
     2. 使用缩减积分的细化网格仍然会出现体积自锁时，可能会出现在应变距离塑性段还有较长距离的弹塑性材料。
-
 46. 即使使用了混合单元，一阶三角形和四面体单元仍然会在模拟完全不可压缩材料时发生过度约束，因此只推荐它们作为四边形或六面体网格的填料（占比较低）。
 47. 有时几何比较复杂，只能使用三角形或四面体网格，但是不推荐使用一阶的，因为他们计算效率低，且即使使用混合单元，仍然有体积自锁问题。二阶单元适用面较广，推荐使用。接触问题中，surface to surface接触不限制使用的单元类型。而node to surface限定使用修正modified的二阶三角形或四面体单元。
 48. ABAQUS在拓扑上只有以下12种单元，和网格划分软件沟通只需要这些即可。不过还有1维的点单元，可以用来附加质量或转动惯量。
-49. <img src="Abaqus.assets/image-20200617011220167.png" alt="image-20200617011220167"  />
+49. <img src="Abaqus.assets/image-20200617011220167.png" alt="image-20200617011220167" />
 50. 网格收敛性分析，随着网格的细化，关键变量差异变小。如下图中绿线左侧不可靠。和无关性分析类似，后者是指同样的网格密度下，不同的网格拓扑，对结果的影响不大。如果没有实验对照的情况下，这两个分析尤为重要。
 51. <img src="Abaqus.assets/image-20200617012032048.png" alt="image-20200617012032048" />
 52. 设置global seed时，使用curvature control来设定的最大偏差值（h/L，h为几何与单元之间的最大间隙，L为单元的长度）。该数值越小，直线段就越贴合曲线段，也会划分更多的段数。下方会显示一个圆大约被划分成的段数。
@@ -541,17 +533,16 @@
 57. 6面体和四边形网格的生成算法有两种：advancing front和medial axis。第二种对于圆孔较多的几何能够划分更好，因为它会隐性地对几何进行partition，但是这些不会展示给用户。但是medial axis不支持虚拟拓扑功能。
 58. 带圆孔的part建议使用sweep而非structured来划分， 这样圆孔附近的网格畸变小。
 59. mesh模块会根据指定的划分网格的方法来为不同的region显示不同的颜色。绿色表示使用结构网格，黄色表示使用扫略，粉色表示使用自由网格，橙色表示划分技术使用不正确。一些几何要经过partition成多个cell后才可以进行结构网格划分。
-60. <img src="Abaqus.assets/image-20200616004354927.png" alt="image-20200616004354927"  />
+60. <img src="Abaqus.assets/image-20200616004354927.png" alt="image-20200616004354927" />
 61. 扫掠sweep生成网格时，abaqus会自动选择来源面（可以有多个）和目标面（只能有一个）。
 62. 在Assign Mesh Control中指定划分网格的策略。
 63. 遇到圆孔，至少应该切分2次，才可以划分成结构网格。结构网格要求：
     1. cell的所有面都必须有3个以上的边，例如半圆柱的两端面只有2个边，因此需要再切分成2个1/4圆柱cell才可以划分结构网格。
     2. cell的每个点必须刚好有3个点交于其上，例如金字塔cell的顶点有4个边相连，将其竖直切分成2个四面体cell就可以划分结构网格了。
     3. 边与边的夹角应该尽可能接近90度，可以利用partition消除超过150度的角。
-
 64. 可以先划分网格，再指定网格类型，不过不建议这么做。
 65. 在网格划分中，选择不同的单元，会导致显示的区别，左边是二阶四面体单元，右边是一阶。可以看到左边的单元存在边中节点。这里的几何是一段圆弧，abaqus会将角点和边中节点连接成直线显示，而不是曲线。
-66. <img src="Abaqus.assets/image-20241212153416681.png" alt="image-20241212153416681" style="zoom:50%;" />
+66. <img src="Abaqus.assets/image-20241212153416681.png" alt="image-20241212153416681" />
 67. 网格划分完，应进行check，确保没有error，且warning的比例应低于5%。
 68. 单元的长宽比不应大于5，这容易出现在使用实体单元对薄壁结构进行离散的问题中，因为厚度方向有时需要4层。
 69. 网格质量检查主要是两个方面，单元的形状shape和尺寸size。形状检查最大最小夹角，长宽比，尺寸检查最大最小尺寸，还可以找出稳定时间长度小于某个值的单元（这对于显式分析有帮助）。
@@ -560,7 +551,7 @@
 72. Query information→mass properties可以查询单元的体积，质量，face的面积等，可以调整选择工具过滤器，来选择1D，2D，3D。
 73. Mesh模块最下边的Edit Mesh可以对节点，单元，网格进行编辑。原生网格的编辑功能比orphan网格要少，因为原生网格出问题的话，首先应该考虑几何是不是出问题了。
 74. collapse short edge功能会对网格进行搜索，高亮edge长度小于特定值的单元，由用户觉得是否塌缩，这样可以忽略一些几何细节（例如小台阶），但是能提高网格质量。同时在显式分析中，也可以提高稳定增量大小。修改单元后，需要注意，如果这里涉及到接触或tie约束，需要检查是否已经发生了穿透。collapse short edge只能用在一阶单元上，因此需要先按照一阶单元划分，collapse完成后，再指定为2阶单元。
-75. <img src="Abaqus.assets/image-20241213212735651.png" alt="image-20241213212735651" style="zoom:80%;" />
+75. <img src="Abaqus.assets/image-20241213212735651.png" alt="image-20241213212735651" />
 76. 可以将shell的section指定给实体，不过后面mesh时，单元类型就应该是实体壳单元了。这对于变厚度壳的建模很有帮助，因为壳的厚度是由几何参考得到的。实体壳单元的形状和实体单元一样，不过和壳单元不同的是，它的节点只有平动自由度。实体壳对于接触的判定比曲面壳更精确。只有2种单元：SC6R和SC8R可以使用，分别为三角形和四边形的拉伸形状。不能和hyperfoam材料一起使用，如果将其用于非常薄的壳，收敛速度较慢，应该使用传统壳。
 77. 变厚度壳的section定义不用指定厚度，在section assignment中选择从几何创建厚度即可。
 78. 实体壳也具有top和bottom面，可以使用query information→mesh stack orientation查看。和传统壳一样，不一致的堆叠方向会导致分析时出错。堆叠方向只允许由一层网格。在mesh模块种可以assign mesh stack orientation。
@@ -573,8 +564,6 @@
 85. 可以使用query information→mesh gap/intersection来侦测网格间隙和干涉。abaqus不支持几何干涉侦测，只能对划分后的网格进行侦测。
 86. Mesh菜单栏中可以将网格保存到part，也就是orphan网格。还可以将网格和几何取消关联，这样就会产生orphan，之后再对几何进行重新划分，会和原有网格重叠。可以使用query diagnostic→Unassociated geometry中高亮显示未关联的。
 87. 在划分四面体网格时，默认会将内部的网格密度设置的比表面的粗糙（Mesh control→Tet→Free→Non-standard interior element growth），这是为了减少单元的数量，因为对大部分的材料来说，最大应力位置很大可能出现在外表面。
-88. 
-89. 
 
 # 自适应网格划分
 
@@ -629,7 +618,7 @@
 
 9. 链接的窗口只能有一个，打开该功能后，勾选需要链接的窗口即可。链接的窗口可以选择要同步的选项。一般来说就同步位置和视角就行了。
 
-10. <img src="Abaqus.assets/image-20210320111520801.png" alt="image-20210320111520801"  />
+10. <img src="Abaqus.assets/image-20210320111520801.png" alt="image-20210320111520801" />
 
 11. common option 可以设置显示的透明度和是否显示网格。如果网格过于密集，可以取消显示网格，选择visible edges→Feature edge即可，这样会使得云图变亮很多。
 
@@ -683,9 +672,9 @@
 
 36. 差异比例的计算方法：(节点上各个单元外插的最大值-节点上各个单元外插的最小值)/(模型区域内最大值-模型区域内最小值)。默认的模型区域是截面性质相同的区域。还可以选择为elementset或显示群组。
 
-37. <img src="Abaqus.assets/image-20200616011552372.png" alt="image-20200616011552372"  />
+37. <img src="Abaqus.assets/image-20200616011552372.png" alt="image-20200616011552372" />
 
-38. <img src="Abaqus.assets/image-20200616012007640.png" alt="image-20200616012007640"  />
+38. <img src="Abaqus.assets/image-20200616012007640.png" alt="image-20200616012007640" />
 
 39. Query information→probe value，使用探针查看单元或节点等的数据时，可以在积分点上查看，可以在单元的中心Centroid查看，也可以是单元的节点，也可以是单元的面face。
 
@@ -732,7 +721,7 @@
 
 42. Report输出中，Element Nodal表示每个单元的节点，这个是一个二级表单的形式展示的，单元共用的节点会出现多次。Unique Nodal是全局编号，只有一级，和单元无关，不会重复。Centroid表示单元的形心，也不会重复。
 
-43. <img src="Abaqus.assets/image-20210319145101051.png" alt="image-20210319145101051"  />
+43. <img src="Abaqus.assets/image-20210319145101051.png" alt="image-20210319145101051" />
 
 44. 对于两个相邻的C3D20R单元（一共有2x2x2=8个积分点）来说，element Nodal是按照单元来组织的，2个单元，每个20个，但是其中会有重复的，相邻的face上的所有Node都有重复。而Unique Nodal是不考虑单元，只考虑这些node，不重复出现。一共有2x20-8=32个。
 
@@ -766,7 +755,7 @@
 
 59. session中可以保存的内容如下，主要是用户创建的东西，或显示的设置，可以将其保存到.xml文件，.cae文件或.odb文件。
 
-60. <img src="Abaqus.assets/image-20241218194405039.png" alt="image-20241218194405039"  />
+60. <img src="Abaqus.assets/image-20241218194405039.png" alt="image-20241218194405039" />
 
 61. 后处理中输出S11等分量时，对于壳/梁，是将张量在各自的坐标系进行分解，并非一个统一的坐标系。
 
@@ -812,11 +801,11 @@
 
 12. 注意，对于实体单元来说，其节点只有平动自由度，而coupling到ref point后，ref point是具有转动自由度的，应该视情况对ref point进行约束和加载。一般会输出参考点的力或位移的history数据，可以绘制力-位移曲线。
 
-13. <img src="Abaqus.assets/image-20200616101859947.png" alt="image-20200616101859947"  />
+13. <img src="Abaqus.assets/image-20200616101859947.png" alt="image-20200616101859947" />
 
 14. shell to solid 用在这种情况：壳体部分使用shell单元，实体部分使用solid单元。将shell的边和solid的侧面相连。
 
-15. <img src="Abaqus.assets/image-20200616102303335.png" alt="image-20200616102303335"  />
+15. <img src="Abaqus.assets/image-20200616102303335.png" alt="image-20200616102303335" />
 
 16. 模拟加载实验的支座的垫块时，可以在垫块上建立一个ref point，将对应的surface耦合到该ref point。然后把荷载和位移约束施加到refpoint上，这样可以避免应力集中。也有用Rigid body约束的，后者一般会比较刚硬，不太推荐。
 
@@ -849,7 +838,7 @@
 
 26. ABAQUS可以自动将参考点移动到所选部分的质心。如果想要施加外力或外力矩在刚体上，则不用勾选此选项。
 
-27. <img src="Abaqus.assets/image-20200616103850406.png" alt="image-20200616103850406"  />
+27. <img src="Abaqus.assets/image-20200616103850406.png" alt="image-20200616103850406" />
 
 28. 刚体的运动（例如位移控制的冲压过程）应该施加在ref point上。
 
@@ -886,7 +875,7 @@
    1. general contact，范围内包含的所有节点和单元之间都可以发生接触，计算机来考量接触行为。越来越多的新功能都是首先加入到general contact，这对用户使用非常友好。
    2. contact pair，需要逐一定义，每次只能定义两个surface之间的接触，分析范围小，搜索速度快。
 
-5. <img src="Abaqus.assets/image-20200616184730505.png" alt="image-20200616184730505"  />
+5. <img src="Abaqus.assets/image-20200616184730505.png" alt="image-20200616184730505" />
 
 6. 二者的选择取决于定义接触的难度和所需分析的效率。如果接触对难以定义，则使用general contact，如果要求分析效率高，则使用contact pair。
 
@@ -934,7 +923,7 @@
 
 23. 除了hard以外都是soft接触。法向行为可以设定接触后是否可以分离。
 
-24. <img src="Abaqus.assets/image-20200616201818598.png" alt="image-20200616201818598"  />
+24. <img src="Abaqus.assets/image-20200616201818598.png" alt="image-20200616201818598" />
 
 25. 指数形式是为了解决数值计算的收敛问题，在不到0的间隙就开始产生接触压力。
 
@@ -970,7 +959,7 @@
 
 35. 初始干涉的来源：刻意制造，例如卡扣，它在制造和建模时都是自然状态，而装配后，就会产生干涉；薄壳单元的厚度以及offset；前处理的错误；曲面离散化的结果。下图就是网格划分造成的初始干涉，可以通过增加网格密度来避免。
 
-36. <img src="Abaqus.assets/image-20241215214943205.png" alt="image-20241215214943205"  />
+36. <img src="Abaqus.assets/image-20241215214943205.png" alt="image-20241215214943205" />
 
 37. 处理方法：
 
@@ -981,7 +970,7 @@
 
 39. surface的类型影响到他是否可以用于特定的分析的master或slave中。不连续是指一个surface的存在两个face不能通过相邻face连接起来，就是不连通。三维中两个face只通过一个node连接起来也算不连续。
 
-40. <img src="Abaqus.assets/image-20241214163934488.png" alt="image-20241214163934488"  />
+40. <img src="Abaqus.assets/image-20241214163934488.png" alt="image-20241214163934488" />
 
 41. 接触公式包含三个部分：
 
@@ -991,17 +980,17 @@
 
 42. node to surface是较早发展的算法，就是将node拒止在surface之外。例如下图中，slave中的每个可能接触的node在同一时刻，都只能对应到master上的一个face，而没有对应任何slave node的master face，则可以穿透slave surface。例如下图的箭头指示的2个红色节点。因此如果slave的网格比较稀疏时，node to surface会造成严重的穿透，但是无论如何，slave节点都不会穿透master面，因此要求将网格稀疏的当作master。每个slave node都要沿着master face的法线计算它到master的距离，计算接触力时需要。
 
-43. <img src="Abaqus.assets/image-20241214183408702.png" alt="image-20241214183408702"  />
+43. <img src="Abaqus.assets/image-20241214183408702.png" alt="image-20241214183408702" />
 
 44. 每个slave节点还会计算node面积，用来将接触力转化成接触应力CPRESS，这个用来当作边界条件。
 
 45. 对于surface to surface，每个slave节点都会对应多个master face，接触通过加权平均处理。此时接触间隙通过slave face的法线，计算到对应的master face的距离。surface to surface的好处有：提高接触应力的准确性（同时接触应力更平滑），减少接触的卡顿（角点被钩住的情况），减少面穿透，降低对master或slave选择的敏感度。
 
-46. <img src="Abaqus.assets/image-20241214205931740.png" alt="image-20241214205931740"  />
+46. <img src="Abaqus.assets/image-20241214205931740.png" alt="image-20241214205931740" />
 
 47. snag，由于node to surface无法避免master节点对slave surface的穿透，因而造成节点钩住的情况。
 
-48. <img src="Abaqus.assets/image-20241214210628044.png" alt="image-20241214210628044" style="zoom: 50%;" />
+48. <img src="Abaqus.assets/image-20241214210628044.png" alt="image-20241214210628044" />
 
 49. node to surface只有在小滑移时才会考虑壳/膜的厚度，surface to surface默认都考虑，不过也可以设置不考虑exclude。
 
@@ -1009,7 +998,7 @@
 
 51. 小滑移会将一开始接触时的face延伸出去，而不去考虑后续和其他face的接触，认为始终和最初的那个face接触，有限滑移会实时更新master面的状态，默认就是有限滑移。小滑移假设会加快计算速度，适用于螺栓紧固的情况，金属冲压成型属于有限滑移，如果使用小滑移计算，则会出问题。大小的确定可以以单元的尺寸为界。通用接触不可以使用小滑移，二者都可以使用有限滑移。由于node to surface是从master face法线寻找接触间隙，因此它和滑移公式也有关系。
 
-52. <img src="Abaqus.assets/image-20241214211928036.png" alt="image-20241214211928036" style="zoom:67%;" />
+52. <img src="Abaqus.assets/image-20241214211928036.png" alt="image-20241214211928036" />
 
 53. 使用小滑移计算时，需要在节点上输出CSL_NORMALIZED，它等于CSLIPEQ/正规化距离。用来度量滑移量的大小，如果大于0.5则表示该区域不适合使用小滑移。
 
@@ -1017,11 +1006,11 @@
 
 55. Direct（拉格朗日乘子法）会修改待求解的线性方程组，λ是包含所有约束自由度的向量。优点是准确，会完全满足约束条件，缺点是会增加求解成本，增大了系数矩阵的阶数，由于接触刚度的突变会造成潜在的收敛问题。接触约束可能与MPC冲突。
 
-56. <img src="Abaqus.assets/image-20241215210912956.png" alt="image-20241215210912956" style="zoom:50%;" />
+56. <img src="Abaqus.assets/image-20241215210912956.png" alt="image-20241215210912956" />
 
 57. penalty分为线性和非线性两种，线性可以可以设置一个接触力不为0的起始间隙C0（默认为0），让真正接触之前就产生接触力。接触刚度默认是接触面下单元的刚度的10倍，可以手动调整这个值（如果倍数太大，abaqus会使用拉格朗日乘子，避免病态状况）。非线性的一开始也是线性倾斜上升，然后是二次函数。线性容易收敛，适用于稳定接触的问题。非线性初始刚度低，适用于颤动问题，末端高刚度可以降低穿透，但是会降低收敛性。
 
-58. <img src="Abaqus.assets/image-20241215212158047.png" alt="image-20241215212158047" style="zoom:50%;" />
+58. <img src="Abaqus.assets/image-20241215212158047.png" alt="image-20241215212158047" />
 
 59. penalty的优点，大幅提高收敛速度，由于没有拉格朗日乘子的额外自由度，因此方程求解成本也较低。缺点，存在微量穿透，某些情况，可能需要调整接触刚度。
 
@@ -1109,7 +1098,7 @@
 
 3. 显式方法使用中心差分来得出加速度，也就是位移的前向差分和后向差分分别得到半增量时刻的速度，然后再中心差分得到加速度。$\dot{u_i}=\frac{u_{i+1}-u_{i-1}}{2\Delta t}$，$\ddot{u_i}=\frac{u_{i+1}-2u_i+u_{i-1}}{\Delta t^2}$，将左侧公式带入运动方程，可得：$[\frac{M}{\Delta t^2}+\frac{C}{2\Delta t}]u_{i+1}=p_i-[\frac{M}{\Delta t^2}-\frac{C}{2\Delta t}]u_{i-1}-[K-\frac{2M}{\Delta t^2}]u_i$​，可以发现根据过往时刻的状态就可以直接算出下一时刻的状态。
 
-4. <img src="Abaqus.assets/image-20241214124524279.png" alt="image-20241214124524279" style="zoom:67%;" />
+4. <img src="Abaqus.assets/image-20241214124524279.png" alt="image-20241214124524279" />
 
 5. 显式方法只需建立一次系统的刚度矩阵，不用计算切线刚度矩阵。条件稳定，只有时间增量小于一个临界值，才可以计算出有限解（非发散的）。稳定时间增量取决于最高特征频率$\omega_{\text{max}}$和该模态的临界阻尼$\xi$，阻尼会缩短稳定时间增量，或者用单元尺寸/波速 $\Delta t=L_e/c_d$​，也就是膨胀波穿过任何一个单元所需要的时间，对于弹性问题，$c_d=\sqrt{E/\rho}$​。这也被称为CFL条件。
    $$
@@ -1358,7 +1347,7 @@
 
     3. 如果$\xi>1$，则有两个不同的虚根，通解同上，不过$\xi$越大，衰减到0所需时间就越长。即过阻尼状态。
 
-53. ![image-20250227102337549](Abaqus.assets/image-20250227102337549.png)
+53. <img src="Abaqus.assets/image-20250227102337549.png" alt="image-20250227102337549" />
 
 54. 除了和速度相关的粘滞阻尼外，还有位移相关的结构阻尼（虚刚度，Imaginary），在复频率分析中会用到。一般来说，如果阻尼器和摩擦相关，更多表现为位移阻尼，如果阻尼器和材料非线性相关，更多表现为速度阻尼。
 
@@ -1431,13 +1420,13 @@
 
 71. 注意，材料和单元阻尼会对阻尼矩阵的非对角线元素产生贡献，而全局和模态阻尼只会对对角线元素产生贡献。
 
-72. ![image-20250303111017815](Abaqus.assets/image-20250303111017815.png)
+72. <img src="Abaqus.assets/image-20250303111017815.png" alt="image-20250303111017815" />
 
 73. 传统架构支持Lanczos和基于子空间的频率提取，SIM架构支持Lanczos和AMS频率提取。下表的第一列为直接积分法。
 
-74. ![image-20250303111055517](Abaqus.assets/image-20250303111055517.png)
+74. <img src="Abaqus.assets/image-20250303111055517.png" alt="image-20250303111055517" />
 
-75. ![image-20250303111321274](Abaqus.assets/image-20250303111321274.png)
+75. <img src="Abaqus.assets/image-20250303111321274.png" alt="image-20250303111321274" />
 
 76. 可以看到，全局阻尼的适应性最广。
 
@@ -1455,26 +1444,6 @@
 
 81. 只有一个自由度方向可以定义为Primary的，其余都是Secondary。
 
-82. 
-
-83. 
-
-84. 
-
-85. 
-
-86. 
-
-87. 
-
-88. 
-
-89. 
-
-90. 
-
-91. 
-
 # 多体动力学与Connector
 
 1. abaqus还可以进行多体动力学的分析，主要应用有两个：
@@ -1485,16 +1454,16 @@
 2. 模型由刚体和可变形体连接而成，它们之间使用连接器connector连接起来。有时为了让结果更好看，还会添加display body，它只是显示，不会参与计算。
 3. connector可以用来模拟假人各关节的行为，车辆悬挂的行为。只需要在assembly中创建即可，不需要建立part。
 4. connector单元可以通过力（液压部件）或位移（齿轮传动）来驱动。加速度计（ACCELEROMETER），活塞油缸（AXIAL），ALIGN（约束转动），球头（JOIN），两个球头（LINK），滑轨（SLOT），铰链（HINGE，门框上用的，相当于JOIN+REVOLUTE），万向节（U-JOINT相当于JOIN+UNIVERSIAL），刚臂（BEAM，相当于JOIN+ALIGN）。
-5. <img src="Abaqus.assets/image-20241216164355509.png" alt="image-20241216164355509" style="zoom: 80%;" />
+5. <img src="Abaqus.assets/image-20241216164355509.png" alt="image-20241216164355509" />
 6. 上图都是基本约束，abaqus还为用户构建了组合约束，见下图，这可以在connection category中选择，还可以使用MPC。
-7. <img src="Abaqus.assets/image-20241216164610212.png" alt="image-20241216164610212" style="zoom:80%;" />
+7. <img src="Abaqus.assets/image-20241216164610212.png" alt="image-20241216164610212" />
 8. connector可以施加在刚体上的点，而不用施加在刚体的参考点。
 9. 一般来说，都要开启几何非线性功能，因为这里涉及到大位移，大转动。如果没有开启，则会倍线性化，例如下图。
-10. <img src="Abaqus.assets/image-20241216165155778.png" alt="image-20241216165155778" style="zoom:50%;" />
+10. <img src="Abaqus.assets/image-20241216165155778.png" alt="image-20241216165155778" />
 11. 平面四连杆机构，每个杆都是刚体，通过铰链连接。每个杆有2个平动，1个转动，4个杆一共3x4=12个自由度。beam4固定在地面，完全约束，相当于约束了3个自由度，4个铰链，每个铰链约束2个自由度，因此一共约束3+4x2=11个自由度，还剩一个自由度，正好。
-12. ![image-20241216165927972](Abaqus.assets/image-20241216165927972.png)
+12. <img src="Abaqus.assets/image-20241216165927972.png" alt="image-20241216165927972" />
 13. 如果是三维情况，则会导致过约束。一共有4x6=24个自由度，一个铰链约束5个自由度（三个平动，2个转动）。24-6-4x5=-2。abaqus会自动尝试移除过约束，例如将右下角的铰链换成新的约束，只约束两个平动，这样24-6-3x5-2=1。
-14. ![image-20241216193829065](Abaqus.assets/image-20241216193829065.png)
+14. <img src="Abaqus.assets/image-20241216193829065.png" alt="image-20241216193829065" />
 15. 注意球铰和铰链不同，球铰只要求平动自由度相同，铰链还约束额外的2个转动自由度。
 16. 所有的connector都在interaction→connector builder中构建。
 17. builder可以为选定的两个point创建参考点。如果已经手动创建，则不需要勾选。
@@ -1654,12 +1623,11 @@
 23. 模型的假设如下：该模型假设混凝土的单轴拉伸和压缩响应以损伤塑性为特征。下图是单轴拉伸和压缩的响应，虚线为损伤后的卸载路径。
     1. 拉伸情况：初始开裂应力$\sigma_{t0}$​对应着混凝土微裂纹的产生，此后，微裂纹的形成在宏观上表现为软化应力-应变响应，这会导致混凝土结构中的应变局部化（塑性）。
     2. 压缩情况：塑性状态下，压缩响应通常是应力硬化，然后是超过极限应力$\sigma_{cu}$​的应变软化。
-24. <img src="Abaqus.assets/cconcretedamaged-uniaxial.png" alt="img" style="zoom:67%;" />
+24. <img src="Abaqus.assets/cconcretedamaged-uniaxial.png" alt="img" />
 25. ${{\mathbf{\sigma} = {\left( {1 - d} \right)\mathbf{D}_{0}^{el}}}:{\left( {\mathbf{\varepsilon} - \mathbf{\varepsilon}^{pl}} \right) = \mathbf{D}^{el}}:\left( {\mathbf{\varepsilon} - \mathbf{\varepsilon}^{pl}} \right)},$
 26. *Concrete Failure关键字是在2019版本中才加入的，只有Explicit可以支持，但是CDP模型对于Standard和Explicit都是可以使用的。
 27. 在包含单元删除的模拟中，飞出去的并非是彻底损伤的单元，而是由于彻底损伤的单元被删除，导致一些还没彻底损伤的单元失去了连接，飞了出去。
-28. 
-29. 对材料模型进行验证时，应该还原材料实验的情况，如果试件端部没有涂抹凡士林，则约束较强，可以将试件端部和参考点耦合，然后约束。如果涂抹了凡士林，则不需要建立参考点，直接将轴向约束施加在端面上。
+28. 对材料模型进行验证时，应该还原材料实验的情况，如果试件端部没有涂抹凡士林，则约束较强，可以将试件端部和参考点耦合，然后约束。如果涂抹了凡士林，则不需要建立参考点，直接将轴向约束施加在端面上。
 
 
 # 几何缺陷
@@ -1699,11 +1667,11 @@
 1. 结构在热加工中由于受热或冷却不均匀，导致出现残余应力。下图是热轧工字钢的残余应力分布，都是垂直于横截面，即残余应力在长度方向梯度为0，可以简化为二维。
 2. 压缩残余应力在切开后，没有了压应力的约束，会膨胀。一般需要将残余应力作为应力的初始场，然后进行其他计算。
 3. 需要注意的是，每个截面的残余应力的合力需要为0，即内力平衡，否则该截面会飞走（可以取一个平行于该截面的薄片，合力不为0），这不符合残余应力的物理事实。实际的结构由于有周围部件的约束，并不会飞走，而是会继续变形，也就是释放残余应力到一个平衡的状态，这时的应力才是真实的残余应力。
-4. <img src="Abaqus.assets/无标题.png" alt="无标题" style="zoom:67%;" />
+4. <img src="Abaqus.assets/无标题.png" alt="无标题" />
 5. 可以对规则划分网格后的单元进行分组，然后按照位置对上述残余应力场的函数进行插值，可以选择单元中心点作为位置的代表值。
 6. predefined field→stress，只能在initial步中指定，因为残余应力是在其他荷载施加前就存在的。只对轴向应力对应的σ分量进行设置。可以在后处理中的0增量检查残余应力的施加是否正确，不施加任何荷载或约束，只约束刚体位移即可。
 7. 如果边界条件没有足够的约束，则只施加残余应力的结构在不受任何外力下，也会变形。如下图，左端为自由端，右端为固定端，左端就会产生应力重分布，相当于卸载，右端由于约束充分，则不会产生应力重分布。
-8. ![无标题](Abaqus.assets/无标题-1735009237910-1.png)
+8. <img src="Abaqus.assets/无标题-1735009237910-1.png" alt="无标题" />
 
 
 
@@ -1887,34 +1855,34 @@
 
 10. 在abaqus_v6.env（在Solver_install_directory中）末尾追加如下代码，注意不能出现中文，注释也不行：
 
-   ```python
-compile_fortran += ['/names:lowercase',] # Solves problem with naming convention。修改编译器的标志，以便在编译器中将外部名称转换为小写。
-# 回调函数，初始化时会自动执行，不需要在这里手动执行，只需要定义即可。
-def onCaeStartup():
-	#设置.rpy文件中的几何编码为坐标，默认是mask，这个效率更高，但是不利于阅读。
-	session.journalOptions.setValues(recoverGeometry=COORDINATE)
-   ```
+    ```python
+    compile_fortran += ['/names:lowercase',] # Solves problem with naming convention。修改编译器的标志，以便在编译器中将外部名称转换为小写。
+    # 回调函数，初始化时会自动执行，不需要在这里手动执行，只需要定义即可。
+    def onCaeStartup():
+    	#设置.rpy文件中的几何编码为坐标，默认是mask，这个效率更高，但是不利于阅读。
+    	session.journalOptions.setValues(recoverGeometry=COORDINATE)
+    ```
 
 11. 修改D:\SIMULIA\Commands\abq2023.bat文件
 
-   ```shell
-@echo off
-setlocal
-set ABA_DRIVERNAME=%~nx0
-call "D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x64 #新增加的一行，配置vs环境，需要先执行。
-call "D:\Program Files (x86)\Intel\oneAPI\setvars.bat" intel64 vs2019 #新增加的一行，配置Intel Fortran的环境。
-"D:\SIMULIA\EstProducts\2023\win_b64\code\bin\SMALauncher.exe" %*
-endlocal
-   ```
+    ```cmd
+    @echo off
+    setlocal
+    set ABA_DRIVERNAME=%~nx0
+    call "D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x64 #新增加的一行，配置vs环境，需要先执行。
+    call "D:\Program Files (x86)\Intel\oneAPI\setvars.bat" intel64 vs2019 #新增加的一行，配置Intel Fortran的环境。
+    "D:\SIMULIA\EstProducts\2023\win_b64\code\bin\SMALauncher.exe" %*
+    endlocal
+    ```
 
-11. 需要在path中添加两个环境变量，用来指示Intel oneAPI和VS的目录（经验证，不加好像也没事，因为上面执行的vs脚本和intel fortran脚本都给定了全部目录）：
+12. 需要在path中添加两个环境变量，用来指示Intel oneAPI和VS的目录（经验证，不加好像也没事，因为上面执行的vs脚本和intel fortran脚本都给定了全部目录）：
 
     ```shell
     D:\Program Files (x86)\Intel\oneAPI\compiler\2024.0\env
     D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build
     ```
 
-12. 开始菜单的命令行包含Abaqus Command（一般用这个进行命令行的操作），这个默认是直接打开cmd而不设置环境，可以修改它的快捷方式如下。
+13. 开始菜单的命令行包含Abaqus Command（一般用这个进行命令行的操作），这个默认是直接打开cmd而不设置环境，可以修改它的快捷方式如下。
 
     ```shell
     #修改前
@@ -1923,7 +1891,7 @@ endlocal
     "D:\Program Files (x86)\Intel\oneAPI\setvars.bat" intel64 vs2019 & C:\Windows\System32\cmd.exe /k
     ```
 
-13. 如果要使用subroutine，在安装时应该安装caaapi（用于子程序开发的库），和sample（因为运行verification需要从中提取例子来验证，如果确信配置没有问题，可以不用安装sample，可以用自己编写的子程序来验证）。
+14. 如果要使用subroutine，在安装时应该安装caaapi（用于子程序开发的库），和sample（因为运行verification需要从中提取例子来验证，如果确信配置没有问题，可以不用安装sample，可以用自己编写的子程序来验证）。
 
     ```shell
     #验证配置是否成功的命令
@@ -1931,26 +1899,26 @@ endlocal
     abaqus verify -user_std #仅隐式
     ```
 
-14. 如果想要通过验证，就不能给win86_64.env中的compile_fortran添加/free选项。因为官方例子里的.for文件都是固定格式的，按照自由格式解析会出错。
+15. 如果想要通过验证，就不能给win86_64.env中的compile_fortran添加/free选项。因为官方例子里的.for文件都是固定格式的，按照自由格式解析会出错。
 
-15. `/Qmkl:sequential`选项，需要安装MKL之后才可以使用，否则会报错。
+16. `/Qmkl:sequential`选项，需要安装MKL之后才可以使用，否则会报错。
 
-16. `/free`不能和VUMAT联合使用。
+17. `/free`不能和VUMAT联合使用。
 
-17. 通过命令行提交job，附带子程序。
+18. 通过命令行提交job，附带子程序。
 
     ```shell
     abaqus job=Job-2-umat user=umat.for #inp文件中并没有关联子程序的具体文件名，如果不提供子程序的文件名，会报错。user参数的值也可以是编译好的obj目标文件。
     #默认会提交到一个后台进程去计算，然后立即返回，可以添加interactive选项来保持前台，这样会显示log文件的内容。
     ```
 
-18. 如果经常需要相同的用户子程序，可以使用`abaqus make`创建包含用户子程序的共享库，然后在环境文件（abaqus_v6.env即可）中设置`usub_lib_dir`参数即可，例如`usub_lib_dir=r"E:\Abaqus file\Concrete dam"`。这将避免每次需要时都需要重新编译链接。如果分析调用的用户子程序包含在库中，则不需要user选项指定。如果指定了user选项，则不会使用环境文件参数给出的目录中包含的用户库。
+19. 如果经常需要相同的用户子程序，可以使用`abaqus make`创建包含用户子程序的共享库，然后在环境文件（abaqus_v6.env即可）中设置`usub_lib_dir`参数即可，例如`usub_lib_dir=r"E:\Abaqus file\Concrete dam"`。这将避免每次需要时都需要重新编译链接。如果分析调用的用户子程序包含在库中，则不需要user选项指定。如果指定了user选项，则不会使用环境文件参数给出的目录中包含的用户库。
 
-19. 当使用double选项运行Explicit分析时，不能使用user选项来指定对象文件，因为Explicit双精度运行需要单精度和双精度对象。此时必须设置环境文件参数，并将单精度和双精度对象文件放置在指定目录中；或者可以提供用户子例程源代码。
+20. 当使用double选项运行Explicit分析时，不能使用user选项来指定对象文件，因为Explicit双精度运行需要单精度和双精度对象。此时必须设置环境文件参数，并将单精度和双精度对象文件放置在指定目录中；或者可以提供用户子例程源代码。
 
-20. 如果user没有提供后缀名，则会依次寻找：`xx.f, xx.for, xx.f90, xx.F90, xx.c, xx.C, xx.cpp, xx.c++, xx.obj`。
+21. 如果user没有提供后缀名，则会依次寻找：`xx.f, xx.for, xx.f90, xx.F90, xx.c, xx.C, xx.cpp, xx.c++, xx.obj`。
 
-21. 如果想将子程序提供给他人使用，但不希望他人看到源码，此时可将编译后的obj和dll文件提供给他人，也可以用这个方法来提前检查以下语法错误：
+22. 如果想将子程序提供给他人使用，但不希望他人看到源码，此时可将编译后的obj和dll文件提供给他人，也可以用这个方法来提前检查以下语法错误：
 
     ```shell
     abaqus make library=umat.for object_type=fortran
@@ -1966,11 +1934,11 @@ endlocal
     #产生两个文件umat-std.obj和standardU.dll，前者是编译的结果，后者是链接后的结果，名称固定。如果使用user参数指定，则只需要.obj就可以。如果使用环境文件参数，则只需要standardU.dll，因为这里无法指定文件名，只能指定路径。
     ```
 
-22. 编译得到的目标文件有一个后缀，指示它是用于Standard（-std）还是Explicit（单精度为-xpl，双精度为-xplD）。链接得到的Standard用户子程序共享库名为standardU.dll，Explicit共享库分别名为explicitU.dll和explicitU-D.dll。如果使用directory选项，并且包含具有所创建共享库适当后缀的对象文件，则这些文件将链接到共享库。
+23. 编译得到的目标文件有一个后缀，指示它是用于Standard（-std）还是Explicit（单精度为-xpl，双精度为-xplD）。链接得到的Standard用户子程序共享库名为standardU.dll，Explicit共享库分别名为explicitU.dll和explicitU-D.dll。如果使用directory选项，并且包含具有所创建共享库适当后缀的对象文件，则这些文件将链接到共享库。
 
-23. 如果发现Intel Fortran的命令行环境配置结果中，没有显示compiler，则可以在卸载程序的地方双击，然后repair该程序。
+24. 如果发现Intel Fortran的命令行环境配置结果中，没有显示compiler，则可以在卸载程序的地方双击，然后repair该程序。
 
-24. 最简单的例子，各向同性线弹性材料，需要注意的是，官方给的例子第一行SUBROUTINE前面没有空出6个字符（前6个字符是注释内容），当使用固定格式时会报错。这个材料不能用于平面应力问题：
+25. 最简单的例子，各向同性线弹性材料，需要注意的是，官方给的例子第一行SUBROUTINE前面没有空出6个字符（前6个字符是注释内容），当使用固定格式时会报错。这个材料不能用于平面应力问题：
 
     ```fortran
           SUBROUTINE UMAT(STRESS,STATEV,DDSDDE,SSE,SPD,SCD,
@@ -2019,7 +1987,7 @@ endlocal
           END
     ```
 
-25. <img src="Abaqus.assets/image-20241107225604101.png" alt="image-20241107225604101" style="zoom:50%;" />
+26. <img src="Abaqus.assets/image-20241107225604101.png" alt="image-20241107225604101" />
 
 
 # User Subroutine
@@ -2034,11 +2002,11 @@ endlocal
 
 5. 下图为Standard从开始分析到一个分析步结束的总体流程，以及相应的子程序调用的位置。
 
-6. ![基于ABAQUS的有限元子程序开发与应用](Abaqus.assets/基于ABAQUS的有限元子程序开发与应用.png)
+6. <img src="Abaqus.assets/基于ABAQUS的有限元子程序开发与应用.png" alt="基于ABAQUS的有限元子程序开发与应用" />
 
 7. 下图为上图中应力应变更新和单元刚度计算的详细图：
 
-8. ![基于ABAQUS的有限元子程序开发与应用](Abaqus.assets/基于ABAQUS的有限元子程序开发与应用-1731143195719-2.png)
+8. <img src="Abaqus.assets/基于ABAQUS的有限元子程序开发与应用-1731143195719-2.png" alt="基于ABAQUS的有限元子程序开发与应用" />
 
 9. 在一个增量步的第一次迭代时，上面两张图中的每个用户子程序被调用了两次。第一次调用时，通过增量步开始时的构型来计算模型的初始刚度矩阵；第二次调用时，通过更新的构型计算一个新的刚度矩阵。在接下来的每个迭代步中，每个子程序只被调用一次，在这次调用中，总是通过上一个迭代步结束时的模型刚度来修正模型当前构型的刚度。
 
@@ -2199,7 +2167,7 @@ endlocal
 
 4. 上面的设置只是声明了模型中要用到USDFLD或VUSDFLD，而如果想要是材料属性依赖于场变量的值，还需要通过CAE中的数据表格或其他子程序（例如CREEP）来设置具体的依赖关系。假设材料属性依赖于两个场变量$f_1$和$f_2$。其中材料的杨氏模量只依赖于场变量$f_1$，而热膨胀系数依赖于场变量$f_1$和$f_2$，具体的依赖关系由表格给出，其他值下的依赖关系通过表格中的数据线性插值得到。
 
-5. ![111](Abaqus.assets/111.png)
+5. <img src="Abaqus.assets/111.png" alt="111" />
 
 6. 可以观察到，如果Number of field variables为默认的0，此时弹性属性的表格只能输入一行2列，也就是杨氏模量和泊松比。
 
@@ -2322,18 +2290,13 @@ endlocal
 ## UEL
 
 1. 单元的性能决定了它可模拟计算的问题和可扩展的空间，ABAQUS为用户提供了用户自定义单元的程序接口，允许用户自定义地实现线性和非线性的单元，可以定义任意复杂度的任何单元，使得用户可以方便地对ABAQUS的功能进行扩展，以满足复杂的个性化求解需求。
-
 2. 对于一些耦合了力学行为的物理过程，载荷和求解的结果有关；在求解的过程中激活控制机制等的问题，ABAQUS现有的单元库还无法满足分析需求，需要我们编写用户子程序来实现。
-
 3. 相比于写一个完整的有限元求解程序，在一些现有程序的基础上（如ABAQUS）编写用户单元可以大大降低开发成本、缩短开发时间，并且可以充分利用ABAQUS提供的强大的前后处理能力。此外，ABAQUS内置的求解器的效率非常高，求解非线性问题具有很好的收敛性，这也使得用户单元子程序具有非常广的应用前景。
-
 4. 多个用户单元可以在单个模型中一起使用，其使用方法与多个UMAT在同一个模型中一起使用是类似的，只需给每个单元一个特定的名称，然后定义其在inp文件中对应的UEL的变量property即可。
-
 5. 定义用户单元的方式：
    1. 线性单元，在Standard中，可以通过直接使用关键字*MATRIX在.inp文件中定义单元的刚度矩阵和质量矩阵，从而可以定义一个线性的用户单元（无须写编用户子程序）。
 
    2. 任意单元，在Standard中，可通过UEL或UELMAT来定义任意单元；在Explicit中，可通过VUEL来实现非线性单元。
-
 6. 在Standard中，有两个用户单元的接口程序：UELMAT可以直接访问ABAQUS内置的材料模型，这样用户就不需要自己去编写材料的本构关系了。但是，UELMAT支持的分析步类型比UEL少，此时我们只能通过UEL来实现。
 7. 在使用UEL或UELMAT之前，需要在.inp文件中定义以下单元信息：
    1. 用户单元的节点数
@@ -2342,8 +2305,6 @@ endlocal
    4. 单元的属性参数的个数
    5. 每个单元中需要存储的解依赖的状态变量（SDV）的个数
    6. 单元可用载荷类型的个数
-
-8. 
 
 ## Sensor和UAMP
 
@@ -2573,7 +2534,7 @@ endlocal
     1. 计算出等效塑性应变增量$\Delta\varepsilon^p$后，带入$\Delta\varepsilon^p=\Delta\varepsilon_p \frac{3}{2}\frac{s^{tr}}{\sigma^{tr}_e}$，得到塑性应变增量$\Delta\varepsilon^p$，更新塑性应变$\varepsilon^p_{k+1}=\varepsilon^p_k+\Delta\varepsilon^p$。
     1. 然后根据$\Delta\varepsilon^e=\Delta\varepsilon-\Delta\varepsilon^p$，得到弹性应变增量。
     1. 根据$\sigma_{k+1}=\sigma_k+C:\Delta\varepsilon^e$。或者使用试应力+塑性纠正方法计算$\sigma_{k+1}=\sigma^{tr}-2G\Delta\varepsilon^p$。
-    1. ![image-20241108184030608](Abaqus.assets/image-20241108184030608.png)
+    1. <img src="Abaqus.assets/image-20241108184030608.png" alt="image-20241108184030608" />
 
 24. 需要从UMAT函数的参数中读取状态变量，这里只有一个有效塑性应变，还有2个材料参数，初始屈服应力和线性强化的斜率参数。
 

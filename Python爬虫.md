@@ -33,7 +33,7 @@
 
 15. Python3和2的urllib结构不一样：
 
-16. ![1591067050341](Python 爬虫实战.assets/1591067050341.png)
+16. <img src="Python 爬虫实战.assets/1591067050341.png" alt="1591067050341" />
 
 17. urllib和urllib2的主要区别:
 
@@ -57,17 +57,15 @@
 
 26. 编码就是把一个字符用二进制表示出来。字符串就是由很多字符构成的。
 
-27. 形如：
+23. 形如如下的一串字符是HTML等语言的转义序列。代表一个字符。第一种是 character entity reference，后接预先定义的 entity 名称，而 entity 声明了自身指代的字符。 例如&lt表示<，&nbsp表示空格。&amp表示&本身。
 
-29. ```html
+    ```html
     &name;
     &#dddd;
     &#xhhhh;    =  \uhhhh
     ```
 
-30. 的一串字符是HTML等语言的转义序列。代表一个字符。第一种是 character entity reference，后接预先定义的 entity 名称，而 entity 声明了自身指代的字符。 例如&lt表示<，&nbsp表示空格。&amp表示&本身。
-
-31. numeric character reference（NCR），数字取值为目标字符的 Unicode code point。以「&#」开头的后接十进制数字，以「&#x」开头的后接十六进制数字。
+30. numeric character reference（NCR），数字取值为目标字符的 Unicode code point。以「&#」开头的后接十进制数字，以「&#x」开头的后接十六进制数字。
 
 32. 例如：“中国”这两个字的Unicode编码为4e2d和56fd。可以写作：
 
@@ -76,17 +74,17 @@
     &#20013;&#22269;     10进制表示
     ```
 
-34. 使用Python解析NCR：
+27. 使用Python解析NCR：
 
-35. ```python
+    ```python
     from html import unescape
     print (unescape('&#20013;&#22269;&lt;&amp'))
     输出：中国<&
     ```
 
-36. 同时，
+28. 同时：
 
-37. ```
+    ```html
     &gt;&#62;&#x3e;    都表示的是>这个字符。
     ```
 
@@ -96,7 +94,7 @@
     [\u4e00-\u9fa5]
     ```
 
-35. ![1591094386594](Python 爬虫实战.assets/1591094386594.png)
+35. <img src="Python 爬虫实战.assets/1591094386594.png" alt="1591094386594" />
 
 # 网络信息爬取
 

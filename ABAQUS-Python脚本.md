@@ -20,7 +20,7 @@
 
 6. ABAQUS的基础架构如下：
 
-7. ![image-20210610094648581](ABAQUS-Python脚本.assets/image-20210610094648581.png)
+7. <img src="ABAQUS-Python脚本.assets/image-20210610094648581.png" alt="image-20210610094648581" />
 
 8. 常见的执行.py脚本的方法：
 
@@ -37,18 +37,20 @@
 
 10. 所有的ABAQUS Python脚本都必须在开头包含这两行：
 
-   ```python
-   from abaqus import *      #这行使得系统默认的session和mdb对象可以被使用。
-   from abaqusConstants import *
-   
-   from odbAccess import *   #访问ODB文件需要
-   from visualization import *    #可视化需要
-   ```
+    ```python
+    from abaqus import *      #这行使得系统默认的session和mdb对象可以被使用。
+    from abaqusConstants import *
+    
+    from odbAccess import *   #访问ODB文件需要
+    from visualization import *    #可视化需要
+    ```
 
 11. import语法：
 
    12. import一个模块后，无法卸载它，除非重启Python的解释器。
+
    13. from math import sin   后可以只用使用sin
+
    14. import math 后需要通过math.sin来使用
 
 15. rpy文件第一行为如下，mbcs表示多字节编码系统，也就是Windows下的ANSI。对于简体中文Windows系统就是GBK。
@@ -98,7 +100,7 @@
 
 24. 提交之后，CAE就会卡死，此时可以通过.sta文件查看迭代收敛的情况。
 
-25. 可以使用abaqus自带的RSG（Really Simple GUI） Dialog Builder来创建待GUI界面的用户插件。参考手册为Abaqus GUI Toolkit User's Guide。
+25. 可以使用abaqus自带的RSG（Really Simple GUI）Dialog Builder来创建待GUI界面的用户插件。参考手册为Abaqus GUI Toolkit User's Guide。
 
 # 对象与方法
 
@@ -168,7 +170,7 @@
 
 20. ABAQUS的对象模型主要分为三种：Session树，Mdb树，Odb树。session对象和mdb对象只能有一个。
 
-21. ![img](ABAQUS-Python脚本.assets/cmd-int-model-overview-nls.png)
+21. <img src="ABAQUS-Python脚本.assets/cmd-int-model-overview-nls.png" alt="img" />
 
 22. mdb对象包含jobs和models容器。
 
@@ -184,15 +186,15 @@
 
 24. part对象：
 
-25. ![img](ABAQUS-Python脚本.assets/cmd-int-model-part-nls.png)
+25. <img src="ABAQUS-Python脚本.assets/cmd-int-model-part-nls.png" alt="img" />
 
 26. rootAssembly对象：
 
-27. ![img](ABAQUS-Python脚本.assets/cmd-int-model-assembly-nls.png)
+27. <img src="ABAQUS-Python脚本.assets/cmd-int-model-assembly-nls.png" alt="img" />
 
 28. initialStep类继承自Step，他们之间是is-a关系。Step类是一个抽象基类，该类没有实例，而Feature类是一个基类，但不是抽象类，因此有实例。
 
-29. ![img](ABAQUS-Python脚本.assets/cmd-int-abstract-nls.png)
+29. <img src="ABAQUS-Python脚本.assets/cmd-int-abstract-nls.png" alt="img" />
 
 30. ABAQUS使用基类的repository来存储所有的派生类对象。例如上面的initialStep和StaticStep对象都存储在steps容器中。
 
@@ -302,7 +304,7 @@
     session.odbs[name].sections[name]
     ```
 
-54. ![image-20200615104814484](ABAQUS-Python脚本.assets/image-20200615104814484.png)
+54. <img src="ABAQUS-Python脚本.assets/image-20200615104814484.png" alt="image-20200615104814484" />
 
 52. 下图表明了该对象的构造函数的使用方法。需要加上路径。
 
