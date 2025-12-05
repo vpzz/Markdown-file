@@ -234,6 +234,27 @@
 
 22. 虚拟机的挂起相当于睡眠。
 
+23. 启动某个虚拟机，并后台运行：
+
+    ```shell
+    "D:\Program Files (x86)\VMware\VMware Workstation\vmrun.exe" -T ws start "D:\Virtual Machines\Ubuntu 24.04\Ubuntu 24.04.vmx" nogui
+    
+    # -T ws：表示使用 VMware Workstation（ws = Workstation）
+    # nogui：关键参数，表示无 GUI 模式（即后台运行）
+    # .vmx是虚拟的配置文件
+    ```
+
+24. 虚拟机磁盘用久了体积膨胀很大，但是进入虚拟机内部使用df查看，实际占用体积却不大，可以填充再删除，然后收缩磁盘，注意此方法只能收缩挂载再根目录的分区，如果/boot目录和根目录在同一个分区中，则可能造成崩溃：
+
+    ```shell
+    #在虚拟机中执行
+    dd if=/dev/zero of=/zero-fill bs=1M status=progress #在根目录创建一个全零的文件，一次读写1M，显示进度
+    rm -rf /zero-fill #填充根目录完成后，立刻删除该文件
+    
+    #在宿主机执行，-k表示收缩虚拟机磁盘，.vmdk是虚拟机磁盘文件
+    "D:\Program Files (x86)\VMware\VMware Workstation\vmware-vdiskmanager.exe" -k "Ubuntu 24.04.vmdk"
+    ```
+
 # 系统安装
 
 1. 分区命令：
