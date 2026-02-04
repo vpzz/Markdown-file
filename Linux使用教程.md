@@ -248,8 +248,8 @@
 
     ```shell
     #在虚拟机中执行
-    dd if=/dev/zero of=/zero-fill bs=1M status=progress #在根目录创建一个全零的文件，一次读写1M，显示进度
-    rm -rf /zero-fill #填充根目录完成后，立刻删除该文件
+    sudo dd if=/dev/zero of=/zero-fill bs=1M status=progress #在根目录创建一个全零的文件，一次读写1M，显示进度
+    sudo rm -rf /zero-fill #填充根目录完成后，立刻删除该文件
     
     #在宿主机执行，-k表示收缩虚拟机磁盘，.vmdk是虚拟机磁盘文件
     "D:\Program Files (x86)\VMware\VMware Workstation\vmware-vdiskmanager.exe" -k "Ubuntu 24.04.vmdk"

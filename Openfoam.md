@@ -1883,32 +1883,6 @@
 
    ```shell
    #!/bin/bash
-   #------------------------------------------------------------------------------
-   # =========                 |
-   # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-   #  \\    /   O peration     | Website:  https://openfoam.org
-   #   \\  /    A nd           | Copyright (C) 2011-2020 OpenFOAM Foundation
-   #    \\/     M anipulation  |
-   #------------------------------------------------------------------------------
-   # License
-   #     This file is part of OpenFOAM.
-   #
-   #     OpenFOAM is free software: you can redistribute it and/or modify it
-   #     under the terms of the GNU General Public License as published by
-   #     the Free Software Foundation, either version 3 of the License, or
-   #     (at your option) any later version.
-   #
-   #     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-   #     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   #     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   #     for more details.
-   #
-   #     You should have received a copy of the GNU General Public License
-   #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
-   #
-   # Script
-   #     wmake
-   #
    # Description
    #     General, easy to use make system for multi-platform development
    #     with support for local and network parallel compilation.
@@ -1929,10 +1903,6 @@
    #     files are harder to find but are sometimes useful to study which header
    #     files are included.  For those who need access to the dependency files the new wdep script is provided to locate them.  See the wdep script header or   run:
    #         wdep -h
-   # 
-   # See also
-   #     wmakeLnInclude, wmakeLnIncludeAll, wmakeCollect, wdep, wrmdep, wrmo,
-   #     wclean, wcleanPlatform, wcleanLnIncludeAll
    Script=${0##*/}
    
    # 执行wmakeFunctions脚本，其中定义了几个函数
@@ -2309,7 +2279,7 @@
    
    unset Script usage error useAllCores update expandPath findTarget
    ```
-
+   
 2. wdep工具：
 
    ```shell
@@ -2317,7 +2287,7 @@
    /home/zj/OpenFOAM/OpenFOAM-11/platforms/linux64GccDPInt32Opt/src/OpenFOAM/global/argList/argList.C.dep
    ```
 
-3. 新版的wmake会在s'rc同级的目录中创建一个paltform目录，将所有的输出文件都放在这里。
+3. 新版的wmake会在src同级的目录中创建一个paltforms目录，将所有的输出文件都放在这里。
 
 4. wmakeFilesAndOptions程序会读取当前目录下的所有文件夹和文件，然后在同级的Make文件夹中生成files和options文件。不过如果已经存在这两个文件，则不会修改已有的文件。
 
@@ -2455,6 +2425,100 @@
 9. src目录下的所有目录或子目录最终都会生成一个对应的共享库。
 
 10. 共享库一共有143个，可执行文件一共有157个。
+
+
+# 依赖处理
+
+1. 不同的模块之间存在依赖，可以使用如下代码从options中的`LIB_LIBS=`中提取依赖，然后使用graphviz构建成图：
+
+   ```python
+   #!/usr/bin/env python3
+   import os
+   import re
+   import argparse
+   from pathlib import Path
+   
+   def parse_lib_libs(options_file):
+       """从 Make/options 文件中提取 LIB_LIBS 列表"""
+       libs = []
+       if not options_file.exists():
+           return libs
+       with open(options_file, 'r') as f:
+           content = f.read()
+       # 匹配 LIB_LIBS = \ ... 或 LIB_LIBS = -la -lb
+       match = re.search(r'LIB_LIBS\s*=(.*?)(?=\n\w+|\Z)', content, re.DOTALL)
+       if not match:
+           return libs
+       lib_str = match.group(1)
+       # 提取所有 -lxxx
+       for lib in re.findall(r'-l(\w+)', lib_str):
+           libs.append(lib)
+       return libs
+   
+   def build_dependency_graph(src_dir):
+       """遍历 src/ 下所有含 Make/options 的目录，构建依赖图"""
+       graph = {}
+       src_path = Path(src_dir)
+       for make_dir in src_path.rglob('Make'):
+           if not make_dir.is_dir():
+               continue
+           options_file = make_dir / 'options'
+           files_file = make_dir / 'files'
+   
+           # 确保这是一个库（不是 application）
+           if not files_file.exists():
+               continue
+           with open(files_file, 'r') as f:
+               files_content = f.read()
+           if 'LIB =' not in files_content:
+               continue  # 跳过可执行程序（EXE = ...）
+   
+           # 获取当前库名
+           lib_match = re.search(r'LIB\s*=\s*\$\(FOAM_LIBBIN\)/lib(\w+)', files_content)
+           if not lib_match:
+               continue
+           current_lib = lib_match.group(1)
+   
+           deps = parse_lib_libs(options_file)
+           graph[current_lib] = deps
+           print(f"Found lib: {current_lib} -> {deps}")
+   
+       return graph
+   
+   def write_dot(graph, output_file):
+       with open(output_file, 'w') as f:
+           f.write("digraph OpenFOAM {\n")
+           f.write("    rankdir=LR;\n")
+           f.write("    node [shape=box, style=filled, fillcolor=\"#e6f2ff\"];\n")
+           for lib, deps in graph.items():
+               for dep in deps:
+                   # 只画图中存在的节点（避免指向 system lib）
+                   f.write(f'    "{lib}" -> "{dep}";\n')
+           f.write("}\n")
+   
+   def main():
+       parser = argparse.ArgumentParser()
+       parser.add_argument("src_dir", help="Path to OpenFOAM src/ directory")
+       parser.add_argument("-o", "--output", default="foam_deps.dot", help="Output .dot file")
+       args = parser.parse_args()
+   
+       graph = build_dependency_graph(args.src_dir)
+       write_dot(graph, args.output)
+       print(f"\n Dependency graph written to {args.output}")
+       print("Run: dot -Tpdf foam_deps.dot -o foam_deps.pdf")
+   
+   if __name__ == "__main__":
+       main()
+   ```
+
+2. 使用方法：
+
+   ```shell
+   #生成foam_deps.dot
+   ./extract_deps_from_options.py $WM_PROJECT_DIR/src
+   #调整 Graphviz 参数提升可读性
+   dot -Tpdf -Gsplines=true -Goverlap=false -Gsep="+25,25" foam_deps.dot -o foam_deps.pdf
+   ```
 
 
 # 教程
